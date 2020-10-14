@@ -1,0 +1,3 @@
+#base=js
+
+fix-broken-link.js

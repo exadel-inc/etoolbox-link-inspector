@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<workspaceFilter version="1.0">
+    <filter root="/apps/linkchecker/clientlibs"/>
+    <filter root="/apps/linkchecker/components"/>
+    <filter root="/apps/linkchecker/components/content/cache" mode="merge"/>
+    <filter root="/apps/linkchecker/i18n"/>
+    <filter root="/apps/cq/core/content/nav" mode="update"/>
+</workspaceFilter>
