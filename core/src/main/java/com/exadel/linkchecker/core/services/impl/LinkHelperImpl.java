@@ -28,7 +28,7 @@ public class LinkHelperImpl implements LinkHelper {
     private static final Logger LOG = LoggerFactory.getLogger(LinkHelper.class);
 
     private static final String REGEX_EXTERNAL_LINK = "(https?://(?:www\\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\\.[^\\s]{2,}|www\\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\\.[^\\s]{2,}|https?://(?:www\\.|(?!www))[a-zA-Z0-9]+\\.[^\\s]{2,}|www\\.[a-zA-Z0-9]+\\.[^\\s]{2,})";
-    private static final String REGEX_INTERNAL_LINK = "\\/content(.*)";
+    private static final String REGEX_INTERNAL_LINK = "(^|(?<=\"))\\/content\\/([-a-zA-Z0-9:%_\\+.~#?&//=]*)";
 
     private static final String LINK_TYPE_EXTERNAL = "External";
     private static final String LINK_TYPE_INTERNAL = "Internal";
@@ -72,7 +72,7 @@ public class LinkHelperImpl implements LinkHelper {
             String message = Optional.ofNullable(e.getCause())
                     .map(Throwable::toString)
                     .orElse(e.toString());
-            LOG.debug("Result of checking the link " + link, message);
+            LOG.debug("Result of checking the link " + link + " " + message);
             return new LinkStatus(HttpStatus.SC_BAD_REQUEST, message);
         }
     }
