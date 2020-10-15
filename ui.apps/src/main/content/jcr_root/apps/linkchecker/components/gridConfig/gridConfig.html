@@ -23,14 +23,13 @@
     </td>
 
     <td class="foundation-collection-item-keys" is="coral-table-cell">
-        <a href="${'{0}{1}' @ format=[model.EDITOR_LINK, model.pagePath], extension = 'html'}" target="_blank"
+        <a href="${model.pagePath @ extension = 'html'}" target="_blank"
            x-cq-linkchecker="skip">
-            ${model.pagePath}
+            ${model.pageTitle}
         </a>
     </td>
 
     <td class="foundation-collection-item-keys" is="coral-table-cell">
-        <br/>
         <a href="${'{0}{1}' @ format=[model.CRX_DE_LINK, model.componentPath]}" target="_blank" x-cq-linkchecker="skip">
             ${model.componentName}
         </a>
@@ -38,6 +37,6 @@
     </td>
 
     <td class="foundation-collection-item-keys" is="coral-table-cell">
-        ${model.propertyName}
+        ${model.path}@<b>${model.propertyName}</b>
     </td>
 </tr>

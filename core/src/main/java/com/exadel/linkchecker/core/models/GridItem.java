@@ -1,12 +1,11 @@
 package com.exadel.linkchecker.core.models;
 
-import com.day.cq.commons.date.RelativeTimeFormat;
-import com.day.cq.replication.ReplicationStatus;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
 import com.day.cq.wcm.api.components.Component;
 import com.day.cq.wcm.api.components.ComponentManager;
 import com.exadel.linkchecker.core.services.util.GridResourceProperties;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -14,12 +13,15 @@ import org.apache.sling.models.annotations.DefaultInjectionStrategy;
 import org.apache.sling.models.annotations.Model;
 import org.apache.sling.models.annotations.injectorspecific.SlingObject;
 import org.apache.sling.models.annotations.injectorspecific.ValueMapValue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
 import java.util.*;
 
 @Model(adaptables = SlingHttpServletRequest.class, defaultInjectionStrategy = DefaultInjectionStrategy.OPTIONAL)
 public class GridItem {
+    private static final Logger LOG = LoggerFactory.getLogger(GridItem.class);
 
     public final static String EDITOR_LINK = "/editor.html";
     //todo - crxde is not available in AEMaaCS
@@ -49,40 +51,32 @@ public class GridItem {
     private String propertyName;
 
     private String pagePath;
+    private String pageTitle;
     private String componentName;
     private String componentPath;
     private String componentType;
-    private Calendar lastReplicated;
 
     @PostConstruct
     private void init() {
         Resource resourceToShow = resourceResolver.getResource(path);
+        if (resourceToShow == null) {
+            LOG.warn("Resource for is null, path: {}", path);
+            return;
+        }
 
-        ComponentManager componentManager = resourceResolver.adaptTo(ComponentManager.class);
-        Component cpm = componentManager.getComponentOfResource(resourceToShow);
-        componentName = cpm != null ? cpm.getTitle() : resourceToShow.getName();
-        componentType = cpm != null ? cpm.getResourceType() : "";
+        Optional<Component> componentOptional = Optional.ofNullable(resourceResolver.adaptTo(ComponentManager.class))
+                .map(componentManager -> componentManager.getComponentOfResource(resourceToShow));
+        componentName = componentOptional.map(Component::getTitle).orElse(resourceToShow.getName());
+        componentType = componentOptional.map(Component::getResourceType).orElse(StringUtils.EMPTY);
 
-        Page page = resourceResolver.adaptTo(PageManager.class).getContainingPage(resourceToShow);
-        pagePath = page.getPath();
+        Optional<Page> pageOptional = Optional.ofNullable(resourceResolver.adaptTo(PageManager.class))
+                .map(pageManager -> pageManager.getContainingPage(resourceToShow));
+        pagePath = pageOptional.map(page -> EDITOR_LINK + page.getPath()).orElse(path);
+        pageTitle = pageOptional.map(Page::getTitle).orElse(path);
 
-        lastReplicated = page.adaptTo(ReplicationStatus.class).getLastPublished();
-
+        //todo - use proper url encoding
         componentPath = path.replaceAll(":", "%3A");
     }
-
-//    private void setDescription(List<String> languageCodes) {
-//        if (languageCodes.size() < 10) {
-//            description = String.join(", ", languageCodes);
-//        } else {
-//            description = languageCodes.size() + " languages";
-//        }
-//    }
-//
-//    private boolean isNewTranslationSinceLastReplication(Resource dictionaryKeyResource) {
-//        Calendar created = dictionaryKeyResource.getValueMap().get("jcr:created", Calendar.class);
-//        return lastReplicated == null || lastReplicated.before(created);
-//    }
 
     public String getTitle() {
         return getPath();
@@ -94,18 +88,6 @@ public class GridItem {
 
     public String getPath() {
         return path;
-    }
-
-    public String getReplicationDate() {
-        return formatDateRDF(lastReplicated, null);
-    }
-
-    private String formatDateRDF(Calendar cal, String defaultValue) {
-        if (cal == null) {
-            return defaultValue;
-        }
-        RelativeTimeFormat rtf = new RelativeTimeFormat("r");
-        return rtf.format(cal.getTimeInMillis(), true);
     }
 
     public String getLink() {
@@ -142,5 +124,9 @@ public class GridItem {
 
     public String getComponentType() {
         return componentType;
+    }
+
+    public String getPageTitle() {
+        return pageTitle;
     }
 }

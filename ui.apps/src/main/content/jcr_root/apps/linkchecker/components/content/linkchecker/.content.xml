@@ -75,7 +75,7 @@
                             sortable="{Boolean}true"/>
                     <pagePath
                             jcr:primaryType="nt:unstructured"
-                            jcr:title="Page Path"
+                            jcr:title="Page"
                             class="pagePath"
                             sortable="{Boolean}true"/>
                     <component

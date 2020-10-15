@@ -42,7 +42,8 @@ public class GridDataSourceImpl implements GridDataSource {
     private static final String PN_DATASOURCE = "datasource";
     private static final String PN_ITEM_RESOURCE_TYPE = "itemResourceType";
 
-    private static final String QUERY = "SELECT * FROM [nt:base] AS s WHERE ISDESCENDANTNODE([%s]) and (CONTAINS(s.*, 'http://') OR CONTAINS(s.*, 'https://') OR CONTAINS(s.*, 'www.') OR CONTAINS(s.*, '/content'))";
+    //todo - search /content at the beginning of a property or "/content in the middle
+    private static final String QUERY = "SELECT * FROM [nt:base] AS s WHERE ISDESCENDANTNODE([%s]) and (CONTAINS(s.*, 'http://') OR CONTAINS(s.*, 'https://') OR CONTAINS(s.*, 'www.') OR CONTAINS(s.*, '/content/'))";
 
     @Reference
     private ResourceResolverFactory resourceResolverFactory;
@@ -62,7 +63,7 @@ public class GridDataSourceImpl implements GridDataSource {
         }
 
         //todo - make path configurable
-        String query = String.format(QUERY, "/content/hpe/base/blueprint/ba-uat-content/dl-uat-pages");
+        String query = String.format(QUERY, "/content");
         final Iterator<Resource> iterator = resourceResolver.findResources(query, Query.JCR_SQL2);
         LOG.debug("Query execution completed in {} ms", stopWatch.getTime(TimeUnit.MILLISECONDS));
 
