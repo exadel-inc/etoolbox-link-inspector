@@ -15,8 +15,12 @@ import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.api.resource.ResourceUtil;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.exadel.linkchecker.core.models.Link;
@@ -36,20 +40,42 @@ import java.util.stream.Stream;
 @Component(
         service = GridDataSource.class
 )
+@Designate(
+        ocd = GridDataSourceImpl.Configuration.class
+)
 public class GridDataSourceImpl implements GridDataSource {
+
+    @ObjectClassDefinition(
+            name = "Exadel Link Checker Data Source",
+            description = "Finds broken links below the specified path for further outputting them in a report"
+    )
+    @interface Configuration {
+        @AttributeDefinition(
+                name = "Path",
+                description = "The content path for searching broken links"
+        ) String search_path() default DEFAULT_SEARCH_PATH;
+    }
+
     private static final Logger LOG = LoggerFactory.getLogger(GridDataSource.class);
 
     private static final String PN_DATASOURCE = "datasource";
     private static final String PN_ITEM_RESOURCE_TYPE = "itemResourceType";
-
     //todo - search /content at the beginning of a property or "/content in the middle
     private static final String QUERY = "SELECT * FROM [nt:base] AS s WHERE ISDESCENDANTNODE([%s]) and (CONTAINS(s.*, 'http://') OR CONTAINS(s.*, 'https://') OR CONTAINS(s.*, 'www.') OR CONTAINS(s.*, '/content/'))";
+    private static final String DEFAULT_SEARCH_PATH = "/content";
 
     @Reference
     private ResourceResolverFactory resourceResolverFactory;
 
     @Reference
     private LinkHelper linkHelper;
+
+    private String searchPath;
+
+    @Activate
+    protected void activate(Configuration configuration) {
+        searchPath = configuration.search_path();
+    }
 
     @Override
     public DataSource getDataSource(HttpServletRequest request, Object cmp, Resource resource) {
@@ -62,15 +88,14 @@ public class GridDataSourceImpl implements GridDataSource {
             return new SimpleDataSource(Collections.emptyIterator());
         }
 
-        //todo - make path configurable
-        String query = String.format(QUERY, "/content");
+        String query = String.format(QUERY, searchPath);
         final Iterator<Resource> iterator = resourceResolver.findResources(query, Query.JCR_SQL2);
         LOG.debug("Query execution completed in {} ms", stopWatch.getTime(TimeUnit.MILLISECONDS));
 
         String gridResourceType = getDataSourceResourceType(resource);
         List<Resource> itemsToShow = getGridResources(iterator, gridResourceType);
         stopWatch.stop();
-        LOG.debug("Generating link checker report is completed in {} ms, the nymber of items is {}",
+        LOG.debug("Generating link checker report is completed in {} ms, the number of items is {}",
                 stopWatch.getTime(TimeUnit.MILLISECONDS), itemsToShow.size());
 
         return new SimpleDataSource(itemsToShow.iterator());
