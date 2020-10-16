@@ -15,6 +15,7 @@ import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.api.resource.ResourceUtil;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
+import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -28,6 +29,7 @@ import com.exadel.linkchecker.core.models.Link;
 import javax.jcr.query.Query;
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -54,6 +56,11 @@ public class GridDataSourceImpl implements GridDataSource {
                 name = "Path",
                 description = "The content path for searching broken links"
         ) String search_path() default DEFAULT_SEARCH_PATH;
+
+        @AttributeDefinition(
+                name = "Excluded properties",
+                description = "The List of properties excluded from processing "
+        ) String[] excluded_properties() default {};
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(GridDataSource.class);
@@ -71,10 +78,12 @@ public class GridDataSourceImpl implements GridDataSource {
     private LinkHelper linkHelper;
 
     private String searchPath;
+    private String[] excludedProperties;
 
     @Activate
     protected void activate(Configuration configuration) {
         searchPath = configuration.search_path();
+        excludedProperties = PropertiesUtil.toStringArray(configuration.excluded_properties());
     }
 
     @Override
@@ -115,6 +124,9 @@ public class GridDataSourceImpl implements GridDataSource {
         return ResourceUtil.getValueMap(resource)
                 .entrySet()
                 .stream()
+                .filter(entry ->
+                        Arrays.stream(excludedProperties)
+                                .noneMatch(excludedProperty -> excludedProperty.equals(entry.getKey())))
                 .flatMap(entry -> propertyToGridResources(entry.getKey(), entry.getValue(), resource, gridResourceType))
                 .collect(Collectors.toList());
     }
