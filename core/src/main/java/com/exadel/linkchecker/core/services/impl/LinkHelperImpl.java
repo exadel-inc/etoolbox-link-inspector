@@ -27,8 +27,8 @@ import java.util.stream.Stream;
 public class LinkHelperImpl implements LinkHelper {
     private static final Logger LOG = LoggerFactory.getLogger(LinkHelper.class);
 
-    private static final String REGEX_EXTERNAL_LINK = "(https?://(?:www\\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\\.[^\\s]{2,}|www\\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\\.[^\\s]{2,}|https?://(?:www\\.|(?!www))[a-zA-Z0-9]+\\.[^\\s]{2,}|www\\.[a-zA-Z0-9]+\\.[^\\s]{2,})";
-    private static final String REGEX_INTERNAL_LINK = "(^|(?<=\"))\\/content\\/([-a-zA-Z0-9:%_\\+.~#?&//=]*)";
+    private static final Pattern PATTERN_EXTERNAL_LINK = Pattern.compile("(https?://(?:www\\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\\.[^\\s\"]{2,}|www\\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\\.[^\\s\"]{2,}|https?://(?:www\\.|(?!www))[a-zA-Z0-9]+\\.[^\\s\"]{2,}|www\\.[a-zA-Z0-9]+\\.[^\\s\"]{2,})");
+    private static final Pattern PATTERN_INTERNAL_LINK = Pattern.compile("(^|(?<=\"))/content/([-a-zA-Z0-9:%_+.~#?&/=\\s]*)");
 
     private static final String LINK_TYPE_EXTERNAL = "External";
     private static final String LINK_TYPE_INTERNAL = "Internal";
@@ -50,11 +50,11 @@ public class LinkHelperImpl implements LinkHelper {
     }
 
     public Stream<String> getExternalLinksFromString(String text) {
-        return getLinksByRegex(text, REGEX_EXTERNAL_LINK);
+        return getLinksByPattern(text, PATTERN_EXTERNAL_LINK);
     }
 
     public Stream<String> getInternalLinksFromString(String text) {
-        return getLinksByRegex(text, REGEX_INTERNAL_LINK);
+        return getLinksByPattern(text, PATTERN_INTERNAL_LINK);
     }
 
     public LinkStatus validateInternalLink(String link, ResourceResolver resourceResolver) {
@@ -87,9 +87,8 @@ public class LinkHelperImpl implements LinkHelper {
         return Stream.concat(internalLinksStream, externalLinksStream);
     }
 
-    private Stream<String> getLinksByRegex(String text, String regex) {
+    private Stream<String> getLinksByPattern(String text, Pattern pattern) {
         Set<String> links = new HashSet<>();
-        Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(text);
         while (matcher.find()) {
             String link = matcher.group();
