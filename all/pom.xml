@@ -194,12 +194,6 @@
         </dependency>
         <dependency>
             <groupId>com.exadel.linkchecker</groupId>
-            <artifactId>linkchecker.ui.content</artifactId>
-            <version>${project.version}</version>
-            <type>zip</type>
-        </dependency>
-        <dependency>
-            <groupId>com.exadel.linkchecker</groupId>
             <artifactId>linkchecker.ui.config</artifactId>
             <version>${project.version}</version>
             <type>zip</type>
