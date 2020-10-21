@@ -34,7 +34,7 @@
 
     <properties>
         <aem.host>localhost</aem.host>
-        <aem.port>4505</aem.port>
+        <aem.port>4502</aem.port>
         <aem.publish.host>localhost</aem.publish.host>
         <aem.publish.port>4503</aem.publish.port>
         <sling.user>admin</sling.user>
@@ -609,6 +609,12 @@ Bundle-DocURL:
                 <groupId>org.osgi</groupId>
                 <artifactId>org.osgi.util.tracker</artifactId>
                 <version>1.5.1</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>org.apache.felix.scr.annotations</artifactId>
+                <version>1.9.6</version>
                 <scope>provided</scope>
             </dependency>
             <dependency>
