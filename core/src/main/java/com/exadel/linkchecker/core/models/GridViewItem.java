@@ -20,8 +20,8 @@ import javax.annotation.PostConstruct;
 import java.util.*;
 
 @Model(adaptables = SlingHttpServletRequest.class, defaultInjectionStrategy = DefaultInjectionStrategy.OPTIONAL)
-public class GridItem {
-    private static final Logger LOG = LoggerFactory.getLogger(GridItem.class);
+public class GridViewItem {
+    private static final Logger LOG = LoggerFactory.getLogger(GridViewItem.class);
 
     public final static String EDITOR_LINK = "/editor.html";
     //todo - crxde is not available in AEMaaCS

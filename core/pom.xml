@@ -24,8 +24,8 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>linkchecker.core</artifactId>
-    <name>Link Checker - Core</name>
-    <description>Core bundle for Link Checker</description>
+    <name>Exadel Link Checker - Core</name>
+    <description>Core bundle for Exadel Link Checker</description>
     <build>
         <plugins>
             <plugin>

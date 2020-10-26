@@ -1,0 +1,36 @@
+package com.exadel.linkchecker.core.services.util;
+
+import com.exadel.linkchecker.core.models.Link;
+
+public class LinksCounter {
+    private int internalLinks;
+    private int externalLinks;
+
+    public int getInternalLinks() {
+        return internalLinks;
+    }
+
+    public int getExternalLinks() {
+        return externalLinks;
+    }
+
+    public void incrementInternal() {
+        this.internalLinks++;
+    }
+
+    public void incrementExternal() {
+        this.externalLinks++;
+    }
+
+    public void countValidatedLinks(Link link) {
+        switch (link.getType()) {
+            case INTERNAL: {
+                this.incrementInternal();
+                break;
+            }
+            case EXTERNAL: {
+                this.incrementExternal();
+            }
+        }
+    }
+}
