@@ -18,12 +18,11 @@ import org.slf4j.LoggerFactory;
 import javax.servlet.Servlet;
 import java.util.Optional;
 
-@Component(service = {Servlet.class}, property = "sling.servlet.paths=" + "/bin/exadel/fix-broken-link")
+@Component(service = {Servlet.class})
 @SlingServletResourceTypes(
-        resourceTypes = "/bin/exadel/fix-broken-link",
-        methods = HttpConstants.METHOD_POST
-)
-public class FixLinkServlet extends SlingAllMethodsServlet {
+        resourceTypes="/bin/exadel/fix-broken-link",
+        methods= HttpConstants.METHOD_POST
+)public class FixLinkServlet extends SlingAllMethodsServlet {
     private static final Logger LOG = LoggerFactory.getLogger(FixLinkServlet.class);
 
     private static final String PATH_PARAM = "path";
