@@ -1,19 +1,14 @@
-package com.exadel.linkchecker.core.services.impl;
+package com.exadel.linkchecker.core.services.data.impl;
 
-import com.adobe.granite.ui.components.ds.ValueMapResource;
-import com.exadel.linkchecker.core.models.GridResource;
+import com.exadel.linkchecker.core.services.data.models.GridResource;
 import com.exadel.linkchecker.core.models.Link;
-import com.exadel.linkchecker.core.services.GridResourcesGenerator;
+import com.exadel.linkchecker.core.services.data.GridResourcesGenerator;
 import com.exadel.linkchecker.core.services.LinkHelper;
-import com.exadel.linkchecker.core.services.util.GridResourceProperties;
 import com.exadel.linkchecker.core.services.util.LinksCounter;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.api.resource.ResourceUtil;
-import org.apache.sling.api.resource.ValueMap;
-import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -84,9 +79,6 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
     private static final int DEFAULT_THREADS_PER_CORE = 4;
 
     @Reference
-    private ResourceResolverFactory resourceResolverFactory;
-
-    @Reference
     private LinkHelper linkHelper;
 
     private String searchPath;
@@ -101,20 +93,15 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
         threadsPerCore = configuration.threads_per_core();
     }
 
-    public List<Resource> generateGridResources(String gridResourceType) {
+    @Override
+    public Set<GridResource> generateGridResources(String gridResourceType, ResourceResolver resourceResolver) {
         StopWatch stopWatch = StopWatch.createStarted();
-        LOG.info("Start link checker report generation");
-
-        ResourceResolver resourceResolver = resourceResolverFactory.getThreadResourceResolver();
-        if (resourceResolver == null) {
-            LOG.warn("ResourceResolver is null, link checker report generation is stopped");
-            return Collections.emptyList();
-        }
+        LOG.debug("Start broken links collecting");
 
         Resource rootResource = resourceResolver.getResource(searchPath);
         if (rootResource == null) {
             LOG.warn("Search path resource is null, link checker report generation is stopped");
-            return Collections.emptyList();
+            return Collections.emptySet();
         }
 
         Map<Link, List<GridResource>> linkToGridResourcesMap = new HashMap<>();
@@ -123,15 +110,12 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
                 stopWatch.getTime(TimeUnit.MILLISECONDS), traversedNodesCounter);
 
         Set<GridResource> gridResources = validateLinksInParallel(linkToGridResourcesMap, resourceResolver);
-        List<Resource> itemsToShow = gridResources.stream()
-                .map(gridResource -> createSlingResource(gridResource, resourceResolver))
-                .collect(Collectors.toList());
 
         stopWatch.stop();
-        LOG.info("Generating link checker report is completed in {} ms, the number of items is {}",
-                stopWatch.getTime(TimeUnit.MILLISECONDS), itemsToShow.size());
+        LOG.info("Collecting broken links is completed in {} ms, the number of grid items is {}",
+                stopWatch.getTime(TimeUnit.MILLISECONDS), gridResources.size());
 
-        return itemsToShow;
+        return gridResources;
     }
 
     private Set<GridResource> validateLinksInParallel(Map<Link, List<GridResource>> linkToGridResourcesMap,
@@ -212,16 +196,5 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
             }
         }
         return true;
-    }
-
-    private Resource createSlingResource(GridResource gridResource, ResourceResolver resourceResolver) {
-        ValueMap valueMap = new ValueMapDecorator(new HashMap<>());
-        valueMap.put(GridResourceProperties.PN_LINK, gridResource.getLink().getHref());
-        valueMap.put(GridResourceProperties.PN_LINK_TYPE, gridResource.getLink().getType().getValue());
-        valueMap.put(GridResourceProperties.PN_LINK_STATUS_CODE, gridResource.getLink().getStatusCode());
-        valueMap.put(GridResourceProperties.PN_LINK_STATUS_MESSAGE, gridResource.getLink().getStatusMessage());
-        valueMap.put(GridResourceProperties.PN_RESOURCE_PATH, gridResource.getResourcePath());
-        valueMap.put(GridResourceProperties.PN_PROPERTY_NAME, gridResource.getPropertyName());
-        return new ValueMapResource(resourceResolver, gridResource.getResourcePath(), gridResource.getResourceType(), valueMap);
     }
 }

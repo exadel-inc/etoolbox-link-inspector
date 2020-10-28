@@ -1,4 +1,4 @@
-package com.exadel.linkchecker.core.services.util;
+package com.exadel.linkchecker.core.services.util.constants;
 
 public final class GridResourceProperties {
     private GridResourceProperties() {

@@ -44,7 +44,6 @@
                     sling:resourceType="granite/ui/components/coral/foundation/table"
                     itemprop="item"
                     layoutId="list"
-                    limit="{Long}40"
                     maximized="{Boolean}true"
                     modeGroup="exadel-link-checker"
                     path="${requestPathInfo.suffix}"

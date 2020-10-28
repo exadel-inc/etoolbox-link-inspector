@@ -23,10 +23,15 @@
     </td>
 
     <td class="foundation-collection-item-keys" is="coral-table-cell">
-        <a href="${model.pagePath @ extension = 'html'}" target="_blank"
-           x-cq-linkchecker="skip">
-            ${model.pageTitle}
-        </a>
+        <sly data-sly-test.isValidPage="${model.isValidPage}">
+            <a href="${model.pagePath}" target="_blank"
+               x-cq-linkchecker="skip">
+                ${model.pageTitle}
+            </a>
+        </sly>
+        <sly data-sly-test.isValidPage="${!isValidPage}">
+            <span>${model.pagePath}</span>
+        </sly>
     </td>
 
     <td class="foundation-collection-item-keys" is="coral-table-cell">
