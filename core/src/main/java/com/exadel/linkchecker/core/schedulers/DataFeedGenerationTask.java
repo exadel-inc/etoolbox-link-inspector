@@ -14,8 +14,7 @@ import org.slf4j.LoggerFactory;
 @Component(service = Runnable.class)
 public class DataFeedGenerationTask implements Runnable {
 
-    @ObjectClassDefinition(name="Exadel Link Checker - data feed generation scheduled task",
-                           description = "Simple demo for cron-job like task with properties")
+    @ObjectClassDefinition(name="Exadel Link Checker - Data Feed Generation Task")
     public static @interface Config {
 
         @AttributeDefinition(name = "Cron-job expression")
