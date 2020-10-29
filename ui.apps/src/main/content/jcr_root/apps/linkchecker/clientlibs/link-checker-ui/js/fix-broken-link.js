@@ -64,8 +64,8 @@
                     data: {
                         _charset_: "UTF-8",
                         cmd: "fixBrokenLink",
-                        path: path,
-                        currentElementName: currentElementName,
+                        path: JSON.stringify(paths),
+                        currentElementName: JSON.stringify(currentElementName),
                         newLink: newLink
                     }
                 }).fail(function() {

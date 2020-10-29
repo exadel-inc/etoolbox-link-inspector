@@ -103,7 +103,7 @@
                         jcr:primaryType="nt:unstructured"
                         sling:resourceType="granite/ui/components/coral/foundation/collection/action"
                         action="cq-admin.exadel.linkchecker.action.fix-broken-link"
-                        activeSelectionCount="single"
+                        activeSelectionCount="multiple"
                         icon="publish"
                         rel="exadel-link-checker-action-publish"
                         target=".exadel-link-checker"

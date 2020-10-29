@@ -33,17 +33,22 @@ import java.util.Optional;
     protected void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response) {
         try {
             ResourceResolver resourceResolver = request.getResourceResolver();
-            String path = getRequestParamString(request, PATH_PARAM);
-            if (StringUtils.isNotBlank(path)) {
-                Resource resource = resourceResolver.getResource(path);
-                if (resource != null) {
-                    ModifiableValueMap map = resource.adaptTo(ModifiableValueMap.class);
-                    if (map != null) {
-                        map.put(getRequestParamString(request, CURRENT_ELEMENT_NAME_PARAM), getRequestParamString(request, NEW_LINK_PARAM));
+            String [] paths = StringUtils.substringBetween(getRequestParamString(request, PATH_PARAM), "[\"", "\"]").split("\",\"");
+            for (String path : paths) {
+                if (StringUtils.isNotBlank(path)) {
+                    Resource resource = resourceResolver.getResource(path);
+                    if (resource != null) {
+                        ModifiableValueMap map = resource.adaptTo(ModifiableValueMap.class);
+                        if (map != null) {
+                            String [] elementNames = StringUtils.substringBetween(getRequestParamString(request,CURRENT_ELEMENT_NAME_PARAM), "[\"", "\"]").split("\",\"");
+                            for (String elementName : elementNames) {
+                                map.put(elementName, getRequestParamString(request, NEW_LINK_PARAM));
+                            }
+                        }
                     }
                 }
+                resourceResolver.commit();
             }
-            resourceResolver.commit();
         } catch (PersistenceException e) {
             LOG.error(e.getMessage(), e);
         }
