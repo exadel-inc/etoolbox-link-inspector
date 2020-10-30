@@ -81,8 +81,9 @@ public class LinkHelperImpl implements LinkHelper {
                 break;
             }
             case EXTERNAL: {
+                LOG.trace("Start validation of the external link {}", link.getHref());
                 link.setStatus(validateExternalLink(link.getHref()));
-                LOG.trace("Validation of the external link {} completed", link.getHref());
+                LOG.trace("Completed validation of the external link {}", link.getHref());
             }
         }
         return link.isValid();

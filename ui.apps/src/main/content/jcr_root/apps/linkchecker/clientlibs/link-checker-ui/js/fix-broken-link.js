@@ -142,4 +142,22 @@
             }]);
         }
     });
+
+    $(document).ready(function(){
+        $(".download-full-report-button").click(function(e) {
+            e.preventDefault();
+            $.ajax({
+                url: "/content/exadel-linkchecker/report.csv",
+                method: 'HEAD',
+                success: function() {
+                    window.location = "/content/exadel-linkchecker/report.csv";
+                },
+                error: function () {
+                    //todo - replace with coral alert
+                    alert("Report hasn't been generated yet");
+                }
+            });
+        });
+    });
+
 })(window, document, Granite.$, Granite);

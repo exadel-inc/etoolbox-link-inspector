@@ -121,28 +121,37 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
     private Set<GridResource> validateLinksInParallel(Map<Link, List<GridResource>> linkToGridResourcesMap,
                                                       ResourceResolver resourceResolver) {
         LinksCounter linksCounter = new LinksCounter();
+        LinksCounter brokenLinksCounter = new LinksCounter();
         ExecutorService executorService =
                 Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() * threadsPerCore);
         Set<GridResource> gridResources = new CopyOnWriteArraySet<>();
-        linkToGridResourcesMap.forEach((link, resources) -> {
-                    linksCounter.countValidatedLinks(link);
-                    executorService.submit(() -> {
-                                if (!linkHelper.validateLink(link, resourceResolver)) {
-                                    resources.forEach(resource -> resource.setLink(link));
-                                    gridResources.addAll(resources);
-                                }
-                            }
-                    );
-                }
-        );
         try {
+            linkToGridResourcesMap.forEach((link, resources) -> {
+                        linksCounter.countValidatedLinks(link);
+                        executorService.submit(() -> {
+                                    if (!linkHelper.validateLink(link, resourceResolver)) {
+                                        resources.forEach(resource -> resource.setLink(link));
+                                        gridResources.addAll(resources);
+                                        brokenLinksCounter.countValidatedLinks(link);
+                                    }
+                                }
+                        );
+                    }
+            );
+        } finally {
             executorService.shutdown();
-            executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+        }
+        try {
+            boolean terminated = executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+            LOG.trace("ExecutorService terminated: {}", terminated);
         } catch (InterruptedException e) {
             LOG.error("Parallel links validation failed", e);
         }
         LOG.debug("Checked internal links count: {}", linksCounter.getInternalLinks());
         LOG.debug("Checked external links count: {}", linksCounter.getExternalLinks());
+
+        LOG.debug("Broken internal links count: {}", brokenLinksCounter.getInternalLinks());
+        LOG.debug("Broken external links count: {}", brokenLinksCounter.getExternalLinks());
         return gridResources;
     }
 

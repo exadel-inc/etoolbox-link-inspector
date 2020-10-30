@@ -22,7 +22,10 @@ import java.util.Arrays;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@Model(adaptables = SlingHttpServletRequest.class, defaultInjectionStrategy = DefaultInjectionStrategy.OPTIONAL)
+@Model(
+        adaptables = { SlingHttpServletRequest.class, Resource.class },
+        defaultInjectionStrategy = DefaultInjectionStrategy.OPTIONAL
+)
 public class GridViewItem {
     private static final Logger LOG = LoggerFactory.getLogger(GridViewItem.class);
 
@@ -73,13 +76,13 @@ public class GridViewItem {
         Optional<Component> componentOptional = Optional.ofNullable(resourceResolver.adaptTo(ComponentManager.class))
                 .map(componentManager -> componentManager.getComponentOfResource(resourceToShow));
         componentName = componentOptional.map(Component::getTitle).orElse(resourceToShow.getName());
-        componentType = componentOptional.map(Component::getResourceType).orElse(StringUtils.EMPTY);
+        componentType = componentOptional.map(Component::getResourceType).orElse(resourceToShow.getResourceType());
 
         Optional<Page> pageOptional = Optional.ofNullable(resourceResolver.adaptTo(PageManager.class))
                 .map(pageManager -> pageManager.getContainingPage(resourceToShow));
         pagePath = pageOptional.map(page -> EDITOR_LINK + page.getPath() + HTML_EXTENSION)
                 .orElse(path);
-        pageTitle = pageOptional.map(Page::getTitle).orElse(path);
+        pageTitle = pageOptional.map(Page::getTitle).orElse(StringUtils.EMPTY);
         isValidPage = pageOptional.isPresent();
 
         componentPath = encodePath(path);

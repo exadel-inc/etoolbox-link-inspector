@@ -39,9 +39,10 @@ public class DataFeedGenerationTask implements Runnable {
     @Override
     public void run() {
         if (!enabled) {
-            LOG.debug("The Data feed generation scheduled task is not enabled");
+            LOG.debug("The Data Feed Generation scheduled task is not enabled");
             return;
         }
+        LOG.debug("The Data Feed Generation scheduled task started");
         dataFeedService.generateDataFeed();
     }
 

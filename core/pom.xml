@@ -29,6 +29,7 @@
                         <configuration>
                             <bnd><![CDATA[
 Import-Package: javax.annotation;version=0.0.0,*
+-conditionalpackage: org.apache.commons.csv.*
                                 ]]></bnd>
                         </configuration>
                     </execution>
@@ -193,6 +194,12 @@ Import-Package: javax.annotation;version=0.0.0,*
             <artifactId>org.apache.sling.models.impl</artifactId>
             <version>1.4.4</version>
             <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-csv</artifactId>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>

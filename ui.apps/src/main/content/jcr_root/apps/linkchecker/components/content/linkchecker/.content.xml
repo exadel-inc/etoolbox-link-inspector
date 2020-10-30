@@ -104,13 +104,22 @@
                         action="cq-admin.exadel.linkchecker.action.fix-broken-link"
                         activeSelectionCount="single"
                         icon="publish"
-                        rel="exadel-link-checker-action-publish"
+                        rel="exadel-link-checker-fix-broken-link"
                         target=".exadel-link-checker"
                         text="Fix Broken Link"
                         title="Fix Broken Link"
                         variant="actionBar">
                 </fixBrokenLink>
             </selection>
+            <secondary jcr:primaryType="nt:unstructured">
+                <download
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="granite/ui/components/coral/foundation/anchorbutton"
+                        text="Download Full Report"
+                        variant="primary"
+                        granite:class="download-full-report-button"
+                        x-cq-linkchecker="skip"/>
+            </secondary>
         </actions>
     </jcr:content>
 </jcr:root>

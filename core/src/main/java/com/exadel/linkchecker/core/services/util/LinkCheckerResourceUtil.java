@@ -20,11 +20,15 @@ import java.util.Calendar;
 public class LinkCheckerResourceUtil {
     private static final Logger LOG = LoggerFactory.getLogger(LinkCheckerResourceUtil.class);
 
-    public static void removeResource(String path, ResourceResolver resourceResolver) throws PersistenceException {
-        Resource resource = resourceResolver.getResource(path);
-        if (resource != null) {
-            resourceResolver.delete(resource);
-            resourceResolver.commit();
+    public static void removeResource(String path, ResourceResolver resourceResolver) {
+        try {
+            Resource resource = resourceResolver.getResource(path);
+            if (resource != null) {
+                resourceResolver.delete(resource);
+                resourceResolver.commit();
+            }
+        } catch (PersistenceException e) {
+            LOG.error("Failed to delete resource " + path, e);
         }
     }
 
@@ -54,7 +58,7 @@ public class LinkCheckerResourceUtil {
 
             session.save();
         } catch (RepositoryException | IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("Failed to create file node " + path, e);
         }
     }
 }

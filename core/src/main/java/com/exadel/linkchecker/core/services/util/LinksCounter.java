@@ -22,7 +22,7 @@ public class LinksCounter {
         this.externalLinks++;
     }
 
-    public void countValidatedLinks(Link link) {
+    public synchronized void countValidatedLinks(Link link) {
         switch (link.getType()) {
             case INTERNAL: {
                 this.incrementInternal();
