@@ -1,6 +1,8 @@
 package com.exadel.linkchecker.core.schedulers;
 
-import com.exadel.linkchecker.core.services.data.DataFeedService;
+import com.exadel.linkchecker.core.services.job.DataFeedJobExecutor;
+import com.exadel.linkchecker.core.services.job.SlingJobUtil;
+import org.apache.sling.event.jobs.JobManager;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -9,6 +11,8 @@ import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Collections;
 
 @Designate(ocd = DataFeedGenerationTask.Config.class)
 @Component(service = Runnable.class)
@@ -32,7 +36,7 @@ public class DataFeedGenerationTask implements Runnable {
     private final Logger LOG = LoggerFactory.getLogger(DataFeedGenerationTask.class);
 
     @Reference
-    private DataFeedService dataFeedService;
+    private JobManager jobManager;
 
     private boolean enabled;
     
@@ -43,7 +47,7 @@ public class DataFeedGenerationTask implements Runnable {
             return;
         }
         LOG.debug("The Data Feed Generation scheduled task started");
-        dataFeedService.generateDataFeed();
+        SlingJobUtil.addJob(jobManager, DataFeedJobExecutor.GENERATE_DATA_FEED_TOPIC, Collections.emptyMap());
     }
 
     @Activate
