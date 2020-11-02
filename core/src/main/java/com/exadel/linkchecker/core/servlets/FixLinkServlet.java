@@ -16,34 +16,42 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.Servlet;
+import java.util.Arrays;
 import java.util.Optional;
 
 @Component(service = {Servlet.class})
 @SlingServletResourceTypes(
-        resourceTypes="/bin/exadel/fix-broken-link",
-        methods= HttpConstants.METHOD_POST
-)public class FixLinkServlet extends SlingAllMethodsServlet {
+        resourceTypes = "/bin/exadel/fix-broken-link",
+        methods = HttpConstants.METHOD_POST
+)
+public class FixLinkServlet extends SlingAllMethodsServlet {
     private static final Logger LOG = LoggerFactory.getLogger(FixLinkServlet.class);
 
     private static final String PATH_PARAM = "path";
     private static final String CURRENT_ELEMENT_NAME_PARAM = "currentElementName";
+    private static final String CURRENT_LINK_PARAM = "currentLink";
     private static final String NEW_LINK_PARAM = "newLink";
 
     @Override
     protected void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response) {
         try {
             ResourceResolver resourceResolver = request.getResourceResolver();
-            String [] paths = StringUtils.substringBetween(getRequestParamString(request, PATH_PARAM), "[\"", "\"]").split("\",\"");
-            for (String path : paths) {
-                if (StringUtils.isNotBlank(path)) {
-                    Resource resource = resourceResolver.getResource(path);
-                    if (resource != null) {
-                        ModifiableValueMap map = resource.adaptTo(ModifiableValueMap.class);
-                        if (map != null) {
-                            String [] elementNames = StringUtils.substringBetween(getRequestParamString(request,CURRENT_ELEMENT_NAME_PARAM), "[\"", "\"]").split("\",\"");
-                            for (String elementName : elementNames) {
-                                map.put(elementName, getRequestParamString(request, NEW_LINK_PARAM));
+            String paths = getRequestParamString(request, PATH_PARAM);
+            if (StringUtils.isNotBlank(paths)) {
+                Resource resource = resourceResolver.getResource(paths);
+                if (resource != null) {
+                    ModifiableValueMap map = resource.adaptTo(ModifiableValueMap.class);
+                    if (map != null) {
+                        String elementName =getRequestParamString(request, CURRENT_ELEMENT_NAME_PARAM);
+                        if (map.get(elementName) instanceof String[]) {
+                            String[] multiple = (String[]) map.get(elementName);
+                            for (int i = 0; i < multiple.length; i++) {
+                                multiple[i] = multiple[i].replaceAll(getRequestParamString(request, CURRENT_LINK_PARAM), getRequestParamString(request, NEW_LINK_PARAM));
                             }
+                            map.put(elementName, multiple);
+                        }
+                        else{
+                            map.put(elementName, map.get(elementName).toString().replaceAll(getRequestParamString(request, CURRENT_LINK_PARAM), getRequestParamString(request, NEW_LINK_PARAM)));
                         }
                     }
                 }

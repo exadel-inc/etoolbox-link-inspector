@@ -45,7 +45,7 @@
         };
     }
 
-    function fixBrokenLink(paths, currentElementName,newLink) {
+    function fixBrokenLink(paths, currentLink, currentElementName,newLink) {
 
         var tickerMessage = $(document.createElement("div"));
 
@@ -64,9 +64,10 @@
                     data: {
                         _charset_: "UTF-8",
                         cmd: "fixBrokenLink",
-                        path: JSON.stringify(paths),
-                        currentElementName: JSON.stringify(currentElementName),
-                        newLink: newLink
+                        path: paths,
+                        currentElementName: currentElementName,
+                        newLink: newLink,
+                        currentLink:currentLink
                     }
                 }).fail(function() {
                     $(document.createElement("div"))
@@ -138,11 +139,14 @@
                     var paths = selections.map(function(v) {
                         return $(v).data("path");
                     });
+                    var currentLink = selections.map(function(v) {
+                        return $(v).find(".main-sync h4").text();
+                    });
                     var currentElementName = selections.map(function(v) {
                         return $(v).find("b").text();
                     });
                     var newLink = document.getElementsByClassName('coral3-Textfield')[0].value;
-                    fixBrokenLink(paths,currentElementName,newLink);
+                    fixBrokenLink(paths,currentLink,currentElementName,newLink);
                 }
             }]);
         }
