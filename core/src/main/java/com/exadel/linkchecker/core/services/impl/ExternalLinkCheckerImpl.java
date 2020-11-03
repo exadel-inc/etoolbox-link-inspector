@@ -50,6 +50,7 @@ public class ExternalLinkCheckerImpl implements ExternalLinkChecker {
 
     private int connectionTimeout;
 
+    @Override
     public int checkLink(String url) throws URISyntaxException, IOException {
         HttpHead headMethod = null;
         try {

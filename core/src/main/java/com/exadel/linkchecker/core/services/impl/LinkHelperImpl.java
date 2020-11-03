@@ -46,20 +46,24 @@ public class LinkHelperImpl implements LinkHelper {
         return linkStream;
     }
 
+    @Override
     public Stream<String> getExternalLinksFromString(String text) {
         return getLinksByPattern(text, PATTERN_EXTERNAL_LINK);
     }
 
+    @Override
     public Stream<String> getInternalLinksFromString(String text) {
         return getLinksByPattern(text, PATTERN_INTERNAL_LINK);
     }
 
+    @Override
     public LinkStatus validateInternalLink(String link, ResourceResolver resourceResolver) {
         return Optional.ofNullable(resourceResolver.getResource(link))
                 .map(resource -> new LinkStatus(HttpStatus.SC_OK, HttpStatus.getStatusText(HttpStatus.SC_OK)))
                 .orElse(new LinkStatus(HttpStatus.SC_NOT_FOUND, HttpStatus.getStatusText(HttpStatus.SC_NOT_FOUND)));
     }
 
+    @Override
     public LinkStatus validateExternalLink(String link) {
         try {
             int statusCode = externalLinkChecker.checkLink(link);
@@ -74,6 +78,7 @@ public class LinkHelperImpl implements LinkHelper {
         }
     }
 
+    @Override
     public boolean validateLink(Link link, ResourceResolver resourceResolver) {
         switch (link.getType()) {
             case INTERNAL: {
