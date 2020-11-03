@@ -1,10 +1,11 @@
 package com.exadel.linkchecker.core.models;
 
+import com.day.cq.commons.jcr.JcrUtil;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
 import com.day.cq.wcm.api.components.Component;
 import com.day.cq.wcm.api.components.ComponentManager;
-import com.exadel.linkchecker.core.services.util.GridResourceProperties;
+import com.exadel.linkchecker.core.services.util.constants.GridResourceProperties;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
@@ -17,17 +18,24 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
-@Model(adaptables = SlingHttpServletRequest.class, defaultInjectionStrategy = DefaultInjectionStrategy.OPTIONAL)
-public class GridItem {
-    private static final Logger LOG = LoggerFactory.getLogger(GridItem.class);
+@Model(
+        adaptables = { SlingHttpServletRequest.class, Resource.class },
+        defaultInjectionStrategy = DefaultInjectionStrategy.OPTIONAL
+)
+public class GridViewItem {
+    private static final Logger LOG = LoggerFactory.getLogger(GridViewItem.class);
 
     public final static String EDITOR_LINK = "/editor.html";
-    //todo - crxde is not available in AEMaaCS
+    //Note: CRX DE is not available in AEMaaCS
     public final static String CRX_DE_LINK = "/crx/de/index.jsp#";
 
     public final static String THUMBNAIL_PATH = "/apps/linkchecker/components/thumb.png";
+    public final static String HTML_EXTENSION = ".html";
+    public final static String SLASH_CHAR = "/";
 
     @SlingObject
     private ResourceResolver resourceResolver;
@@ -55,27 +63,29 @@ public class GridItem {
     private String componentName;
     private String componentPath;
     private String componentType;
+    private boolean isValidPage;
 
     @PostConstruct
     private void init() {
         Resource resourceToShow = resourceResolver.getResource(path);
         if (resourceToShow == null) {
-            LOG.warn("Resource for is null, path: {}", path);
+            LOG.warn("Resource is null, path: {}", path);
             return;
         }
 
         Optional<Component> componentOptional = Optional.ofNullable(resourceResolver.adaptTo(ComponentManager.class))
                 .map(componentManager -> componentManager.getComponentOfResource(resourceToShow));
         componentName = componentOptional.map(Component::getTitle).orElse(resourceToShow.getName());
-        componentType = componentOptional.map(Component::getResourceType).orElse(StringUtils.EMPTY);
+        componentType = componentOptional.map(Component::getResourceType).orElse(resourceToShow.getResourceType());
 
         Optional<Page> pageOptional = Optional.ofNullable(resourceResolver.adaptTo(PageManager.class))
                 .map(pageManager -> pageManager.getContainingPage(resourceToShow));
-        pagePath = pageOptional.map(page -> EDITOR_LINK + page.getPath()).orElse(path);
-        pageTitle = pageOptional.map(Page::getTitle).orElse(path);
+        pagePath = pageOptional.map(page -> EDITOR_LINK + page.getPath() + HTML_EXTENSION)
+                .orElse(path);
+        pageTitle = pageOptional.map(Page::getTitle).orElse(StringUtils.EMPTY);
+        isValidPage = pageOptional.isPresent();
 
-        //todo - use proper url encoding
-        componentPath = path.replaceAll(":", "%3A");
+        componentPath = encodePath(path);
     }
 
     public String getTitle() {
@@ -128,5 +138,15 @@ public class GridItem {
 
     public String getPageTitle() {
         return pageTitle;
+    }
+
+    public boolean isValidPage() {
+        return isValidPage;
+    }
+
+    private static String encodePath(String path) {
+        return Arrays.stream(path.split(SLASH_CHAR))
+                .map(JcrUtil::escapeIllegalJcrChars)
+                .collect(Collectors.joining(SLASH_CHAR));
     }
 }

@@ -1,8 +1,8 @@
 package com.exadel.linkchecker.core.services.impl;
 
-import com.day.cq.rewriter.linkchecker.ExternalLinkChecker;
 import com.exadel.linkchecker.core.models.Link;
 import com.exadel.linkchecker.core.models.LinkStatus;
+import com.exadel.linkchecker.core.services.ExternalLinkChecker;
 import com.exadel.linkchecker.core.services.LinkHelper;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -27,62 +27,79 @@ import java.util.stream.Stream;
 public class LinkHelperImpl implements LinkHelper {
     private static final Logger LOG = LoggerFactory.getLogger(LinkHelper.class);
 
-    private static final Pattern PATTERN_EXTERNAL_LINK = Pattern.compile("(https?://(?:www\\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\\.[^\\s\"]{2,}|www\\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\\.[^\\s\"]{2,}|https?://(?:www\\.|(?!www))[a-zA-Z0-9]+\\.[^\\s\"]{2,}|www\\.[a-zA-Z0-9]+\\.[^\\s\"]{2,})");
+    private static final Pattern PATTERN_EXTERNAL_LINK = Pattern.compile("(https?://(?:www\\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\\.[^\\s\"<]{2,}|www\\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\\.[^\\s\"<]{2,}|https?://(?:www\\.|(?!www))[a-zA-Z0-9]+\\.[^\\s\"<]{2,}|www\\.[a-zA-Z0-9]+\\.[^\\s\"<]{2,})");
     private static final Pattern PATTERN_INTERNAL_LINK = Pattern.compile("(^|(?<=\"))/content/([-a-zA-Z0-9:%_+.~#?&/=\\s]*)");
-
-    private static final String LINK_TYPE_EXTERNAL = "External";
-    private static final String LINK_TYPE_INTERNAL = "Internal";
 
     @Reference
     private ExternalLinkChecker externalLinkChecker;
 
     @Override
-    public Stream<Link> getLinkStream(Object propertyValue, ResourceResolver resourceResolver) {
+    public Stream<Link> getLinkStream(Object propertyValue) {
         Stream<Link> linkStream = Stream.empty();
         if (propertyValue instanceof String) {
             String stringValue = (String) propertyValue;
-            linkStream = getLinksStream(stringValue, resourceResolver);
+            linkStream = getLinksStream(stringValue);
         } else if (propertyValue instanceof String[]) {
             linkStream = Arrays.stream((String[]) propertyValue)
-                    .flatMap(stringValue -> getLinksStream(stringValue, resourceResolver));
+                    .flatMap(this::getLinksStream);
         }
         return linkStream;
     }
 
+    @Override
     public Stream<String> getExternalLinksFromString(String text) {
         return getLinksByPattern(text, PATTERN_EXTERNAL_LINK);
     }
 
+    @Override
     public Stream<String> getInternalLinksFromString(String text) {
         return getLinksByPattern(text, PATTERN_INTERNAL_LINK);
     }
 
+    @Override
     public LinkStatus validateInternalLink(String link, ResourceResolver resourceResolver) {
         return Optional.ofNullable(resourceResolver.getResource(link))
                 .map(resource -> new LinkStatus(HttpStatus.SC_OK, HttpStatus.getStatusText(HttpStatus.SC_OK)))
                 .orElse(new LinkStatus(HttpStatus.SC_NOT_FOUND, HttpStatus.getStatusText(HttpStatus.SC_NOT_FOUND)));
     }
 
+    @Override
     public LinkStatus validateExternalLink(String link) {
         try {
-            int statusCode = externalLinkChecker.check(link);
+            int statusCode = externalLinkChecker.checkLink(link);
             String statusMessage = HttpStatus.getStatusText(statusCode);
             return new LinkStatus(statusCode, statusMessage);
         } catch (URISyntaxException | IOException e) {
             String message = Optional.ofNullable(e.getCause())
                     .map(Throwable::toString)
                     .orElse(e.toString());
-            LOG.debug("Result of checking the link " + link + " " + message);
+            LOG.debug("Validation didn't pass for the external link {} due to the error: {}", link, message);
             return new LinkStatus(HttpStatus.SC_BAD_REQUEST, message);
         }
     }
 
-    private Stream<Link> getLinksStream(String text, ResourceResolver resourceResolver) {
+    @Override
+    public boolean validateLink(Link link, ResourceResolver resourceResolver) {
+        switch (link.getType()) {
+            case INTERNAL: {
+                link.setStatus(validateInternalLink(link.getHref(), resourceResolver));
+                break;
+            }
+            case EXTERNAL: {
+                LOG.trace("Start validation of the external link {}", link.getHref());
+                link.setStatus(validateExternalLink(link.getHref()));
+                LOG.trace("Completed validation of the external link {}", link.getHref());
+            }
+        }
+        return link.isValid();
+    }
+
+    private Stream<Link> getLinksStream(String text) {
         Stream<Link> internalLinksStream = getInternalLinksFromString(text)
-                .map(linkString -> new Link(linkString, LINK_TYPE_INTERNAL, validateInternalLink(linkString, resourceResolver)))
+                .map(linkString -> new Link(linkString, Link.Type.INTERNAL))
                 .distinct();
         Stream<Link> externalLinksStream = getExternalLinksFromString(text)
-                .map(linkString -> new Link(linkString, LINK_TYPE_EXTERNAL, validateExternalLink(linkString)))
+                .map(linkString -> new Link(linkString, Link.Type.EXTERNAL))
                 .distinct();
         return Stream.concat(internalLinksStream, externalLinksStream);
     }

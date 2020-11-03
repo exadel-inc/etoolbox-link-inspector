@@ -1,8 +1,8 @@
 package com.exadel.linkchecker.core.models;
 
 public final class LinkStatus {
-    private int statusCode;
-    private String statusMessage;
+    private final int statusCode;
+    private final String statusMessage;
 
     public LinkStatus(int statusCode, String statusMessage) {
         this.statusCode = statusCode;

@@ -2,7 +2,7 @@
     "use strict";
 
     var ui = $(window).adaptTo("foundation-ui");
-    var COMMAND_URL = Granite.HTTP.externalize("/bin/exadel/fix-broken-link");
+    var COMMAND_URL = "/apps/linkchecker/components/content/fixBrokenLink";
     var updateText = Granite.I18n.get("Update Link");
     var cancelText = Granite.I18n.get("Cancel");
 
@@ -59,7 +59,7 @@
 
                 var deferred = $.Deferred();
                 $.ajax({
-                    url: "/apps/linkchecker/components/content/fixBrokenLink",
+                    url: COMMAND_URL,
                     type: "POST",
                     data: {
                         _charset_: "UTF-8",
@@ -151,4 +151,22 @@
             }]);
         }
     });
+
+    $(document).ready(function(){
+        $(".download-full-report-button").click(function(e) {
+            e.preventDefault();
+            $.ajax({
+                url: "/content/exadel-linkchecker/report.csv",
+                method: 'HEAD',
+                success: function() {
+                    window.location = "/content/exadel-linkchecker/report.csv";
+                },
+                error: function () {
+                    //todo - replace with coral alert
+                    alert("Report hasn't been generated yet");
+                }
+            });
+        });
+    });
+
 })(window, document, Granite.$, Granite);

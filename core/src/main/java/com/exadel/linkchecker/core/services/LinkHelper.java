@@ -13,11 +13,9 @@ public interface LinkHelper {
      * which are instantiated as {@link Link} objects.
      *
      * @param propertyValue - the value to be parsed
-     * @param resourceResolver - {@link ResourceResolver}
      * @return The Stream<Link> of parsed links, or Stream.empty()
      */
-    Stream<Link> getLinkStream(Object propertyValue, ResourceResolver resourceResolver);
-
+    Stream<Link> getLinkStream(Object propertyValue);
 
     Stream<String> getExternalLinksFromString(String text);
 
@@ -32,4 +30,6 @@ public interface LinkHelper {
      * @return the http status response
      */
     LinkStatus validateExternalLink(String link);
+
+    boolean validateLink(Link link, ResourceResolver resourceResolver);
 }

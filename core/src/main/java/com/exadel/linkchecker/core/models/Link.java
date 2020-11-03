@@ -3,40 +3,63 @@ package com.exadel.linkchecker.core.models;
 import org.apache.commons.httpclient.HttpStatus;
 
 import java.util.Objects;
+import java.util.Optional;
 
 public final class Link {
-    private final String href;
-    private final String type;
-    private final boolean isValid;
-    private final int statusCode;
-    private final String statusMessage;
+    public enum Type {
+        INTERNAL("Internal"),
+        EXTERNAL("External");
 
-    public Link(String href, String type, LinkStatus status) {
+        private final String value;
+
+        Type(String value) {
+            this.value = value;
+        }
+
+        public String getValue() {
+            return value;
+        }
+    }
+
+    private final String href;
+    private final Type type;
+    private LinkStatus status;
+
+    public Link(String href, Type type) {
         this.href = href;
         this.type = type;
-        this.statusCode = status.getStatusCode();
-        this.statusMessage = status.getStatusMessage();
-        this.isValid = this.statusCode == HttpStatus.SC_OK;
     }
 
     public String getHref() {
         return href;
     }
 
-    public String getType() {
+    public Type getType() {
         return type;
     }
 
     public boolean isValid() {
-        return isValid;
+        return getStatusCode() == HttpStatus.SC_OK;
     }
 
     public int getStatusCode() {
-        return statusCode;
+        return Optional.ofNullable(status)
+                .map(LinkStatus::getStatusCode)
+                .orElse(HttpStatus.SC_NOT_FOUND);
     }
 
     public String getStatusMessage() {
-        return statusMessage;
+        return Optional.ofNullable(status)
+                .map(LinkStatus::getStatusMessage)
+                .orElse(HttpStatus.getStatusText(HttpStatus.SC_NOT_FOUND));
+    }
+
+    public LinkStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(LinkStatus status) {
+        this.status = status;
     }
 
     @Override
