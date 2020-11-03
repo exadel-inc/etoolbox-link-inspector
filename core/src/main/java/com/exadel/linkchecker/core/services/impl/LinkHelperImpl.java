@@ -1,8 +1,8 @@
 package com.exadel.linkchecker.core.services.impl;
 
-import com.day.cq.rewriter.linkchecker.ExternalLinkChecker;
 import com.exadel.linkchecker.core.models.Link;
 import com.exadel.linkchecker.core.models.LinkStatus;
+import com.exadel.linkchecker.core.services.ExternalLinkChecker;
 import com.exadel.linkchecker.core.services.LinkHelper;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -62,7 +62,7 @@ public class LinkHelperImpl implements LinkHelper {
 
     public LinkStatus validateExternalLink(String link) {
         try {
-            int statusCode = externalLinkChecker.check(link);
+            int statusCode = externalLinkChecker.checkLink(link);
             String statusMessage = HttpStatus.getStatusText(statusCode);
             return new LinkStatus(statusCode, statusMessage);
         } catch (URISyntaxException | IOException e) {
