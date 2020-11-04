@@ -8,6 +8,7 @@ import com.exadel.linkchecker.core.services.data.GridResourcesGenerator;
 import com.exadel.linkchecker.core.services.util.JsonUtil;
 import com.exadel.linkchecker.core.services.util.LinkCheckerResourceUtil;
 import com.exadel.linkchecker.core.services.util.constants.GridResourceProperties;
+import com.exadel.linkchecker.core.services.util.constants.CommonConstants;
 import com.google.common.collect.ImmutableMap;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.csv.CSVFormat;
@@ -55,14 +56,12 @@ public class DataFeedServiceImpl implements DataFeedService {
     @Reference
     private GridResourcesGenerator gridResourcesGenerator;
 
-    public static final String LINK_CHECKER_SERVICE_NAME = "exadel-linkchecker-service";
-
     private static final String GRID_RESOURCE_TYPE = "linkchecker/components/gridConfig";
     public static final int UI_ITEMS_LIMIT = 500;
 
     public static final String JSON_FEED_PATH = "/apps/linkchecker/components/content/data/datafeed.json";
 
-    public static final String CSV_REPORT_PATH = "/content/exadel-linkchecker/report.csv";
+    public static final String CSV_REPORT_PATH = "/content/exadel-linkchecker/download/report.csv";
     private static final String CSV_MIME_TYPE = "text/csv";
     private static final String[] CSV_COLUMNS = {
             "Link",
@@ -112,7 +111,7 @@ public class DataFeedServiceImpl implements DataFeedService {
     private ResourceResolver getResourceResolver() {
         try {
             return resourceResolverFactory.getServiceResourceResolver(
-                    ImmutableMap.of(ResourceResolverFactory.SUBSERVICE, LINK_CHECKER_SERVICE_NAME));
+                    ImmutableMap.of(ResourceResolverFactory.SUBSERVICE, CommonConstants.LINK_CHECKER_SERVICE_NAME));
         } catch (LoginException e) {
             LOG.error("Failed to get service resource resolver", e);
         }
@@ -144,6 +143,7 @@ public class DataFeedServiceImpl implements DataFeedService {
             JSONArray resourcesJsonArray = JsonUtil.objectsToJsonArray(gridResources);
                 removePreviousDataFeed(resourceResolver);
                 saveGridResourcesToJcr(resourceResolver, resourcesJsonArray);
+                removePendingNode(resourceResolver);
                 resourceResolver.commit();
                 LOG.debug("Saving data feed json in jcr completed, path {}", JSON_FEED_PATH);
         } catch (PersistenceException e) {
@@ -158,6 +158,10 @@ public class DataFeedServiceImpl implements DataFeedService {
     private void saveGridResourcesToJcr(ResourceResolver resourceResolver, JSONArray jsonArray) {
         LinkCheckerResourceUtil.saveFileToJCR(JSON_FEED_PATH, jsonArray.toString().getBytes(),
                 ContentTypeUtil.TYPE_JSON, resourceResolver);
+    }
+
+    private void removePendingNode(ResourceResolver resourceResolver) {
+        LinkCheckerResourceUtil.removeResource(CommonConstants.PENDING_GENERATION_NODE, resourceResolver);
     }
 
     private Stream<Resource> toSlingResourcesStream(Collection<GridResource> gridResources, ResourceResolver resourceResolver) {

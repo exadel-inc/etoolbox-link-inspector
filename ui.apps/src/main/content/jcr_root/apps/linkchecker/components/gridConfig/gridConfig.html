@@ -9,7 +9,7 @@
 
     <td class="foundation-collection-item-title" is="coral-table-cell">
         <div class="main-sync">
-            <h4 title="${model.link}">${model.link}</h4>
+            <h4 id="current-link" title="${model.link}">${model.link}</h4>
             <span class="description">${model.linkType}</span>
         </div>
     </td>
@@ -42,6 +42,6 @@
     </td>
 
     <td class="foundation-collection-item-keys" is="coral-table-cell">
-        ${model.path}@<b>${model.propertyName}</b>
+        ${model.path}@<b id="property-location">${model.propertyName}</b>
     </td>
 </tr>
