@@ -1,4 +1,4 @@
-(function(window, document, $, Granite) {
+(function (window, document, $, Granite) {
     "use strict";
 
     var ui = $(window).adaptTo("foundation-ui");
@@ -19,7 +19,7 @@
         el.show();
 
         return {
-            finished: function(message) {
+            finished: function (message) {
                 el.header.textContent = "Finished"
                 el.content.innerHTML = message;
 
@@ -27,20 +27,20 @@
                 b.label.textContent = "Close";
                 b.variant = "primary";
 
-                b.on("click", function(e) {
+                b.on("click", function (e) {
                     //ui.clearWait();
                     window.location.reload();
                 });
 
                 el.footer.appendChild(b);
             },
-            updateMessage: function(message) {
+            updateMessage: function (message) {
                 el.content.innerHTML = message;
             },
-            clear: function() {
+            clear: function () {
                 el.hide();
 
-                requestAnimationFrame(function() {
+                requestAnimationFrame(function () {
                     el.remove();
                 });
             }
@@ -68,21 +68,21 @@
                         cmd: "fixBrokenLink",
                         path: paths,
                         propertyName: propertyName,
-                        currentLink:currentLink,
+                        currentLink: currentLink,
                         newLink: newLink
                     }
-                }).fail(function() {
+                }).fail(function () {
                     $(document.createElement("div"))
                         .html("Failed to replace the link <b>" + currentLink + "</b> with <b>" + newLink + "</b><br/> at <i>" + path + "@" + propertyName + "</i>")
                         .appendTo(tickerMessage);
-                }).done(function(data, textStatus, xhr) {
+                }).done(function (data, textStatus, xhr) {
                     console.log("status: " + xhr.status);
                     var message = "The link <b>" + currentLink + "</b> was successfully replaced with <b>" + newLink + "</b><br/> at <i>" + path + "@" + propertyName + "</i>";
                     if (xhr.status == 204) {
-                        message =  "The link <b>" + currentLink + "</b> was not found at <i>" + path + "@" + propertyName + "</i>"
+                        message = "The link <b>" + currentLink + "</b> was not found at <i>" + path + "@" + propertyName + "</i>"
                     }
                     if (xhr.status == 202) {
-                        message =  "The current link <b>" + currentLink + "</b> is equal to the entered one, replacement was not applied";
+                        message = "The current link <b>" + currentLink + "</b> is equal to the entered one, replacement was not applied";
                     }
                     $(document.createElement("div"))
                         .html(message)
@@ -104,7 +104,7 @@
             requests = requests.then(createFixRequest(path));
         }
 
-        requests.always(function() {
+        requests.always(function () {
             wt.finished(tickerMessage.html());
 
             setTimeout(function () {
@@ -114,7 +114,7 @@
 
     $(window).adaptTo("foundation-registry").register("foundation.collection.action.action", {
         name: "cq-admin.exadel.linkchecker.action.fix-broken-link",
-        handler: function(name, el, config, collection, selections) {
+        handler: function (name, el, config, collection, selections) {
             var message = $(document.createElement("div"));
 
             var intro = $(document.createElement("p")).appendTo(message);
@@ -146,14 +146,14 @@
             }, {
                 text: updateText,
                 primary: true,
-                handler: function() {
-                    var path = selections.map(function(v) {
+                handler: function () {
+                    var path = selections.map(function (v) {
                         return $(v).data("path");
                     });
-                    var currentLink = selections.map(function(v) {
+                    var currentLink = selections.map(function (v) {
                         return $(v).find("#current-link").text();
                     });
-                    var propertyName = selections.map(function(v) {
+                    var propertyName = selections.map(function (v) {
                         return $(v).find("#property-location").text();
                     });
                     var newLink = $('#new-link').val();
@@ -164,18 +164,37 @@
         }
     });
 
-    $(document).ready(function(){
-        $(".download-full-report-button").click(function(e) {
+    $(document).ready(function () {
+        $(".download-full-report-button").click(function (e) {
             e.preventDefault();
             $.ajax({
                 url: REPORT_URL,
                 method: 'HEAD',
-                success: function() {
+                success: function () {
                     window.location = REPORT_URL;
                 },
                 error: function () {
-                    //todo - replace with coral alert
-                    alert("Report hasn't been generated yet");
+                    var alertPopup = new Coral.Alert().set({
+                        variant: "warning",
+                        header: {
+                            innerHTML: "WARNING"
+                        },
+                        content: {
+                            innerHTML: "No report found"
+                        },
+                        id: "no-report-found-alert"
+                    });
+                    var previousAlertElement = $("#no-report-found-alert");
+                    if (previousAlertElement.length > 0) {
+                        previousAlertElement.remove();
+                    }
+                    document.body.append(alertPopup);
+
+                    var newAlertElement = $("#no-report-found-alert");
+                    newAlertElement.addClass("linkchecker-coral-alert");
+                    setTimeout(function () {
+                        newAlertElement.fadeOut();
+                    }, 2000);
                 }
             });
         });
@@ -184,7 +203,7 @@
             url: "/content/exadel-linkchecker/servlet/pendingGenerationCheck",
             async: false,
             type: "POST",
-            success: function(data, textStatus, xhr) {
+            success: function (data, textStatus, xhr) {
                 if (xhr.status == 200) {
                     var alertPopup = new Coral.Alert().set({
                         header: {
@@ -193,9 +212,10 @@
                         content: {
                             innerHTML: "Some links were updated. Changes will be reflected in the report after data feed regeneration"
                         },
-                        id: "linkchecker-info-alert"
+                        id: "pending-generation-alert"
                     });
                     document.body.append(alertPopup);
+                    $("#pending-generation-alert").addClass("linkchecker-coral-alert");
                 }
             }
         });

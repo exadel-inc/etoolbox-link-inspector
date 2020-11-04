@@ -16,5 +16,4 @@
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 <workspaceFilter version="1.0">
     <filter root="/apps/linkchecker-packages"/>
-    <filter root="/apps/linkchecker-vendor-packages"/>
 </workspaceFilter>
