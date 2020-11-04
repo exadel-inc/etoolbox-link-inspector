@@ -31,8 +31,8 @@ import java.util.Optional;
         resourceTypes = "/bin/exadel/fix-broken-link",
         methods = HttpConstants.METHOD_POST
 )
-public class FixLinkServlet extends SlingAllMethodsServlet {
-    private static final Logger LOG = LoggerFactory.getLogger(FixLinkServlet.class);
+public class FixBrokenLinkServlet extends SlingAllMethodsServlet {
+    private static final Logger LOG = LoggerFactory.getLogger(FixBrokenLinkServlet.class);
 
     private static final String PATH_PARAM = "path";
     private static final String PROPERTY_NAME_PARAM = "propertyName";
