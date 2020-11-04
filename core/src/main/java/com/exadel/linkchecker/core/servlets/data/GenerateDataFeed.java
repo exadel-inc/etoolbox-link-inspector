@@ -17,7 +17,7 @@ import java.util.Collections;
 
 @Component(service = {Servlet.class})
 @SlingServletResourceTypes(
-        resourceTypes = "/bin/exadel/generate-datafeed",
+        resourceTypes = "/bin/exadel/datafeed/generate",
         methods = HttpConstants.METHOD_GET
 )
 @ServiceDescription("The servlet for manual triggering data feed generation")
