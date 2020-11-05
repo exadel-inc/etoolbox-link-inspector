@@ -2,14 +2,16 @@ package com.exadel.linkchecker.core.services.impl;
 
 import com.exadel.linkchecker.core.services.ExternalLinkChecker;
 import org.apache.commons.httpclient.HttpStatus;
-import org.apache.http.HttpResponse;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.osgi.services.HttpClientBuilderFactory;
+import org.apache.http.util.EntityUtils;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -38,17 +40,31 @@ public class ExternalLinkCheckerImpl implements ExternalLinkChecker {
                 name = "Connection timeout",
                 description = "The time (in milliseconds) for connection to disconnect"
         ) int connection_timeout() default DEFAULT_CONNECTION_TIMEOUT;
+
+        @AttributeDefinition(
+                name = "Socket timeout",
+                description = "The timeout (in milliseconds) for socket"
+        ) int socket_timeout() default DEFAULT_SOCKET_TIMEOUT;
+
+        @AttributeDefinition(
+                name = "User agent",
+                description = "Example - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.111 Safari/537.36"
+        ) String user_agent() default StringUtils.EMPTY;
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(ExternalLinkChecker.class);
     private static final int DEFAULT_CONNECTION_TIMEOUT = 5000;
+    private static final int DEFAULT_SOCKET_TIMEOUT = 15000;
 
     @Reference
     private HttpClientBuilderFactory httpClientBuilderFactory;
 
     private CloseableHttpClient httpClient;
+    private PoolingHttpClientConnectionManager connectionManager;
 
     private int connectionTimeout;
+    private int socketTimeout;
+    private String userAgent;
 
     @Override
     public int checkLink(String url) throws URISyntaxException, IOException {
@@ -56,12 +72,17 @@ public class ExternalLinkCheckerImpl implements ExternalLinkChecker {
         try {
             URI uri = new URI(url);
             headMethod = new HttpHead(uri.toString());
-            HttpResponse httpResp = this.httpClient.execute(headMethod);
-            if (httpResp == null) {
-                LOG.error("Failed to get response from server while performing HEAD request, url: {}", url);
-                return HttpStatus.SC_BAD_REQUEST;
+            try (CloseableHttpResponse httpResp = this.httpClient.execute(headMethod)) {
+                if (httpResp == null) {
+                    LOG.error("Failed to get response from server while performing HEAD request, url: {}", url);
+                    return HttpStatus.SC_BAD_REQUEST;
+                }
+                int statusCode = httpResp.getStatusLine().getStatusCode();
+                EntityUtils.consumeQuietly(httpResp.getEntity());
+                LOG.trace("PoolingHttpClientConnectionManager leased: {}, link: {}",
+                        connectionManager.getTotalStats().getLeased(), url);
+                return statusCode;
             }
-            return httpResp.getStatusLine().getStatusCode();
         } finally {
             Optional.ofNullable(headMethod)
                     .ifPresent(HttpRequestBase::releaseConnection);
@@ -72,6 +93,8 @@ public class ExternalLinkCheckerImpl implements ExternalLinkChecker {
     @Modified
     protected void activate(Configuration configuration) {
         connectionTimeout = configuration.connection_timeout();
+        socketTimeout = configuration.socket_timeout();
+        userAgent = configuration.user_agent();
         buildCloseableHttpClient();
     }
 
@@ -84,17 +107,24 @@ public class ExternalLinkCheckerImpl implements ExternalLinkChecker {
                 LOG.error("Failed to close httpClient", e);
             }
         }
+        Optional.ofNullable(connectionManager).
+                ifPresent(PoolingHttpClientConnectionManager::close);
     }
 
     private void buildCloseableHttpClient() {
-        PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager();
+        connectionManager = new PoolingHttpClientConnectionManager();
+        connectionManager.setMaxTotal(1000);
+        connectionManager.setDefaultMaxPerRoute(1000);
         HttpClientBuilder clientBuilder = this.httpClientBuilderFactory.newBuilder()
                 .setConnectionManager(connectionManager);
+        Optional.of(userAgent)
+                .filter(StringUtils::isNotBlank)
+                .ifPresent(clientBuilder::setUserAgent);
         if (connectionTimeout >= DEFAULT_CONNECTION_TIMEOUT) {
             RequestConfig config = RequestConfig.custom()
                     .setConnectTimeout(connectionTimeout)
-                    .setConnectionRequestTimeout(connectionTimeout)
-                    .setSocketTimeout(connectionTimeout)
+                    .setConnectionRequestTimeout(socketTimeout)
+                    .setSocketTimeout(socketTimeout)
                     .build();
             this.httpClient = clientBuilder
                     .setDefaultRequestConfig(config)

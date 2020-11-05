@@ -49,7 +49,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
 
         @AttributeDefinition(
                 name = "Excluded properties",
-                description = "The List of properties excluded from processing"
+                description = "The list of properties excluded from processing"
         ) String[] excluded_properties() default {
                 "dam:Comments",
                 "cq:allowedTemplates",
@@ -68,6 +68,11 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
         };
 
         @AttributeDefinition(
+                name = "Excluded sites",
+                description = "The list of sites excluded from processing"
+        ) String[] excluded_sites() default {};
+
+        @AttributeDefinition(
                 name = "Threads per core",
                 description = "The number of threads created per each CPU core for validating links in parallel"
         ) int threads_per_core() default DEFAULT_THREADS_PER_CORE;
@@ -76,13 +81,14 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
     private static final Logger LOG = LoggerFactory.getLogger(GridResourcesGenerator.class);
 
     private static final String DEFAULT_SEARCH_PATH = "/content";
-    private static final int DEFAULT_THREADS_PER_CORE = 4;
+    private static final int DEFAULT_THREADS_PER_CORE = 60;
 
     @Reference
     private LinkHelper linkHelper;
 
     private String searchPath;
     private String[] excludedProperties;
+    private String[] excludedSites;
     private int threadsPerCore;
 
     @Activate
@@ -90,6 +96,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
     protected void activate(Configuration configuration) {
         searchPath = configuration.search_path();
         excludedProperties = PropertiesUtil.toStringArray(configuration.excluded_properties());
+        excludedSites = PropertiesUtil.toStringArray(configuration.excluded_sites());
         threadsPerCore = configuration.threads_per_core();
     }
 
@@ -181,6 +188,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
                 .filter(valueMapEntry -> isNonExcludedProperty(valueMapEntry.getKey()))
                 .flatMap(valueMapEntry ->
                         getLinkToGridResourceMap(valueMapEntry.getKey(), valueMapEntry.getValue(), resource, gridResourceType))
+                .filter(linkToGridResource -> !isExcludedSite(linkToGridResource.getKey().getHref()))
                 .collect(Collectors.groupingBy(Map.Entry::getKey,
                         Collectors.mapping(Map.Entry::getValue, Collectors.toList()))
                 );
@@ -205,5 +213,15 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
             }
         }
         return true;
+    }
+
+    private boolean isExcludedSite(String link) {
+        //java.util.stream.Stream.noneMatch is not used to avoid Stream creation upon each property check
+        for (String excludedSite : excludedSites) {
+            if (link.contains(excludedSite)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
