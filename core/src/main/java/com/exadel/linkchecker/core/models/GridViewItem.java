@@ -5,6 +5,7 @@ import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
 import com.day.cq.wcm.api.components.Component;
 import com.day.cq.wcm.api.components.ComponentManager;
+import com.exadel.linkchecker.core.services.util.constants.CommonConstants;
 import com.exadel.linkchecker.core.services.util.constants.GridResourceProperties;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -34,7 +35,6 @@ public class GridViewItem {
     public final static String CRX_DE_LINK = "/crx/de/index.jsp#";
 
     public final static String THUMBNAIL_PATH = "/etc.clientlibs/linkchecker/clientlibs/link-checker-ui/resources/thumbnail.png";
-    public final static String HTML_EXTENSION = ".html";
     public final static String SLASH_CHAR = "/";
 
     @SlingObject
@@ -80,7 +80,7 @@ public class GridViewItem {
 
         Optional<Page> pageOptional = Optional.ofNullable(resourceResolver.adaptTo(PageManager.class))
                 .map(pageManager -> pageManager.getContainingPage(resourceToShow));
-        pagePath = pageOptional.map(page -> EDITOR_LINK + page.getPath() + HTML_EXTENSION)
+        pagePath = pageOptional.map(page -> EDITOR_LINK + page.getPath() + CommonConstants.HTML_EXTENSION)
                 .orElse(path);
         pageTitle = pageOptional.map(Page::getTitle).orElse(StringUtils.EMPTY);
         isValidPage = pageOptional.isPresent();

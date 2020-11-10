@@ -6,4 +6,5 @@ public final class CommonConstants {
     public static final String LINK_CHECKER_SERVICE_NAME = "exadel-linkchecker-service";
 
     public final static String PENDING_GENERATION_NODE = "/apps/linkchecker/components/content/pendingDataFeedUpdate";
+    public final static String HTML_EXTENSION = ".html";
 }

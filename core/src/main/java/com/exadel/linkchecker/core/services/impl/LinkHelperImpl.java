@@ -4,7 +4,9 @@ import com.exadel.linkchecker.core.models.Link;
 import com.exadel.linkchecker.core.models.LinkStatus;
 import com.exadel.linkchecker.core.services.ExternalLinkChecker;
 import com.exadel.linkchecker.core.services.LinkHelper;
+import com.exadel.linkchecker.core.services.util.constants.CommonConstants;
 import org.apache.commons.httpclient.HttpStatus;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -53,7 +55,9 @@ public class LinkHelperImpl implements LinkHelper {
 
     @Override
     public Stream<String> getInternalLinksFromString(String text) {
-        return getLinksByPattern(text, PATTERN_INTERNAL_LINK);
+        return getLinksByPattern(text, PATTERN_INTERNAL_LINK)
+//                todo - exclude .html from internal links via regex
+                .map(internalLink -> StringUtils.substringBefore(internalLink, CommonConstants.HTML_EXTENSION));
     }
 
     @Override

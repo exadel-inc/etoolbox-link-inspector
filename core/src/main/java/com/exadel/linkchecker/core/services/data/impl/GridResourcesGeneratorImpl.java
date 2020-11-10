@@ -5,6 +5,7 @@ import com.exadel.linkchecker.core.models.Link;
 import com.exadel.linkchecker.core.services.data.GridResourcesGenerator;
 import com.exadel.linkchecker.core.services.LinkHelper;
 import com.exadel.linkchecker.core.services.util.LinksCounter;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -17,6 +18,7 @@ import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
+import org.osgi.service.metatype.annotations.Option;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,6 +27,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ExecutorService;
@@ -46,6 +49,17 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
                 name = "Path",
                 description = "The content path for searching broken links. The search path should be located under /content"
         ) String search_path() default DEFAULT_SEARCH_PATH;
+
+        @AttributeDefinition(
+                name = "Links type",
+                description = "The type of links in the report",
+                options = {
+                        @Option(label = "Internal", value = "INTERNAL"),
+                        @Option(label = "External", value = "EXTERNAL"),
+                        @Option(label = "All", value = StringUtils.EMPTY),
+                }
+        )
+        String links_type() default StringUtils.EMPTY;
 
         @AttributeDefinition(
                 name = "Excluded properties",
@@ -87,6 +101,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
     private LinkHelper linkHelper;
 
     private String searchPath;
+    private Link.Type reportLinksType;
     private String[] excludedProperties;
     private String[] excludedSites;
     private int threadsPerCore;
@@ -98,12 +113,16 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
         excludedProperties = PropertiesUtil.toStringArray(configuration.excluded_properties());
         excludedSites = PropertiesUtil.toStringArray(configuration.excluded_sites());
         threadsPerCore = configuration.threads_per_core();
+        reportLinksType = Optional.of(configuration.links_type())
+                .filter(StringUtils::isNotBlank)
+                .map(Link.Type::valueOf)
+                .orElse(null);
     }
 
     @Override
     public Set<GridResource> generateGridResources(String gridResourceType, ResourceResolver resourceResolver) {
         StopWatch stopWatch = StopWatch.createStarted();
-        LOG.debug("Start broken links collecting");
+        LOG.debug("Start broken links collecting, path: {}", searchPath);
 
         Resource rootResource = resourceResolver.getResource(searchPath);
         if (rootResource == null) {
@@ -197,6 +216,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
     private Stream<Map.Entry<Link, GridResource>> getLinkToGridResourceMap(String property, Object propertyValue,
                                                                            Resource resource, String gridResourceType) {
         return linkHelper.getLinkStream(propertyValue)
+                .filter(link -> reportLinksType == null || link.getType().equals(reportLinksType))
                 .collect(Collectors.toMap(Function.identity(),
                         link -> new GridResource(resource.getPath(), property, gridResourceType),
                         (existingValue, newValue) -> existingValue
