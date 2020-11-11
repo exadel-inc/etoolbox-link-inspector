@@ -31,5 +31,5 @@ public interface LinkHelper {
      */
     LinkStatus validateExternalLink(String link);
 
-    boolean validateLink(Link link, ResourceResolver resourceResolver);
+    LinkStatus validateLink(Link link, ResourceResolver resourceResolver);
 }

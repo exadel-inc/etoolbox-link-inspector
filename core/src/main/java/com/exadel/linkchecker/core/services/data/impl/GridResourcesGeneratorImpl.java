@@ -5,6 +5,8 @@ import com.exadel.linkchecker.core.models.Link;
 import com.exadel.linkchecker.core.services.data.GridResourcesGenerator;
 import com.exadel.linkchecker.core.services.LinkHelper;
 import com.exadel.linkchecker.core.services.util.LinksCounter;
+import org.apache.commons.httpclient.HttpStatus;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.sling.api.resource.Resource;
@@ -62,6 +64,14 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
         String links_type() default StringUtils.EMPTY;
 
         @AttributeDefinition(
+                name = "Status codes",
+                description = "The list of status codes allowed for broken links in the report"
+        )
+        int[] allowed_status_codes() default {
+                HttpStatus.SC_NOT_FOUND
+        };
+
+        @AttributeDefinition(
                 name = "Excluded properties",
                 description = "The list of properties excluded from processing"
         ) String[] excluded_properties() default {
@@ -102,6 +112,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
 
     private String searchPath;
     private Link.Type reportLinksType;
+    private int[] allowedStatusCodes;
     private String[] excludedProperties;
     private String[] excludedSites;
     private int threadsPerCore;
@@ -117,6 +128,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
                 .filter(StringUtils::isNotBlank)
                 .map(Link.Type::valueOf)
                 .orElse(null);
+        allowedStatusCodes = configuration.allowed_status_codes();
     }
 
     @Override
@@ -132,14 +144,14 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
 
         Map<Link, List<GridResource>> linkToGridResourcesMap = new HashMap<>();
         int traversedNodesCounter = getGridResourcesViaTraversing(rootResource, gridResourceType, linkToGridResourcesMap);
-        LOG.debug("Traversal is completed in {} ms, traversed nodes count: {}",
-                stopWatch.getTime(TimeUnit.MILLISECONDS), traversedNodesCounter);
+        LOG.debug("Traversal is completed in {} ms, path: {}, traversed nodes count: {}",
+                stopWatch.getTime(TimeUnit.MILLISECONDS), searchPath, traversedNodesCounter);
 
         Set<GridResource> gridResources = validateLinksInParallel(linkToGridResourcesMap, resourceResolver);
 
         stopWatch.stop();
-        LOG.info("Collecting broken links is completed in {} ms, the number of grid items is {}",
-                stopWatch.getTime(TimeUnit.MILLISECONDS), gridResources.size());
+        LOG.info("Collecting broken links is completed in {} ms, path: {}, the number of grid items is {}",
+                stopWatch.getTime(TimeUnit.MILLISECONDS), searchPath, gridResources.size());
 
         return gridResources;
     }
@@ -155,7 +167,8 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
             linkToGridResourcesMap.forEach((link, resources) -> {
                         linksCounter.countValidatedLinks(link);
                         executorService.submit(() -> {
-                                    if (!linkHelper.validateLink(link, resourceResolver)) {
+                                    int statusCode = linkHelper.validateLink(link, resourceResolver).getStatusCode();
+                                    if (isAllowedErrorCode(statusCode)) {
                                         resources.forEach(resource -> resource.setLink(link));
                                         gridResources.addAll(resources);
                                         brokenLinksCounter.countValidatedLinks(link);
@@ -236,9 +249,20 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
     }
 
     private boolean isExcludedSite(String link) {
-        //java.util.stream.Stream.noneMatch is not used to avoid Stream creation upon each property check
         for (String excludedSite : excludedSites) {
             if (link.contains(excludedSite)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean isAllowedErrorCode(int linkStatusCode) {
+        if (ArrayUtils.isEmpty(allowedStatusCodes)) {
+            return true;
+        }
+        for (int allowedStatusCode : allowedStatusCodes) {
+            if (allowedStatusCode == linkStatusCode) {
                 return true;
             }
         }

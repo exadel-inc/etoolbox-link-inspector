@@ -13,6 +13,7 @@ import com.google.common.collect.ImmutableMap;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;
@@ -211,8 +212,12 @@ public class DataFeedServiceImpl implements DataFeedService {
 
     private void printGridResource(CSVPrinter csvPrinter, GridViewItem viewItem) {
         try {
+            String linkColumnValue = viewItem.getLink();
+            if (linkColumnValue.contains(CommonConstants.SEMICOLON)) {
+                linkColumnValue = StringUtils.wrap(linkColumnValue, CommonConstants.QUOTE);
+            }
             csvPrinter.printRecord(
-                    viewItem.getLink(),
+                    linkColumnValue,
                     viewItem.getLinkStatusCode(),
                     viewItem.getLinkStatusMessage(),
                     viewItem.getPageTitle(),

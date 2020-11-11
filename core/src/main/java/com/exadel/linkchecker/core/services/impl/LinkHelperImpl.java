@@ -5,6 +5,7 @@ import com.exadel.linkchecker.core.models.LinkStatus;
 import com.exadel.linkchecker.core.services.ExternalLinkChecker;
 import com.exadel.linkchecker.core.services.LinkHelper;
 import com.exadel.linkchecker.core.services.util.constants.CommonConstants;
+import org.apache.commons.httpclient.ConnectionPoolTimeoutException;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -14,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.net.SocketTimeoutException;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -29,7 +31,7 @@ import java.util.stream.Stream;
 public class LinkHelperImpl implements LinkHelper {
     private static final Logger LOG = LoggerFactory.getLogger(LinkHelper.class);
 
-    private static final Pattern PATTERN_EXTERNAL_LINK = Pattern.compile("(https?://(?:www\\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\\.[^\\s\"<]{2,}|www\\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\\.[^\\s\"<]{2,}|https?://(?:www\\.|(?!www))[a-zA-Z0-9]+\\.[^\\s\"<]{2,}|www\\.[a-zA-Z0-9]+\\.[^\\s\"<]{2,})");
+    private static final Pattern PATTERN_EXTERNAL_LINK = Pattern.compile("(https?://(?:www\\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\\.[^\\s\"'<]{2,}|www\\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\\.[^\\s\"'<]{2,}|https?://(?:www\\.|(?!www))[a-zA-Z0-9]+\\.[^\\s\"'<]{2,}|www\\.[a-zA-Z0-9]+\\.[^\\s\"'<]{2,})");
     private static final Pattern PATTERN_INTERNAL_LINK = Pattern.compile("(^|(?<=\"))/content/([-a-zA-Z0-9:%_+.~#?&/=\\s]*)");
 
     @Reference
@@ -73,17 +75,17 @@ public class LinkHelperImpl implements LinkHelper {
             int statusCode = externalLinkChecker.checkLink(link);
             String statusMessage = HttpStatus.getStatusText(statusCode);
             return new LinkStatus(statusCode, statusMessage);
+        } catch (SocketTimeoutException | ConnectionPoolTimeoutException e) {
+            String errorMessage = logValidationError(e, link);
+            return new LinkStatus(HttpStatus.SC_REQUEST_TIMEOUT, errorMessage);
         } catch (URISyntaxException | IOException e) {
-            String message = Optional.ofNullable(e.getCause())
-                    .map(Throwable::toString)
-                    .orElse(e.toString());
-            LOG.debug("Validation didn't pass for the external link {} due to the error: {}", link, message);
-            return new LinkStatus(HttpStatus.SC_BAD_REQUEST, message);
+            String errorMessage = logValidationError(e, link);
+            return new LinkStatus(HttpStatus.SC_BAD_REQUEST, errorMessage);
         }
     }
 
     @Override
-    public boolean validateLink(Link link, ResourceResolver resourceResolver) {
+    public LinkStatus validateLink(Link link, ResourceResolver resourceResolver) {
         switch (link.getType()) {
             case INTERNAL: {
                 link.setStatus(validateInternalLink(link.getHref(), resourceResolver));
@@ -95,7 +97,7 @@ public class LinkHelperImpl implements LinkHelper {
                 LOG.trace("Completed validation of the external link {}", link.getHref());
             }
         }
-        return link.isValid();
+        return link.getStatus();
     }
 
     private Stream<Link> getLinksStream(String text) {
@@ -116,5 +118,13 @@ public class LinkHelperImpl implements LinkHelper {
             links.add(link);
         }
         return links.stream();
+    }
+
+    private String logValidationError(Exception e, String link) {
+        String errorMessage = Optional.ofNullable(e.getCause())
+                .map(Throwable::toString)
+                .orElse(e.toString());
+        LOG.debug("Validation didn't pass for the external link {} due to the error: {}", link, errorMessage);
+        return errorMessage;
     }
 }
