@@ -7,7 +7,7 @@
     <!-- ====================================================================== -->
     <parent>
         <groupId>com.exadel.linkchecker</groupId>
-        <artifactId>linkchecker</artifactId>
+        <artifactId>exadel-linkchecker</artifactId>
         <version>1.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
@@ -15,7 +15,7 @@
     <!-- ====================================================================== -->
     <!-- P R O J E C T  D E S C R I P T I O N                                   -->
     <!-- ====================================================================== -->
-    <artifactId>linkchecker.ui.apps.structure</artifactId>
+    <artifactId>exadel-linkchecker.ui.apps.structure</artifactId>
     <packaging>content-package</packaging>
     <name>Exadel Link Checker - Repository Structure Package</name>
     <description>

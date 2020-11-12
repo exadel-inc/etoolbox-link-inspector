@@ -4,11 +4,11 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.exadel.linkchecker</groupId>
-        <artifactId>linkchecker</artifactId>
+        <artifactId>exadel-linkchecker</artifactId>
         <version>1.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
-    <artifactId>linkchecker.core</artifactId>
+    <artifactId>exadel-linkchecker.core</artifactId>
     <name>Exadel Link Checker - Core</name>
     <description>Core bundle for Exadel Link Checker</description>
     <build>

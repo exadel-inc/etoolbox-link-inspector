@@ -7,7 +7,7 @@
     <!-- ====================================================================== -->
     <parent>
         <groupId>com.exadel.linkchecker</groupId>
-        <artifactId>linkchecker</artifactId>
+        <artifactId>exadel-linkchecker</artifactId>
         <version>1.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
@@ -15,7 +15,7 @@
     <!-- ====================================================================== -->
     <!-- P R O J E C T  D E S C R I P T I O N                                   -->
     <!-- ====================================================================== -->
-    <artifactId>linkchecker.ui.apps</artifactId>
+    <artifactId>exadel-linkchecker.ui.apps</artifactId>
     <packaging>content-package</packaging>
     <name>Exadel Link Checker - UI apps</name>
     <description>UI apps package for Exadel Link Checker</description>
@@ -34,13 +34,13 @@
                 <artifactId>filevault-package-maven-plugin</artifactId>
                 <configuration>
                     <group>com.exadel.linkchecker</group>
-                    <name>linkchecker.ui.apps</name>
+                    <name>exadel-linkchecker.ui.apps</name>
                     <packageType>application</packageType>
                     <accessControlHandling>merge</accessControlHandling>
                     <repositoryStructurePackages>
                         <repositoryStructurePackage>
                             <groupId>com.exadel.linkchecker</groupId>
-                            <artifactId>linkchecker.ui.apps.structure</artifactId>
+                            <artifactId>exadel-linkchecker.ui.apps.structure</artifactId>
                         </repositoryStructurePackage>
                     </repositoryStructurePackages>
                 </configuration>
@@ -87,14 +87,14 @@
     <dependencies>
         <dependency>
             <groupId>com.exadel.linkchecker</groupId>
-            <artifactId>linkchecker.core</artifactId>
+            <artifactId>exadel-linkchecker.core</artifactId>
             <version>${project.version}</version>
         </dependency>
 
 
         <dependency>
             <groupId>com.exadel.linkchecker</groupId>
-            <artifactId>linkchecker.ui.apps.structure</artifactId>
+            <artifactId>exadel-linkchecker.ui.apps.structure</artifactId>
             <version>${project.version}</version>
             <type>zip</type>
         </dependency>
