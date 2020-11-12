@@ -34,7 +34,7 @@ public class GridViewItem {
     //Note: CRX DE is not available in AEMaaCS
     public final static String CRX_DE_LINK = "/crx/de/index.jsp#";
 
-    public final static String THUMBNAIL_PATH = "/etc.clientlibs/linkchecker/clientlibs/link-checker-ui/resources/thumbnail.png";
+    public final static String THUMBNAIL_PATH = "/etc.clientlibs/exadel-linkchecker/clientlibs/link-checker-ui/resources/thumbnail.png";
     public final static String SLASH_CHAR = "/";
 
     @SlingObject

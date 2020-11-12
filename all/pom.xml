@@ -46,24 +46,24 @@
                             <groupId>com.exadel.linkchecker</groupId>
                             <artifactId>exadel-linkchecker.ui.apps</artifactId>
                             <type>zip</type>
-                            <target>/apps/linkchecker-packages/application/install</target>
+                            <target>/apps/exadel-linkchecker-packages/application/install</target>
                         </embedded>
                         <embedded>
                             <groupId>com.exadel.linkchecker</groupId>
                             <artifactId>exadel-linkchecker.core</artifactId>
-                            <target>/apps/linkchecker-packages/application/install</target>
+                            <target>/apps/exadel-linkchecker-packages/application/install</target>
                         </embedded>
                         <embedded>
                             <groupId>com.exadel.linkchecker</groupId>
                             <artifactId>exadel-linkchecker.ui.content</artifactId>
                             <type>zip</type>
-                            <target>/apps/linkchecker-packages/content/install</target>
+                            <target>/apps/exadel-linkchecker-packages/content/install</target>
                         </embedded>
                         <embedded>
                             <groupId>com.exadel.linkchecker</groupId>
                             <artifactId>exadel-linkchecker.ui.config</artifactId>
                             <type>zip</type>
-                            <target>/apps/linkchecker-packages/application/install</target>
+                            <target>/apps/exadel-linkchecker-packages/application/install</target>
                         </embedded>
                     </embeddeds>
                 </configuration>

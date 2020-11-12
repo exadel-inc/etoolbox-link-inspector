@@ -15,5 +15,5 @@
   ~ limitations under the License.
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 <workspaceFilter version="1.0">
-    <filter root="/apps/linkchecker-packages"/>
+    <filter root="/apps/exadel-linkchecker-packages"/>
 </workspaceFilter>

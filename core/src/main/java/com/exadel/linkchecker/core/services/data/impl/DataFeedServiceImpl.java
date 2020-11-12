@@ -57,10 +57,10 @@ public class DataFeedServiceImpl implements DataFeedService {
     @Reference
     private GridResourcesGenerator gridResourcesGenerator;
 
-    private static final String GRID_RESOURCE_TYPE = "linkchecker/components/gridConfig";
+    private static final String GRID_RESOURCE_TYPE = "exadel-linkchecker/components/gridConfig";
     public static final int UI_ITEMS_LIMIT = 500;
 
-    public static final String JSON_FEED_PATH = "/apps/linkchecker/components/content/data/datafeed.json";
+    public static final String JSON_FEED_PATH = "/apps/exadel-linkchecker/components/content/data/datafeed.json";
 
     public static final String CSV_REPORT_PATH = "/content/exadel-linkchecker/download/report.csv";
     private static final String CSV_MIME_TYPE = "text/csv";

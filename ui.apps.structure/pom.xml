@@ -33,7 +33,7 @@
 
                         <!-- /apps root -->
                         <filter><root>/apps</root></filter>
-                        <filter><root>/apps/linkchecker</root></filter>
+                        <filter><root>/apps/exadel-linkchecker</root></filter>
 
                         <!-- Common overlay roots -->
                         <filter><root>/apps/sling</root></filter>
