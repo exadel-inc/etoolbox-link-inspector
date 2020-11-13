@@ -14,32 +14,35 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 
+/**
+ * The task for scheduled data feed generation.
+ */
 @Designate(ocd = DataFeedGenerationTask.Config.class)
 @Component(service = Runnable.class)
 public class DataFeedGenerationTask implements Runnable {
 
-    @ObjectClassDefinition(name="Exadel Link Checker - Data Feed Generation Task")
+    @ObjectClassDefinition(name = "Exadel Link Checker - Data Feed Generation Task")
     public static @interface Config {
 
         @AttributeDefinition(name = "Cron-job expression")
         String scheduler_expression() default "0 0 5 1/1 * ? *";
 
         @AttributeDefinition(name = "Concurrent task",
-                             description = "Whether or not to schedule this task concurrently")
+                description = "Whether or not to schedule this task concurrently")
         boolean scheduler_concurrent() default false;
 
         @AttributeDefinition(name = "Enabled",
-                             description = "Whether or not to enable this task")
+                description = "Whether or not to enable this task")
         boolean enabled() default false;
     }
 
-    private final Logger LOG = LoggerFactory.getLogger(DataFeedGenerationTask.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DataFeedGenerationTask.class);
 
     @Reference
     private JobManager jobManager;
 
     private boolean enabled;
-    
+
     @Override
     public void run() {
         if (!enabled) {

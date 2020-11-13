@@ -20,6 +20,10 @@ import org.slf4j.LoggerFactory;
 import javax.servlet.Servlet;
 import java.util.Optional;
 
+/**
+ * After fixing broken links the node, indicating that data feed regeneration is required in order to reflect
+ * the latest changes, is created. The purpose of the servlet is to check presence of the mentioned node.
+ */
 @Component(service = {Servlet.class})
 @SlingServletResourceTypes(
         resourceTypes = "/bin/exadel/datafeed/pending-generation-check",

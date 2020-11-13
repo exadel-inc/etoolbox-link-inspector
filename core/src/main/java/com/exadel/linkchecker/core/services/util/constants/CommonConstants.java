@@ -5,9 +5,9 @@ public final class CommonConstants {
 
     public static final String LINK_CHECKER_SERVICE_NAME = "exadel-linkchecker-service";
 
-    public final static String PENDING_GENERATION_NODE = "/apps/exadel-linkchecker/components/content/pendingDataFeedUpdate";
+    public static final String PENDING_GENERATION_NODE = "/apps/exadel-linkchecker/components/content/pendingDataFeedUpdate";
 
-    public final static String HTML_EXTENSION = ".html";
-    public final static String SEMICOLON = ";";
-    public final static String QUOTE = "\"";
+    public static final String HTML_EXTENSION = ".html";
+    public static final String SEMICOLON = ";";
+    public static final String QUOTE = "\"";
 }

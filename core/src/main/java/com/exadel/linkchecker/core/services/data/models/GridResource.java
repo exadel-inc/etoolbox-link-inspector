@@ -11,6 +11,10 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.Objects;
 import java.util.Optional;
 
+/**
+ * The model encloses all necessary data for saving it in the data feed and further usage in the Link Checker grid.
+ * Each model instance contains data for a single row in the grid.
+ */
 public class GridResource {
     @JsonIgnore
     private Link link;

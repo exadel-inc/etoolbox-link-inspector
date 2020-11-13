@@ -26,6 +26,10 @@ import javax.servlet.Servlet;
 import java.util.Arrays;
 import java.util.Optional;
 
+/**
+ * The servlet for replacement a broken link with the new one within the specified resource property. The resource path,
+ * property name, link for replacement and the desired link are passed from js during ajax call.
+ */
 @Component(service = {Servlet.class})
 @SlingServletResourceTypes(
         resourceTypes = "/bin/exadel/fix-broken-link",

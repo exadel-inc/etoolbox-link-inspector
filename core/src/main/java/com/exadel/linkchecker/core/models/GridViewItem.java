@@ -23,8 +23,11 @@ import java.util.Arrays;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * The model represents a separate row in the grid.
+ */
 @Model(
-        adaptables = { SlingHttpServletRequest.class, Resource.class },
+        adaptables = {SlingHttpServletRequest.class, Resource.class},
         defaultInjectionStrategy = DefaultInjectionStrategy.OPTIONAL
 )
 public class GridViewItem {

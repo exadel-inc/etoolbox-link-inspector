@@ -28,6 +28,10 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Optional;
 
+/**
+ * The service leverages the PoolingHttpClientConnectionManager for sending HEAD requests concurrently
+ * to validate external links.
+ */
 @Component(service = ExternalLinkChecker.class)
 @Designate(ocd = ExternalLinkCheckerImpl.Configuration.class)
 public class ExternalLinkCheckerImpl implements ExternalLinkChecker {
