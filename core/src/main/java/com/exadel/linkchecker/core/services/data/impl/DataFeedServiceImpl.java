@@ -227,7 +227,7 @@ public class DataFeedServiceImpl implements DataFeedService {
                     viewItem.getPath() + "@" + viewItem.getPropertyName()
             );
         } catch (IOException e) {
-            LOG.error("Failed to build CSV for the grid resource " + viewItem.getLink(), e);
+            LOG.error(String.format("Failed to build CSV for the grid resource %s", viewItem.getLink()), e);
         }
     }
 }

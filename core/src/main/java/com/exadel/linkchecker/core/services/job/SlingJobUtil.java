@@ -8,9 +8,9 @@ import java.util.Map;
 import java.util.Optional;
 
 public class SlingJobUtil {
-    private static final Logger LOG = LoggerFactory.getLogger(SlingJobUtil.class);
-
     private SlingJobUtil() {}
+
+    private static final Logger LOG = LoggerFactory.getLogger(SlingJobUtil.class);
 
     public static void addJob(final JobManager jobManager, final String jobTopic, final Map<String, Object> payload) {
         boolean jobAdded = Optional.ofNullable(jobManager.addJob(jobTopic, payload))

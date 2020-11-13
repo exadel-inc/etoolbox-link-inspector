@@ -22,7 +22,7 @@ import java.util.Collections;
 public class DataFeedGenerationTask implements Runnable {
 
     @ObjectClassDefinition(name = "Exadel Link Checker - Data Feed Generation Task")
-    public static @interface Config {
+    public @interface Config {
 
         @AttributeDefinition(name = "Cron-job expression")
         String scheduler_expression() default "0 0 5 1/1 * ? *";

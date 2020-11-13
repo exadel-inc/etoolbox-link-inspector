@@ -185,6 +185,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
             LOG.trace("ExecutorService terminated: {}", terminated);
         } catch (InterruptedException e) {
             LOG.error("Parallel links validation failed", e);
+            Thread.currentThread().interrupt();
         }
         LOG.debug("Checked internal links count: {}", linksCounter.getInternalLinks());
         LOG.debug("Checked external links count: {}", linksCounter.getExternalLinks());

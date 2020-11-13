@@ -3,7 +3,6 @@ package com.exadel.linkchecker.core.services.util;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.json.JSONArray;
@@ -15,10 +14,13 @@ import org.slf4j.LoggerFactory;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Optional;
 
 public class JsonUtil {
+    private JsonUtil() {}
+
     private static final Logger LOG = LoggerFactory.getLogger(JsonUtil.class);
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
@@ -51,7 +53,7 @@ public class JsonUtil {
                 .map(resource -> resource.adaptTo(InputStream.class));
         if (streamOptional.isPresent()) {
             try {
-                String stringValue = IOUtils.toString(streamOptional.get(), Charsets.UTF_8);
+                String stringValue = IOUtils.toString(streamOptional.get(), StandardCharsets.UTF_8);
                 return new JSONArray(stringValue);
             } catch (IOException e) {
                 LOG.error("Failed to convert file stream to string", e);

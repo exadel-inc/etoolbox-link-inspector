@@ -33,12 +33,12 @@ import java.util.stream.Collectors;
 public class GridViewItem {
     private static final Logger LOG = LoggerFactory.getLogger(GridViewItem.class);
 
-    public final static String EDITOR_LINK = "/editor.html";
+    public static final String EDITOR_LINK = "/editor.html";
     //Note: CRX DE is not available in AEMaaCS
-    public final static String CRX_DE_LINK = "/crx/de/index.jsp#";
+    public static final String CRX_DE_LINK = "/crx/de/index.jsp#";
 
-    public final static String THUMBNAIL_PATH = "/etc.clientlibs/exadel-linkchecker/clientlibs/link-checker-ui/resources/thumbnail.png";
-    public final static String SLASH_CHAR = "/";
+    public static final String THUMBNAIL_PATH = "/etc.clientlibs/exadel-linkchecker/clientlibs/link-checker-ui/resources/thumbnail.png";
+    public static final String SLASH_CHAR = "/";
 
     @SlingObject
     private ResourceResolver resourceResolver;

@@ -18,6 +18,8 @@ import java.io.InputStream;
 import java.util.Calendar;
 
 public class LinkCheckerResourceUtil {
+    private LinkCheckerResourceUtil() {}
+
     private static final Logger LOG = LoggerFactory.getLogger(LinkCheckerResourceUtil.class);
 
     public static void removeResource(String path, ResourceResolver resourceResolver) {
@@ -28,7 +30,7 @@ public class LinkCheckerResourceUtil {
                 resourceResolver.commit();
             }
         } catch (PersistenceException e) {
-            LOG.error("Failed to delete resource " + path, e);
+            LOG.error(String.format("Failed to delete resource %s", path), e);
         }
     }
 
@@ -58,7 +60,7 @@ public class LinkCheckerResourceUtil {
 
             session.save();
         } catch (RepositoryException | IOException e) {
-            LOG.error("Failed to create file node " + path, e);
+            LOG.error(String.format("Failed to create file node %s", path), e);
         }
     }
 }
