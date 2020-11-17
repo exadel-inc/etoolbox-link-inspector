@@ -1,5 +1,6 @@
 package com.exadel.linkchecker.core.services.data.impl;
 
+import com.exadel.linkchecker.core.models.LinkStatus;
 import com.exadel.linkchecker.core.services.data.models.GridResource;
 import com.exadel.linkchecker.core.models.Link;
 import com.exadel.linkchecker.core.services.data.GridResourcesGenerator;
@@ -65,7 +66,8 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
 
         @AttributeDefinition(
                 name = "Status codes",
-                description = "The list of status codes allowed for broken links in the report"
+                description = "The list of status codes allowed for broken links in the report. " +
+                        "Set a single negative value to allow all http error codes"
         )
         int[] allowed_status_codes() default {
                 HttpStatus.SC_NOT_FOUND
@@ -167,8 +169,8 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
             linkToGridResourcesMap.forEach((link, resources) -> {
                         linksCounter.countValidatedLinks(link);
                         executorService.submit(() -> {
-                                    int statusCode = linkHelper.validateLink(link, resourceResolver).getStatusCode();
-                                    if (isAllowedErrorCode(statusCode)) {
+                                    LinkStatus status = linkHelper.validateLink(link, resourceResolver);
+                                    if (!status.isValid() && isAllowedErrorCode(status.getStatusCode())) {
                                         resources.forEach(resource -> resource.setLink(link));
                                         gridResources.addAll(resources);
                                         brokenLinksCounter.countValidatedLinks(link);
@@ -259,7 +261,8 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
     }
 
     private boolean isAllowedErrorCode(int linkStatusCode) {
-        if (ArrayUtils.isEmpty(allowedStatusCodes)) {
+        if (ArrayUtils.isEmpty(allowedStatusCodes) ||
+                (allowedStatusCodes.length == 1 && allowedStatusCodes[0] < 0)) {
             return true;
         }
         for (int allowedStatusCode : allowedStatusCodes) {

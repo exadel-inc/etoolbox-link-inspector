@@ -39,7 +39,9 @@ public final class Link {
     }
 
     public boolean isValid() {
-        return getStatusCode() == HttpStatus.SC_OK;
+        return Optional.ofNullable(status)
+                .map(LinkStatus::isValid)
+                .orElse(false);
     }
 
     public int getStatusCode() {
