@@ -1,12 +1,11 @@
 // List view style
-
+// TODO: scope should be limited to exadel-link-checker
 .list header[class^="card-"] .sort {
   margin: 0 0.5rem 0 0;
   width: 1.9rem;;
 }
 
 tr.card-exadel-link-checker {
-
   .card-page {
     padding-left: 2.8125rem;
     border-bottom: 0.0625rem solid #f2f2f2;
@@ -37,21 +36,28 @@ tr.card-exadel-link-checker {
   }
 }
 
-.linkchecker-coral-alert {
+.elc-coral-alert {
   width: max-content;
   margin-left: auto;
   margin-right: auto;
   display: block;
 }
 
-#fix-broken-link-dialog {
+.elc-log-dialog {
   vertical-align: middle;
 }
 
-#new-link {
+.elc-new-link {
   width: 100%;
 }
 
+.elc-processing-link-list {
+  > li {
+    font-weight: bold;
+  }
+}
+
+// TODO: scope should be limited to exadel-link-checker
 .coral3-Dialog-wrapper {
   width: 30%;
 }

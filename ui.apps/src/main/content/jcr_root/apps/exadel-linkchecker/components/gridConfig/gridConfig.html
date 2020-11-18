@@ -2,6 +2,8 @@
     class="foundation-collection-item foundation-collection-navigator card-exadel-link-checker"
     is="coral-table-row"
     data-path="${model.path}"
+    data-current-link="${model.link}"
+    data-property-name="${model.propertyName}"
     data-rootsource="${model.path}">
     <td is="coral-table-cell" coral-table-rowselect>
         <img itemprop="thumbnail" width="192" src="${model.thumbnail}" alt="">
@@ -9,7 +11,7 @@
 
     <td class="foundation-collection-item-title" is="coral-table-cell">
         <div class="main-sync">
-            <h4 id="current-link" title="${model.link}">${model.link}</h4>
+            <h4 title="${model.link}">${model.link}</h4>
             <span class="description">${model.linkType}</span>
         </div>
     </td>
@@ -42,6 +44,6 @@
     </td>
 
     <td class="foundation-collection-item-keys" is="coral-table-cell">
-        ${model.path}@<strong id="property-location">${model.propertyName}</strong>
+        ${model.path}@<strong>${model.propertyName}</strong>
     </td>
 </tr>

@@ -1,3 +1,5 @@
 #base=js
 
-console-ui.js
+console-ui.pending.js
+console-ui.download.js
+console-ui.fix.js

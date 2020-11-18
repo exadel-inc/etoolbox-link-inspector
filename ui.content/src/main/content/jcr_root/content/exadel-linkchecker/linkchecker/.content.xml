@@ -117,7 +117,7 @@
                         sling:resourceType="granite/ui/components/coral/foundation/anchorbutton"
                         text="Download Full Report"
                         variant="primary"
-                        granite:class="download-full-report-button"
+                        granite:class="elc-download-report-button"
                         x-cq-linkchecker="skip"/>
             </secondary>
         </actions>
