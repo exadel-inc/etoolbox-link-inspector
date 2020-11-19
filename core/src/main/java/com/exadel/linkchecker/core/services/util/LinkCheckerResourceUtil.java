@@ -15,6 +15,7 @@ import javax.jcr.Session;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.Calendar;
 
 public class LinkCheckerResourceUtil {
@@ -62,5 +63,24 @@ public class LinkCheckerResourceUtil {
         } catch (RepositoryException | IOException e) {
             LOG.error(String.format("Failed to create file node %s", path), e);
         }
+    }
+
+    public static Object replaceStringInPropValue(Object value, String current, String replacement) {
+        if (value instanceof String) {
+            String currentValue = (String) value;
+            String newValue = currentValue.replaceAll(current, replacement);
+            if (!currentValue.equals(newValue)) {
+                return newValue;
+            }
+        } else if (value instanceof String[]) {
+            String[] currentValues = (String[]) value;
+            String[] newValues = Arrays.stream(currentValues)
+                    .map(currentValue -> currentValue.replaceAll(current, replacement))
+                    .toArray(String[]::new);
+            if (!Arrays.equals(currentValues, newValues)) {
+                return newValues;
+            }
+        }
+        return null;
     }
 }

@@ -14,7 +14,7 @@ public interface LinkHelper {
      * @param propertyValue - the value to be parsed
      * @return The Stream<Link> of extract links, or Stream.empty()
      */
-    Stream<Link> getLinkStream(Object propertyValue);
+    Stream<Link> getLinkStreamFromProperty(Object propertyValue);
 
     /**
      * Extracts external links based on regex from the string value
@@ -58,4 +58,7 @@ public interface LinkHelper {
      * @return the {@link LinkStatus} exposing http code and status message of the response
      */
     LinkStatus validateLink(Link link, ResourceResolver resourceResolver);
+
+    boolean replaceLink(ResourceResolver resourceResolver, String resourcePath, String propertyName,
+                        String currentLink, String newLink);
 }

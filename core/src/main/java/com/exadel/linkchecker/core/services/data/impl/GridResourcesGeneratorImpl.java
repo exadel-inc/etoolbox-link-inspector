@@ -231,7 +231,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
 
     private Stream<Map.Entry<Link, GridResource>> getLinkToGridResourceMap(String property, Object propertyValue,
                                                                            Resource resource, String gridResourceType) {
-        return linkHelper.getLinkStream(propertyValue)
+        return linkHelper.getLinkStreamFromProperty(propertyValue)
                 .filter(link -> reportLinksType == null || link.getType().equals(reportLinksType))
                 .collect(Collectors.toMap(Function.identity(),
                         link -> new GridResource(resource.getPath(), property, gridResourceType),

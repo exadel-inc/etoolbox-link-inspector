@@ -4,10 +4,12 @@ import com.exadel.linkchecker.core.models.Link;
 import com.exadel.linkchecker.core.models.LinkStatus;
 import com.exadel.linkchecker.core.services.ExternalLinkChecker;
 import com.exadel.linkchecker.core.services.LinkHelper;
+import com.exadel.linkchecker.core.services.util.LinkCheckerResourceUtil;
 import com.exadel.linkchecker.core.services.util.constants.CommonConstants;
 import org.apache.commons.httpclient.ConnectionPoolTimeoutException;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -38,7 +40,7 @@ public class LinkHelperImpl implements LinkHelper {
     private ExternalLinkChecker externalLinkChecker;
 
     @Override
-    public Stream<Link> getLinkStream(Object propertyValue) {
+    public Stream<Link> getLinkStreamFromProperty(Object propertyValue) {
         Stream<Link> linkStream = Stream.empty();
         if (propertyValue instanceof String) {
             String stringValue = (String) propertyValue;
@@ -100,6 +102,18 @@ public class LinkHelperImpl implements LinkHelper {
         return link.getStatus();
     }
 
+    @Override
+    public boolean replaceLink(ResourceResolver resourceResolver,
+                               String resourcePath, String propertyName, String currentLink, String newLink) {
+        return Optional.of(resourcePath)
+                .map(resourceResolver::getResource)
+                .map(resource -> resource.adaptTo(ModifiableValueMap.class))
+                .map(modifiableValueMap ->
+                        updateValueMapWithNewLink(modifiableValueMap, propertyName, currentLink, newLink)
+                )
+                .orElse(false);
+    }
+
     private Stream<Link> getLinksStream(String text) {
         Stream<Link> internalLinksStream = getInternalLinksFromString(text)
                 .map(linkString -> new Link(linkString, Link.Type.INTERNAL))
@@ -118,6 +132,28 @@ public class LinkHelperImpl implements LinkHelper {
             links.add(link);
         }
         return links.stream();
+    }
+
+    private boolean updateValueMapWithNewLink(ModifiableValueMap modifiableValueMap,
+                                              String propertyName, String currentLink, String newLink) {
+        boolean updated = false;
+        Optional<Object> updatedValue = Optional.ofNullable(modifiableValueMap.get(propertyName))
+                .map(value -> updatePropertyWithNewLink(value, currentLink, newLink));
+        if (updatedValue.isPresent()) {
+            modifiableValueMap.put(propertyName, updatedValue.get());
+            updated = true;
+        }
+        return updated;
+    }
+
+    private Object updatePropertyWithNewLink(Object value, String currentLink, String newLink) {
+        return getLinkStreamFromProperty(value)
+                .map(Link::getHref)
+                .filter(currentLink::equals)
+                .findFirst()
+                .map(currentLinkToReplace ->
+                        LinkCheckerResourceUtil.replaceStringInPropValue(value, currentLinkToReplace, newLink))
+                .orElse(null);
     }
 
     private String logValidationError(Exception e, String link) {

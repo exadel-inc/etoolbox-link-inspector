@@ -109,6 +109,15 @@ public class DataFeedServiceImpl implements DataFeedService {
         }
     }
 
+    @Override
+    public List<GridViewItem> dataFeedToViewItems() {
+        return dataFeedToResources()
+                .stream()
+                .map(resource -> resource.adaptTo(GridViewItem.class))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+    }
+
     private ResourceResolver getResourceResolver() {
         try {
             return resourceResolverFactory.getServiceResourceResolver(
