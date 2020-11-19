@@ -16,7 +16,7 @@
     var REPLACEMENT_LINK_LABEL = Granite.I18n.get('Please enter the replacement link');
 
     var PROCESSING_ERROR_MSG = 'Failed to replace the link <b>{{currentLink}}</b> with <b>{{newLink}}</b><br/> at <i>{{path}}@{{propertyName}}</i>';
-    var PROCESSING_SUCCESS_MSG = 'The link <b>{{currentLink}}</b> was successfully replaced with <b>{{newLink}}</b><br/> at <i>{{item.path}}@{{propertyName}}</i>';
+    var PROCESSING_SUCCESS_MSG = 'The link <b>{{currentLink}}</b> was successfully replaced with <b>{{newLink}}</b><br/> at <i>{{path}}@{{propertyName}}</i>';
     var PROCESSING_NOT_FOUND_MSG = 'The link <b>{{currentLink}}</b> was not found at <i>{{path}}@{{propertyName}}</i>';
     var PROCESSING_IDENTICAL_MSG = 'The current link <b>{{currentLink}}</b> is equal to the entered one, replacement was not applied';
 
@@ -156,7 +156,7 @@
      * @return {string}
      */
     function format(text, dictionary) {
-        return text.replace(/{{(\w+)}}/, function (match, term) {
+        return text.replace(/{{(\w+)}}/g, function (match, term) {
            if (term in dictionary) return String(dictionary[term]);
            return match;
         });
