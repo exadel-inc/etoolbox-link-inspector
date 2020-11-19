@@ -31,7 +31,7 @@
             text: UPDATE_LABEL,
             primary: true,
             handler: function () {
-                var newLink = $('.elc-new-link').val();
+                var newLink = $('.elc-replacement-input').val();
                 var replacementList = selections.map(function (v) {
                     var row = $(v);
                     return {
@@ -63,7 +63,7 @@
             name: 'replacementLink',
             value: ''
         });
-        replacementTextField.classList.add('elc-new-link');
+        replacementTextField.classList.add('elc-replacement-input');
 
         $('<br/>').appendTo(message);
         $('<p>').text(REPLACEMENT_LINK_LABEL).appendTo(message);

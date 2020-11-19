@@ -52,7 +52,7 @@
                     stateId="link-checker-ui">
                 <columns
                         jcr:primaryType="nt:unstructured"
-                        class="card-exadel-link-checker">
+                        class="elc-card">
                     <select
                             jcr:primaryType="nt:unstructured"
                             select="{Boolean}true"/>
