@@ -45,6 +45,7 @@
         requests.always(function () {
             logger.finished();
             logger.dialog.on('coral-overlay:close', function () {
+                $(window).adaptTo('foundation-ui').wait();
                 window.location.reload();
             });
         });
