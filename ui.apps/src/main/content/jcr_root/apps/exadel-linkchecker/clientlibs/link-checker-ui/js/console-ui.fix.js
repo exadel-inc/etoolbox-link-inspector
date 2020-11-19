@@ -22,21 +22,9 @@
 
     var FIX_BROKEN_LINK_COMMAND = '/content/exadel-linkchecker/servlet/fixBrokenLink';
 
-    let sharableDialog;
-    function getDialog() {
-        if (!sharableDialog) {
-            sharableDialog = new Coral.Dialog().set({
-                backdrop: Coral.Dialog.backdrop.STATIC,
-                interaction: 'off'
-            }).on('coral-overlay:close', function(e) {
-                e.target.remove();
-            });
-        }
-        return sharableDialog;
-    }
-
+    /** Root action handler */
     function onFixAction(name, el, config, collection, selections) {
-        var selectionItems = buildSelection(selections);
+        var selectionItems = buildSelectionItems(selections);
 
         showConfirmationModal(selectionItems).then(function (newLink) {
             var replacementList = selectionItems.map(function (item) {
@@ -45,67 +33,6 @@
                 }, item);
             });
             processBrokenLink(replacementList);
-        });
-    }
-
-    function buildConfirmationMessage(selections) {
-        var list = selections.slice(0, 12).map(function (row) {
-            return '<li>' + row.currentLink + '</li>';
-        });
-        if (selections.length > 12) {
-            list.push('<li>&#8230;</li>'); // &#8230; is ellipsis
-        }
-        return [
-            '<p>' + LINK_TO_UPDATE_LABEL + '</p>',
-            '<ul class="elc-processing-link-list">' + list.join('') + '</ul>',
-            '<br/>',
-        ].join('');
-    }
-
-    function showConfirmationModal(selection) {
-        var deferred = $.Deferred();
-
-        var el = getDialog();
-        el.variant = 'notice';
-        el.header.textContent = UPDATE_LABEL;
-        el.footer.innerHTML = [
-            '<button is="coral-button" variant="default" coral-close>' + CANCEL_LABEL + '</button>',
-            '<button data-dialog-action is="coral-button" variant="primary" coral-close>' + UPDATE_LABEL + '</button>'
-        ].join('');
-
-        el.content.innerHTML = '';
-        $('<div>').html(buildConfirmationMessage(selection)).appendTo(el.content);
-        $('<p>').text(REPLACEMENT_LINK_LABEL).appendTo(el.content);
-
-        var replacementTextField = new Coral.Textfield().set({
-            name: 'replacementLink',
-            value: ''
-        });
-        replacementTextField.classList.add('elc-replacement-input');
-        $(replacementTextField).appendTo(el.content);
-
-        var onResolve = function () {
-          deferred.resolve(replacementTextField.value);
-        };
-
-        el.on('click', '[data-dialog-action]', onResolve);
-        el.on('coral-overlay:close', function () {
-            el.off('click', '[data-dialog-action]', onResolve);
-            deferred.reject();
-        });
-        el.show();
-
-        return deferred.promise();
-    }
-
-    function buildSelection(selections) {
-        return selections.map(function (v) {
-            var row = $(v);
-            return {
-                path: row.data('path'),
-                currentLink: row.data('currentLink'),
-                propertyName: row.data('propertyName')
-            };
         });
     }
 
@@ -145,6 +72,64 @@
         };
     }
 
+    // Confirmation dialog common methods
+    function showConfirmationModal(selection) {
+        var deferred = $.Deferred();
+
+        var el = getDialog();
+        el.variant = 'notice';
+        el.header.textContent = UPDATE_LABEL;
+        el.footer.innerHTML = [
+            '<button is="coral-button" variant="default" coral-close>' + CANCEL_LABEL + '</button>',
+            '<button data-dialog-action is="coral-button" variant="primary" coral-close>' + UPDATE_LABEL + '</button>'
+        ].join('');
+
+        el.content.innerHTML = ''; // Clean content
+        buildConfirmationMessage(selection).appendTo(el.content);
+
+        // Replacement input group
+        var $replacementTextField =
+            $('<input is="coral-textfield" class="elc-replacement-input" name="replacementLink" value="">');
+        $('<p>').text(REPLACEMENT_LINK_LABEL).appendTo(el.content);
+        $replacementTextField.appendTo(el.content);
+
+        var onResolve = function () {
+            deferred.resolve($replacementTextField.val());
+        };
+
+        el.on('click', '[data-dialog-action]', onResolve);
+        el.on('coral-overlay:close', function () {
+            el.off('click', '[data-dialog-action]', onResolve);
+            deferred.reject();
+        });
+        el.show();
+
+        return deferred.promise();
+    }
+    function buildSelectionItems(selections) {
+        return selections.map(function (v) {
+            var row = $(v);
+            return {
+                path: row.data('path'),
+                currentLink: row.data('currentLink'),
+                propertyName: row.data('propertyName')
+            };
+        });
+    }
+    function buildConfirmationMessage(selections) {
+        var list = selections.slice(0, 12).map(function (row) {
+            return '<li>' + row.currentLink + '</li>';
+        });
+        if (selections.length > 12) {
+            list.push('<li>&#8230;</li>'); // &#8230; is ellipsis
+        }
+        var $msg = $('<div class="elc-confirmation-msg">');
+        $('<p>').text(LINK_TO_UPDATE_LABEL).appendTo($msg);
+        $('<ul class="elc-processing-link-list">').html(list.join('')).appendTo($msg);
+        $('<br/>').appendTo($msg);
+        return $msg;
+    }
+
     /**
      * Create {@return ProcessLogger} wrapper
      * @return {ProcessLogger}
@@ -160,7 +145,6 @@
         el.header.insertBefore(new Coral.Wait(), el.header.firstChild);
         el.footer.innerHTML = '';
         el.content.innerHTML = '';
-        el.classList.add('elc-log-dialog');
 
         var processingLabel = document.createElement('p');
         processingLabel.textContent = processingMsg;
@@ -203,6 +187,21 @@
            if (term in dictionary) return String(dictionary[term]);
            return match;
         });
+    }
+
+    let sharableDialog;
+    /** Common sharable dialog instance getter */
+    function getDialog() {
+        if (!sharableDialog) {
+            sharableDialog = new Coral.Dialog().set({
+                backdrop: Coral.Dialog.backdrop.STATIC,
+                interaction: 'off'
+            }).on('coral-overlay:close', function(e) {
+                e.target.remove();
+            });
+            sharableDialog.classList.add('elc-dialog');
+        }
+        return sharableDialog;
     }
 
     // INIT
