@@ -1,16 +1,18 @@
 <tr data-sly-use.model="com.exadel.linkchecker.core.models.GridViewItem"
-    class="foundation-collection-item foundation-collection-navigator card-exadel-link-checker"
+    class="foundation-collection-item foundation-collection-navigator elc-card"
     is="coral-table-row"
     data-path="${model.path}"
+    data-current-link="${model.link}"
+    data-property-name="${model.propertyName}"
     data-rootsource="${model.path}">
     <td is="coral-table-cell" coral-table-rowselect>
         <img itemprop="thumbnail" width="192" src="${model.thumbnail}" alt="">
     </td>
 
     <td class="foundation-collection-item-title" is="coral-table-cell">
-        <div class="main-sync">
-            <h4 id="current-link" title="${model.link}">${model.link}</h4>
-            <span class="description">${model.linkType}</span>
+        <div class="elc-complex-col">
+            <h4 class="elc-primary-info" title="${model.link}">${model.link}</h4>
+            <span class="elc-secondary-info">${model.linkType}</span>
         </div>
     </td>
 
@@ -29,19 +31,26 @@
                 ${model.pageTitle}
             </a>
         </sly>
-        <sly data-sly-test.isValidPage="${!isValidPage}">
+        <sly data-sly-test="${!isValidPage}">
             <span>${model.pagePath}</span>
         </sly>
     </td>
 
     <td class="foundation-collection-item-keys" is="coral-table-cell">
-        <a href="${'{0}{1}' @ format=[model.CRX_DE_LINK, model.componentPath]}" target="_blank" x-cq-linkchecker="skip">
-            ${model.componentName}
-        </a>
-        <br/><span class="description"><em>${model.componentType}</em></span>
+        <div class="elc-complex-col els-component-col">
+            <a class="elc-primary-info"
+               href="${'{0}{1}' @ format=[model.CRX_DE_LINK, model.componentPath]}"
+               target="_blank"
+               x-cq-linkchecker="skip">
+                ${model.componentName}
+            </a>
+            <span class="elc-secondary-info" title="${model.componentType}"><em>${model.componentType}</em></span>
+        </div>
     </td>
 
     <td class="foundation-collection-item-keys" is="coral-table-cell">
-        ${model.path}@<strong id="property-location">${model.propertyName}</strong>
+        <div class="els-property-col" title="${model.path}@${model.propertyName}">
+            ${model.path}@<strong>${model.propertyName}</strong>
+        </div>
     </td>
 </tr>

@@ -1,57 +1,70 @@
 // List view style
-
+// TODO: scope should be limited to exadel-link-checker
 .list header[class^="card-"] .sort {
   margin: 0 0.5rem 0 0;
   width: 1.9rem;;
 }
+// TODO: scope should be limited to exadel-link-checker
+.coral3-Dialog-wrapper {
+  width: 30%;
+}
 
-tr.card-exadel-link-checker {
-
+tr.elc-card {
   .card-page {
     padding-left: 2.8125rem;
     border-bottom: 0.0625rem solid #f2f2f2;
     padding-right: 0.625rem;
   }
 
-  .main-sync {
-    margin-top: 0.4375rem;
-    float: left;
-    width: 50%;
-
-    h4 {
-      margin-top: 0;
-      margin-bottom: 0;
-      display: block;
-      width: 100%;
-      white-space: nowrap;
-      text-overflow: ellipsis;
-    }
-
-    .description {
-      display: block;
-    }
-  }
-
-  .exadel-link-checker, .coral-Tooltip {
+  .exadel-link-checker,
+  .coral-Tooltip {
     word-break: break-word;
   }
 }
 
-.linkchecker-coral-alert {
+.elc-complex-col {
+  margin: 0.2rem 0;
+  max-width: 600px;
+  overflow: hidden;
+
+  .elc-primary-info {
+    display: block;
+    margin-top: 0;
+    margin-bottom: 0;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .elc-secondary-info {
+    display: block;
+  }
+}
+.els-component-col {
+  max-width: 450px;
+}
+.els-property-col {
+  margin: 0.2rem 0;
+  max-width: 450px;
+  overflow: hidden;
+}
+
+.elc-coral-alert {
   width: max-content;
   margin-left: auto;
   margin-right: auto;
   display: block;
 }
 
-#fix-broken-link-dialog {
+.elc-log-dialog {
   vertical-align: middle;
 }
 
-#new-link {
+.elc-replacement-input {
   width: 100%;
 }
 
-.coral3-Dialog-wrapper {
-  width: 30%;
+.elc-processing-link-list {
+  > li {
+    font-weight: bold;
+  }
 }

@@ -52,7 +52,7 @@
                     stateId="link-checker-ui">
                 <columns
                         jcr:primaryType="nt:unstructured"
-                        class="card-exadel-link-checker">
+                        class="elc-card">
                     <select
                             jcr:primaryType="nt:unstructured"
                             select="{Boolean}true"/>
@@ -117,7 +117,7 @@
                         sling:resourceType="granite/ui/components/coral/foundation/anchorbutton"
                         text="Download Full Report"
                         variant="primary"
-                        granite:class="download-full-report-button"
+                        granite:class="elc-download-report-button"
                         x-cq-linkchecker="skip"/>
             </secondary>
         </actions>
