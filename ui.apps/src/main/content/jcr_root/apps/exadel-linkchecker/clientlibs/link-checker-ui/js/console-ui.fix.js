@@ -16,59 +16,24 @@
     var REPLACEMENT_LINK_LABEL = Granite.I18n.get('Please enter the replacement link');
 
     var PROCESSING_ERROR_MSG = 'Failed to replace the link <b>{{currentLink}}</b> with <b>{{newLink}}</b><br/> at <i>{{path}}@{{propertyName}}</i>';
-    var PROCESSING_SUCCESS_MSG = 'The link <b>{{currentLink}}</b> was successfully replaced with <b>{{newLink}}</b><br/> at <i>{{item.path}}@{{propertyName}}</i>';
+    var PROCESSING_SUCCESS_MSG = 'The link <b>{{currentLink}}</b> was successfully replaced with <b>{{newLink}}</b><br/> at <i>{{path}}@{{propertyName}}</i>';
     var PROCESSING_NOT_FOUND_MSG = 'The link <b>{{currentLink}}</b> was not found at <i>{{path}}@{{propertyName}}</i>';
     var PROCESSING_IDENTICAL_MSG = 'The current link <b>{{currentLink}}</b> is equal to the entered one, replacement was not applied';
 
-    var ui = $(window).adaptTo('foundation-ui');
     var FIX_BROKEN_LINK_COMMAND = '/content/exadel-linkchecker/servlet/fixBrokenLink';
 
+    /** Root action handler */
     function onFixAction(name, el, config, collection, selections) {
-        var message = buildFixDialogContent(selections);
-        ui.prompt(UPDATE_LABEL, message, 'notice', [{
-            text: CANCEL_LABEL
-        }, {
-            text: UPDATE_LABEL,
-            primary: true,
-            handler: function () {
-                var newLink = $('.elc-replacement-input').val();
-                var replacementList = selections.map(function (v) {
-                    var row = $(v);
-                    return {
-                        path: row.data('path'),
-                        currentLink: row.data('currentLink'),
-                        propertyName: row.data('propertyName'),
-                        newLink: newLink
-                    };
-                });
-                processBrokenLink(replacementList);
-            }
-        }]);
-    }
-    function buildFixDialogContent(selections) {
-        // TODO: Still not good enough
-        var message = $('<div>');
-        $('<p>').text(LINK_TO_UPDATE_LABEL).appendTo(message);
+        var selectionItems = buildSelectionItems(selections);
 
-        var list = selections.slice(0, 12).map(function (row) {
-            var link = $(row).data('currentLink');
-            return '<li>' + link + '</li>';
+        showConfirmationModal(selectionItems).then(function (newLink) {
+            var replacementList = selectionItems.map(function (item) {
+                return $.extend({
+                    newLink: newLink
+                }, item);
+            });
+            processBrokenLink(replacementList);
         });
-        if (selections.length > 12) {
-            list.push('<li>&#8230;</li>'); // &#8230; is ellipsis
-        }
-        $('<ul class="elc-processing-link-list">').html(list.join('')).appendTo(message);
-
-        var replacementTextField = new Coral.Textfield().set({
-            name: 'replacementLink',
-            value: ''
-        });
-        replacementTextField.classList.add('elc-replacement-input');
-
-        $('<br/>').appendTo(message);
-        $('<p>').text(REPLACEMENT_LINK_LABEL).appendTo(message);
-        message.append(replacementTextField);
-        return message.html();
     }
 
     function processBrokenLink(items) {
@@ -80,6 +45,7 @@
         requests.always(function () {
             logger.finished();
             logger.dialog.on('coral-overlay:close', function () {
+                $(window).adaptTo('foundation-ui').wait();
                 window.location.reload();
             });
         });
@@ -107,6 +73,64 @@
         };
     }
 
+    // Confirmation dialog common methods
+    function showConfirmationModal(selection) {
+        var deferred = $.Deferred();
+
+        var el = getDialog();
+        el.variant = 'notice';
+        el.header.textContent = UPDATE_LABEL;
+        el.footer.innerHTML = [
+            '<button is="coral-button" variant="default" coral-close>' + CANCEL_LABEL + '</button>',
+            '<button data-dialog-action is="coral-button" variant="primary" coral-close>' + UPDATE_LABEL + '</button>'
+        ].join('');
+
+        el.content.innerHTML = ''; // Clean content
+        buildConfirmationMessage(selection).appendTo(el.content);
+
+        // Replacement input group
+        var $replacementTextField =
+            $('<input is="coral-textfield" class="elc-replacement-input" name="replacementLink" value="">');
+        $('<p>').text(REPLACEMENT_LINK_LABEL).appendTo(el.content);
+        $replacementTextField.appendTo(el.content);
+
+        var onResolve = function () {
+            deferred.resolve($replacementTextField.val());
+        };
+
+        el.on('click', '[data-dialog-action]', onResolve);
+        el.on('coral-overlay:close', function () {
+            el.off('click', '[data-dialog-action]', onResolve);
+            deferred.reject();
+        });
+        el.show();
+
+        return deferred.promise();
+    }
+    function buildSelectionItems(selections) {
+        return selections.map(function (v) {
+            var row = $(v);
+            return {
+                path: row.data('path'),
+                currentLink: row.data('currentLink'),
+                propertyName: row.data('propertyName')
+            };
+        });
+    }
+    function buildConfirmationMessage(selections) {
+        var list = selections.slice(0, 12).map(function (row) {
+            return '<li>' + row.currentLink + '</li>';
+        });
+        if (selections.length > 12) {
+            list.push('<li>&#8230;</li>'); // &#8230; is ellipsis
+        }
+        var $msg = $('<div class="elc-confirmation-msg">');
+        $('<p>').text(LINK_TO_UPDATE_LABEL).appendTo($msg);
+        $('<ul class="elc-processing-link-list">').html(list.join('')).appendTo($msg);
+        $('<br/>').appendTo($msg);
+        return $msg;
+    }
+
     /**
      * Create {@return ProcessLogger} wrapper
      * @return {ProcessLogger}
@@ -115,14 +139,17 @@
      * @method finished
      * @method log
      */
-    function createLoggerDialog(title, message) {
-        var el = new Coral.Dialog({
-            backdrop: Coral.Dialog.backdrop.STATIC
-        });
+    function createLoggerDialog(title, processingMsg) {
+        var el = getDialog();
+        el.variant = 'default';
         el.header.textContent = title;
         el.header.insertBefore(new Coral.Wait(), el.header.firstChild);
-        el.content.innerHTML = message || '';
-        el.classList.add('elc-log-dialog');
+        el.footer.innerHTML = '';
+        el.content.innerHTML = '';
+
+        var processingLabel = document.createElement('p');
+        processingLabel.textContent = processingMsg;
+        el.content.append(processingLabel);
 
         document.body.appendChild(el);
         el.show();
@@ -131,6 +158,7 @@
             dialog: el,
             finished: function () {
                 el.header.textContent = FINISHED_LABEL;
+                processingLabel.remove();
 
                 var closeBtn = new Coral.Button();
                 closeBtn.variant = 'primary';
@@ -156,10 +184,25 @@
      * @return {string}
      */
     function format(text, dictionary) {
-        return text.replace(/{{(\w+)}}/, function (match, term) {
+        return text.replace(/{{(\w+)}}/g, function (match, term) {
            if (term in dictionary) return String(dictionary[term]);
            return match;
         });
+    }
+
+    let sharableDialog;
+    /** Common sharable dialog instance getter */
+    function getDialog() {
+        if (!sharableDialog) {
+            sharableDialog = new Coral.Dialog().set({
+                backdrop: Coral.Dialog.backdrop.STATIC,
+                interaction: 'off'
+            }).on('coral-overlay:close', function(e) {
+                e.target.remove();
+            });
+            sharableDialog.classList.add('elc-dialog');
+        }
+        return sharableDialog;
     }
 
     // INIT

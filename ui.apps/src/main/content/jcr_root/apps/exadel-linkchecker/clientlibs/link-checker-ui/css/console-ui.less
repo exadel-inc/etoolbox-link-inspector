@@ -1,12 +1,8 @@
-// List view style
 // TODO: scope should be limited to exadel-link-checker
+// List view style
 .list header[class^="card-"] .sort {
   margin: 0 0.5rem 0 0;
   width: 1.9rem;;
-}
-// TODO: scope should be limited to exadel-link-checker
-.coral3-Dialog-wrapper {
-  width: 30%;
 }
 
 tr.elc-card {
@@ -29,9 +25,9 @@ tr.elc-card {
 
   .elc-primary-info {
     display: block;
+    max-width: 100%;
     margin-top: 0;
     margin-bottom: 0;
-    white-space: nowrap;
     text-overflow: ellipsis;
   }
 
@@ -55,8 +51,11 @@ tr.elc-card {
   display: block;
 }
 
-.elc-log-dialog {
+.elc-dialog {
   vertical-align: middle;
+  .coral3-Dialog-wrapper {
+    width: 30%;
+  }
 }
 
 .elc-replacement-input {
