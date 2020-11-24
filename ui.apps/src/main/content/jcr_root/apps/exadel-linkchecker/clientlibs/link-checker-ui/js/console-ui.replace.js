@@ -1,37 +1,35 @@
 /**
  * Exadel LinkChecker clientlib.
- * "Fix link" action definition.
+ * "Replace By Pattern" action definition.
  */
 (function (window, document, $, Granite) {
     'use strict';
 
     var CLOSE_LABEL = Granite.I18n.get('Close');
     var CANCEL_LABEL = Granite.I18n.get('Cancel');
-    var UPDATE_LABEL = Granite.I18n.get('Update Link');
+    var REPLACE_LABEL = Granite.I18n.get('Replace By Pattern');
+    var REPLACE_BUTTON_LABEL = Granite.I18n.get('Replace');
     var FINISHED_LABEL = Granite.I18n.get('Finished');
     var PROCESSING_LABEL = Granite.I18n.get('Processing');
-   // var REPLACEMENT_PROGRESS_LABEL = Granite.I18n.get('Replacement in progress ...');
-    var START_REPLACEMENT_LABEL = Granite.I18n.get('Link update is in progress ...');
-    var LINK_TO_UPDATE_LABEL = Granite.I18n.get('The following link will be updated:');
-    var REPLACEMENT_LINK_LABEL = Granite.I18n.get('Please enter the replacement link');
+    var START_REPLACEMENT_LABEL = Granite.I18n.get('Replacement by pattern is in progress ...');
+    var PATTERN_LABEL = Granite.I18n.get('Please enter the regex pattern to be replaced');
+    var REPLACEMENT_LINK_LABEL = Granite.I18n.get('Please enter the replacement');
 
-    var PROCESSING_ERROR_MSG = 'Failed to replace the link <b>{{currentLink}}</b> with <b>{{newLink}}</b><br/> at <i>{{path}}@{{propertyName}}</i>';
-    var PROCESSING_SUCCESS_MSG = 'The link <b>{{currentLink}}</b> was successfully replaced with <b>{{newLink}}</b><br/> at <i>{{path}}@{{propertyName}}</i>';
-    var PROCESSING_NOT_FOUND_MSG = 'The link <b>{{currentLink}}</b> was not found at <i>{{path}}@{{propertyName}}</i>';
-    var PROCESSING_IDENTICAL_MSG = 'The current link <b>{{currentLink}}</b> is equal to the entered one, replacement was not applied';
+    var PROCESSING_ERROR_MSG = 'Failed to replace by pattern<br/>Pattern: <b>{{pattern}}</b><br/>Replacement: <b>{{replacement}}</b>';
+    var PROCESSING_SUCCESS_MSG = 'Replacement completed<br/>Pattern: <b>{{pattern}}</b><br/>Replacement: <b>{{replacement}}</b><br/>The number of updated nodes:';
+    var PROCESSING_NOT_FOUND_MSG = 'The broken links containing the pattern <b>{{pattern}}</b> were not found';
+    var PROCESSING_IDENTICAL_MSG = 'The pattern <b>{{pattern}}</b> is equal to the replacement value, no processing was done';
 
-    var FIX_BROKEN_LINK_COMMAND = '/content/exadel-linkchecker/servlet/fixBrokenLink';
+    var REPLACE_BY_PATTERN_COMMAND = '/content/exadel-linkchecker/servlet/replaceLinksByPattern';
 
     /** Root action handler */
     function onFixAction(name, el, config, collection, selections) {
-        var selectionItems = buildSelectionItems(selections);
-
-        showConfirmationModal(selectionItems).then(function (newLink) {
-            var replacementList = selectionItems.map(function (item) {
-                return $.extend({
-                    newLink: newLink
-                }, item);
-            });
+        showConfirmationModal().then(function (data) {
+            var replacementList = [{
+                pattern: data.pattern,
+                replacement: data.replacement
+            }];
+            //todo - add validation of params: pattern, replacement
             processBrokenLink(replacementList);
         });
     }
@@ -40,7 +38,7 @@
         var logger = createLoggerDialog(PROCESSING_LABEL, START_REPLACEMENT_LABEL);
         var requests = $.Deferred().resolve();
         requests = items.reduce(function (query, item) {
-            return query.then(buildFixRequest(item, logger));
+            return query.then(buildReplaceRequest(item, logger));
         }, requests);
         requests.always(function () {
             logger.finished();
@@ -50,14 +48,15 @@
             });
         });
     }
-    function buildFixRequest(item, logger) {
+
+    function buildReplaceRequest(item, logger) {
         return function () {
             return $.ajax({
-                url: FIX_BROKEN_LINK_COMMAND,
+                url: REPLACE_BY_PATTERN_COMMAND,
                 type: "POST",
                 data: $.extend({
                     _charset_: "UTF-8",
-                    cmd: "fixBrokenLink"
+                    cmd: "replaceByPattern"
                 }, item)
             }).fail(function () {
                 logger.log(format(PROCESSING_ERROR_MSG, item), false);
@@ -74,28 +73,37 @@
     }
 
     // Confirmation dialog common methods
-    function showConfirmationModal(selection) {
+    function showConfirmationModal() {
         var deferred = $.Deferred();
 
         var el = getDialog();
         el.variant = 'notice';
-        el.header.textContent = UPDATE_LABEL;
+        el.header.textContent = REPLACE_LABEL;
         el.footer.innerHTML = [
             '<button is="coral-button" variant="default" coral-close>' + CANCEL_LABEL + '</button>',
-            '<button data-dialog-action is="coral-button" variant="primary" coral-close>' + UPDATE_LABEL + '</button>'
+            '<button data-dialog-action is="coral-button" variant="primary" coral-close>' + REPLACE_BUTTON_LABEL + '</button>'
         ].join('');
 
         el.content.innerHTML = ''; // Clean content
-        buildConfirmationMessage(selection).appendTo(el.content);
+
+        // Pattern input group
+        var $patternTextField =
+            $('<input is="coral-textfield" class="elc-pattern-input" name="pattern" value="">');
+        $('<p>').text(PATTERN_LABEL).appendTo(el.content);
+        $patternTextField.appendTo(el.content);
 
         // Replacement input group
         var $replacementTextField =
-            $('<input is="coral-textfield" class="elc-replacement-input" name="replacementLink" value="">');
+            $('<input is="coral-textfield" class="elc-replacement-input" name="replacement" value="">');
         $('<p>').text(REPLACEMENT_LINK_LABEL).appendTo(el.content);
         $replacementTextField.appendTo(el.content);
 
         var onResolve = function () {
-            deferred.resolve($replacementTextField.val());
+            var data = {
+                pattern: $patternTextField.val(),
+                replacement: $replacementTextField.val()
+            }
+            deferred.resolve(data);
         };
 
         el.on('click', '[data-dialog-action]', onResolve);
@@ -106,29 +114,6 @@
         el.show();
 
         return deferred.promise();
-    }
-    function buildSelectionItems(selections) {
-        return selections.map(function (v) {
-            var row = $(v);
-            return {
-                path: row.data('path'),
-                currentLink: row.data('currentLink'),
-                propertyName: row.data('propertyName')
-            };
-        });
-    }
-    function buildConfirmationMessage(selections) {
-        var list = selections.slice(0, 12).map(function (row) {
-            return '<li>' + row.currentLink + '</li>';
-        });
-        if (selections.length > 12) {
-            list.push('<li>&#8230;</li>'); // &#8230; is ellipsis
-        }
-        var $msg = $('<div class="elc-confirmation-msg">');
-        $('<p>').text(LINK_TO_UPDATE_LABEL).appendTo($msg);
-        $('<ul class="elc-processing-link-list">').html(list.join('')).appendTo($msg);
-        $('<br/>').appendTo($msg);
-        return $msg;
     }
 
     /**
@@ -185,19 +170,20 @@
      */
     function format(text, dictionary) {
         return text.replace(/{{(\w+)}}/g, function (match, term) {
-           if (term in dictionary) return String(dictionary[term]);
-           return match;
+            if (term in dictionary) return String(dictionary[term]);
+            return match;
         });
     }
 
     let sharableDialog;
+
     /** Common sharable dialog instance getter */
     function getDialog() {
         if (!sharableDialog) {
             sharableDialog = new Coral.Dialog().set({
                 backdrop: Coral.Dialog.backdrop.STATIC,
                 interaction: 'off'
-            }).on('coral-overlay:close', function(e) {
+            }).on('coral-overlay:close', function (e) {
                 e.target.remove();
             });
             sharableDialog.classList.add('elc-dialog');
@@ -207,7 +193,7 @@
 
     // INIT
     $(window).adaptTo("foundation-registry").register("foundation.collection.action.action", {
-        name: "cq-admin.exadel.linkchecker.action.fix-broken-link",
+        name: "cq-admin.exadel.linkchecker.action.replace-by-pattern",
         handler: onFixAction
     });
 })(window, document, Granite.$, Granite);

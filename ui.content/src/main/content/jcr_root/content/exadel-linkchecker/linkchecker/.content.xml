@@ -103,7 +103,7 @@
                         sling:resourceType="granite/ui/components/coral/foundation/collection/action"
                         action="cq-admin.exadel.linkchecker.action.fix-broken-link"
                         activeSelectionCount="single"
-                        icon="publish"
+                        icon="linkCheck"
                         rel="exadel-link-checker-fix-broken-link"
                         target=".exadel-link-checker"
                         text="Fix Broken Link"
@@ -111,6 +111,19 @@
                         variant="actionBar">
                 </fixBrokenLink>
             </selection>
+            <primary jcr:primaryType="nt:unstructured">
+                <replaceByPattern
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="granite/ui/components/coral/foundation/collection/action"
+                        action="cq-admin.exadel.linkchecker.action.replace-by-pattern"
+                        icon="linkGlobe"
+                        rel="exadel-link-checker-fix-by-pattern"
+                        target=".exadel-link-checker"
+                        text="Replace By Pattern"
+                        title="Replace By Pattern"
+                        variant="minimal">
+                </replaceByPattern>
+            </primary>
             <secondary jcr:primaryType="nt:unstructured">
                 <download
                         jcr:primaryType="nt:unstructured"

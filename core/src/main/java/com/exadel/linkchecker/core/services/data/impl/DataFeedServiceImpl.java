@@ -101,7 +101,7 @@ public class DataFeedServiceImpl implements DataFeedService {
                 LOG.warn("ResourceResolver is null, data feed to resources conversion is stopped");
                 return Collections.emptyList();
             }
-            List<Resource> resources = toSlingResourcesStream(dataFeedToGridResources(serviceResourceResolver),
+            List<Resource> resources = toSlingResourcesStream(dataFeedToGridResources(serviceResourceResolver, true),
                     resourceResolverFactory.getThreadResourceResolver())
                     .collect(Collectors.toList());
             LOG.info("Exadel Link Checker - the number of items shown on UI is {}", resources.size());
@@ -110,12 +110,14 @@ public class DataFeedServiceImpl implements DataFeedService {
     }
 
     @Override
-    public List<GridViewItem> dataFeedToViewItems() {
-        return dataFeedToResources()
-                .stream()
-                .map(resource -> resource.adaptTo(GridViewItem.class))
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+    public List<GridResource> dataFeedToGridResources() {
+        try (ResourceResolver serviceResourceResolver = getResourceResolver()) {
+            if (serviceResourceResolver == null) {
+                LOG.warn("ResourceResolver is null, data feed to grid resources conversion is stopped");
+                return Collections.emptyList();
+            }
+            return dataFeedToGridResources(serviceResourceResolver, false);
+        }
     }
 
     private ResourceResolver getResourceResolver() {
@@ -128,12 +130,13 @@ public class DataFeedServiceImpl implements DataFeedService {
         return null;
     }
 
-    private List<GridResource> dataFeedToGridResources(ResourceResolver resourceResolver) {
+    private List<GridResource> dataFeedToGridResources(ResourceResolver resourceResolver, boolean limited) {
         Set<GridResource> gridResources = new HashSet<>();
         JSONArray jsonArray = JsonUtil.getJsonArrayFromFile(JSON_FEED_PATH, resourceResolver);
         int allItemsSize = jsonArray.length();
         if (allItemsSize > 0) {
-            for (int i = 0; i < Math.min(allItemsSize, UI_ITEMS_LIMIT); i++) {
+            int limit = limited ? Math.min(allItemsSize, UI_ITEMS_LIMIT) : allItemsSize;
+            for (int i = 0; i < limit; i++) {
                 try {
                     JSONObject jsonObject = jsonArray.getJSONObject(i);
                     Optional.ofNullable(JsonUtil.jsonToModel(jsonObject, GridResource.class))

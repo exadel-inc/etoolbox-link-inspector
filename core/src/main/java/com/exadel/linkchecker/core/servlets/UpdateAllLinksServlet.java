@@ -1,9 +1,9 @@
 package com.exadel.linkchecker.core.servlets;
 
 import com.day.crx.JcrConstants;
-import com.exadel.linkchecker.core.models.GridViewItem;
 import com.exadel.linkchecker.core.services.LinkHelper;
 import com.exadel.linkchecker.core.services.data.DataFeedService;
+import com.exadel.linkchecker.core.services.data.models.GridResource;
 import com.exadel.linkchecker.core.services.util.ServletUtil;
 import com.exadel.linkchecker.core.services.util.constants.CommonConstants;
 import org.apache.commons.httpclient.HttpStatus;
@@ -39,7 +39,7 @@ import java.util.Optional;
 public class UpdateAllLinksServlet extends SlingAllMethodsServlet {
     private static final Logger LOG = LoggerFactory.getLogger(UpdateAllLinksServlet.class);
 
-    private static final String LINK_PATTERN_PARAM = "currentLink";
+    private static final String LINK_PATTERN_PARAM = "pattern";
     private static final String REPLACEMENT_PARAM = "replacement";
 
     public static final Integer COMMIT_THRESHOLD = 500;
@@ -67,8 +67,8 @@ public class UpdateAllLinksServlet extends SlingAllMethodsServlet {
         }
         try {
             ResourceResolver resourceResolver = request.getResourceResolver();
-            List<GridViewItem> viewItems = dataFeedService.dataFeedToViewItems();
-            int updatedLinksCount = replaceLinksByPattern(resourceResolver, viewItems, linkPattern, replacement);
+            List<GridResource> gridResources = dataFeedService.dataFeedToGridResources();
+            int updatedLinksCount = replaceLinksByPattern(resourceResolver, gridResources, linkPattern, replacement);
             if (updatedLinksCount > 0) {
                 ResourceUtil.getOrCreateResource(
                         resourceResolver,
@@ -88,13 +88,16 @@ public class UpdateAllLinksServlet extends SlingAllMethodsServlet {
         }
     }
 
-    private int replaceLinksByPattern(ResourceResolver resourceResolver, Collection<GridViewItem> viewItems,
+    private int replaceLinksByPattern(ResourceResolver resourceResolver, Collection<GridResource> gridResources,
                                       String linkPattern, String replacement) throws PersistenceException {
         int updatedLinksCounter = 0;
-        for (GridViewItem viewItem : viewItems) {
-            String currentLink = viewItem.getLink();
-            String path = viewItem.getPath();
-            String propertyName = viewItem.getPropertyName();
+        for (GridResource gridResource : gridResources) {
+            String currentLink = gridResource.getHref();
+            String path = gridResource.getResourcePath();
+            String propertyName = gridResource.getPropertyName();
+            if (StringUtils.isAnyBlank(currentLink, path, propertyName)) {
+                continue;
+            }
             Optional<String> updated = Optional.of(currentLink.replaceAll(linkPattern, replacement))
                     .filter(updatedLink -> !updatedLink.equals(currentLink))
                     .filter(updatedLink ->
