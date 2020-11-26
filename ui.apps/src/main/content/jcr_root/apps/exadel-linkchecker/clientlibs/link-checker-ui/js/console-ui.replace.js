@@ -14,20 +14,28 @@
     var START_REPLACEMENT_LABEL = Granite.I18n.get('Replacement by pattern is in progress ...');
     var PATTERN_LABEL = Granite.I18n.get('Please enter the regex pattern to be replaced');
     var REPLACEMENT_LINK_LABEL = Granite.I18n.get('Please enter the replacement');
+    var BACKUP_CHECKBOX_LABEL = Granite.I18n.get('Backup before replacement');
+    var CSV_OUT_CHECKBOX_LABEL = Granite.I18n.get('Download CSV with updated items');
+    var REPLACEMENT_DESCRIPTION = Granite.I18n.get('* Replacement will be applied within the detected broken links scope');
 
     var PROCESSING_ERROR_MSG = 'Failed to replace by pattern<br/>Pattern: <b>{{pattern}}</b><br/>Replacement: <b>{{replacement}}</b>';
-    var PROCESSING_SUCCESS_MSG = 'Replacement completed<br/>Pattern: <b>{{pattern}}</b><br/>Replacement: <b>{{replacement}}</b><br/>The number of updated nodes:';
-    var PROCESSING_NOT_FOUND_MSG = 'The broken links containing the pattern <b>{{pattern}}</b> were not found';
+    var PROCESSING_SUCCESS_MSG = 'Replacement completed<br/><br/>Pattern: <b>{{pattern}}</b><br/>Replacement: <b>{{replacement}}</b>';
+    var PROCESSING_NOT_FOUND_MSG = 'Broken links containing the pattern <b>{{pattern}}</b> were not found';
     var PROCESSING_IDENTICAL_MSG = 'The pattern <b>{{pattern}}</b> is equal to the replacement value, no processing was done';
 
     var REPLACE_BY_PATTERN_COMMAND = '/content/exadel-linkchecker/servlet/replaceLinksByPattern';
+
+    let currentDate = Date.now();
+    var CSV_OUTPUT_FILENAME = `replace_by_pattern_${currentDate}.csv`;
 
     /** Root action handler */
     function onFixAction(name, el, config, collection, selections) {
         showConfirmationModal().then(function (data) {
             var replacementList = [{
                 pattern: data.pattern,
-                replacement: data.replacement
+                replacement: data.replacement,
+                isBackup: data.isBackup,
+                isOutputAsCsv: data.isOutputAsCsv
             }];
             //todo - add validation of params: pattern, replacement
             processBrokenLink(replacementList);
@@ -66,10 +74,25 @@
                 } else if (xhr.status === 204) {
                     logger.log(format(PROCESSING_NOT_FOUND_MSG, item), false);
                 } else {
+                    if (data) {
+                        downloadCsvOutput(data);
+                    }
                     logger.log(format(PROCESSING_SUCCESS_MSG, item), false);
                 }
             });
         };
+    }
+
+    function downloadCsvOutput(data) {
+        const blob = new Blob([data], {type : 'text/csv'});
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = CSV_OUTPUT_FILENAME;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
     }
 
     // Confirmation dialog common methods
@@ -98,10 +121,24 @@
         $('<p>').text(REPLACEMENT_LINK_LABEL).appendTo(el.content);
         $replacementTextField.appendTo(el.content);
 
+        // Backup checkbox group
+        var $isBackupCheckbox =
+            $('<coral-checkbox name="isBackup">');
+        $isBackupCheckbox.text(BACKUP_CHECKBOX_LABEL).appendTo(el.content);
+
+        // CSV output checkbox group
+        var $isCsvOutputCheckbox =
+            $('<coral-checkbox name="isOutputAsCsv">');
+        $isCsvOutputCheckbox.text(CSV_OUT_CHECKBOX_LABEL).appendTo(el.content);
+
+        ($('<i>').append($('<p>').text(REPLACEMENT_DESCRIPTION))).appendTo(el.content);
+
         var onResolve = function () {
             var data = {
                 pattern: $patternTextField.val(),
-                replacement: $replacementTextField.val()
+                replacement: $replacementTextField.val(),
+                isBackup: $isBackupCheckbox.prop("checked"),
+                isOutputAsCsv: $isCsvOutputCheckbox.prop("checked")
             }
             deferred.resolve(data);
         };

@@ -2,24 +2,22 @@ package com.exadel.linkchecker.core.services.data.impl;
 
 import com.adobe.granite.ui.components.ds.ValueMapResource;
 import com.exadel.linkchecker.core.models.GridViewItem;
+import com.exadel.linkchecker.core.services.RepositoryHelper;
 import com.exadel.linkchecker.core.services.data.models.GridResource;
 import com.exadel.linkchecker.core.services.data.DataFeedService;
 import com.exadel.linkchecker.core.services.data.GridResourcesGenerator;
+import com.exadel.linkchecker.core.services.util.CsvUtil;
 import com.exadel.linkchecker.core.services.util.JsonUtil;
 import com.exadel.linkchecker.core.services.util.LinkCheckerResourceUtil;
 import com.exadel.linkchecker.core.services.util.constants.GridResourceProperties;
 import com.exadel.linkchecker.core.services.util.constants.CommonConstants;
-import com.google.common.collect.ImmutableMap;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.StopWatch;
-import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.ResourceResolverFactory;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.apache.sling.jcr.contentloader.ContentTypeUtil;
@@ -52,7 +50,7 @@ public class DataFeedServiceImpl implements DataFeedService {
     private static final Logger LOG = LoggerFactory.getLogger(DataFeedService.class);
 
     @Reference
-    private ResourceResolverFactory resourceResolverFactory;
+    private RepositoryHelper repositoryHelper;
 
     @Reference
     private GridResourcesGenerator gridResourcesGenerator;
@@ -63,7 +61,6 @@ public class DataFeedServiceImpl implements DataFeedService {
     public static final String JSON_FEED_PATH = "/apps/exadel-linkchecker/components/content/data/datafeed.json";
 
     public static final String CSV_REPORT_PATH = "/content/exadel-linkchecker/download/report.csv";
-    private static final String CSV_MIME_TYPE = "text/csv";
     private static final String[] CSV_COLUMNS = {
             "Link",
             "Code",
@@ -78,7 +75,7 @@ public class DataFeedServiceImpl implements DataFeedService {
     @Override
     public void generateDataFeed() {
         LOG.info("Start link checker data feed generation");
-        try (ResourceResolver resourceResolver = getResourceResolver()) {
+        try (ResourceResolver resourceResolver = repositoryHelper.getServiceResourceResolver()) {
             if (resourceResolver == null) {
                 LOG.warn("ResourceResolver is null, data feed generation is stopped");
                 return;
@@ -96,13 +93,13 @@ public class DataFeedServiceImpl implements DataFeedService {
     @Override
     public List<Resource> dataFeedToResources() {
         LOG.debug("Start data feed to resources conversion");
-        try (ResourceResolver serviceResourceResolver = getResourceResolver()) {
+        try (ResourceResolver serviceResourceResolver = repositoryHelper.getServiceResourceResolver()) {
             if (serviceResourceResolver == null) {
                 LOG.warn("ResourceResolver is null, data feed to resources conversion is stopped");
                 return Collections.emptyList();
             }
             List<Resource> resources = toSlingResourcesStream(dataFeedToGridResources(serviceResourceResolver, true),
-                    resourceResolverFactory.getThreadResourceResolver())
+                    repositoryHelper.getThreadResourceResolver())
                     .collect(Collectors.toList());
             LOG.info("Exadel Link Checker - the number of items shown on UI is {}", resources.size());
             return resources;
@@ -111,23 +108,13 @@ public class DataFeedServiceImpl implements DataFeedService {
 
     @Override
     public List<GridResource> dataFeedToGridResources() {
-        try (ResourceResolver serviceResourceResolver = getResourceResolver()) {
+        try (ResourceResolver serviceResourceResolver = repositoryHelper.getServiceResourceResolver()) {
             if (serviceResourceResolver == null) {
                 LOG.warn("ResourceResolver is null, data feed to grid resources conversion is stopped");
                 return Collections.emptyList();
             }
             return dataFeedToGridResources(serviceResourceResolver, false);
         }
-    }
-
-    private ResourceResolver getResourceResolver() {
-        try {
-            return resourceResolverFactory.getServiceResourceResolver(
-                    ImmutableMap.of(ResourceResolverFactory.SUBSERVICE, CommonConstants.LINK_CHECKER_SERVICE_NAME));
-        } catch (LoginException e) {
-            LOG.error("Failed to get service resource resolver", e);
-        }
-        return null;
     }
 
     private List<GridResource> dataFeedToGridResources(ResourceResolver resourceResolver, boolean limited) {
@@ -200,7 +187,7 @@ public class DataFeedServiceImpl implements DataFeedService {
         if (csvContentBytes != null) {
             LinkCheckerResourceUtil.removeResource(CSV_REPORT_PATH, resourceResolver);
             LinkCheckerResourceUtil.saveFileToJCR(CSV_REPORT_PATH, csvContentBytes,
-                    CSV_MIME_TYPE, resourceResolver);
+                    CsvUtil.CSV_MIME_TYPE, resourceResolver);
         }
         stopWatch.stop();
         LOG.debug("Generating CSV report is completed in {} ms", stopWatch.getTime(TimeUnit.MILLISECONDS));
@@ -224,19 +211,15 @@ public class DataFeedServiceImpl implements DataFeedService {
 
     private void printGridResource(CSVPrinter csvPrinter, GridViewItem viewItem) {
         try {
-            String linkColumnValue = viewItem.getLink();
-            if (linkColumnValue.contains(CommonConstants.SEMICOLON)) {
-                linkColumnValue = StringUtils.wrap(linkColumnValue, CommonConstants.QUOTE);
-            }
             csvPrinter.printRecord(
-                    linkColumnValue,
+                    CsvUtil.wrapIfContainsSemicolon(viewItem.getLink()),
                     viewItem.getLinkStatusCode(),
                     viewItem.getLinkStatusMessage(),
                     viewItem.getPageTitle(),
                     viewItem.getPagePath(),
                     viewItem.getComponentName(),
                     viewItem.getComponentType(),
-                    viewItem.getPath() + "@" + viewItem.getPropertyName()
+                    CsvUtil.buildLocation(viewItem.getPath(), viewItem.getPropertyName())
             );
         } catch (IOException e) {
             LOG.error(String.format("Failed to build CSV for the grid resource %s", viewItem.getLink()), e);

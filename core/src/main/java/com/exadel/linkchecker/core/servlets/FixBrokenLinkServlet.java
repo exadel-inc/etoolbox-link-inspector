@@ -2,6 +2,7 @@ package com.exadel.linkchecker.core.servlets;
 
 import com.day.crx.JcrConstants;
 import com.exadel.linkchecker.core.services.LinkHelper;
+import com.exadel.linkchecker.core.services.RepositoryHelper;
 import com.exadel.linkchecker.core.services.util.ServletUtil;
 import com.exadel.linkchecker.core.services.util.constants.CommonConstants;
 import org.apache.commons.httpclient.HttpStatus;
@@ -10,7 +11,6 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.ResourceUtil;
 import org.apache.sling.api.servlets.HttpConstants;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
 import org.apache.sling.jcr.resource.api.JcrResourceConstants;
@@ -42,6 +42,9 @@ public class FixBrokenLinkServlet extends SlingAllMethodsServlet {
     @Reference
     private LinkHelper linkHelper;
 
+    @Reference
+    RepositoryHelper repositoryHelper;
+
     @Override
     protected void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response) {
         try {
@@ -63,14 +66,11 @@ public class FixBrokenLinkServlet extends SlingAllMethodsServlet {
             }
             ResourceResolver resourceResolver = request.getResourceResolver();
             if (linkHelper.replaceLink(resourceResolver, path, propertyName, currentLink, newLink)) {
-                ResourceUtil.getOrCreateResource(
-                        resourceResolver,
-                        CommonConstants.PENDING_GENERATION_NODE,
-                        JcrConstants.NT_UNSTRUCTURED,
-                        JcrResourceConstants.NT_SLING_FOLDER,
-                        false
-                );
-                resourceResolver.commit();
+                repositoryHelper.createResourceIfNotExist(CommonConstants.PENDING_GENERATION_NODE,
+                        JcrConstants.NT_UNSTRUCTURED, JcrResourceConstants.NT_SLING_FOLDER);
+                if (resourceResolver.hasChanges()) {
+                    resourceResolver.commit();
+                }
                 LOG.debug("The link was updated: path - {}, propertyName - {}, currentLink - {}, newLink - {}",
                         path, propertyName, currentLink, newLink);
             } else {

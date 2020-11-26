@@ -14,4 +14,8 @@ public class ServletUtil {
                 .map(RequestParameter::getString)
                 .orElse(StringUtils.EMPTY);
     }
+
+    public static boolean getRequestParamBoolean(SlingHttpServletRequest request, String param) {
+        return Boolean.parseBoolean(getRequestParamString(request, param));
+    }
 }
