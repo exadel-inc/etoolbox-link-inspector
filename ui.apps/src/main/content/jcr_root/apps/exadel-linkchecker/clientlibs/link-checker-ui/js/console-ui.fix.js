@@ -7,7 +7,7 @@
 
     var CLOSE_LABEL = Granite.I18n.get('Close');
     var CANCEL_LABEL = Granite.I18n.get('Cancel');
-    var UPDATE_LABEL = Granite.I18n.get('Update Link');
+    var UPDATE_LABEL = Granite.I18n.get('Fix Broken Link');
     var FINISHED_LABEL = Granite.I18n.get('Finished');
     var PROCESSING_LABEL = Granite.I18n.get('Processing');
    // var REPLACEMENT_PROGRESS_LABEL = Granite.I18n.get('Replacement in progress ...');
