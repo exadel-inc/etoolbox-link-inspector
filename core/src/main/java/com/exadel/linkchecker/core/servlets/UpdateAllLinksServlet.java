@@ -54,6 +54,8 @@ import java.util.stream.Collectors;
 public class UpdateAllLinksServlet extends SlingAllMethodsServlet {
     private static final Logger LOG = LoggerFactory.getLogger(UpdateAllLinksServlet.class);
 
+    public static final Integer COMMIT_THRESHOLD = 500;
+    
     private static final String LINK_PATTERN_PARAM = "pattern";
     private static final String REPLACEMENT_PARAM = "replacement";
     private static final String BACKUP_PARAM = "isBackup";
@@ -64,10 +66,6 @@ public class UpdateAllLinksServlet extends SlingAllMethodsServlet {
             "Updated Link",
             "Location"
     };
-
-    public static final Integer COMMIT_THRESHOLD = 500;
-    //todo - move to RepositoryHelper
-    public static final String READ_WRITE_PERMISSIONS = String.join(",", Session.ACTION_READ, Session.ACTION_SET_PROPERTY);
 
     @Reference
     private DataFeedService dataFeedService;
@@ -144,7 +142,7 @@ public class UpdateAllLinksServlet extends SlingAllMethodsServlet {
                 )
                 .filter(gridResource -> pattern.matcher(gridResource.getHref()).find())
                 .filter(gridResource ->
-                        repositoryHelper.hasPermissions(session, gridResource.getResourcePath(), READ_WRITE_PERMISSIONS))
+                        repositoryHelper.hasReadWritePermissions(session, gridResource.getResourcePath()))
                 .collect(Collectors.toList());
     }
 

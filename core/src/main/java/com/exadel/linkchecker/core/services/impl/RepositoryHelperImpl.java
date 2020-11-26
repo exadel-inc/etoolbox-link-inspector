@@ -21,6 +21,8 @@ public class RepositoryHelperImpl implements RepositoryHelper {
 
     private static final String LINK_CHECKER_SERVICE_NAME = "exadel-linkchecker-service";
 
+    private static final String READ_WRITE_PERMISSIONS = String.join(",", Session.ACTION_READ, Session.ACTION_SET_PROPERTY);
+
     @Reference
     private ResourceResolverFactory resourceResolverFactory;
 
@@ -45,6 +47,10 @@ public class RepositoryHelperImpl implements RepositoryHelper {
             LOG.error("Failed to check permissions '{}' for resource {}: {}", permissions, path, e.getMessage());
         }
         return false;
+    }
+
+    public boolean hasReadWritePermissions(Session session, String path) {
+        return hasPermissions(session, path, READ_WRITE_PERMISSIONS);
     }
 
     public void createResourceIfNotExist(String path, String resourceType, String intermediateResourceType) {

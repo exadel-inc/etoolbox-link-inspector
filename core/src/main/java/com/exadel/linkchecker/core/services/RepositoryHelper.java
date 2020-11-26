@@ -10,5 +10,7 @@ public interface RepositoryHelper {
 
     boolean hasPermissions(Session session, String path, String permissions);
 
+    boolean hasReadWritePermissions(Session session, String path);
+
     void createResourceIfNotExist(String path, String resourceType, String intermediateResourceType);
 }
