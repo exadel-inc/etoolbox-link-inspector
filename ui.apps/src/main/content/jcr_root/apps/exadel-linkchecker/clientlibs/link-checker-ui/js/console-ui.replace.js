@@ -74,7 +74,7 @@
                 } else if (xhr.status === 204) {
                     logger.log(format(PROCESSING_NOT_FOUND_MSG, item), false);
                 } else {
-                    if (data) {
+                    if (xhr.getResponseHeader("Content-disposition") && data) {
                         downloadCsvOutput(data);
                     }
                     logger.log(format(PROCESSING_SUCCESS_MSG, item), false);
