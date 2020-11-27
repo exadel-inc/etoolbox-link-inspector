@@ -68,9 +68,7 @@ public class FixBrokenLinkServlet extends SlingAllMethodsServlet {
             if (linkHelper.replaceLink(resourceResolver, path, propertyName, currentLink, newLink)) {
                 repositoryHelper.createResourceIfNotExist(CommonConstants.PENDING_GENERATION_NODE,
                         JcrConstants.NT_UNSTRUCTURED, JcrResourceConstants.NT_SLING_FOLDER);
-                if (resourceResolver.hasChanges()) {
-                    resourceResolver.commit();
-                }
+                resourceResolver.commit();
                 LOG.debug("The link was updated: path - {}, propertyName - {}, currentLink - {}, newLink - {}",
                         path, propertyName, currentLink, newLink);
             } else {
