@@ -2,16 +2,11 @@
  * Exadel LinkChecker clientlib.
  * "Fix link" action definition.
  */
-(function (window, document, $, Granite) {
+(function (window, document, $, ELC, Granite) {
     'use strict';
 
-    var CLOSE_LABEL = Granite.I18n.get('Close');
     var CANCEL_LABEL = Granite.I18n.get('Cancel');
     var UPDATE_LABEL = Granite.I18n.get('Fix Broken Link');
-    var FINISHED_LABEL = Granite.I18n.get('Finished');
-    var PROCESSING_LABEL = Granite.I18n.get('Processing');
-   // var REPLACEMENT_PROGRESS_LABEL = Granite.I18n.get('Replacement in progress ...');
-    var START_REPLACEMENT_LABEL = Granite.I18n.get('Link update is in progress ...');
     var LINK_TO_UPDATE_LABEL = Granite.I18n.get('The following link will be updated:');
     var REPLACEMENT_LINK_LABEL = Granite.I18n.get('Please enter the replacement link');
 
@@ -32,24 +27,10 @@
                     newLink: newLink
                 }, item);
             });
-            processBrokenLink(replacementList);
+            ELC.bulkLinksUpdate(replacementList, buildFixRequest);
         });
     }
 
-    function processBrokenLink(items) {
-        var logger = createLoggerDialog(PROCESSING_LABEL, START_REPLACEMENT_LABEL);
-        var requests = $.Deferred().resolve();
-        requests = items.reduce(function (query, item) {
-            return query.then(buildFixRequest(item, logger));
-        }, requests);
-        requests.always(function () {
-            logger.finished();
-            logger.dialog.on('coral-overlay:close', function () {
-                $(window).adaptTo('foundation-ui').wait();
-                window.location.reload();
-            });
-        });
-    }
     function buildFixRequest(item, logger) {
         return function () {
             return $.ajax({
@@ -60,14 +41,14 @@
                     cmd: "fixBrokenLink"
                 }, item)
             }).fail(function () {
-                logger.log(format(PROCESSING_ERROR_MSG, item), false);
+                logger.log(ELC.format(PROCESSING_ERROR_MSG, item), false);
             }).done(function (data, textStatus, xhr) {
                 if (xhr.status === 202) {
-                    logger.log(format(PROCESSING_IDENTICAL_MSG, item), false);
+                    logger.log(ELC.format(PROCESSING_IDENTICAL_MSG, item), false);
                 } else if (xhr.status === 204) {
-                    logger.log(format(PROCESSING_NOT_FOUND_MSG, item), false);
+                    logger.log(ELC.format(PROCESSING_NOT_FOUND_MSG, item), false);
                 } else {
-                    logger.log(format(PROCESSING_SUCCESS_MSG, item), false);
+                    logger.log(ELC.format(PROCESSING_SUCCESS_MSG, item), false);
                 }
             });
         };
@@ -77,7 +58,7 @@
     function showConfirmationModal(selection) {
         var deferred = $.Deferred();
 
-        var el = getDialog();
+        var el = ELC.getSharableDlg();
         el.variant = 'notice';
         el.header.textContent = UPDATE_LABEL;
         el.footer.innerHTML = [
@@ -131,83 +112,9 @@
         return $msg;
     }
 
-    /**
-     * Create {@return ProcessLogger} wrapper
-     * @return {ProcessLogger}
-     *
-     * @typedef ProcessLogger
-     * @method finished
-     * @method log
-     */
-    function createLoggerDialog(title, processingMsg) {
-        var el = getDialog();
-        el.variant = 'default';
-        el.header.textContent = title;
-        el.header.insertBefore(new Coral.Wait(), el.header.firstChild);
-        el.footer.innerHTML = '';
-        el.content.innerHTML = '';
-
-        var processingLabel = document.createElement('p');
-        processingLabel.textContent = processingMsg;
-        el.content.append(processingLabel);
-
-        document.body.appendChild(el);
-        el.show();
-
-        return {
-            dialog: el,
-            finished: function () {
-                el.header.textContent = FINISHED_LABEL;
-                processingLabel.remove();
-
-                var closeBtn = new Coral.Button();
-                closeBtn.variant = 'primary';
-                closeBtn.label.textContent = CLOSE_LABEL;
-                closeBtn.on('click', function () {
-                    el.hide();
-                });
-
-                el.footer.appendChild(closeBtn);
-            },
-            log: function (message, safe) {
-                var logItem = document.createElement('div');
-                logItem.className = 'elc-log-item';
-                logItem[safe ? 'textContent' : 'innerHTML'] = message;
-                el.content.insertAdjacentElement('beforeend', logItem);
-            }
-        };
-    }
-
-    /**
-     * @param {string} text - text to format
-     * @param {object} dictionary - dictionary object to replace '{{key}}' injections
-     * @return {string}
-     */
-    function format(text, dictionary) {
-        return text.replace(/{{(\w+)}}/g, function (match, term) {
-           if (term in dictionary) return String(dictionary[term]);
-           return match;
-        });
-    }
-
-    let sharableDialog;
-    /** Common sharable dialog instance getter */
-    function getDialog() {
-        if (!sharableDialog) {
-            sharableDialog = new Coral.Dialog().set({
-                backdrop: Coral.Dialog.backdrop.STATIC,
-                interaction: 'off'
-            }).on('coral-overlay:close', function(e) {
-                e.target.remove();
-            });
-            sharableDialog.classList.add('elc-dialog');
-        }
-        return sharableDialog;
-    }
-
     // INIT
     $(window).adaptTo("foundation-registry").register("foundation.collection.action.action", {
         name: "cq-admin.exadel.linkchecker.action.fix-broken-link",
         handler: onFixAction
     });
-})(window, document, Granite.$, Granite);
+})(window, document, Granite.$, Granite.ELC, Granite);
