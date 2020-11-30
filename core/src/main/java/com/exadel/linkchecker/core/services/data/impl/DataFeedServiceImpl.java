@@ -2,7 +2,7 @@ package com.exadel.linkchecker.core.services.data.impl;
 
 import com.adobe.granite.ui.components.ds.ValueMapResource;
 import com.exadel.linkchecker.core.models.GridViewItem;
-import com.exadel.linkchecker.core.services.RepositoryHelper;
+import com.exadel.linkchecker.core.services.helpers.RepositoryHelper;
 import com.exadel.linkchecker.core.services.data.models.GridResource;
 import com.exadel.linkchecker.core.services.data.DataFeedService;
 import com.exadel.linkchecker.core.services.data.GridResourcesGenerator;
@@ -12,7 +12,6 @@ import com.exadel.linkchecker.core.services.util.LinkCheckerResourceUtil;
 import com.exadel.linkchecker.core.services.util.constants.GridResourceProperties;
 import com.exadel.linkchecker.core.services.util.constants.CommonConstants;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.sling.api.resource.PersistenceException;
@@ -29,9 +28,7 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -141,11 +138,11 @@ public class DataFeedServiceImpl implements DataFeedService {
     private void gridResourcesToDataFeed(Collection<GridResource> gridResources, ResourceResolver resourceResolver) {
         try {
             JSONArray resourcesJsonArray = JsonUtil.objectsToJsonArray(gridResources);
-                removePreviousDataFeed(resourceResolver);
-                saveGridResourcesToJcr(resourceResolver, resourcesJsonArray);
-                removePendingNode(resourceResolver);
-                resourceResolver.commit();
-                LOG.debug("Saving data feed json in jcr completed, path {}", JSON_FEED_PATH);
+            removePreviousDataFeed(resourceResolver);
+            saveGridResourcesToJcr(resourceResolver, resourcesJsonArray);
+            removePendingNode(resourceResolver);
+            resourceResolver.commit();
+            LOG.debug("Saving data feed json in jcr completed, path {}", JSON_FEED_PATH);
         } catch (PersistenceException e) {
             LOG.error("Saving data feed json in jcr failed", e);
         }
@@ -183,33 +180,19 @@ public class DataFeedServiceImpl implements DataFeedService {
     private void generateCsvReport(Collection<GridResource> gridResources, ResourceResolver resourceResolver) {
         StopWatch stopWatch = StopWatch.createStarted();
         LOG.debug("Generating CSV report");
-        byte[] csvContentBytes = gridResourcesToCsv(gridResources, resourceResolver);
-        if (csvContentBytes != null) {
-            LinkCheckerResourceUtil.removeResource(CSV_REPORT_PATH, resourceResolver);
-            LinkCheckerResourceUtil.saveFileToJCR(CSV_REPORT_PATH, csvContentBytes,
-                    CsvUtil.CSV_MIME_TYPE, resourceResolver);
-        }
+        List<GridViewItem> gridViewItems = toSlingResourcesStream(gridResources, resourceResolver)
+                .map(resource -> resource.adaptTo(GridViewItem.class))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+        byte[] csvContentBytes = CsvUtil.itemsToCsvByteArray(gridViewItems, this::printViewItemToCsv, CSV_COLUMNS);
+        LinkCheckerResourceUtil.removeResource(CSV_REPORT_PATH, resourceResolver);
+        LinkCheckerResourceUtil.saveFileToJCR(CSV_REPORT_PATH, csvContentBytes,
+                CsvUtil.CSV_MIME_TYPE, resourceResolver);
         stopWatch.stop();
         LOG.debug("Generating CSV report is completed in {} ms", stopWatch.getTime(TimeUnit.MILLISECONDS));
     }
 
-    private byte[] gridResourcesToCsv(Collection<GridResource> gridResources, ResourceResolver resourceResolver) {
-        try (ByteArrayOutputStream out = new ByteArrayOutputStream();
-             CSVPrinter csvPrinter = new CSVPrinter(new PrintWriter(out), CSVFormat.DEFAULT.withHeader(CSV_COLUMNS))
-        ) {
-            toSlingResourcesStream(gridResources, resourceResolver)
-                    .map(resource -> resource.adaptTo(GridViewItem.class))
-                    .filter(Objects::nonNull)
-                    .forEach(viewItem -> printGridResource(csvPrinter, viewItem));
-            csvPrinter.flush();
-            return out.toByteArray();
-        } catch (IOException e) {
-            LOG.error("Failed to build CSV for grid resources", e);
-        }
-        return null;
-    }
-
-    private void printGridResource(CSVPrinter csvPrinter, GridViewItem viewItem) {
+    private void printViewItemToCsv(CSVPrinter csvPrinter, GridViewItem viewItem) {
         try {
             csvPrinter.printRecord(
                     CsvUtil.wrapIfContainsSemicolon(viewItem.getLink()),

@@ -1,7 +1,8 @@
-package com.exadel.linkchecker.core.services;
+package com.exadel.linkchecker.core.services.helpers;
 
 import com.exadel.linkchecker.core.models.Link;
 import com.exadel.linkchecker.core.models.LinkStatus;
+import com.exadel.linkchecker.core.services.ExternalLinkChecker;
 import org.apache.sling.api.resource.ResourceResolver;
 
 import java.util.stream.Stream;

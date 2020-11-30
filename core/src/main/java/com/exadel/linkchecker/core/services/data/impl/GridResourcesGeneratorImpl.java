@@ -4,7 +4,7 @@ import com.exadel.linkchecker.core.models.LinkStatus;
 import com.exadel.linkchecker.core.services.data.models.GridResource;
 import com.exadel.linkchecker.core.models.Link;
 import com.exadel.linkchecker.core.services.data.GridResourcesGenerator;
-import com.exadel.linkchecker.core.services.LinkHelper;
+import com.exadel.linkchecker.core.services.helpers.LinkHelper;
 import com.exadel.linkchecker.core.services.util.LinksCounter;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.lang.ArrayUtils;

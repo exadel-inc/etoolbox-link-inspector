@@ -1,19 +1,20 @@
 package com.exadel.linkchecker.core.servlets;
 
 import com.day.crx.JcrConstants;
-import com.exadel.linkchecker.core.services.LinkHelper;
-import com.exadel.linkchecker.core.services.RepositoryHelper;
+import com.exadel.linkchecker.core.services.helpers.LinkHelper;
+import com.exadel.linkchecker.core.services.helpers.RepositoryHelper;
 import com.exadel.linkchecker.core.services.data.DataFeedService;
 import com.exadel.linkchecker.core.services.data.models.GridResource;
+import com.exadel.linkchecker.core.services.helpers.PackageHelper;
 import com.exadel.linkchecker.core.services.util.CsvUtil;
 import com.exadel.linkchecker.core.services.util.ServletUtil;
 import com.exadel.linkchecker.core.services.util.constants.CommonConstants;
-import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.fileupload.FileUploadBase;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.jackrabbit.vault.packaging.PackageException;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.PersistenceException;
@@ -27,12 +28,11 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.servlet.Servlet;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -43,7 +43,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
- * The servlet for replacement broken link by pattern within the specified resource property.
+ * The servlet for replacement the detected broken links by pattern.
  * The link pattern and replacement are retrieved from UI dialog and passed from js during ajax call.
  */
 @Component(service = {Servlet.class})
@@ -51,16 +51,20 @@ import java.util.stream.Collectors;
         resourceTypes = "/bin/exadel/replace-links-by-pattern",
         methods = HttpConstants.METHOD_POST
 )
-public class UpdateAllLinksServlet extends SlingAllMethodsServlet {
-    private static final Logger LOG = LoggerFactory.getLogger(UpdateAllLinksServlet.class);
+public class ReplaceByPatternServlet extends SlingAllMethodsServlet {
+    private static final Logger LOG = LoggerFactory.getLogger(ReplaceByPatternServlet.class);
 
     public static final Integer COMMIT_THRESHOLD = 500;
-    
+
     private static final String LINK_PATTERN_PARAM = "pattern";
     private static final String REPLACEMENT_PARAM = "replacement";
     private static final String BACKUP_PARAM = "isBackup";
-
     private static final String OUTPUT_AS_CSV_PARAM = "isOutputAsCsv";
+
+    private static final String BACKUP_PACKAGE_GROUP = "Exadel Link Checker";
+    private static final String BACKUP_PACKAGE_NAME = "replace_by_pattern_backup_%s";
+    private static final String BACKUP_PACKAGE_VERSION = "1.0";
+
     private static final String[] CSV_COLUMNS = {
             "Link",
             "Updated Link",
@@ -75,6 +79,9 @@ public class UpdateAllLinksServlet extends SlingAllMethodsServlet {
 
     @Reference
     private RepositoryHelper repositoryHelper;
+
+    @Reference
+    private PackageHelper packageHelper;
 
     @Override
     protected void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response) {
@@ -114,11 +121,14 @@ public class UpdateAllLinksServlet extends SlingAllMethodsServlet {
             }
         } catch (PersistenceException e) {
             LOG.error(String.format("Replacement failed, pattern: %s, replacement: %s", linkPattern, replacement), e);
+        } catch (IOException | RepositoryException | PackageException e) {
+            LOG.error("Failed to create backup package, replacement by pattern was not applied");
         }
     }
 
     private List<UpdatedItem> processResources(ResourceResolver resourceResolver, Collection<GridResource> gridResources,
-                                               String linkPattern, String replacement, boolean backup) throws PersistenceException {
+                                               String linkPattern, String replacement, boolean backup)
+            throws IOException, RepositoryException, PackageException {
         Optional<Session> session = Optional.ofNullable(resourceResolver.adaptTo(Session.class));
         if (!session.isPresent()) {
             LOG.warn("Replacement failed, session is null. Pattern: {}, replacement: {}", linkPattern, replacement);
@@ -126,10 +136,7 @@ public class UpdateAllLinksServlet extends SlingAllMethodsServlet {
         }
         List<GridResource> filteredGridResources = filterGridResources(gridResources, linkPattern, session.get());
         if (backup) {
-            Set<String> backupPaths = filteredGridResources.stream()
-                    .map(GridResource::getResourcePath)
-                    .collect(Collectors.toSet());
-            createBackupPackage(session.get(), backupPaths);
+            createBackupPackage(filteredGridResources, session.get());
         }
         return replaceLinksByPattern(resourceResolver, filteredGridResources, linkPattern, replacement);
     }
@@ -146,7 +153,8 @@ public class UpdateAllLinksServlet extends SlingAllMethodsServlet {
                 .collect(Collectors.toList());
     }
 
-    private List<UpdatedItem> replaceLinksByPattern(ResourceResolver resourceResolver, Collection<GridResource> gridResources,
+    private List<UpdatedItem> replaceLinksByPattern(ResourceResolver resourceResolver,
+                                                    Collection<GridResource> gridResources,
                                                     String linkPattern, String replacement) throws PersistenceException {
         List<UpdatedItem> updatedItems = new ArrayList<>();
         for (GridResource gridResource : gridResources) {
@@ -172,7 +180,7 @@ public class UpdateAllLinksServlet extends SlingAllMethodsServlet {
 
     private void generateCsvOutput(List<UpdatedItem> updatedItems, SlingHttpServletResponse response) {
         try {
-            byte[] csvOutput = updatedItemsToCsv(updatedItems);
+            byte[] csvOutput = CsvUtil.itemsToCsvByteArray(updatedItems, this::printUpdatedItemToCsv, CSV_COLUMNS);
             if (ArrayUtils.isNotEmpty(csvOutput)) {
                 response.setContentType(CsvUtil.CSV_MIME_TYPE);
                 response.setContentLength(csvOutput.length);
@@ -188,20 +196,7 @@ public class UpdateAllLinksServlet extends SlingAllMethodsServlet {
         }
     }
 
-    public byte[] updatedItemsToCsv(Collection<UpdatedItem> items) {
-        try (ByteArrayOutputStream out = new ByteArrayOutputStream();
-             CSVPrinter csvPrinter = new CSVPrinter(new PrintWriter(out), CSVFormat.DEFAULT.withHeader(CSV_COLUMNS))
-        ) {
-            items.forEach(item -> printUpdatedItem(csvPrinter, item));
-            csvPrinter.flush();
-            return out.toByteArray();
-        } catch (IOException e) {
-            LOG.error("Failed to build CSV for updated items", e);
-        }
-        return ArrayUtils.EMPTY_BYTE_ARRAY;
-    }
-
-    private void printUpdatedItem(CSVPrinter csvPrinter, UpdatedItem item) {
+    private void printUpdatedItemToCsv(CSVPrinter csvPrinter, UpdatedItem item) {
         try {
             csvPrinter.printRecord(
                     CsvUtil.wrapIfContainsSemicolon(item.currentLink),
@@ -213,8 +208,17 @@ public class UpdateAllLinksServlet extends SlingAllMethodsServlet {
         }
     }
 
-    void createBackupPackage(Session session, Set<String> paths) {
-        //todo
+    void createBackupPackage(List<GridResource> filteredGridResources, Session session) throws RepositoryException,
+            PackageException, IOException {
+        Set<String> backupPaths = filteredGridResources.stream()
+                .map(GridResource::getResourcePath)
+                .collect(Collectors.toSet());
+        packageHelper.createPackageForPaths(backupPaths, session,
+                BACKUP_PACKAGE_GROUP,
+                String.format(BACKUP_PACKAGE_NAME, System.currentTimeMillis()),
+                BACKUP_PACKAGE_VERSION,
+                true,
+                true);
     }
 
     private static class UpdatedItem {

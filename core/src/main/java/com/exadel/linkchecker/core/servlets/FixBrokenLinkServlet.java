@@ -1,8 +1,8 @@
 package com.exadel.linkchecker.core.servlets;
 
 import com.day.crx.JcrConstants;
-import com.exadel.linkchecker.core.services.LinkHelper;
-import com.exadel.linkchecker.core.services.RepositoryHelper;
+import com.exadel.linkchecker.core.services.helpers.LinkHelper;
+import com.exadel.linkchecker.core.services.helpers.RepositoryHelper;
 import com.exadel.linkchecker.core.services.util.ServletUtil;
 import com.exadel.linkchecker.core.services.util.constants.CommonConstants;
 import org.apache.commons.httpclient.HttpStatus;

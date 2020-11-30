@@ -1,9 +1,9 @@
-package com.exadel.linkchecker.core.services.impl;
+package com.exadel.linkchecker.core.services.helpers.impl;
 
 import com.exadel.linkchecker.core.models.Link;
 import com.exadel.linkchecker.core.models.LinkStatus;
 import com.exadel.linkchecker.core.services.ExternalLinkChecker;
-import com.exadel.linkchecker.core.services.LinkHelper;
+import com.exadel.linkchecker.core.services.helpers.LinkHelper;
 import com.exadel.linkchecker.core.services.util.LinkCheckerResourceUtil;
 import com.exadel.linkchecker.core.services.util.constants.CommonConstants;
 import org.apache.commons.httpclient.ConnectionPoolTimeoutException;
