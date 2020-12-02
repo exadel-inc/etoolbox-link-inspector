@@ -60,6 +60,7 @@ public class DataFeedServiceImpl implements DataFeedService {
     public static final String CSV_REPORT_PATH = "/content/exadel-linkchecker/download/report.csv";
     private static final String[] CSV_COLUMNS = {
             "Link",
+            "Type",
             "Code",
             "Status Message",
             "Page",
@@ -196,6 +197,7 @@ public class DataFeedServiceImpl implements DataFeedService {
         try {
             csvPrinter.printRecord(
                     CsvUtil.wrapIfContainsSemicolon(viewItem.getLink()),
+                    viewItem.getLinkType(),
                     viewItem.getLinkStatusCode(),
                     viewItem.getLinkStatusMessage(),
                     viewItem.getPageTitle(),
