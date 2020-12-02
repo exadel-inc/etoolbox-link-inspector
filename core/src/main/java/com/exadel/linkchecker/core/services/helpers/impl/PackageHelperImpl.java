@@ -5,6 +5,7 @@ import org.apache.jackrabbit.vault.fs.api.PathFilterSet;
 import org.apache.jackrabbit.vault.fs.config.DefaultWorkspaceFilter;
 import org.apache.jackrabbit.vault.fs.filter.DefaultPathFilter;
 import org.apache.jackrabbit.vault.packaging.JcrPackage;
+import org.apache.jackrabbit.vault.packaging.JcrPackageDefinition;
 import org.apache.jackrabbit.vault.packaging.JcrPackageManager;
 import org.apache.jackrabbit.vault.packaging.PackageException;
 import org.apache.jackrabbit.vault.packaging.Packaging;
@@ -36,14 +37,17 @@ public class PackageHelperImpl implements PackageHelper {
             paths.stream()
                     .map(path -> pathToFilterSet(path, excludeChildren))
                     .forEach(workspaceFilter::add);
-            Optional.ofNullable(jcrPackage.getDefinition())
-                    .ifPresent(jcrPackageDefinition -> jcrPackageDefinition.setFilter(workspaceFilter, true));
-            session.save();
-            if (assemble) {
-                jcrPackageManager.assemble(jcrPackage, new DefaultProgressListener());
+            Optional<JcrPackageDefinition> packageDefinition = Optional.ofNullable(jcrPackage.getDefinition());
+            if (packageDefinition.isPresent()) {
+                packageDefinition.get().setFilter(workspaceFilter, true);
+                session.save();
+                if (assemble) {
+                    jcrPackageManager.assemble(jcrPackage, new DefaultProgressListener());
+                }
+                return jcrPackage;
             }
-            return jcrPackage;
         }
+        return null;
     }
 
     private PathFilterSet pathToFilterSet(String path, boolean excludeChildren) {

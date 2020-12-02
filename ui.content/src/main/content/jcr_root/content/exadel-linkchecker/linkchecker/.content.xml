@@ -116,11 +116,13 @@
                         jcr:primaryType="nt:unstructured"
                         sling:resourceType="granite/ui/components/coral/foundation/collection/action"
                         action="cq-admin.exadel.linkchecker.action.replace-by-pattern"
+                        disabled="{Boolean}true"
                         icon="linkGlobe"
                         rel="exadel-link-checker-fix-by-pattern"
                         target=".exadel-link-checker"
                         text="Replace By Pattern"
                         title="Replace By Pattern"
+                        granite:id="elc-replace-by-pattern"
                         variant="minimal">
                 </replaceByPattern>
             </primary>

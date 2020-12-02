@@ -23,8 +23,13 @@ import org.apache.sling.api.servlets.HttpConstants;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
 import org.apache.sling.jcr.resource.api.JcrResourceConstants;
 import org.apache.sling.servlets.annotations.SlingServletResourceTypes;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,10 +56,23 @@ import java.util.stream.Collectors;
         resourceTypes = "/bin/exadel/replace-links-by-pattern",
         methods = HttpConstants.METHOD_POST
 )
+@Designate(ocd = ReplaceByPatternServlet.Configuration.class)
 public class ReplaceByPatternServlet extends SlingAllMethodsServlet {
+    @ObjectClassDefinition(
+            name = "Exadel Link Checker - Replace By Pattern Servlet",
+            description = "The servlet for replacement the detected broken links by pattern"
+    )
+    @interface Configuration {
+        @AttributeDefinition(
+                name = "Limit",
+                description = "The maximum number of items which replacement will be applied for"
+        ) int max_updated_items_count() default DEFAULT_MAX_UPDATED_ITEMS_COUNT;
+    }
+
     private static final Logger LOG = LoggerFactory.getLogger(ReplaceByPatternServlet.class);
 
-    public static final Integer COMMIT_THRESHOLD = 500;
+    public static final Integer COMMIT_THRESHOLD = 1000;
+    public static final Integer DEFAULT_MAX_UPDATED_ITEMS_COUNT = 10000;
 
     private static final String LINK_PATTERN_PARAM = "pattern";
     private static final String REPLACEMENT_PARAM = "replacement";
@@ -82,6 +100,14 @@ public class ReplaceByPatternServlet extends SlingAllMethodsServlet {
 
     @Reference
     private PackageHelper packageHelper;
+
+    private int maxUpdatedItemsCount;
+
+    @Activate
+    @Modified
+    protected void activate(Configuration configuration) {
+        maxUpdatedItemsCount = configuration.max_updated_items_count();
+    }
 
     @Override
     protected void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response) {
@@ -115,14 +141,18 @@ public class ReplaceByPatternServlet extends SlingAllMethodsServlet {
                 if (outputAsCsv) {
                     generateCsvOutput(updatedItems, response);
                 }
+                LOG.info("{} link(s) were updated, linkPattern: {}, replacement: {}", updatedItems.size(), linkPattern,
+                        replacement);
             } else {
                 LOG.debug("No links were updated, linkPattern: {}, replacement: {}", linkPattern, replacement);
                 response.setStatus(HttpStatus.SC_NO_CONTENT);
             }
         } catch (PersistenceException e) {
             LOG.error(String.format("Replacement failed, pattern: %s, replacement: %s", linkPattern, replacement), e);
+            response.setStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR);
         } catch (IOException | RepositoryException | PackageException e) {
-            LOG.error("Failed to create backup package, replacement by pattern was not applied");
+            LOG.error("Failed to create backup package, replacement by pattern was not applied", e);
+            response.setStatus(HttpStatus.SC_FORBIDDEN);
         }
     }
 
@@ -138,7 +168,7 @@ public class ReplaceByPatternServlet extends SlingAllMethodsServlet {
         if (backup) {
             createBackupPackage(filteredGridResources, session.get());
         }
-        return replaceLinksByPattern(resourceResolver, filteredGridResources, linkPattern, replacement);
+        return replaceByPattern(resourceResolver, filteredGridResources, linkPattern, replacement);
     }
 
     private List<GridResource> filterGridResources(Collection<GridResource> gridResources, String linkPattern, Session session) {
@@ -150,12 +180,13 @@ public class ReplaceByPatternServlet extends SlingAllMethodsServlet {
                 .filter(gridResource -> pattern.matcher(gridResource.getHref()).find())
                 .filter(gridResource ->
                         repositoryHelper.hasReadWritePermissions(session, gridResource.getResourcePath()))
+                .limit(maxUpdatedItemsCount)
                 .collect(Collectors.toList());
     }
 
-    private List<UpdatedItem> replaceLinksByPattern(ResourceResolver resourceResolver,
-                                                    Collection<GridResource> gridResources,
-                                                    String linkPattern, String replacement) throws PersistenceException {
+    private List<UpdatedItem> replaceByPattern(ResourceResolver resourceResolver,
+                                               Collection<GridResource> gridResources,
+                                               String linkPattern, String replacement) throws PersistenceException {
         List<UpdatedItem> updatedItems = new ArrayList<>();
         for (GridResource gridResource : gridResources) {
             String currentLink = gridResource.getHref();
@@ -213,12 +244,14 @@ public class ReplaceByPatternServlet extends SlingAllMethodsServlet {
         Set<String> backupPaths = filteredGridResources.stream()
                 .map(GridResource::getResourcePath)
                 .collect(Collectors.toSet());
-        packageHelper.createPackageForPaths(backupPaths, session,
-                BACKUP_PACKAGE_GROUP,
-                String.format(BACKUP_PACKAGE_NAME, System.currentTimeMillis()),
-                BACKUP_PACKAGE_VERSION,
-                true,
-                true);
+        if (!backupPaths.isEmpty()) {
+            packageHelper.createPackageForPaths(backupPaths, session,
+                    BACKUP_PACKAGE_GROUP,
+                    String.format(BACKUP_PACKAGE_NAME, System.currentTimeMillis()),
+                    BACKUP_PACKAGE_VERSION,
+                    true,
+                    true);
+        }
     }
 
     private static class UpdatedItem {

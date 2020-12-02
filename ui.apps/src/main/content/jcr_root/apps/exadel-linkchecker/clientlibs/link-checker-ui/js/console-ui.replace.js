@@ -17,13 +17,16 @@
     var BACKUP_CHECKBOX_LABEL = Granite.I18n.get('Backup before replacement');
     var CSV_OUT_CHECKBOX_LABEL = Granite.I18n.get('Download CSV with updated items');
     var REPLACEMENT_DESCRIPTION = Granite.I18n.get('* Replacement will be applied within the detected broken links scope');
+    var REPLACEMENT_ACL_DESCRIPTION = Granite.I18n.get('** User should have sufficient read/write permissions in order to complete replacement successfully and create the backup package');
 
     var PROCESSING_ERROR_MSG = 'Failed to replace by pattern<br/>Pattern: <b>{{pattern}}</b><br/>Replacement: <b>{{replacement}}</b>';
     var PROCESSING_SUCCESS_MSG = 'Replacement completed<br/><br/>Pattern: <b>{{pattern}}</b><br/>Replacement: <b>{{replacement}}</b>';
-    var PROCESSING_NOT_FOUND_MSG = 'Broken links containing the pattern <b>{{pattern}}</b> were not found';
+    var PROCESSING_NOT_FOUND_MSG = 'Broken links containing the pattern <b>{{pattern}}</b> were not found or user has insufficient permissions to process them';
     var PROCESSING_IDENTICAL_MSG = 'The pattern <b>{{pattern}}</b> is equal to the replacement value, no processing was done';
 
-    var REPLACE_BY_PATTERN_COMMAND = '/content/exadel-linkchecker/servlet/replaceLinksByPattern';
+    var REPLACE_BY_PATTERN_COMMAND = '/content/exadel-linkchecker/servlet/replaceByPattern';
+    var ACL_CHECK_COMMAND = '/content/exadel-linkchecker/servlet/aclCheck';
+    var READ_PERMISSIONS = 'read';
 
     let currentDate = Date.now();
     var CSV_OUTPUT_FILENAME = `replace_by_pattern_${currentDate}.csv`;
@@ -66,8 +69,14 @@
                     _charset_: "UTF-8",
                     cmd: "replaceByPattern"
                 }, item)
-            }).fail(function () {
-                logger.log(format(PROCESSING_ERROR_MSG, item), false);
+            }).fail(function (xhr, status, error) {
+                if (xhr.status === 500) {
+                    logger.log(format("Replacement was interrupted due to the <b>error</b> occurred during persisting changes. Please see logs for more details", item), false);
+                } else if (xhr.status === 403) {
+                    logger.log(format("Failed to build the backup package. Possible reasons: lack of permissions, please see logs for more details.<br/><b>No replacement was applied</b>", item), false);
+                } else {
+                    logger.log(format(PROCESSING_ERROR_MSG, item), false);
+                }
             }).done(function (data, textStatus, xhr) {
                 if (xhr.status === 202) {
                     logger.log(format(PROCESSING_IDENTICAL_MSG, item), false);
@@ -84,7 +93,7 @@
     }
 
     function downloadCsvOutput(data) {
-        const blob = new Blob([data], {type : 'text/csv'});
+        const blob = new Blob([data], {type: 'text/csv'});
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.style.display = 'none';
@@ -132,6 +141,7 @@
         $isCsvOutputCheckbox.text(CSV_OUT_CHECKBOX_LABEL).appendTo(el.content);
 
         ($('<i>').append($('<p>').text(REPLACEMENT_DESCRIPTION))).appendTo(el.content);
+        ($('<i>').append($('<p>').text(REPLACEMENT_ACL_DESCRIPTION))).appendTo(el.content);
 
         var onResolve = function () {
             var data = {
@@ -232,5 +242,23 @@
     $(window).adaptTo("foundation-registry").register("foundation.collection.action.action", {
         name: "cq-admin.exadel.linkchecker.action.replace-by-pattern",
         handler: onFixAction
+    });
+
+    // ACL check
+    $(document).ready(function () {
+        $.ajax({
+            url: ACL_CHECK_COMMAND,
+            type: 'POST',
+            data: {
+                _charset_: "UTF-8",
+                path: REPLACE_BY_PATTERN_COMMAND,
+                permissions: READ_PERMISSIONS
+            },
+            success: function (data) {
+                if (data && data.hasPermissions) {
+                    $('#elc-replace-by-pattern').prop('disabled', false);
+                }
+            }
+        });
     });
 })(window, document, Granite.$, Granite);
