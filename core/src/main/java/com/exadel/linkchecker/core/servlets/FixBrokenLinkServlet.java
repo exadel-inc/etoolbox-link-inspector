@@ -38,6 +38,7 @@ public class FixBrokenLinkServlet extends SlingAllMethodsServlet {
     private static final String PROPERTY_NAME_PARAM = "propertyName";
     private static final String CURRENT_LINK_PARAM = "currentLink";
     private static final String NEW_LINK_PARAM = "newLink";
+    private static final String IS_SKIP_VALIDATION_PARAM = "isSkipValidation";
 
     @Reference
     private LinkHelper linkHelper;
@@ -52,9 +53,10 @@ public class FixBrokenLinkServlet extends SlingAllMethodsServlet {
             String propertyName = ServletUtil.getRequestParamString(request, PROPERTY_NAME_PARAM);
             String currentLink = ServletUtil.getRequestParamString(request, CURRENT_LINK_PARAM);
             String newLink = ServletUtil.getRequestParamString(request, NEW_LINK_PARAM);
+            boolean isSkipValidation = ServletUtil.getRequestParamBoolean(request, IS_SKIP_VALIDATION_PARAM);
 
             if (StringUtils.isAnyBlank(path, propertyName, currentLink, newLink)) {
-                response.setStatus(HttpStatus.SC_BAD_REQUEST);
+                response.setStatus(HttpStatus.SC_UNPROCESSABLE_ENTITY);
                 LOG.warn("Any (or all) request params are empty: path - {}, propertyName - {}, currentLink - {}, newLink - {}",
                         path, propertyName, currentLink, newLink);
                 return;
@@ -64,6 +66,12 @@ public class FixBrokenLinkServlet extends SlingAllMethodsServlet {
                 LOG.debug("currentLink and newLink values are equal, no processing is required");
                 return;
             }
+            if (!isSkipValidation && !validateLink(newLink)) {
+                response.setStatus(HttpStatus.SC_BAD_REQUEST);
+                LOG.debug("The newLink is not valid");
+                return;
+            }
+
             ResourceResolver resourceResolver = request.getResourceResolver();
             if (linkHelper.replaceLink(resourceResolver, path, propertyName, currentLink, newLink)) {
                 repositoryHelper.createResourceIfNotExist(CommonConstants.PENDING_GENERATION_NODE,
@@ -77,6 +85,12 @@ public class FixBrokenLinkServlet extends SlingAllMethodsServlet {
             }
         } catch (PersistenceException e) {
             LOG.error(e.getMessage(), e);
+        }
+    }
+
+    private boolean validateLink(String link) {
+        try (ResourceResolver resourceResolver = repositoryHelper.getServiceResourceResolver()) {
+            return linkHelper.validateLink(link, resourceResolver);
         }
     }
 }

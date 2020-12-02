@@ -21,10 +21,12 @@ import java.net.SocketTimeoutException;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Component(
@@ -100,6 +102,20 @@ public class LinkHelperImpl implements LinkHelper {
             }
         }
         return link.getStatus();
+    }
+
+    @Override
+    public boolean validateLink(String link, ResourceResolver resourceResolver) {
+        List<Link> detectedLinks = getLinkStreamFromProperty(link)
+                .collect(Collectors.toList());
+        if (detectedLinks.size() != 1) {
+            return false;
+        }
+        Link detectedLink = detectedLinks.get(0);
+        if (!detectedLink.getHref().equals(link)) {
+            return false;
+        }
+        return validateLink(detectedLink, resourceResolver).isValid();
     }
 
     @Override

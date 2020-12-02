@@ -60,6 +60,8 @@ public interface LinkHelper {
      */
     LinkStatus validateLink(Link link, ResourceResolver resourceResolver);
 
+    boolean validateLink(String link, ResourceResolver resourceResolver);
+
     boolean replaceLink(ResourceResolver resourceResolver, String resourcePath, String propertyName,
                         String currentLink, String newLink);
 }

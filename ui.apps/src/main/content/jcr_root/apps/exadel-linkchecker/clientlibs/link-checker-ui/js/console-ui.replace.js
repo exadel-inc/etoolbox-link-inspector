@@ -25,7 +25,6 @@
     var PROCESSING_IDENTICAL_MSG = 'The pattern <b>{{pattern}}</b> is equal to the replacement value, no processing was done';
 
     var REPLACE_BY_PATTERN_COMMAND = '/content/exadel-linkchecker/servlet/replaceByPattern';
-    var ACL_CHECK_COMMAND = '/content/exadel-linkchecker/servlet/aclCheck';
     var READ_PERMISSIONS = 'read';
 
     var currentDate = Date.now();
