@@ -16,6 +16,7 @@
     var PROCESSING_IDENTICAL_MSG = 'The current link <b>{{currentLink}}</b> is equal to the entered one, replacement was not applied';
 
     var FIX_BROKEN_LINK_COMMAND = '/content/exadel-linkchecker/servlet/fixBrokenLink';
+    var READ_WRITE_PERMISSIONS = "read,set_property";
 
     /** Root action handler */
     function onFixAction(name, el, config, collection, selections) {
@@ -112,9 +113,20 @@
         return $msg;
     }
 
+    function onFixActiveCondition(name, el, config, collection, selections) {
+        var path = selections.map(function (v) {
+            return $(v).data('path');
+        });
+        return ELC.aclCheck(path, READ_WRITE_PERMISSIONS);
+    }
+
     // INIT
     $(window).adaptTo("foundation-registry").register("foundation.collection.action.action", {
         name: "cq-admin.exadel.linkchecker.action.fix-broken-link",
         handler: onFixAction
+    });
+    $(window).adaptTo("foundation-registry").register("foundation.collection.action.activecondition", {
+        name: "cq-admin.exadel.linkchecker.actioncondition.fix-broken-link",
+        handler: onFixActiveCondition
     });
 })(window, document, Granite.$, Granite.ELC, Granite);

@@ -182,19 +182,8 @@
 
     // ACL check
     $(document).ready(function () {
-        $.ajax({
-            url: ACL_CHECK_COMMAND,
-            type: 'POST',
-            data: {
-                _charset_: "UTF-8",
-                path: REPLACE_BY_PATTERN_COMMAND,
-                permissions: READ_PERMISSIONS
-            },
-            success: function (data) {
-                if (data && data.hasPermissions) {
-                    $('#elc-replace-by-pattern').prop('disabled', false);
-                }
-            }
-        });
+        if (ELC.aclCheck(REPLACE_BY_PATTERN_COMMAND, READ_PERMISSIONS)) {
+            $('#elc-replace-by-pattern').prop('disabled', false);
+        }
     });
 })(window, document, Granite.$, Granite.ELC, Granite);
