@@ -88,7 +88,7 @@
     Utils.createLoggerDialog = createLoggerDialog;
 
     var PROCESSING_LABEL = Granite.I18n.get('Processing');
-    var START_REPLACEMENT_LABEL = Granite.I18n.get('Link update is in progress ...');
+    var START_REPLACEMENT_LABEL = Granite.I18n.get('Links update is in progress ...');
 
     /**
      * Process bulk update for the links.

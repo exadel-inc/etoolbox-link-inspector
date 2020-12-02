@@ -14,6 +14,7 @@ import org.apache.commons.fileupload.FileUploadBase;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.StopWatch;
 import org.apache.jackrabbit.vault.packaging.PackageException;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
@@ -35,6 +36,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
+import javax.json.Json;
 import javax.servlet.Servlet;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -44,6 +46,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -71,13 +74,14 @@ public class ReplaceByPatternServlet extends SlingAllMethodsServlet {
 
     private static final Logger LOG = LoggerFactory.getLogger(ReplaceByPatternServlet.class);
 
-    public static final Integer COMMIT_THRESHOLD = 1000;
-    public static final Integer DEFAULT_MAX_UPDATED_ITEMS_COUNT = 10000;
+    public static final int COMMIT_THRESHOLD = 1000;
+    public static final int DEFAULT_MAX_UPDATED_ITEMS_COUNT = 10000;
 
     private static final String LINK_PATTERN_PARAM = "pattern";
     private static final String REPLACEMENT_PARAM = "replacement";
     private static final String BACKUP_PARAM = "isBackup";
     private static final String OUTPUT_AS_CSV_PARAM = "isOutputAsCsv";
+    private static final String ITEMS_COUNT_RESP_PARAM = "updatedItemsCount";
 
     private static final String BACKUP_PACKAGE_GROUP = "Exadel Link Checker";
     private static final String BACKUP_PACKAGE_NAME = "replace_by_pattern_backup_%s";
@@ -128,6 +132,8 @@ public class ReplaceByPatternServlet extends SlingAllMethodsServlet {
             return;
         }
 
+        StopWatch stopWatch = StopWatch.createStarted();
+        LOG.info("Starting replacement by pattern, linkPattern: {}, replacement: {}", linkPattern, replacement);
         try {
             ResourceResolver resourceResolver = request.getResourceResolver();
             List<GridResource> gridResources = dataFeedService.dataFeedToGridResources();
@@ -140,13 +146,17 @@ public class ReplaceByPatternServlet extends SlingAllMethodsServlet {
                 }
                 if (outputAsCsv) {
                     generateCsvOutput(updatedItems, response);
+                } else {
+                    itemsCountToResponse(updatedItems.size(), response);
                 }
                 LOG.info("{} link(s) were updated, linkPattern: {}, replacement: {}", updatedItems.size(), linkPattern,
                         replacement);
             } else {
-                LOG.debug("No links were updated, linkPattern: {}, replacement: {}", linkPattern, replacement);
+                LOG.info("No links were updated, linkPattern: {}, replacement: {}", linkPattern, replacement);
                 response.setStatus(HttpStatus.SC_NO_CONTENT);
             }
+            stopWatch.stop();
+            LOG.info("Replacement by pattern is finished in {} ms", stopWatch.getTime(TimeUnit.MILLISECONDS));
         } catch (PersistenceException e) {
             LOG.error(String.format("Replacement failed, pattern: %s, replacement: %s", linkPattern, replacement), e);
             response.setStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR);
@@ -210,6 +220,8 @@ public class ReplaceByPatternServlet extends SlingAllMethodsServlet {
     }
 
     private void generateCsvOutput(List<UpdatedItem> updatedItems, SlingHttpServletResponse response) {
+        StopWatch stopWatch = StopWatch.createStarted();
+        LOG.debug("Starting CSV output generation, the number of updated items: {}", updatedItems.size());
         try {
             byte[] csvOutput = CsvUtil.itemsToCsvByteArray(updatedItems, this::printUpdatedItemToCsv, CSV_COLUMNS);
             if (ArrayUtils.isNotEmpty(csvOutput)) {
@@ -225,6 +237,8 @@ public class ReplaceByPatternServlet extends SlingAllMethodsServlet {
         } catch (IOException e) {
             LOG.error("Failed to download output as CSV, the number of updated locations: {}", updatedItems.size());
         }
+        stopWatch.stop();
+        LOG.debug("CSV output generation is finished in {} ms", stopWatch.getTime(TimeUnit.MILLISECONDS));
     }
 
     private void printUpdatedItemToCsv(CSVPrinter csvPrinter, UpdatedItem item) {
@@ -245,13 +259,25 @@ public class ReplaceByPatternServlet extends SlingAllMethodsServlet {
                 .map(GridResource::getResourcePath)
                 .collect(Collectors.toSet());
         if (!backupPaths.isEmpty()) {
+            StopWatch stopWatch = StopWatch.createStarted();
+            LOG.debug("Starting backup package creation/build, the number of paths: {}", backupPaths.size());
             packageHelper.createPackageForPaths(backupPaths, session,
                     BACKUP_PACKAGE_GROUP,
                     String.format(BACKUP_PACKAGE_NAME, System.currentTimeMillis()),
                     BACKUP_PACKAGE_VERSION,
                     true,
                     true);
+            stopWatch.stop();
+            LOG.debug("Backup package build is finished in {} ms", stopWatch.getTime(TimeUnit.MILLISECONDS));
         }
+    }
+
+    private void itemsCountToResponse(int count, SlingHttpServletResponse response) {
+        String jsonResponse = Json.createObjectBuilder()
+                .add(ITEMS_COUNT_RESP_PARAM, count)
+                .build()
+                .toString();
+        ServletUtil.writeJsonResponse(response, jsonResponse);
     }
 
     private static class UpdatedItem {

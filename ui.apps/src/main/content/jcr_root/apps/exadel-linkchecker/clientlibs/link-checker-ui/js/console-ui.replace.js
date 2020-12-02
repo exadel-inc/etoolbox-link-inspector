@@ -17,7 +17,10 @@
     var VALIDATION_MSG = Granite.I18n.get('Replacement can\'t be the same as pattern');
 
     var PROCESSING_ERROR_MSG = 'Failed to replace by pattern<br/>Pattern: <b>{{pattern}}</b><br/>Replacement: <b>{{replacement}}</b>';
-    var PROCESSING_SUCCESS_MSG = 'Replacement completed<br/><br/>Pattern: <b>{{pattern}}</b><br/>Replacement: <b>{{replacement}}</b>';
+    var PERSISTENCE_ERROR_MSG = 'Replacement was interrupted due to the <b>error</b> occurred during persisting changes. Please see logs for more details';
+    var FORBIDDEN_ERROR_MSG = 'Failed to build the backup package. Possible reasons: lack of permissions, please see logs for more details.<br/><b>No replacement was applied</b>';
+    var PROCESSING_SUCCESS_MSG = 'Replacement completed. %s<br/><br/>Pattern: <b>{{pattern}}</b><br/>Replacement: <b>{{replacement}}</b>';
+    var DOWNLOADED_CSV_MSG = 'Please see the downloaded CSV for more details.';
     var PROCESSING_NOT_FOUND_MSG = 'Broken links containing the pattern <b>{{pattern}}</b> were not found or user has insufficient permissions to process them';
     var PROCESSING_IDENTICAL_MSG = 'The pattern <b>{{pattern}}</b> is equal to the replacement value, no processing was done';
 
@@ -54,9 +57,9 @@
                 }, item)
             }).fail(function (xhr, status, error) {
                 if (xhr.status === 500) {
-                    logger.log(ELC.format("Replacement was interrupted due to the <b>error</b> occurred during persisting changes. Please see logs for more details", item), false);
+                    logger.log(ELC.format(PERSISTENCE_ERROR_MSG, item), false);
                 } else if (xhr.status === 403) {
-                    logger.log(ELC.format("Failed to build the backup package. Possible reasons: lack of permissions, please see logs for more details.<br/><b>No replacement was applied</b>", item), false);
+                    logger.log(ELC.format(FORBIDDEN_ERROR_MSG, item), false);
                 } else {
                     logger.log(ELC.format(PROCESSING_ERROR_MSG, item), false);
                 }
@@ -66,13 +69,25 @@
                 } else if (xhr.status === 204) {
                     logger.log(ELC.format(PROCESSING_NOT_FOUND_MSG, item), false);
                 } else {
-                    if (xhr.getResponseHeader("Content-disposition") && data) {
-                        downloadCsvOutput(data);
-                    }
-                    logger.log(ELC.format(PROCESSING_SUCCESS_MSG, item), false);
+                    handleSuccessRequest(xhr, data, logger, item);
                 }
             });
         };
+    }
+
+    function handleSuccessRequest(xhr, data, logger, item) {
+        if (xhr.getResponseHeader("Content-disposition") && data) {
+            PROCESSING_SUCCESS_MSG = PROCESSING_SUCCESS_MSG.replace("%s", DOWNLOADED_CSV_MSG);
+            downloadCsvOutput(data);
+        }
+        if (data && data.updatedItemsCount) {
+            var updatedItemsCount = data.updatedItemsCount;
+            var countMessage = `The number of updated items: <b>${updatedItemsCount}</b>`;
+            PROCESSING_SUCCESS_MSG = PROCESSING_SUCCESS_MSG.replace("%s", countMessage);
+        } else {
+            PROCESSING_SUCCESS_MSG = PROCESSING_SUCCESS_MSG.replace("%s", "");
+        }
+        logger.log(ELC.format(PROCESSING_SUCCESS_MSG, item), false);
     }
 
     function downloadCsvOutput(data) {
