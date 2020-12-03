@@ -1,6 +1,7 @@
 package com.exadel.linkchecker.core.servlets;
 
 import com.day.crx.JcrConstants;
+import com.exadel.linkchecker.core.models.LinkStatus;
 import com.exadel.linkchecker.core.services.helpers.LinkHelper;
 import com.exadel.linkchecker.core.services.helpers.RepositoryHelper;
 import com.exadel.linkchecker.core.services.util.ServletUtil;
@@ -20,6 +21,7 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.json.Json;
 import javax.servlet.Servlet;
 
 /**
@@ -40,11 +42,14 @@ public class FixBrokenLinkServlet extends SlingAllMethodsServlet {
     private static final String NEW_LINK_PARAM = "newLink";
     private static final String IS_SKIP_VALIDATION_PARAM = "isSkipValidation";
 
+    private static final String STATUS_CODE_RESP_PARAM = "statusCode";
+    private static final String STATUS_MSG_RESP_PARAM = "statusMessage";
+
     @Reference
     private LinkHelper linkHelper;
 
     @Reference
-    RepositoryHelper repositoryHelper;
+    private RepositoryHelper repositoryHelper;
 
     @Override
     protected void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response) {
@@ -66,10 +71,14 @@ public class FixBrokenLinkServlet extends SlingAllMethodsServlet {
                 LOG.debug("currentLink and newLink values are equal, no processing is required");
                 return;
             }
-            if (!isSkipValidation && !validateLink(newLink)) {
-                response.setStatus(HttpStatus.SC_BAD_REQUEST);
-                LOG.debug("The newLink is not valid");
-                return;
+            if (!isSkipValidation) {
+                LinkStatus linkStatus = validateLink(newLink);
+                if (!linkStatus.isValid()) {
+                    response.setStatus(HttpStatus.SC_BAD_REQUEST);
+                    linkStatusToResponse(linkStatus, response);
+                    LOG.debug("The newLink is not valid");
+                    return;
+                }
             }
 
             ResourceResolver resourceResolver = request.getResourceResolver();
@@ -88,9 +97,18 @@ public class FixBrokenLinkServlet extends SlingAllMethodsServlet {
         }
     }
 
-    private boolean validateLink(String link) {
+    private LinkStatus validateLink(String link) {
         try (ResourceResolver resourceResolver = repositoryHelper.getServiceResourceResolver()) {
             return linkHelper.validateLink(link, resourceResolver);
         }
+    }
+
+    private void linkStatusToResponse(LinkStatus linkStatus, SlingHttpServletResponse response) {
+        String jsonResponse = Json.createObjectBuilder()
+                .add(STATUS_CODE_RESP_PARAM, linkStatus.getStatusCode())
+                .add(STATUS_MSG_RESP_PARAM, linkStatus.getStatusMessage())
+                .build()
+                .toString();
+        ServletUtil.writeJsonResponse(response, jsonResponse);
     }
 }

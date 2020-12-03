@@ -21,12 +21,10 @@ import java.net.SocketTimeoutException;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Component(
@@ -105,17 +103,13 @@ public class LinkHelperImpl implements LinkHelper {
     }
 
     @Override
-    public boolean validateLink(String link, ResourceResolver resourceResolver) {
-        List<Link> detectedLinks = getLinkStreamFromProperty(link)
-                .collect(Collectors.toList());
-        if (detectedLinks.size() != 1) {
-            return false;
+    public LinkStatus validateLink(String link, ResourceResolver resourceResolver) {
+        Optional<Link> detectedLink = getLinkStreamFromProperty(link)
+                .findFirst();
+        if (!detectedLink.isPresent() || !detectedLink.get().getHref().equals(link)) {
+            return new LinkStatus(HttpStatus.SC_BAD_REQUEST, "The provided link doesn't fit internal nor external link patterns");
         }
-        Link detectedLink = detectedLinks.get(0);
-        if (!detectedLink.getHref().equals(link)) {
-            return false;
-        }
-        return validateLink(detectedLink, resourceResolver).isValid();
+        return validateLink(detectedLink.get(), resourceResolver);
     }
 
     @Override

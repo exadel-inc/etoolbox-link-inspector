@@ -12,7 +12,7 @@
     var SKIP_VALIDATION_LABEL = 'Skip validation (validation of the input link before replacement will be ignored)'
 
     var PROCESSING_ERROR_MSG = 'Failed to replace the link <b>{{currentLink}}</b> with <b>{{newLink}}</b><br/> at <i>{{path}}@{{propertyName}}</i>';
-    var LINK_VALIDATION_ERROR_MSG = 'The input link <b>{{newLink}}</b> is not valid.<br/><br/>Please enter a valid link and try again';
+    var LINK_VALIDATION_ERROR_MSG = 'The input link <b>{{newLink}}</b> is not valid.%s<br/><br/>Please enter a valid link and try again';
     var PROCESSING_SUCCESS_MSG = 'The link <b>{{currentLink}}</b> was successfully replaced with <b>{{newLink}}</b><br/> at <i>{{path}}@{{propertyName}}</i>';
     var PROCESSING_NOT_FOUND_MSG = 'The link <b>{{currentLink}}</b> was not found at <i>{{path}}@{{propertyName}}</i>';
     var PROCESSING_IDENTICAL_MSG = 'The current link <b>{{currentLink}}</b> is equal to the entered one, replacement was not applied';
@@ -46,6 +46,14 @@
                 }, item)
             }).fail(function (xhr, status, error) {
                 if (xhr.status === 400) {
+                    var statusCode = xhr.responseJSON.statusCode;
+                    var statusMessage = xhr.responseJSON.statusMessage;
+                    if (statusCode && statusMessage) {
+                        var errorMsgDetails = `<br/>Status: ${statusCode}, ${statusMessage}`;
+                        LINK_VALIDATION_ERROR_MSG = LINK_VALIDATION_ERROR_MSG.replace("%s", errorMsgDetails);
+                    } else {
+                        LINK_VALIDATION_ERROR_MSG = LINK_VALIDATION_ERROR_MSG.replace("%s", "");
+                    }
                     logger.log(ELC.format(LINK_VALIDATION_ERROR_MSG, item), false);
                 } else {
                     logger.log(ELC.format(PROCESSING_ERROR_MSG, item), false);
