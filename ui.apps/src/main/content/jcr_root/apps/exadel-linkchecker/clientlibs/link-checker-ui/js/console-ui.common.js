@@ -141,4 +141,30 @@
     }
     Utils.aclCheck = aclCheck;
 
+    var RESOURCE_EXIST_CHECK_COMMAND = '/content/exadel-linkchecker/servlet/resourceExistCheck';
+
+    /**
+     * Checks if the resource with specified paths exists
+     *
+     * @param {String} path - resource path to check
+     * @returns {boolean}
+     */
+    function resourceExistCheck(path) {
+        var isResourceExist = false;
+        $.ajax({
+            url: RESOURCE_EXIST_CHECK_COMMAND,
+            type: 'POST',
+            async: false,
+            data: {
+                _charset_: "UTF-8",
+                path: path
+            },
+            success: function (data) {
+                isResourceExist = data && data.isResourceExist;
+            }
+        });
+        return isResourceExist;
+    }
+    Utils.resourceExistCheck = resourceExistCheck;
+
 })(window, document, Granite.$, Granite);
