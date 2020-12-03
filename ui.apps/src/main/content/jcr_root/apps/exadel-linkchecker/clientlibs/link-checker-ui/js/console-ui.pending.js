@@ -11,7 +11,6 @@
     $(document).ready(function () {
         $.ajax({
             url: CHECK_URL,
-            async: false, // TODO ??
             type: 'POST',
             success: function (data, textStatus, xhr) {
                 if (xhr.status === 200) {

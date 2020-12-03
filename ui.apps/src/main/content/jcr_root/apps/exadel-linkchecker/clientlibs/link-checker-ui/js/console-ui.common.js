@@ -88,7 +88,7 @@
     Utils.createLoggerDialog = createLoggerDialog;
 
     var PROCESSING_LABEL = Granite.I18n.get('Processing');
-    var START_REPLACEMENT_LABEL = Granite.I18n.get('Link update is in progress ...');
+    var START_REPLACEMENT_LABEL = Granite.I18n.get('Links update is in progress ...');
 
     /**
      * Process bulk update for the links.
@@ -112,5 +112,33 @@
         return requests;
     }
     Utils.bulkLinksUpdate = bulkLinksUpdate;
+
+    var ACL_CHECK_COMMAND = '/content/exadel-linkchecker/servlet/aclCheck';
+
+    /**
+     * Check if user has specified permissions for the given path.
+     *
+     * @param {String} path - the path in a repository for checking
+     * @param {String} permissions - comma separated set of permissions
+     * @returns {boolean}
+     */
+    function aclCheck(path, permissions) {
+        var hasPermissions = false;
+        $.ajax({
+            url: ACL_CHECK_COMMAND,
+            type: 'POST',
+            async: false,
+            data: {
+                _charset_: "UTF-8",
+                path: path,
+                permissions: permissions
+            },
+            success: function (data) {
+                hasPermissions = data && data.hasPermissions;
+            }
+        });
+        return hasPermissions;
+    }
+    Utils.aclCheck = aclCheck;
 
 })(window, document, Granite.$, Granite);

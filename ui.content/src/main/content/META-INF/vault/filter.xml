@@ -2,5 +2,6 @@
 <workspaceFilter version="1.0">
     <filter root="/home/users/system/exadel-linkchecker" mode="merge"/>
     <filter root="/content/rep:policy" mode="merge"/>
+    <filter root="/content/exadel-linkchecker/linkchecker" mode="replace"/>
     <filter root="/content/exadel-linkchecker" mode="merge"/>
 </workspaceFilter>

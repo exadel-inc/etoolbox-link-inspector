@@ -1,6 +1,6 @@
-package com.exadel.linkchecker.core.services.impl;
+package com.exadel.linkchecker.core.services.helpers.impl;
 
-import com.exadel.linkchecker.core.services.RepositoryHelper;
+import com.exadel.linkchecker.core.services.helpers.RepositoryHelper;
 import com.google.common.collect.ImmutableMap;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;

@@ -1,7 +1,8 @@
-package com.exadel.linkchecker.core.services;
+package com.exadel.linkchecker.core.services.helpers;
 
 import com.exadel.linkchecker.core.models.Link;
 import com.exadel.linkchecker.core.models.LinkStatus;
+import com.exadel.linkchecker.core.services.ExternalLinkChecker;
 import org.apache.sling.api.resource.ResourceResolver;
 
 import java.util.stream.Stream;
@@ -58,6 +59,8 @@ public interface LinkHelper {
      * @return the {@link LinkStatus} exposing http code and status message of the response
      */
     LinkStatus validateLink(Link link, ResourceResolver resourceResolver);
+
+    boolean validateLink(String link, ResourceResolver resourceResolver);
 
     boolean replaceLink(ResourceResolver resourceResolver, String resourcePath, String propertyName,
                         String currentLink, String newLink);

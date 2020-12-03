@@ -1,4 +1,4 @@
-package com.exadel.linkchecker.core.services;
+package com.exadel.linkchecker.core.services.helpers;
 
 import org.apache.sling.api.resource.ResourceResolver;
 import javax.jcr.Session;
