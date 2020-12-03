@@ -26,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -134,14 +135,14 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
     }
 
     @Override
-    public Set<GridResource> generateGridResources(String gridResourceType, ResourceResolver resourceResolver) {
+    public List<GridResource> generateGridResources(String gridResourceType, ResourceResolver resourceResolver) {
         StopWatch stopWatch = StopWatch.createStarted();
         LOG.debug("Start broken links collecting, path: {}", searchPath);
 
         Resource rootResource = resourceResolver.getResource(searchPath);
         if (rootResource == null) {
             LOG.warn("Search path resource is null, link checker report generation is stopped");
-            return Collections.emptySet();
+            return Collections.emptyList();
         }
 
         Map<Link, List<GridResource>> linkToGridResourcesMap = new HashMap<>();
@@ -149,13 +150,16 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
         LOG.debug("Traversal is completed in {} ms, path: {}, traversed nodes count: {}",
                 stopWatch.getTime(TimeUnit.MILLISECONDS), searchPath, traversedNodesCounter);
 
-        Set<GridResource> gridResources = validateLinksInParallel(linkToGridResourcesMap, resourceResolver);
+        List<GridResource> sortedGridResources = validateLinksInParallel(linkToGridResourcesMap, resourceResolver)
+                .stream()
+                .sorted(Comparator.comparing(GridResource::getHref))
+                .collect(Collectors.toList());
 
         stopWatch.stop();
         LOG.info("Collecting broken links is completed in {} ms, path: {}, the number of grid items is {}",
-                stopWatch.getTime(TimeUnit.MILLISECONDS), searchPath, gridResources.size());
+                stopWatch.getTime(TimeUnit.MILLISECONDS), searchPath, sortedGridResources.size());
 
-        return gridResources;
+        return sortedGridResources;
     }
 
     private Set<GridResource> validateLinksInParallel(Map<Link, List<GridResource>> linkToGridResourcesMap,

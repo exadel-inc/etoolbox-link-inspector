@@ -3,7 +3,7 @@ package com.exadel.linkchecker.core.services.data;
 import com.exadel.linkchecker.core.services.data.models.GridResource;
 import org.apache.sling.api.resource.ResourceResolver;
 
-import java.util.Set;
+import java.util.List;
 
 public interface GridResourcesGenerator {
     /**
@@ -15,5 +15,5 @@ public interface GridResourcesGenerator {
      * @param resourceResolver - {@link ResourceResolver}
      * @return Set of models {@link GridResource}
      */
-    Set<GridResource> generateGridResources(String gridResourceType, ResourceResolver resourceResolver);
+    List<GridResource> generateGridResources(String gridResourceType, ResourceResolver resourceResolver);
 }

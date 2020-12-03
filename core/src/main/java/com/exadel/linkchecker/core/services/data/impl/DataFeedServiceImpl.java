@@ -29,15 +29,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -116,7 +114,7 @@ public class DataFeedServiceImpl implements DataFeedService {
     }
 
     private List<GridResource> dataFeedToGridResources(ResourceResolver resourceResolver, boolean limited) {
-        Set<GridResource> gridResources = new HashSet<>();
+        List<GridResource> gridResources = new ArrayList<>();
         JSONArray jsonArray = JsonUtil.getJsonArrayFromFile(JSON_FEED_PATH, resourceResolver);
         int allItemsSize = jsonArray.length();
         if (allItemsSize > 0) {
@@ -131,9 +129,7 @@ public class DataFeedServiceImpl implements DataFeedService {
                 }
             }
         }
-        return gridResources.stream()
-                .sorted(Comparator.comparing(GridResource::getHref))
-                .collect(Collectors.toList());
+        return gridResources;
     }
 
     private void gridResourcesToDataFeed(Collection<GridResource> gridResources, ResourceResolver resourceResolver) {
