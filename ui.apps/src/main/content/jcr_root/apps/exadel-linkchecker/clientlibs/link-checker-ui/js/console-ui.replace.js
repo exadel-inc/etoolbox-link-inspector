@@ -181,7 +181,8 @@
 
     // ACL check
     $(document).ready(function () {
-        if (ELC.aclCheck(REPLACE_BY_PATTERN_COMMAND, READ_PERMISSIONS)) {
+        var gridHasItems = $('.elc-card[is="coral-table-row"][data-path]').length > 0;
+        if (gridHasItems && ELC.aclCheck(REPLACE_BY_PATTERN_COMMAND, READ_PERMISSIONS)) {
             $('#elc-replace-by-pattern').prop('disabled', false);
         }
     });
