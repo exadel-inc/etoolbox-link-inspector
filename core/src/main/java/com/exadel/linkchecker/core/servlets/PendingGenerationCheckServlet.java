@@ -27,9 +27,9 @@ import java.util.Optional;
         resourceTypes = "/bin/exadel/datafeed/pending-generation-check",
         methods = HttpConstants.METHOD_POST
 )
-@ServiceDescription("The servlet for manual triggering data feed generation")
-public class PendingGenerationCheck extends SlingAllMethodsServlet {
-    private static final Logger LOG = LoggerFactory.getLogger(PendingGenerationCheck.class);
+@ServiceDescription("The servlet for checking if the pending generation node exists")
+public class PendingGenerationCheckServlet extends SlingAllMethodsServlet {
+    private static final Logger LOG = LoggerFactory.getLogger(PendingGenerationCheckServlet.class);
 
     @Reference
     private RepositoryHelper repositoryHelper;

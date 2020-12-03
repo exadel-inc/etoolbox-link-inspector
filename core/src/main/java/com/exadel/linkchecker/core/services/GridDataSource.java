@@ -7,7 +7,7 @@ public interface GridDataSource {
      * Generates {@link DataSource} necessary for displaying items on the Link Checker's page
      * withing the grid (granite/ui/components/coral/foundation/table)
      *
-     * @return
+     * @return the {@link DataSource} object containing data related to grid items
      */
     DataSource getDataSource();
 }

@@ -1,8 +1,8 @@
 package com.exadel.linkchecker.core.services.util.constants;
 
 public final class GridResourceProperties {
-    private GridResourceProperties() {
-    }
+    private GridResourceProperties() {}
+
     public static final String PN_LINK = "link";
     public static final String PN_LINK_TYPE = "linkType";
     public static final String PN_LINK_STATUS_CODE = "linkStatusCode";

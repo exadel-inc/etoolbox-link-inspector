@@ -6,6 +6,9 @@ import javax.jcr.Session;
 public interface RepositoryHelper {
     ResourceResolver getServiceResourceResolver();
 
+    /**
+     * @see org.apache.sling.api.resource.ResourceResolverFactory#getThreadResourceResolver()
+     */
     ResourceResolver getThreadResourceResolver();
 
     boolean hasPermissions(Session session, String path, String permissions);

@@ -60,8 +60,31 @@ public interface LinkHelper {
      */
     LinkStatus validateLink(Link link, ResourceResolver resourceResolver);
 
+    /**
+     * Checks the given String link validity using {@link ExternalLinkChecker} for an external
+     * or {@link ResourceResolver} for an internal link.
+     *
+     * @param link             - the link href to be checked
+     * @param resourceResolver - {@link ResourceResolver}
+     * @return the {@link LinkStatus} exposing http code and status message of the response
+     */
     LinkStatus validateLink(String link, ResourceResolver resourceResolver);
 
+    /**
+     * Replaces the given link stored in the specified location (resourcePath + propertyName)
+     * with the given replacement.
+     * <p>
+     * All the links contained within the specified property are retrieved
+     * by {@link #getLinkStreamFromProperty}. If none matches the given link, no replacement is applied.
+     * Otherwise, all matching links are replaced with the given replacement.
+     *
+     * @param resourceResolver - {@link ResourceResolver}
+     * @param resourcePath     - the path of the resource containing the link
+     * @param propertyName     - the name of the property containing the link
+     * @param currentLink      - the link to be replaced
+     * @param newLink          - the replacement link
+     * @return true, if the replacement completed successfully
+     */
     boolean replaceLink(ResourceResolver resourceResolver, String resourcePath, String propertyName,
                         String currentLink, String newLink);
 }
