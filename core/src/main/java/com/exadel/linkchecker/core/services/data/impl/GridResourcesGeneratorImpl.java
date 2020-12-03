@@ -257,7 +257,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
 
     private boolean isExcludedSite(String link) {
         for (String excludedSite : excludedSites) {
-            if (link.contains(excludedSite)) {
+            if (StringUtils.isNotBlank(excludedSite) && link.contains(excludedSite)) {
                 return true;
             }
         }
