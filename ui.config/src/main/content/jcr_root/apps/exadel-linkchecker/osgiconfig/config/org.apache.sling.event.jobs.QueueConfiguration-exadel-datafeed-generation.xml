@@ -5,7 +5,7 @@
           queue.topics="[exadel/job/datafeed/generate]"
           queue.type="ORDERED"
           queue.maxparallel="{Long}-1"
-          queue.retries="{Long}3"
+          queue.retries="{Long}1"
           queue.retrydelay="{Long}5000"
           queue.priority="NORM"
           queue.keepJobs="{Boolean}false"

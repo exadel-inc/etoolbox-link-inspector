@@ -16,6 +16,7 @@ import org.apache.sling.api.resource.ResourceUtil;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.metatype.annotations.AttributeDefinition;
@@ -113,6 +114,8 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
     @Reference
     private LinkHelper linkHelper;
 
+    private ExecutorService executorService;
+
     private String searchPath;
     private Link.Type reportLinksType;
     private int[] allowedStatusCodes;
@@ -166,7 +169,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
                                                       ResourceResolver resourceResolver) {
         LinksCounter linksCounter = new LinksCounter();
         LinksCounter brokenLinksCounter = new LinksCounter();
-        ExecutorService executorService =
+        executorService =
                 Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() * threadsPerCore);
         Set<GridResource> gridResources = new CopyOnWriteArraySet<>();
         try {
@@ -275,5 +278,13 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
             }
         }
         return false;
+    }
+
+    @Deactivate
+    protected void deactivate() {
+        LOG.debug("Deactivate GridResourcesGenerator (executorService.shutdownNow)");
+        if (executorService != null) {
+            executorService.shutdownNow();
+        }
     }
 }

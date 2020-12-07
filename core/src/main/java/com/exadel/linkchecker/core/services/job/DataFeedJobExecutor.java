@@ -26,6 +26,10 @@ public class DataFeedJobExecutor implements JobExecutor {
     public JobExecutionResult process(Job job, JobExecutionContext jobExecutionContext) {
         LOG.debug("DataFeedJobExecutor - start Data Feed Generation sling job processing");
         dataFeedService.generateDataFeed();
+        if(jobExecutionContext.isStopped()) {
+            LOG.debug("DataFeedJobExecutor - Data Feed Generation sling job cancelled");
+            return jobExecutionContext.result().cancelled();
+        }
         LOG.debug("DataFeedJobExecutor - Data Feed Generation sling job completed");
         return jobExecutionContext.result().succeeded();
     }

@@ -5,6 +5,7 @@ import com.exadel.linkchecker.core.services.job.SlingJobUtil;
 import org.apache.sling.event.jobs.JobManager;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
@@ -56,5 +57,12 @@ public class DataFeedGenerationTask implements Runnable {
     @Activate
     protected void activate(final Config config) {
         enabled = config.enabled();
+    }
+
+    @Deactivate
+    protected void deactivate() {
+        LOG.debug("Deactivating DataFeedGenerationTask, sling jobs with the topic {} will be stopped and removed",
+                DataFeedJobExecutor.GENERATE_DATA_FEED_TOPIC);
+        SlingJobUtil.stopAndRemoveJobs(jobManager, DataFeedJobExecutor.GENERATE_DATA_FEED_TOPIC);
     }
 }
