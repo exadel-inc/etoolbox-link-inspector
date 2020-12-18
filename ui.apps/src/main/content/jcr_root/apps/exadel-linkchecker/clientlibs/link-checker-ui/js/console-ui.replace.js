@@ -98,8 +98,10 @@
         a.download = CSV_OUTPUT_FILENAME;
         document.body.appendChild(a);
         a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
+        setTimeout(function(){
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }, 5000);
     }
 
     // Confirmation dialog common methods
