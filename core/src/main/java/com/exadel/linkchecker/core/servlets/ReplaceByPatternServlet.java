@@ -70,11 +70,15 @@ public class ReplaceByPatternServlet extends SlingAllMethodsServlet {
                 name = "Limit",
                 description = "The maximum number of items which replacement will be applied for"
         ) int max_updated_items_count() default DEFAULT_MAX_UPDATED_ITEMS_COUNT;
+        @AttributeDefinition(
+                name = "Commit Threshold",
+                description = "The size of updated items chunks saved via resourceResolver.commit()"
+        ) int commit_threshold() default DEFAULT_COMMIT_THRESHOLD;
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(ReplaceByPatternServlet.class);
 
-    public static final int COMMIT_THRESHOLD = 1000;
+    public static final int DEFAULT_COMMIT_THRESHOLD = 1000;
     public static final int DEFAULT_MAX_UPDATED_ITEMS_COUNT = 10000;
 
     private static final String LINK_PATTERN_PARAM = "pattern";
@@ -106,11 +110,13 @@ public class ReplaceByPatternServlet extends SlingAllMethodsServlet {
     private PackageHelper packageHelper;
 
     private int maxUpdatedItemsCount;
+    private int commitThreshold;
 
     @Activate
     @Modified
     protected void activate(Configuration configuration) {
         maxUpdatedItemsCount = configuration.max_updated_items_count();
+        commitThreshold = configuration.commit_threshold();
     }
 
     @Override
@@ -211,7 +217,7 @@ public class ReplaceByPatternServlet extends SlingAllMethodsServlet {
                 updatedItems.add(new UpdatedItem(currentLink, updated.get(), path, propertyName));
                 LOG.trace("The link was updated: location - {}@{}, currentLink - {}, updatedLink - {}",
                         path, propertyName, currentLink, updated.get());
-                if (updatedItems.size() % COMMIT_THRESHOLD == 0) {
+                if (updatedItems.size() % commitThreshold == 0) {
                     resourceResolver.commit();
                 }
             }

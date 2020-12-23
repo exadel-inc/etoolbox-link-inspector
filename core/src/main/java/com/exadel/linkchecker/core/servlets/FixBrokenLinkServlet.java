@@ -94,6 +94,7 @@ public class FixBrokenLinkServlet extends SlingAllMethodsServlet {
             }
         } catch (PersistenceException e) {
             LOG.error(e.getMessage(), e);
+            response.setStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR);
         }
     }
 

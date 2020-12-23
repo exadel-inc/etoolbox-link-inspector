@@ -153,6 +153,12 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
         LOG.debug("Traversal is completed in {} ms, path: {}, traversed nodes count: {}",
                 stopWatch.getTime(TimeUnit.MILLISECONDS), searchPath, traversedNodesCounter);
 
+        if (linkToGridResourcesMap.isEmpty()) {
+            LOG.warn("Collecting broken links is completed in {} ms, path: {}. No broken links were found after traversing",
+                    stopWatch.getTime(TimeUnit.MILLISECONDS), searchPath);
+            return Collections.emptyList();
+        }
+
         List<GridResource> sortedGridResources = validateLinksInParallel(linkToGridResourcesMap, resourceResolver)
                 .stream()
                 .sorted(Comparator.comparing(GridResource::getHref))
@@ -194,6 +200,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
             LOG.trace("ExecutorService terminated: {}", terminated);
         } catch (InterruptedException e) {
             LOG.error("Parallel links validation failed", e);
+            executorService.shutdownNow();
             Thread.currentThread().interrupt();
         }
         LOG.debug("Checked internal links count: {}", linksCounter.getInternalLinks());
