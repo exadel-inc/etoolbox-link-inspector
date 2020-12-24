@@ -2,11 +2,11 @@
 <jcr:root xmlns:jcr="http://www.jcp.org/jcr/1.0"
           xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
           jcr:primaryType="nt:unstructured"
-          jcr:title="Exadel Tools">
+          jcr:title="Utilities">
     <linkchecker
             jcr:primaryType="nt:unstructured"
-            jcr:title="Link Checker"
-            jcr:description="Checking links for all the site content with possibility to fix the broken ones"
+            jcr:title="Advanced Link Checker"
+            jcr:description="Collects broken links (external/internal) below the specified content path and generates a comprehensive report"
             href="/tools/exadel/linkchecker.html"
             consoleId="exadel-link-checker"
             icon="box"

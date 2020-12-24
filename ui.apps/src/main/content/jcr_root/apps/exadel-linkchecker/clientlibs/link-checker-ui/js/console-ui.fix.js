@@ -9,7 +9,7 @@
     var UPDATE_LABEL = Granite.I18n.get('Fix Broken Link');
     var LINK_TO_UPDATE_LABEL = Granite.I18n.get('The following link will be updated:');
     var REPLACEMENT_LINK_LABEL = Granite.I18n.get('Please enter the replacement link');
-    var SKIP_VALIDATION_LABEL = 'Skip validation (validation of the input link before replacement will be ignored)'
+    var SKIP_VALIDATION_LABEL = 'Skip input link check before replacement'
 
     var PROCESSING_ERROR_MSG = 'Failed to replace the link <b>{{currentLink}}</b> with <b>{{newLink}}</b><br/> at <i>{{path}}@{{propertyName}}</i>';
     var LINK_VALIDATION_ERROR_MSG = 'The input link <b>{{newLink}}</b> is not valid.%s<br/><br/>Please enter a valid link and try again';

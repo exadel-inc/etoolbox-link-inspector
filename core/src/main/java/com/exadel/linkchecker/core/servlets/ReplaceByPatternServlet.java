@@ -86,7 +86,7 @@ public class ReplaceByPatternServlet extends SlingAllMethodsServlet {
     private static final String OUTPUT_AS_CSV_PARAM = "isOutputAsCsv";
     private static final String ITEMS_COUNT_RESP_PARAM = "updatedItemsCount";
 
-    private static final String BACKUP_PACKAGE_GROUP = "Exadel Link Checker";
+    private static final String BACKUP_PACKAGE_GROUP = "Advanced Link Checker";
     private static final String BACKUP_PACKAGE_NAME = "replace_by_pattern_backup_%s";
     private static final String BACKUP_PACKAGE_VERSION = "1.0";
 

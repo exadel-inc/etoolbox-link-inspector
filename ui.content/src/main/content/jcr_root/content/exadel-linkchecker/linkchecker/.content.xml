@@ -6,7 +6,7 @@
     <jcr:content
             jcr:mixinTypes="[sling:VanityPath]"
             jcr:primaryType="nt:unstructured"
-            jcr:title="Exadel Link Checker"
+            jcr:title="Advanced Link Checker"
             sling:resourceType="granite/ui/components/shell/collectionpage"
             currentView="list"
             modeGroup="exadel-link-checker"
@@ -27,7 +27,7 @@
                     sling:resourceType="cq/gui/components/siteadmin/admin/page/winmode"/>
             <title
                     jcr:primaryType="nt:unstructured"
-                    jcr:title="Exadel Link Checker Tool"
+                    jcr:title="Advanced Link Checker"
                     sling:resourceType="cq/gui/components/siteadmin/admin/page/title"/>
             <favicon
                     jcr:primaryType="nt:unstructured"
