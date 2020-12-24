@@ -16,6 +16,16 @@ import java.util.Optional;
  * Each model instance contains data for a single row in the grid.
  */
 public class GridResource {
+    /**
+     * Property names
+     */
+    public static final String PN_LINK = "link";
+    public static final String PN_LINK_TYPE = "linkType";
+    public static final String PN_LINK_STATUS_CODE = "linkStatusCode";
+    public static final String PN_LINK_STATUS_MESSAGE = "linkStatusMessage";
+    public static final String PN_RESOURCE_PATH = "resourcePath";
+    public static final String PN_PROPERTY_NAME = "propertyName";
+
     @JsonIgnore
     private Link link;
 

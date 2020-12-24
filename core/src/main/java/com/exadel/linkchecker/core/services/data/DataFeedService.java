@@ -7,6 +7,12 @@ import java.util.List;
 
 public interface DataFeedService {
     /**
+     * If the node presents, users are informed that data feed regeneration is required
+     * in order to display up-to-date results.
+     */
+    String PENDING_GENERATION_NODE = "/apps/exadel-linkchecker/components/content/pendingDataFeedUpdate";
+
+    /**
      * Collects broken links and generates json data feed for further usage in the Link Checker grid.
      */
     void generateDataFeed();

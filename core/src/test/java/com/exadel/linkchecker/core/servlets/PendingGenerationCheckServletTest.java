@@ -1,7 +1,7 @@
 package com.exadel.linkchecker.core.servlets;
 
+import com.exadel.linkchecker.core.services.data.DataFeedService;
 import com.exadel.linkchecker.core.services.helpers.RepositoryHelper;
-import com.exadel.linkchecker.core.services.util.constants.CommonConstants;
 import io.wcm.testing.mock.aem.junit5.AemContext;
 import io.wcm.testing.mock.aem.junit5.AemContextExtension;
 import junitx.util.PrivateAccessor;
@@ -40,7 +40,7 @@ class PendingGenerationCheckServletTest {
 
     @Test
     void testPendingNodePresent() {
-        context.create().resource(CommonConstants.PENDING_GENERATION_NODE);
+        context.create().resource(DataFeedService.PENDING_GENERATION_NODE);
 
         fixture.doPost(request, response);
 

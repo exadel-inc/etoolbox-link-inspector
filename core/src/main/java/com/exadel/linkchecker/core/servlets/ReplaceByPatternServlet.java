@@ -8,7 +8,6 @@ import com.exadel.linkchecker.core.services.data.models.GridResource;
 import com.exadel.linkchecker.core.services.helpers.PackageHelper;
 import com.exadel.linkchecker.core.services.util.CsvUtil;
 import com.exadel.linkchecker.core.services.util.ServletUtil;
-import com.exadel.linkchecker.core.services.util.constants.CommonConstants;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.fileupload.FileUploadBase;
 import org.apache.commons.httpclient.HttpStatus;
@@ -145,7 +144,7 @@ public class ReplaceByPatternServlet extends SlingAllMethodsServlet {
             List<GridResource> gridResources = dataFeedService.dataFeedToGridResources();
             List<UpdatedItem> updatedItems = processResources(resourceResolver, gridResources, linkPattern, replacement, isBackup);
             if (!updatedItems.isEmpty()) {
-                repositoryHelper.createResourceIfNotExist(CommonConstants.PENDING_GENERATION_NODE,
+                repositoryHelper.createResourceIfNotExist(DataFeedService.PENDING_GENERATION_NODE,
                         JcrConstants.NT_UNSTRUCTURED, JcrResourceConstants.NT_SLING_FOLDER);
                 if (resourceResolver.hasChanges()) {
                     resourceResolver.commit();

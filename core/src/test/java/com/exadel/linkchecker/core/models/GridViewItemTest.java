@@ -3,8 +3,8 @@ package com.exadel.linkchecker.core.models;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.wcm.api.NameConstants;
 import com.day.cq.wcm.api.Page;
+import com.exadel.linkchecker.core.services.data.models.GridResource;
 import com.exadel.linkchecker.core.services.util.constants.CommonConstants;
-import com.exadel.linkchecker.core.services.util.constants.GridResourceProperties;
 import io.wcm.testing.mock.aem.junit5.AemContext;
 import io.wcm.testing.mock.aem.junit5.AemContextExtension;
 import junitx.util.PrivateAccessor;
@@ -215,12 +215,12 @@ class GridViewItemTest {
     private void setupGridResourceAndViewItem(String resourceWithBrokenLinkPath) {
         Resource gridResource = context.create().resource(TEST_GRID_RESOURCE_PATH,
                 JcrResourceConstants.SLING_RESOURCE_TYPE_PROPERTY, GRID_RESOURCE_TYPE,
-                GridResourceProperties.PN_LINK, TEST_BROKEN_LINK_HREF,
-                GridResourceProperties.PN_LINK_TYPE, TEST_BROKEN_LINK_TYPE,
-                GridResourceProperties.PN_LINK_STATUS_CODE, TEST_BROKEN_LINK_SC,
-                GridResourceProperties.PN_LINK_STATUS_MESSAGE, TEST_BROKEN_LINK_STATUS_MESSAGE,
-                GridResourceProperties.PN_RESOURCE_PATH, resourceWithBrokenLinkPath,
-                GridResourceProperties.PN_PROPERTY_NAME, TEST_PROPERTY
+                GridResource.PN_LINK, TEST_BROKEN_LINK_HREF,
+                GridResource.PN_LINK_TYPE, TEST_BROKEN_LINK_TYPE,
+                GridResource.PN_LINK_STATUS_CODE, TEST_BROKEN_LINK_SC,
+                GridResource.PN_LINK_STATUS_MESSAGE, TEST_BROKEN_LINK_STATUS_MESSAGE,
+                GridResource.PN_RESOURCE_PATH, resourceWithBrokenLinkPath,
+                GridResource.PN_PROPERTY_NAME, TEST_PROPERTY
         );
 
         viewItem = gridResource.adaptTo(GridViewItem.class);

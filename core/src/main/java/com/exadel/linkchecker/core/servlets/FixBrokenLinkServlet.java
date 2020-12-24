@@ -2,10 +2,10 @@ package com.exadel.linkchecker.core.servlets;
 
 import com.day.crx.JcrConstants;
 import com.exadel.linkchecker.core.models.LinkStatus;
+import com.exadel.linkchecker.core.services.data.DataFeedService;
 import com.exadel.linkchecker.core.services.helpers.LinkHelper;
 import com.exadel.linkchecker.core.services.helpers.RepositoryHelper;
 import com.exadel.linkchecker.core.services.util.ServletUtil;
-import com.exadel.linkchecker.core.services.util.constants.CommonConstants;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -83,7 +83,7 @@ public class FixBrokenLinkServlet extends SlingAllMethodsServlet {
 
             ResourceResolver resourceResolver = request.getResourceResolver();
             if (linkHelper.replaceLink(resourceResolver, path, propertyName, currentLink, newLink)) {
-                repositoryHelper.createResourceIfNotExist(CommonConstants.PENDING_GENERATION_NODE,
+                repositoryHelper.createResourceIfNotExist(DataFeedService.PENDING_GENERATION_NODE,
                         JcrConstants.NT_UNSTRUCTURED, JcrResourceConstants.NT_SLING_FOLDER);
                 resourceResolver.commit();
                 LOG.debug("The link was updated: path - {}, propertyName - {}, currentLink - {}, newLink - {}",

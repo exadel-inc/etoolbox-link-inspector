@@ -9,8 +9,6 @@ import com.exadel.linkchecker.core.services.data.GridResourcesGenerator;
 import com.exadel.linkchecker.core.services.util.CsvUtil;
 import com.exadel.linkchecker.core.services.util.JsonUtil;
 import com.exadel.linkchecker.core.services.util.LinkCheckerResourceUtil;
-import com.exadel.linkchecker.core.services.util.constants.GridResourceProperties;
-import com.exadel.linkchecker.core.services.util.constants.CommonConstants;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.lang3.time.StopWatch;
@@ -155,7 +153,7 @@ public class DataFeedServiceImpl implements DataFeedService {
     }
 
     private void removePendingNode(ResourceResolver resourceResolver) {
-        LinkCheckerResourceUtil.removeResource(CommonConstants.PENDING_GENERATION_NODE, resourceResolver);
+        LinkCheckerResourceUtil.removeResource(DataFeedService.PENDING_GENERATION_NODE, resourceResolver);
     }
 
     private Stream<Resource> toSlingResourcesStream(Collection<GridResource> gridResources, ResourceResolver resourceResolver) {
@@ -165,12 +163,12 @@ public class DataFeedServiceImpl implements DataFeedService {
 
     private Resource toSlingResource(GridResource gridResource, ResourceResolver resourceResolver) {
         ValueMap valueMap = new ValueMapDecorator(new HashMap<>());
-        valueMap.put(GridResourceProperties.PN_LINK, gridResource.getHref());
-        valueMap.put(GridResourceProperties.PN_LINK_TYPE, gridResource.getType());
-        valueMap.put(GridResourceProperties.PN_LINK_STATUS_CODE, gridResource.getStatusCode());
-        valueMap.put(GridResourceProperties.PN_LINK_STATUS_MESSAGE, gridResource.getStatusMessage());
-        valueMap.put(GridResourceProperties.PN_RESOURCE_PATH, gridResource.getResourcePath());
-        valueMap.put(GridResourceProperties.PN_PROPERTY_NAME, gridResource.getPropertyName());
+        valueMap.put(GridResource.PN_LINK, gridResource.getHref());
+        valueMap.put(GridResource.PN_LINK_TYPE, gridResource.getType());
+        valueMap.put(GridResource.PN_LINK_STATUS_CODE, gridResource.getStatusCode());
+        valueMap.put(GridResource.PN_LINK_STATUS_MESSAGE, gridResource.getStatusMessage());
+        valueMap.put(GridResource.PN_RESOURCE_PATH, gridResource.getResourcePath());
+        valueMap.put(GridResource.PN_PROPERTY_NAME, gridResource.getPropertyName());
         return new ValueMapResource(resourceResolver, gridResource.getResourcePath(), gridResource.getResourceType(), valueMap);
     }
 

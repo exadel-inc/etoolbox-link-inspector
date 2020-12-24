@@ -5,8 +5,8 @@ import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
 import com.day.cq.wcm.api.components.Component;
 import com.day.cq.wcm.api.components.ComponentManager;
+import com.exadel.linkchecker.core.services.data.models.GridResource;
 import com.exadel.linkchecker.core.services.util.constants.CommonConstants;
-import com.exadel.linkchecker.core.services.util.constants.GridResourceProperties;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
@@ -43,22 +43,22 @@ public class GridViewItem {
     @SlingObject
     private ResourceResolver resourceResolver;
 
-    @ValueMapValue(name = GridResourceProperties.PN_LINK)
+    @ValueMapValue(name = GridResource.PN_LINK)
     private String link;
 
-    @ValueMapValue(name = GridResourceProperties.PN_LINK_TYPE)
+    @ValueMapValue(name = GridResource.PN_LINK_TYPE)
     private String linkType;
 
-    @ValueMapValue(name = GridResourceProperties.PN_LINK_STATUS_CODE)
+    @ValueMapValue(name = GridResource.PN_LINK_STATUS_CODE)
     private String linkStatusCode;
 
-    @ValueMapValue(name = GridResourceProperties.PN_LINK_STATUS_MESSAGE)
+    @ValueMapValue(name = GridResource.PN_LINK_STATUS_MESSAGE)
     private String linkStatusMessage;
 
-    @ValueMapValue(name = GridResourceProperties.PN_RESOURCE_PATH)
+    @ValueMapValue(name = GridResource.PN_RESOURCE_PATH)
     private String path;
 
-    @ValueMapValue(name = GridResourceProperties.PN_PROPERTY_NAME)
+    @ValueMapValue(name = GridResource.PN_PROPERTY_NAME)
     private String propertyName;
 
     private String pagePath;

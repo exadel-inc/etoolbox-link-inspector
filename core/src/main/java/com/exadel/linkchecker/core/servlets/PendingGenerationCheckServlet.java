@@ -1,7 +1,7 @@
 package com.exadel.linkchecker.core.servlets;
 
+import com.exadel.linkchecker.core.services.data.DataFeedService;
 import com.exadel.linkchecker.core.services.helpers.RepositoryHelper;
-import com.exadel.linkchecker.core.services.util.constants.CommonConstants;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
@@ -38,7 +38,7 @@ public class PendingGenerationCheckServlet extends SlingAllMethodsServlet {
     protected void doPost(final SlingHttpServletRequest request, final SlingHttpServletResponse response) {
         try (ResourceResolver resourceResolver = repositoryHelper.getServiceResourceResolver()) {
             boolean isPendingNodePresent =
-                    Optional.ofNullable(resourceResolver.getResource(CommonConstants.PENDING_GENERATION_NODE))
+                    Optional.ofNullable(resourceResolver.getResource(DataFeedService.PENDING_GENERATION_NODE))
                             .isPresent();
             LOG.trace("Is pending node present: {} ", isPendingNodePresent);
             response.setStatus(isPendingNodePresent ? HttpStatus.SC_OK : HttpStatus.SC_NO_CONTENT);
