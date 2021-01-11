@@ -56,6 +56,12 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
         ) String search_path() default DEFAULT_SEARCH_PATH;
 
         @AttributeDefinition(
+                name = "Excluded paths",
+                description = "The list of paths excluded from processing. The specified path and all its children " +
+                        "are excluded. The excluded path should not end with slash"
+        ) String[] excluded_paths() default {};
+
+        @AttributeDefinition(
                 name = "Links type",
                 description = "The type of links in the report",
                 options = {
@@ -117,6 +123,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
     private ExecutorService executorService;
 
     private String searchPath;
+    private String[] excludedPaths;
     private Link.Type reportLinksType;
     private int[] allowedStatusCodes;
     private String[] excludedProperties;
@@ -127,6 +134,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
     @Modified
     protected void activate(Configuration configuration) {
         searchPath = configuration.search_path();
+        excludedPaths = PropertiesUtil.toStringArray(configuration.excluded_paths());
         excludedProperties = PropertiesUtil.toStringArray(configuration.excluded_properties());
         excludedSites = PropertiesUtil.toStringArray(configuration.excluded_sites());
         threadsPerCore = configuration.threads_per_core();
@@ -214,18 +222,20 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
     private int getGridResourcesViaTraversing(Resource resource, String gridResourceType,
                                               Map<Link, List<GridResource>> allLinkToGridResourcesMap) {
         int traversedNodesCount = 0;
-        traversedNodesCount++;
-        getLinkToGridResourcesMap(resource, gridResourceType).forEach((k, v) ->
-                allLinkToGridResourcesMap.merge(k, v,
-                        (existing, newValue) -> {
-                            existing.addAll(newValue);
-                            return existing;
-                        })
-        );
-        Iterator<Resource> children = resource.listChildren();
-        while (children.hasNext()) {
-            Resource child = children.next();
-            traversedNodesCount += getGridResourcesViaTraversing(child, gridResourceType, allLinkToGridResourcesMap);
+        if (!isExcludedPath(resource.getPath())) {
+            traversedNodesCount++;
+            getLinkToGridResourcesMap(resource, gridResourceType).forEach((k, v) ->
+                    allLinkToGridResourcesMap.merge(k, v,
+                            (existing, newValue) -> {
+                                existing.addAll(newValue);
+                                return existing;
+                            })
+            );
+            Iterator<Resource> children = resource.listChildren();
+            while (children.hasNext()) {
+                Resource child = children.next();
+                traversedNodesCount += getGridResourcesViaTraversing(child, gridResourceType, allLinkToGridResourcesMap);
+            }
         }
         return traversedNodesCount;
     }
@@ -268,6 +278,18 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
     private boolean isExcludedSite(String link) {
         for (String excludedSite : excludedSites) {
             if (StringUtils.isNotBlank(excludedSite) && link.contains(excludedSite)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean isExcludedPath(String path) {
+        if (ArrayUtils.isEmpty(excludedPaths)) {
+            return false;
+        }
+        for (String excludedPath : excludedPaths) {
+            if (StringUtils.isNotBlank(excludedPath) && path.equals(excludedPath)) {
                 return true;
             }
         }

@@ -165,7 +165,7 @@ class DataFeedServiceImplTest {
         ExternalLinkChecker externalLinkChecker = mock(ExternalLinkChecker.class);
         PrivateAccessor.setField(linkHelper, EXTERNAL_LINK_CHECKER_FIELD, externalLinkChecker);
         PrivateAccessor.setField(gridResourcesGenerator, LINK_HELPER_FIELD, linkHelper);
-        GridResourcesGeneratorImplTest.setUpConfig(gridResourcesGenerator, true);
+        GridResourcesGeneratorImplTest.setUpConfig(gridResourcesGenerator);
 
         when(externalLinkChecker.checkLink(anyString())).thenReturn(HttpStatus.SC_NOT_FOUND);
 

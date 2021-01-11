@@ -38,12 +38,6 @@ public final class Link {
         return type;
     }
 
-    public boolean isValid() {
-        return Optional.ofNullable(status)
-                .map(LinkStatus::isValid)
-                .orElse(false);
-    }
-
     public int getStatusCode() {
         return Optional.ofNullable(status)
                 .map(LinkStatus::getStatusCode)

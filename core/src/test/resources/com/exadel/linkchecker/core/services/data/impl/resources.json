@@ -22,5 +22,13 @@
     "single_prop_external": "https://www.google.com/test-external-1.html",
     "single_prop_rte": "Lorem ipsum dolor sit amet <a href=\"/content/test-link-internal-2\"></a>, sed do https://www.google.com/test-external-2.html eiusmod tempor <a href=\"/content/test-link-internal-2\"></a>",
     "multi_prop_rte": ["/content/test-link-internal-3", "https://www.google.com/test-external-3.html","Lorem ipsum dolor sit amet <a href=\"/content/test-link-internal-4\"></a>, sed do https://www.google.com/test-external-4.html eiusmod tempor"]
+  },
+  "excluded": {
+    "jcr:primaryType": "nt:unstructured",
+    "single_prop_internal": "/content/test-link-excluded-1",
+    "excluded_child": {
+      "jcr:primaryType": "nt:unstructured",
+      "single_prop_internal": "/content/test-link-excluded-2"
+    }
   }
 }
