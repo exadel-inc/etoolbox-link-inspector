@@ -1,0 +1,107 @@
+{
+  "jcr:primaryType": "sling:Folder",
+  "test-page-inactive-1": {
+    "jcr:primaryType": "cq:Page",
+    "jcr:content": {
+      "jcr:primaryType": "cq:PageContent",
+      "cq:lastReplicationAction": "Deactivate",
+      "cq:lastReplicated": "2020-06-29T21:23:32.056Z",
+      "cq:lastReplicatedBy": "admin",
+      "jcr:title": "test-page-inactive-1",
+      "single_prop_internal": "/content/test-link-inactive-1",
+      "test-component": {
+        "jcr:primaryType": "nt:unstructured",
+        "single_prop_internal": "/content/test-link-inactive-2"
+      }
+    }
+  },
+  "test-page-active": {
+    "jcr:primaryType": "cq:Page",
+    "jcr:content": {
+      "jcr:primaryType": "cq:PageContent",
+      "cq:lastReplicationAction": "Activate",
+      "cq:lastReplicated": "2020-06-29T21:23:32.056Z",
+      "cq:lastReplicatedBy": "admin",
+      "jcr:title": "test-page-active",
+      "single_prop_internal": "/content/test-link-active-0",
+      "test-component": {
+        "jcr:primaryType": "nt:unstructured",
+        "single_prop_internal": "/content/test-link-active-1",
+        "test-component": {
+          "jcr:primaryType": "nt:unstructured",
+          "single_prop_internal": "/content/test-link-active-2"
+        }
+      },
+      "test-component-inactive": {
+        "cq:lastReplicationAction": "Deactivate",
+        "jcr:primaryType": "nt:unstructured",
+        "single_prop_internal": "/content/test-link-inactive-3"
+      }
+    },
+    "test-page-inactive-2": {
+      "jcr:primaryType": "cq:Page",
+      "jcr:content": {
+        "jcr:primaryType": "cq:PageContent",
+        "cq:lastReplicationAction": "Deactivate",
+        "cq:lastReplicated": "2020-06-29T21:23:32.056Z",
+        "cq:lastReplicatedBy": "admin",
+        "jcr:title": "test-page-inactive-2",
+        "single_prop_internal": "/content/test-link-inactive-1",
+        "test-component": {
+          "jcr:primaryType": "nt:unstructured",
+          "single_prop_internal": "/content/test-link-inactive-2"
+        }
+      }
+    }
+  },
+  "test-component": {
+    "jcr:primaryType": "nt:unstructured",
+    "single_prop_internal": "/content/test-link-active-3"
+  },
+  "test-component-inactive": {
+    "jcr:primaryType": "nt:unstructured",
+    "single_prop_internal": "/content/test-link-inactive-2",
+    "cq:lastReplicationAction": "Deactivate"
+  },
+  "test-asset-active": {
+    "jcr:primaryType": "dam:Asset",
+    "jcr:content": {
+      "jcr:primaryType": "dam:AssetContent",
+      "cq:lastReplicationAction": "Activate",
+      "cq:lastReplicated": "2020-06-29T21:23:32.056Z",
+      "cq:lastReplicatedBy": "admin",
+      "single_prop_internal": "/content/test-link-active-4",
+      "test-component": {
+        "jcr:primaryType": "nt:unstructured",
+        "single_prop_internal": "/content/test-link-active-5",
+        "test-component": {
+          "jcr:primaryType": "nt:unstructured",
+          "single_prop_internal": "/content/test-link-active-6"
+        }
+      },
+      "test-component-inactive": {
+        "cq:lastReplicationAction": "Deactivate",
+        "jcr:primaryType": "nt:unstructured",
+        "single_prop_internal": "/content/test-link-inactive-asset-0"
+      }
+    }
+  },
+  "test-asset-inactive": {
+    "jcr:primaryType": "dam:Asset",
+    "jcr:content": {
+      "jcr:primaryType": "dam:AssetContent",
+      "cq:lastReplicationAction": "Deactivate",
+      "cq:lastReplicated": "2020-06-29T21:23:32.056Z",
+      "cq:lastReplicatedBy": "admin",
+      "single_prop_internal": "/content/test-link-inactive-asset-0",
+      "test-component": {
+        "jcr:primaryType": "nt:unstructured",
+        "single_prop_internal": "/content/test-link-inactive-asset-1",
+        "test-component": {
+          "jcr:primaryType": "nt:unstructured",
+          "single_prop_internal": "/content/test-link-inactive-asset-2"
+        }
+      }
+    }
+  }
+}

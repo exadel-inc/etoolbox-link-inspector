@@ -10,7 +10,7 @@
             sling:resourceType="granite/ui/components/shell/collectionpage"
             currentView="list"
             modeGroup="exadel-link-checker"
-            sling:vanityPath="/tools/exadel/linkchecker"
+            sling:vanityPath="/tools/utilities/advanced-linkchecker"
             pageURITemplate="#"
             targetCollection=".exadel-link-checker">
         <head jcr:primaryType="nt:unstructured">

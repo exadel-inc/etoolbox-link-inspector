@@ -7,7 +7,7 @@
             jcr:primaryType="nt:unstructured"
             jcr:title="Advanced Link Checker"
             jcr:description="Collects broken links (external/internal) below the specified content path and generates a comprehensive report"
-            href="/tools/exadel/linkchecker.html"
+            href="/tools/utilities/advanced-linkchecker.html"
             consoleId="exadel-link-checker"
             icon="box"
             order="{Long}100"/>

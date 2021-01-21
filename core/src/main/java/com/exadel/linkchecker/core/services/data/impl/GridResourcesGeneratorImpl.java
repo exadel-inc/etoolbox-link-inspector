@@ -1,5 +1,10 @@
 package com.exadel.linkchecker.core.services.data.impl;
 
+import com.day.cq.dam.api.DamConstants;
+import com.day.cq.replication.ReplicationActionType;
+import com.day.cq.replication.ReplicationStatus;
+import com.day.cq.wcm.api.NameConstants;
+import com.day.crx.JcrConstants;
 import com.exadel.linkchecker.core.models.LinkStatus;
 import com.exadel.linkchecker.core.services.data.models.GridResource;
 import com.exadel.linkchecker.core.models.Link;
@@ -60,6 +65,11 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
                 description = "The list of paths excluded from processing. The specified path and all its children " +
                         "are excluded. The excluded path should not end with slash"
         ) String[] excluded_paths() default {};
+
+        @AttributeDefinition(
+                name = "Activated Content",
+                description = "If checked, links fill be retrieved from replicated (Activate) content only"
+        ) boolean check_activation() default false;
 
         @AttributeDefinition(
                 name = "Links type",
@@ -124,6 +134,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
 
     private String searchPath;
     private String[] excludedPaths;
+    private boolean checkActivation;
     private Link.Type reportLinksType;
     private int[] allowedStatusCodes;
     private String[] excludedProperties;
@@ -136,6 +147,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
         searchPath = configuration.search_path();
         excludedPaths = PropertiesUtil.toStringArray(configuration.excluded_paths());
         excludedProperties = PropertiesUtil.toStringArray(configuration.excluded_properties());
+        checkActivation = configuration.check_activation();
         excludedSites = PropertiesUtil.toStringArray(configuration.excluded_sites());
         threadsPerCore = configuration.threads_per_core();
         reportLinksType = Optional.of(configuration.links_type())
@@ -222,7 +234,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
     private int getGridResourcesViaTraversing(Resource resource, String gridResourceType,
                                               Map<Link, List<GridResource>> allLinkToGridResourcesMap) {
         int traversedNodesCount = 0;
-        if (!isExcludedPath(resource.getPath())) {
+        if (!isExcludedPath(resource.getPath()) && isAllowedReplicationStatus(resource)) {
             traversedNodesCount++;
             getLinkToGridResourcesMap(resource, gridResourceType).forEach((k, v) ->
                     allLinkToGridResourcesMap.merge(k, v,
@@ -307,6 +319,32 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
             }
         }
         return false;
+    }
+
+    private boolean isAllowedReplicationStatus(Resource resource) {
+        if (checkActivation) {
+            boolean isPageOrAsset = Optional.of(resource.getValueMap())
+                    .map(valueMap -> valueMap.get(JcrConstants.JCR_PRIMARYTYPE))
+                    .filter(type -> NameConstants.NT_PAGE.equals(type) || DamConstants.NT_DAM_ASSET.equals(type))
+                    .isPresent();
+            if (isPageOrAsset) {
+                return isActivatedResource(resource);
+            } else {
+                Optional<String> replicationAction = Optional.of(resource.getValueMap())
+                        .map(valueMap -> valueMap.get(ReplicationStatus.NODE_PROPERTY_LAST_REPLICATION_ACTION, String.class));
+                if (replicationAction.isPresent()) {
+                    return replicationAction.filter(ReplicationActionType.ACTIVATE.getName()::equals)
+                            .isPresent();
+                }
+            }
+        }
+        return true;
+    }
+
+    private boolean isActivatedResource(Resource resource) {
+        return Optional.ofNullable(resource.adaptTo(ReplicationStatus.class))
+                .filter(ReplicationStatus::isActivated)
+                .isPresent();
     }
 
     @Deactivate

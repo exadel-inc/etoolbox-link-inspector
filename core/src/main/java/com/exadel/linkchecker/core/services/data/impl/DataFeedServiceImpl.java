@@ -75,7 +75,6 @@ public class DataFeedServiceImpl implements DataFeedService {
                 return;
             }
             Optional.of(gridResourcesGenerator.generateGridResources(GRID_RESOURCE_TYPE, resourceResolver))
-                    .filter(CollectionUtils::isNotEmpty)
                     .ifPresent(gridResources -> {
                         gridResourcesToDataFeed(gridResources, resourceResolver);
                         generateCsvReport(gridResources, resourceResolver);
@@ -193,10 +192,10 @@ public class DataFeedServiceImpl implements DataFeedService {
                     CsvUtil.wrapIfContainsSemicolon(viewItem.getLink()),
                     viewItem.getLinkType(),
                     viewItem.getLinkStatusCode(),
-                    viewItem.getLinkStatusMessage(),
-                    viewItem.getPageTitle(),
+                    CsvUtil.wrapIfContainsSemicolon(viewItem.getLinkStatusMessage()),
+                    CsvUtil.wrapIfContainsSemicolon(viewItem.getPageTitle()),
                     viewItem.getPagePath(),
-                    viewItem.getComponentName(),
+                    CsvUtil.wrapIfContainsSemicolon(viewItem.getComponentName()),
                     viewItem.getComponentType(),
                     CsvUtil.buildLocation(viewItem.getPath(), viewItem.getPropertyName())
             );
