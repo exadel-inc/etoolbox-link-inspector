@@ -69,6 +69,7 @@ public class ReplaceByPatternServlet extends SlingAllMethodsServlet {
                 name = "Limit",
                 description = "The maximum number of items which replacement will be applied for"
         ) int max_updated_items_count() default DEFAULT_MAX_UPDATED_ITEMS_COUNT;
+
         @AttributeDefinition(
                 name = "Commit Threshold",
                 description = "The size of updated items chunks saved via resourceResolver.commit()"
@@ -82,6 +83,7 @@ public class ReplaceByPatternServlet extends SlingAllMethodsServlet {
 
     private static final String LINK_PATTERN_PARAM = "pattern";
     private static final String REPLACEMENT_PARAM = "replacement";
+    private static final String DRY_RUN_PARAM = "isDryRun";
     private static final String BACKUP_PARAM = "isBackup";
     private static final String OUTPUT_AS_CSV_PARAM = "isOutputAsCsv";
     private static final String ITEMS_COUNT_RESP_PARAM = "updatedItemsCount";
@@ -122,6 +124,7 @@ public class ReplaceByPatternServlet extends SlingAllMethodsServlet {
     protected void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response) {
         String linkPattern = ServletUtil.getRequestParamString(request, LINK_PATTERN_PARAM);
         String replacement = ServletUtil.getRequestParamString(request, REPLACEMENT_PARAM);
+        boolean isDryRun = ServletUtil.getRequestParamBoolean(request, DRY_RUN_PARAM);
         boolean isBackup = ServletUtil.getRequestParamBoolean(request, BACKUP_PARAM);
         boolean outputAsCsv = ServletUtil.getRequestParamBoolean(request, OUTPUT_AS_CSV_PARAM);
 
@@ -142,12 +145,15 @@ public class ReplaceByPatternServlet extends SlingAllMethodsServlet {
         try {
             ResourceResolver resourceResolver = request.getResourceResolver();
             List<GridResource> gridResources = dataFeedService.dataFeedToGridResources();
-            List<UpdatedItem> updatedItems = processResources(resourceResolver, gridResources, linkPattern, replacement, isBackup);
+            List<UpdatedItem> updatedItems =
+                    processResources(resourceResolver, gridResources, linkPattern, replacement, isDryRun, isBackup);
             if (!updatedItems.isEmpty()) {
-                repositoryHelper.createResourceIfNotExist(DataFeedService.PENDING_GENERATION_NODE,
-                        JcrConstants.NT_UNSTRUCTURED, JcrResourceConstants.NT_SLING_FOLDER);
-                if (resourceResolver.hasChanges()) {
-                    resourceResolver.commit();
+                if (!isDryRun) {
+                    repositoryHelper.createResourceIfNotExist(DataFeedService.PENDING_GENERATION_NODE,
+                            JcrConstants.NT_UNSTRUCTURED, JcrResourceConstants.NT_SLING_FOLDER);
+                    if (resourceResolver.hasChanges()) {
+                        resourceResolver.commit();
+                    }
                 }
                 if (outputAsCsv) {
                     generateCsvOutput(updatedItems, response);
@@ -172,7 +178,7 @@ public class ReplaceByPatternServlet extends SlingAllMethodsServlet {
     }
 
     private List<UpdatedItem> processResources(ResourceResolver resourceResolver, Collection<GridResource> gridResources,
-                                               String linkPattern, String replacement, boolean backup)
+                                               String linkPattern, String replacement, boolean isDryRun, boolean backup)
             throws IOException, RepositoryException, PackageException {
         Optional<Session> session = Optional.ofNullable(resourceResolver.adaptTo(Session.class));
         if (!session.isPresent()) {
@@ -183,7 +189,7 @@ public class ReplaceByPatternServlet extends SlingAllMethodsServlet {
         if (backup) {
             createBackupPackage(filteredGridResources, session.get());
         }
-        return replaceByPattern(resourceResolver, filteredGridResources, linkPattern, replacement);
+        return replaceByPattern(isDryRun, resourceResolver, filteredGridResources, linkPattern, replacement);
     }
 
     private List<GridResource> filterGridResources(Collection<GridResource> gridResources, String linkPattern, Session session) {
@@ -199,7 +205,8 @@ public class ReplaceByPatternServlet extends SlingAllMethodsServlet {
                 .collect(Collectors.toList());
     }
 
-    private List<UpdatedItem> replaceByPattern(ResourceResolver resourceResolver,
+    private List<UpdatedItem> replaceByPattern(boolean isDryRun,
+                                               ResourceResolver resourceResolver,
                                                Collection<GridResource> gridResources,
                                                String linkPattern, String replacement) throws PersistenceException {
         List<UpdatedItem> updatedItems = new ArrayList<>();
@@ -216,7 +223,7 @@ public class ReplaceByPatternServlet extends SlingAllMethodsServlet {
                 updatedItems.add(new UpdatedItem(currentLink, updated.get(), path, propertyName));
                 LOG.trace("The link was updated: location - {}@{}, currentLink - {}, updatedLink - {}",
                         path, propertyName, currentLink, updated.get());
-                if (updatedItems.size() % commitThreshold == 0) {
+                if (!isDryRun && updatedItems.size() % commitThreshold == 0) {
                     resourceResolver.commit();
                 }
             }

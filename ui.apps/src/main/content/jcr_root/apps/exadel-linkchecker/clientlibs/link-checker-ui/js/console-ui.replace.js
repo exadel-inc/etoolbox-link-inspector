@@ -10,8 +10,10 @@
     var REPLACE_BUTTON_LABEL = Granite.I18n.get('Replace');
     var PATTERN_LABEL = Granite.I18n.get('Please enter the regex pattern to be replaced');
     var REPLACEMENT_LINK_LABEL = Granite.I18n.get('Please enter the replacement');
+    var DRY_RUN_CHECKBOX_LABEL = Granite.I18n.get('Dry run');
     var BACKUP_CHECKBOX_LABEL = Granite.I18n.get('Backup before replacement');
     var CSV_OUT_CHECKBOX_LABEL = Granite.I18n.get('Download CSV with updated items');
+    var DRY_RUN_TOOLTIP = Granite.I18n.get("If checked, no changes will be applied in the repository");
     var REPLACEMENT_DESCRIPTION = Granite.I18n.get('* Replacement will be applied within the detected broken links scope');
     var REPLACEMENT_ACL_DESCRIPTION = Granite.I18n.get('** User should have sufficient read/write permissions in order to complete replacement successfully and create the backup package');
     var VALIDATION_MSG = Granite.I18n.get('Replacement can\'t be the same as pattern');
@@ -20,6 +22,7 @@
     var PERSISTENCE_ERROR_MSG = 'Replacement was interrupted due to the <b>error</b> occurred during persisting changes. Please see logs for more details';
     var FORBIDDEN_ERROR_MSG = 'Failed to build the backup package. Possible reasons: lack of permissions, please see logs for more details.<br/><b>No replacement was applied</b>';
     var PROCESSING_SUCCESS_MSG = 'Replacement completed. %s<br/><br/>Pattern: <b>{{pattern}}</b><br/>Replacement: <b>{{replacement}}</b>';
+    var DRY_RUN_PREFIX_MSG = '(Dry run) ';
     var DOWNLOADED_CSV_MSG = 'Please see the downloaded CSV for more details.';
     var PROCESSING_NOT_FOUND_MSG = 'Broken links containing the pattern <b>{{pattern}}</b> were not found or user has insufficient permissions to process them';
     var PROCESSING_IDENTICAL_MSG = 'The pattern <b>{{pattern}}</b> is equal to the replacement value, no processing was done';
@@ -36,6 +39,7 @@
             var replacementList = [{
                 pattern: data.pattern,
                 replacement: data.replacement,
+                isDryRun: data.isDryRun,
                 isBackup: data.isBackup,
                 isOutputAsCsv: data.isOutputAsCsv
             }].filter(function (item) {
@@ -75,6 +79,9 @@
     }
 
     function handleSuccessRequest(xhr, data, logger, item) {
+        if (item.isDryRun) {
+            PROCESSING_SUCCESS_MSG = DRY_RUN_PREFIX_MSG + PROCESSING_SUCCESS_MSG;
+        }
         if (xhr.getResponseHeader("Content-disposition") && data) {
             PROCESSING_SUCCESS_MSG = PROCESSING_SUCCESS_MSG.replace("%s", DOWNLOADED_CSV_MSG);
             downloadCsvOutput(data);
@@ -131,6 +138,11 @@
         $('<p>').text(REPLACEMENT_LINK_LABEL).appendTo(el.content);
         $replacementTextField.appendTo(el.content);
 
+        // Dry run checkbox group
+        var $isDryRunCheckbox =
+            $('<coral-checkbox name="$isDryRun" title="' + DRY_RUN_TOOLTIP + '" checked>').text(DRY_RUN_CHECKBOX_LABEL);
+        $isDryRunCheckbox.appendTo(el.content);
+
         // Backup checkbox group
         var $isBackupCheckbox = $('<coral-checkbox name="isBackup">').text(BACKUP_CHECKBOX_LABEL);
         $isBackupCheckbox.appendTo(el.content);
@@ -155,6 +167,7 @@
             var data = {
                 pattern: $patternTextField.val(),
                 replacement: $replacementTextField.val(),
+                isDryRun: $isDryRunCheckbox.prop("checked"),
                 isBackup: $isBackupCheckbox.prop("checked"),
                 isOutputAsCsv: $isCsvOutputCheckbox.prop("checked")
             }

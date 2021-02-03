@@ -52,6 +52,7 @@ import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -70,9 +71,9 @@ class ReplaceByPatternServletTest {
 
     private static final String LINK_PATTERN_PARAM = "pattern";
     private static final String REPLACEMENT_PARAM = "replacement";
+    private static final String DRY_RUN_PARAM = "isDryRun";
     private static final String BACKUP_PARAM = "isBackup";
     private static final String OUTPUT_AS_CSV_PARAM = "isOutputAsCsv";
-    private static final String ITEMS_COUNT_RESP_PARAM = "updatedItemsCount";
 
     private static final String TEST_LINK_PATTERN = "test-pattern";
     private static final String TEST_REPLACEMENT = "test-replacement";
@@ -166,6 +167,29 @@ class ReplaceByPatternServletTest {
         assertEquals(HttpStatus.SC_OK, response.getStatus());
         assertTrue(isReplacementDone(TEST_RESOURCE_PATH_1, TEST_PROPERTY_1, TEST_REPLACEMENT));
         assertTrue(isReplacementDone(TEST_RESOURCE_PATH_3, TEST_PROPERTY_3, TEST_REPLACEMENT));
+    }
+
+    @Test
+    void testDryRun() throws NoSuchFieldException, PersistenceException {
+        setUpDataFeedService(getRepositoryHelperFromContext());
+        setUpCommitThreshold();
+        setUpResources();
+
+        SlingHttpServletRequest requestMock = mockSlingRequest();
+        mockRequestParam(DRY_RUN_PARAM, Boolean.TRUE.toString(), requestMock);
+
+        ResourceResolver resourceResolverMock = mockResourceResolver(requestMock);
+        mockLinkHelper(resourceResolverMock);
+        mockSession(resourceResolverMock);
+
+        when(repositoryHelper.hasReadWritePermissions(any(Session.class), anyString())).thenReturn(true);
+        when(resourceResolverMock.hasChanges()).thenReturn(true);
+
+        fixture.doPost(requestMock, response);
+
+        verify(repositoryHelper, never())
+                .createResourceIfNotExist(eq(DataFeedService.PENDING_GENERATION_NODE), anyString(), anyString());
+        verify(resourceResolverMock, never()).commit();
     }
 
     @Test
