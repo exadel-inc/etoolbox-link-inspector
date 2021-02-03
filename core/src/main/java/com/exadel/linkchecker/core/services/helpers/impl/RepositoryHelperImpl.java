@@ -63,7 +63,7 @@ public class RepositoryHelperImpl implements RepositoryHelper {
                     true
             );
         } catch (PersistenceException e) {
-            LOG.error(String.format("Failed to create the node %s", path), e);
+            LOG.error(String.format("Failed to create the resource %s", path), e);
         }
     }
 }

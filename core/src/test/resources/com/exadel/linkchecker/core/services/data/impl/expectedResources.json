@@ -214,5 +214,14 @@
     "statusMessage": "Not Found",
     "resourceType": "exadel-linkchecker/components/gridConfig",
     "statusCode": 404
+  },
+  {
+    "propertyName": "single_prop_internal",
+    "resourcePath": "/content/test-folder/included_by_last_modified",
+    "href": "/content/test-link-included-last-modified",
+    "type": "Internal",
+    "statusMessage": "Not Found",
+    "resourceType": "exadel-linkchecker/components/gridConfig",
+    "statusCode": 404
   }
 ]

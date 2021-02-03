@@ -18,6 +18,7 @@ import org.apache.commons.lang3.time.StopWatch;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceUtil;
+import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -31,12 +32,17 @@ import org.osgi.service.metatype.annotations.Option;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Instant;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -63,7 +69,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
         @AttributeDefinition(
                 name = "Excluded paths",
                 description = "The list of paths excluded from processing. The specified path and all its children " +
-                        "are excluded. The excluded path should not end with slash"
+                        "are excluded. The excluded path should not end with slash. Can be specified as a regex"
         ) String[] excluded_paths() default {};
 
         @AttributeDefinition(
@@ -72,28 +78,14 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
         ) boolean check_activation() default false;
 
         @AttributeDefinition(
-                name = "Links type",
-                description = "The type of links in the report",
-                options = {
-                        @Option(label = "Internal", value = "INTERNAL"),
-                        @Option(label = "External", value = "EXTERNAL"),
-                        @Option(label = "All", value = StringUtils.EMPTY),
-                }
-        )
-        String links_type() default StringUtils.EMPTY;
-
-        @AttributeDefinition(
-                name = "Status codes",
-                description = "The list of status codes allowed for broken links in the report. " +
-                        "Set a single negative value to allow all http error codes"
-        )
-        int[] allowed_status_codes() default {
-                HttpStatus.SC_NOT_FOUND
-        };
+                name = "Last Modified",
+                description = "The content modified before the specified date will be excluded. " +
+                        "Tha date should has the ISO-like date-time format, such as '2011-12-03T10:15:30+01:00'"
+        ) String last_modified_boundary() default StringUtils.EMPTY;
 
         @AttributeDefinition(
                 name = "Excluded properties",
-                description = "The list of properties excluded from processing"
+                description = "The list of properties excluded from processing. Each value can be specified as a regex"
         ) String[] excluded_properties() default {
                 "dam:Comments",
                 "cq:allowedTemplates",
@@ -112,9 +104,34 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
         };
 
         @AttributeDefinition(
-                name = "Excluded sites",
-                description = "The list of sites excluded from processing"
-        ) String[] excluded_sites() default {};
+                name = "Links type",
+                description = "The type of links in the report",
+                options = {
+                        @Option(label = "Internal", value = "INTERNAL"),
+                        @Option(label = "External", value = "EXTERNAL"),
+                        @Option(label = "Internal + External", value = StringUtils.EMPTY),
+                }
+        )
+        String links_type() default StringUtils.EMPTY;
+
+        @AttributeDefinition(
+                name = "Excluded links patterns",
+                description = "Links are excluded from processing if match any of the specified regex patterns"
+        ) String[] excluded_links_patterns() default {};
+
+        @AttributeDefinition(
+                name = "Exclude tags",
+                description = "If checked, the internal links starting with /content/cq:tags will be excluded"
+        ) boolean exclude_tags() default true;
+
+        @AttributeDefinition(
+                name = "Status codes",
+                description = "The list of status codes allowed for broken links in the report. " +
+                        "Set a single negative value to allow all http error codes"
+        )
+        int[] allowed_status_codes() default {
+                HttpStatus.SC_NOT_FOUND
+        };
 
         @AttributeDefinition(
                 name = "Threads per core",
@@ -125,6 +142,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
     private static final Logger LOG = LoggerFactory.getLogger(GridResourcesGenerator.class);
 
     private static final String DEFAULT_SEARCH_PATH = "/content";
+    private static final String TAGS_LOCATION = "/content/cq:tags";
     private static final int DEFAULT_THREADS_PER_CORE = 60;
 
     @Reference
@@ -135,10 +153,12 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
     private String searchPath;
     private String[] excludedPaths;
     private boolean checkActivation;
-    private Link.Type reportLinksType;
-    private int[] allowedStatusCodes;
+    private Instant lastModifiedBoundary;
     private String[] excludedProperties;
-    private String[] excludedSites;
+    private Link.Type reportLinksType;
+    private String[] excludedLinksPatterns;
+    private boolean excludeTags;
+    private int[] allowedStatusCodes;
     private int threadsPerCore;
 
     @Activate
@@ -146,15 +166,21 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
     protected void activate(Configuration configuration) {
         searchPath = configuration.search_path();
         excludedPaths = PropertiesUtil.toStringArray(configuration.excluded_paths());
-        excludedProperties = PropertiesUtil.toStringArray(configuration.excluded_properties());
         checkActivation = configuration.check_activation();
-        excludedSites = PropertiesUtil.toStringArray(configuration.excluded_sites());
-        threadsPerCore = configuration.threads_per_core();
+        lastModifiedBoundary = Optional.of(configuration.last_modified_boundary())
+                .filter(StringUtils::isNotBlank)
+                .map(dateString -> ZonedDateTime.parse(dateString, DateTimeFormatter.ISO_DATE_TIME))
+                .map(ZonedDateTime::toInstant)
+                .orElse(null);
+        excludedProperties = PropertiesUtil.toStringArray(configuration.excluded_properties());
         reportLinksType = Optional.of(configuration.links_type())
                 .filter(StringUtils::isNotBlank)
                 .map(Link.Type::valueOf)
                 .orElse(null);
+        excludedLinksPatterns = PropertiesUtil.toStringArray(configuration.excluded_links_patterns());
+        excludeTags = configuration.exclude_tags();
         allowedStatusCodes = configuration.allowed_status_codes();
+        threadsPerCore = configuration.threads_per_core();
     }
 
     @Override
@@ -234,7 +260,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
     private int getGridResourcesViaTraversing(Resource resource, String gridResourceType,
                                               Map<Link, List<GridResource>> allLinkToGridResourcesMap) {
         int traversedNodesCount = 0;
-        if (!isExcludedPath(resource.getPath()) && isAllowedReplicationStatus(resource)) {
+        if (isAllowedResource(resource)) {
             traversedNodesCount++;
             getLinkToGridResourcesMap(resource, gridResourceType).forEach((k, v) ->
                     allLinkToGridResourcesMap.merge(k, v,
@@ -256,10 +282,9 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
         return ResourceUtil.getValueMap(resource)
                 .entrySet()
                 .stream()
-                .filter(valueMapEntry -> isNonExcludedProperty(valueMapEntry.getKey()))
+                .filter(valueMapEntry -> !isExcludedProperty(valueMapEntry.getKey()))
                 .flatMap(valueMapEntry ->
                         getLinkToGridResourceMap(valueMapEntry.getKey(), valueMapEntry.getValue(), resource, gridResourceType))
-                .filter(linkToGridResource -> !isExcludedSite(linkToGridResource.getKey().getHref()))
                 .collect(Collectors.groupingBy(Map.Entry::getKey,
                         Collectors.mapping(Map.Entry::getValue, Collectors.toList()))
                 );
@@ -268,7 +293,8 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
     private Stream<Map.Entry<Link, GridResource>> getLinkToGridResourceMap(String property, Object propertyValue,
                                                                            Resource resource, String gridResourceType) {
         return linkHelper.getLinkStreamFromProperty(propertyValue)
-                .filter(link -> reportLinksType == null || link.getType().equals(reportLinksType))
+                .filter(this::isAllowedLinkType)
+                .filter(this::isAllowedLink)
                 .collect(Collectors.toMap(Function.identity(),
                         link -> new GridResource(resource.getPath(), property, gridResourceType),
                         (existingValue, newValue) -> existingValue
@@ -277,35 +303,51 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
                 .stream();
     }
 
-    private boolean isNonExcludedProperty(String propertyName) {
-        //java.util.stream.Stream.noneMatch is not used to avoid Stream creation upon each property check
-        for (String excludedProperty : excludedProperties) {
-            if (excludedProperty.equals(propertyName)) {
-                return false;
-            }
-        }
-        return true;
+    private boolean isAllowedResource(Resource resource) {
+        return !isExcludedPath(resource.getPath()) && isAllowedReplicationStatus(resource)
+                && isAllowedLastModifiedDate(resource);
     }
 
-    private boolean isExcludedSite(String link) {
-        for (String excludedSite : excludedSites) {
-            if (StringUtils.isNotBlank(excludedSite) && link.contains(excludedSite)) {
-                return true;
-            }
+    private boolean isAllowedLastModifiedDate(Resource resource) {
+        if (lastModifiedBoundary == null) {
+            return true;
         }
-        return false;
+        ValueMap properties = resource.getValueMap();
+        Date cqLastModified = properties.get(NameConstants.PN_PAGE_LAST_MOD, Date.class);
+        Date jcrLastModified = properties.get(JcrConstants.JCR_LASTMODIFIED, Date.class);
+
+        return Stream.of(cqLastModified, jcrLastModified)
+                .filter(Objects::nonNull)
+                .sorted(Comparator.reverseOrder())
+                .map(Date::toInstant)
+                .findFirst()
+                .map(lastModifiedBoundary::isBefore)
+                .orElse(true);
+    }
+
+    private boolean isAllowedLinkType(Link link) {
+        return reportLinksType == null || reportLinksType == link.getType();
+    }
+
+    private boolean isAllowedLink(Link link) {
+        return !(Link.Type.INTERNAL == link.getType() && isExcludedTag(link.getHref())) &&
+                !isExcludedByPattern(link.getHref());
+    }
+
+    private boolean isExcludedByPattern(String href) {
+        return isStringMatchAnyPattern(href, excludedLinksPatterns);
+    }
+
+    private boolean isExcludedTag(String href) {
+        return excludeTags && href.startsWith(TAGS_LOCATION);
+    }
+
+    private boolean isExcludedProperty(String propertyName) {
+        return isStringMatchAnyPattern(propertyName, excludedProperties);
     }
 
     private boolean isExcludedPath(String path) {
-        if (ArrayUtils.isEmpty(excludedPaths)) {
-            return false;
-        }
-        for (String excludedPath : excludedPaths) {
-            if (StringUtils.isNotBlank(excludedPath) && path.equals(excludedPath)) {
-                return true;
-            }
-        }
-        return false;
+        return isStringMatchAnyPattern(path, excludedPaths);
     }
 
     private boolean isAllowedErrorCode(int linkStatusCode) {
@@ -345,6 +387,18 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
         return Optional.ofNullable(resource.adaptTo(ReplicationStatus.class))
                 .filter(ReplicationStatus::isActivated)
                 .isPresent();
+    }
+
+    private boolean isStringMatchAnyPattern(String value, String[] patterns) {
+        if (ArrayUtils.isEmpty(patterns)) {
+            return false;
+        }
+        for (String pattern : patterns) {
+            if (StringUtils.isNotBlank(pattern) && value.matches(pattern)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Deactivate

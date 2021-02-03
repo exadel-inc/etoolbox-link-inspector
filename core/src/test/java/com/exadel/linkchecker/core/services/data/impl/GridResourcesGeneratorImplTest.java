@@ -53,7 +53,7 @@ class GridResourcesGeneratorImplTest {
     private static final String RESOURCE_RESOLVER_FACTORY_FIELD = "resourceResolverFactory";
     private static final String REPOSITORY_HELPER_FIELD = "repositoryHelper";
     private static final String LINK_HELPER_FIELD = "linkHelper";
-    private static final String REAL_DATAFEED_PATH = "/apps/exadel-linkchecker/components/content/data/datafeed.json";
+    private static final String REAL_DATAFEED_PATH = "/content/exadel-linkchecker/data/datafeed.json";
     private static final String EXECUTOR_SERVICE_FIELD = "executorService";
     private static final String EXTERNAL_LINK_CHECKER_FIELD = "externalLinkChecker";
     private static final String GRID_RESOURCE_TYPE = "exadel-linkchecker/components/gridConfig";
@@ -62,10 +62,12 @@ class GridResourcesGeneratorImplTest {
     private static final String TEST_RESOURCES_TREE_PATH = "/com/exadel/linkchecker/core/services/data/impl/resources.json";
     private static final String TEST_FOLDER_PATH = "/content/test-folder";
     private static final String TEST_EXCLUDED_PROPERTY = "excluded_prop";
-    private static final String TEST_EXCLUDED_SITE = "linkedin.com";
-    private static final String TEST_EXCLUDED_PATH = "/content/test-folder/excluded";
+    private static final String TEST_LAST_MODIFIED_BOUNDARY = "2021-04-05T05:00:00Z";
+    private static final String TEST_EXCLUDED_PATTERN = "/content(.*)/test-exclude-pattern(.*)";
+    private static final String TEST_EXCLUDED_PATH = "/content/test-folder/excluded_by_path";
     private static final String TEST_EXCLUDED_LINK = "/content/test-link-excluded-1";
     private static final String TEST_EXCLUDED_CHILD_LINK = "/content/test-link-excluded-2";
+    private static final String TEST_EXCLUDED_BY_LAST_MODIFIED = "/content/test-link-excluded-last-modified";
 
     /**
      * Constants related to replication status check
@@ -157,6 +159,19 @@ class GridResourcesGeneratorImplTest {
                 .noneMatch(href ->
                         href.equals(TEST_EXCLUDED_LINK) || href.equals(TEST_EXCLUDED_CHILD_LINK)
                 );
+
+        assertTrue(notContainsExcluded);
+    }
+
+    @Test
+    void testLastModified() {
+        setUpConfig(fixture);
+        context.load().json(TEST_RESOURCES_TREE_PATH, TEST_FOLDER_PATH);
+
+        List<GridResource> gridResources = fixture.generateGridResources(GRID_RESOURCE_TYPE, context.resourceResolver());
+        boolean notContainsExcluded = gridResources.stream()
+                .map(GridResource::getHref)
+                .noneMatch(TEST_EXCLUDED_BY_LAST_MODIFIED::equals);
 
         assertTrue(notContainsExcluded);
     }
@@ -299,8 +314,12 @@ class GridResourcesGeneratorImplTest {
         String[] excludedProps = {TEST_EXCLUDED_PROPERTY};
         when(config.excluded_properties()).thenReturn(excludedProps);
 
-        String[] excludedSites = {TEST_EXCLUDED_SITE};
-        when(config.excluded_sites()).thenReturn(excludedSites);
+        when(config.last_modified_boundary()).thenReturn(TEST_LAST_MODIFIED_BOUNDARY);
+
+        String[] excludedPatterns = {TEST_EXCLUDED_PATTERN};
+        when(config.excluded_links_patterns()).thenReturn(excludedPatterns);
+
+        when(config.exclude_tags()).thenReturn(true);
 
         return config;
     }

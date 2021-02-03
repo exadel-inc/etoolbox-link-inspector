@@ -5,12 +5,11 @@ import com.exadel.linkchecker.core.models.LinkStatus;
 import com.exadel.linkchecker.core.services.ExternalLinkChecker;
 import com.exadel.linkchecker.core.services.helpers.LinkHelper;
 import com.exadel.linkchecker.core.services.util.LinkCheckerResourceUtil;
-import com.exadel.linkchecker.core.services.util.constants.CommonConstants;
 import org.apache.commons.httpclient.ConnectionPoolTimeoutException;
 import org.apache.commons.httpclient.HttpStatus;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceUtil;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
@@ -59,14 +58,13 @@ public class LinkHelperImpl implements LinkHelper {
 
     @Override
     public Stream<String> getInternalLinksFromString(String text) {
-        return getLinksByPattern(text, PATTERN_INTERNAL_LINK)
-//                todo - exclude .html from internal links via regex
-                .map(internalLink -> StringUtils.substringBefore(internalLink, CommonConstants.HTML_EXTENSION));
+        return getLinksByPattern(text, PATTERN_INTERNAL_LINK);
     }
 
     @Override
     public LinkStatus validateInternalLink(String link, ResourceResolver resourceResolver) {
-        return Optional.ofNullable(resourceResolver.getResource(link))
+        return Optional.of(resourceResolver.resolve(link))
+                .filter(resource -> !ResourceUtil.isNonExistingResource(resource))
                 .map(resource -> new LinkStatus(HttpStatus.SC_OK, HttpStatus.getStatusText(HttpStatus.SC_OK)))
                 .orElse(new LinkStatus(HttpStatus.SC_NOT_FOUND, HttpStatus.getStatusText(HttpStatus.SC_NOT_FOUND)));
     }

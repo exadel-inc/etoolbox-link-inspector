@@ -104,14 +104,6 @@ class LinkHelperImplTest {
     }
 
     @Test
-    void shouldReturnSingleValidInternalNoHtmlExtension() {
-        String expectedLinkValue = StringUtils.substringBefore(VALID_INTERNAL_HTML_EXTENSION, CommonConstants.HTML_EXTENSION);
-
-        testGetSingleLinkFromText(VALID_INTERNAL_HTML_EXTENSION, expectedLinkValue);
-        testGetSingleLinkFromText(String.format(SINGLE_LINK_HTML_TAG_PLACEHOLDER, VALID_INTERNAL_HTML_EXTENSION), expectedLinkValue);
-    }
-
-    @Test
     void shouldReturnSingleValidInternalWithSpaces() {
         testGetSingleLink(VALID_INTERNAL_SPACES);
         testGetSingleLinkFromText(String.format(SINGLE_LINK_HTML_TAG_PLACEHOLDER, VALID_INTERNAL_SPACES), VALID_INTERNAL_SPACES);

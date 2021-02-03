@@ -81,7 +81,7 @@ class ReplaceByPatternServletTest {
     private static final String TEST_RESOURCE_PATH_3 = "/content/test-folder/test-resource3";
     private static final String TEST_PROPERTY_3 = "test3";
     private static final String TEST_DATAFEED_PATH = "/com/exadel/linkchecker/core/servlets/datafeed.json";
-    private static final String REAL_DATAFEED_PATH = "/apps/exadel-linkchecker/components/content/data/datafeed.json";
+    private static final String REAL_DATAFEED_PATH = "/content/exadel-linkchecker/data/datafeed.json";
     private static final String TEST_RESOURCES_TREE_PATH = "/com/exadel/linkchecker/core/servlets/resources.json";
     private static final String TEST_FOLDER_PATH = "/content/test-folder";
     private static final String TEST_EXCEPTION_MSG = "Test exception message";

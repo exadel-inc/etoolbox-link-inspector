@@ -7,7 +7,7 @@
     "single_prop_rte": "Lorem ipsum dolor sit amet <a href=\"/content/test-link-internal-2\"></a>, sed do https://www.google.com/test-external-2.html eiusmod tempor",
     "multi_prop_rte": ["/content/test-link-internal-3", "https://www.google.com/test-external-3.html","Lorem ipsum dolor sit amet <a href=\"/content/test-link-internal-4\"></a>, sed do https://www.google.com/test-external-4.html eiusmod tempor"],
     "excluded_prop": "/content/test-link-internal-1",
-    "excluded_site": "https://www.linkedin.com/test-external-1.html"
+    "excluded_by_pattern": "/content/test-exclude-pattern/link-1"
   },
   "test-resource2": {
     "jcr:primaryType": "nt:unstructured",
@@ -23,12 +23,23 @@
     "single_prop_rte": "Lorem ipsum dolor sit amet <a href=\"/content/test-link-internal-2\"></a>, sed do https://www.google.com/test-external-2.html eiusmod tempor <a href=\"/content/test-link-internal-2\"></a>",
     "multi_prop_rte": ["/content/test-link-internal-3", "https://www.google.com/test-external-3.html","Lorem ipsum dolor sit amet <a href=\"/content/test-link-internal-4\"></a>, sed do https://www.google.com/test-external-4.html eiusmod tempor"]
   },
-  "excluded": {
+  "excluded_by_path": {
     "jcr:primaryType": "nt:unstructured",
     "single_prop_internal": "/content/test-link-excluded-1",
     "excluded_child": {
       "jcr:primaryType": "nt:unstructured",
       "single_prop_internal": "/content/test-link-excluded-2"
     }
+  },
+  "included_by_last_modified": {
+    "jcr:primaryType": "nt:unstructured",
+    "cq:lastModified": "2021-05-05T05:00:00.000Z",
+    "jcr:lastModified": "2021-03-05T05:00:00.000Z",
+    "single_prop_internal": "/content/test-link-included-last-modified"
+  },
+  "excluded_by_last_modified": {
+    "jcr:primaryType": "nt:unstructured",
+    "cq:lastModified": "2021-03-05T05:00:00.000Z",
+    "single_prop_internal": "/content/test-link-excluded-last-modified"
   }
 }

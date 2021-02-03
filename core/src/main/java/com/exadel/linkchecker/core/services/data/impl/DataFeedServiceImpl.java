@@ -9,7 +9,6 @@ import com.exadel.linkchecker.core.services.data.GridResourcesGenerator;
 import com.exadel.linkchecker.core.services.util.CsvUtil;
 import com.exadel.linkchecker.core.services.util.JsonUtil;
 import com.exadel.linkchecker.core.services.util.LinkCheckerResourceUtil;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.sling.api.resource.PersistenceException;
@@ -51,7 +50,7 @@ public class DataFeedServiceImpl implements DataFeedService {
     private static final String GRID_RESOURCE_TYPE = "exadel-linkchecker/components/gridConfig";
     public static final int UI_ITEMS_LIMIT = 500;
 
-    public static final String JSON_FEED_PATH = "/apps/exadel-linkchecker/components/content/data/datafeed.json";
+    public static final String JSON_FEED_PATH = "/content/exadel-linkchecker/data/datafeed.json";
 
     public static final String CSV_REPORT_PATH = "/content/exadel-linkchecker/download/report.csv";
     private static final String[] CSV_COLUMNS = {

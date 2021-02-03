@@ -47,7 +47,7 @@ class DataFeedServiceImplTest {
     private static final String LINK_HELPER_FIELD = "linkHelper";
     private static final String EXTERNAL_LINK_CHECKER_FIELD = "externalLinkChecker";
 
-    private static final String DATAFEED_PATH = "/apps/exadel-linkchecker/components/content/data/datafeed.json";
+    private static final String DATAFEED_PATH = "/content/exadel-linkchecker/data/datafeed.json";
     private static final String CSV_REPORT_PATH = "/content/exadel-linkchecker/download/report.csv";
 
     private static final String TEST_RESOURCES_TREE_PATH = "/com/exadel/linkchecker/core/services/data/impl/resources.json";
