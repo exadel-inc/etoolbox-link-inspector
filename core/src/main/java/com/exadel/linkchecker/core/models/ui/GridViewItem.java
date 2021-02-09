@@ -1,4 +1,4 @@
-package com.exadel.linkchecker.core.models;
+package com.exadel.linkchecker.core.models.ui;
 
 import com.day.cq.commons.jcr.JcrUtil;
 import com.day.cq.wcm.api.Page;
@@ -6,7 +6,6 @@ import com.day.cq.wcm.api.PageManager;
 import com.day.cq.wcm.api.components.Component;
 import com.day.cq.wcm.api.components.ComponentManager;
 import com.exadel.linkchecker.core.services.data.models.GridResource;
-import com.exadel.linkchecker.core.services.util.constants.CommonConstants;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
@@ -37,8 +36,10 @@ public class GridViewItem {
     //Note: CRX DE is not available in AEMaaCS
     public static final String CRX_DE_LINK = "/crx/de/index.jsp#";
 
-    public static final String THUMBNAIL_PATH = "/etc.clientlibs/exadel-linkchecker/clientlibs/link-checker-ui/resources/thumbnail.png";
+    public static final String THUMBNAIL_PATH =
+            "/etc.clientlibs/exadel-linkchecker/clientlibs/link-checker-ui/resources/thumbnail.png";
     public static final String SLASH_CHAR = "/";
+    public static final String HTML_EXTENSION = ".html";
 
     @SlingObject
     private ResourceResolver resourceResolver;
@@ -83,7 +84,7 @@ public class GridViewItem {
 
         Optional<Page> pageOptional = Optional.ofNullable(resourceResolver.adaptTo(PageManager.class))
                 .map(pageManager -> pageManager.getContainingPage(resourceToShow));
-        pagePath = pageOptional.map(page -> EDITOR_LINK + page.getPath() + CommonConstants.HTML_EXTENSION)
+        pagePath = pageOptional.map(page -> EDITOR_LINK + page.getPath() + HTML_EXTENSION)
                 .orElse(path);
         pageTitle = pageOptional.map(Page::getTitle).orElse(StringUtils.EMPTY);
         isValidPage = pageOptional.isPresent();

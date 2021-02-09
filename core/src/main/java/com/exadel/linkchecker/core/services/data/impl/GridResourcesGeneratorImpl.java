@@ -6,20 +6,24 @@ import com.day.cq.replication.ReplicationStatus;
 import com.day.cq.wcm.api.NameConstants;
 import com.day.crx.JcrConstants;
 import com.exadel.linkchecker.core.models.LinkStatus;
+import com.exadel.linkchecker.core.services.data.GenerationStatsProps;
 import com.exadel.linkchecker.core.services.data.models.GridResource;
 import com.exadel.linkchecker.core.models.Link;
 import com.exadel.linkchecker.core.services.data.GridResourcesGenerator;
 import com.exadel.linkchecker.core.services.helpers.LinkHelper;
+import com.exadel.linkchecker.core.services.util.LinkCheckerResourceUtil;
 import com.exadel.linkchecker.core.services.util.LinksCounter;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.StopWatch;
+import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceUtil;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.commons.osgi.PropertiesUtil;
+import org.apache.sling.jcr.resource.api.JcrResourceConstants;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -32,7 +36,6 @@ import org.osgi.service.metatype.annotations.Option;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
@@ -109,10 +112,13 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
                 options = {
                         @Option(label = "Internal", value = "INTERNAL"),
                         @Option(label = "External", value = "EXTERNAL"),
-                        @Option(label = "Internal + External", value = StringUtils.EMPTY),
+                        @Option(
+                                label = GenerationStatsProps.REPORT_LINKS_TYPE_ALL,
+                                value = GenerationStatsProps.REPORT_LINKS_TYPE_ALL
+                        ),
                 }
         )
-        String links_type() default StringUtils.EMPTY;
+        String links_type() default GenerationStatsProps.REPORT_LINKS_TYPE_ALL;
 
         @AttributeDefinition(
                 name = "Excluded links patterns",
@@ -142,8 +148,10 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
     private static final Logger LOG = LoggerFactory.getLogger(GridResourcesGenerator.class);
 
     private static final String DEFAULT_SEARCH_PATH = "/content";
-    private static final String TAGS_LOCATION = "/content/cq:tags";
     private static final int DEFAULT_THREADS_PER_CORE = 60;
+
+    private static final String TAGS_LOCATION = "/content/cq:tags";
+    public static final String STATS_RESOURCE_PATH = "/content/exadel-linkchecker/data/stats";
 
     @Reference
     private LinkHelper linkHelper;
@@ -153,9 +161,9 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
     private String searchPath;
     private String[] excludedPaths;
     private boolean checkActivation;
-    private Instant lastModifiedBoundary;
+    private ZonedDateTime lastModifiedBoundary;
     private String[] excludedProperties;
-    private Link.Type reportLinksType;
+    private String reportLinksType;
     private String[] excludedLinksPatterns;
     private boolean excludeTags;
     private int[] allowedStatusCodes;
@@ -170,13 +178,9 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
         lastModifiedBoundary = Optional.of(configuration.last_modified_boundary())
                 .filter(StringUtils::isNotBlank)
                 .map(dateString -> ZonedDateTime.parse(dateString, DateTimeFormatter.ISO_DATE_TIME))
-                .map(ZonedDateTime::toInstant)
                 .orElse(null);
         excludedProperties = PropertiesUtil.toStringArray(configuration.excluded_properties());
-        reportLinksType = Optional.of(configuration.links_type())
-                .filter(StringUtils::isNotBlank)
-                .map(Link.Type::valueOf)
-                .orElse(null);
+        reportLinksType = configuration.links_type();
         excludedLinksPatterns = PropertiesUtil.toStringArray(configuration.excluded_links_patterns());
         excludeTags = configuration.exclude_tags();
         allowedStatusCodes = configuration.allowed_status_codes();
@@ -202,6 +206,8 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
         if (linkToGridResourcesMap.isEmpty()) {
             LOG.warn("Collecting broken links is completed in {} ms, path: {}. No broken links were found after traversing",
                     stopWatch.getTime(TimeUnit.MILLISECONDS), searchPath);
+            LinksCounter emptyCounter = new LinksCounter();
+            saveStatsToJcr(emptyCounter, emptyCounter, resourceResolver);
             return Collections.emptyList();
         }
 
@@ -219,14 +225,14 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
 
     private Set<GridResource> validateLinksInParallel(Map<Link, List<GridResource>> linkToGridResourcesMap,
                                                       ResourceResolver resourceResolver) {
-        LinksCounter linksCounter = new LinksCounter();
+        LinksCounter allLinksCounter = new LinksCounter();
         LinksCounter brokenLinksCounter = new LinksCounter();
         executorService =
                 Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() * threadsPerCore);
         Set<GridResource> gridResources = new CopyOnWriteArraySet<>();
         try {
             linkToGridResourcesMap.forEach((link, resources) -> {
-                        linksCounter.countValidatedLinks(link);
+                        allLinksCounter.countValidatedLinks(link);
                         executorService.submit(() -> {
                                     LinkStatus status = linkHelper.validateLink(link, resourceResolver);
                                     if (!status.isValid() && isAllowedErrorCode(status.getStatusCode())) {
@@ -249,11 +255,14 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
             executorService.shutdownNow();
             Thread.currentThread().interrupt();
         }
-        LOG.debug("Checked internal links count: {}", linksCounter.getInternalLinks());
-        LOG.debug("Checked external links count: {}", linksCounter.getExternalLinks());
+        LOG.debug("Checked internal links count: {}", allLinksCounter.getInternalLinks());
+        LOG.debug("Checked external links count: {}", allLinksCounter.getExternalLinks());
 
         LOG.debug("Broken internal links count: {}", brokenLinksCounter.getInternalLinks());
         LOG.debug("Broken external links count: {}", brokenLinksCounter.getExternalLinks());
+
+        saveStatsToJcr(allLinksCounter, brokenLinksCounter, resourceResolver);
+
         return gridResources;
     }
 
@@ -321,12 +330,13 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
                 .sorted(Comparator.reverseOrder())
                 .map(Date::toInstant)
                 .findFirst()
-                .map(lastModifiedBoundary::isBefore)
+                .map(lastModified -> lastModifiedBoundary.toInstant().isBefore(lastModified))
                 .orElse(true);
     }
 
     private boolean isAllowedLinkType(Link link) {
-        return reportLinksType == null || reportLinksType == link.getType();
+        return GenerationStatsProps.REPORT_LINKS_TYPE_ALL.equals(reportLinksType) ||
+                Link.Type.valueOf(reportLinksType) == link.getType();
     }
 
     private boolean isAllowedLink(Link link) {
@@ -399,6 +409,53 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
             }
         }
         return false;
+    }
+
+    private void saveStatsToJcr(LinksCounter allLinksCounter, LinksCounter brokenLinksCounter, ResourceResolver resourceResolver) {
+        try {
+            LinkCheckerResourceUtil.removeResource(STATS_RESOURCE_PATH, resourceResolver);
+            ResourceUtil.getOrCreateResource(
+                    resourceResolver,
+                    STATS_RESOURCE_PATH,
+                    getGenerationStatsMap(allLinksCounter, brokenLinksCounter),
+                    JcrResourceConstants.NT_SLING_FOLDER,
+                    true
+            );
+        } catch (PersistenceException e) {
+            LOG.error(String.format("Failed to create the resource %s", STATS_RESOURCE_PATH), e);
+        }
+    }
+
+    public Map<String, Object> getGenerationStatsMap(LinksCounter allLinksCounter, LinksCounter brokenLinksCounter) {
+        Map<String, Object> stats = new HashMap<>();
+
+        stats.put(JcrResourceConstants.SLING_RESOURCE_TYPE_PROPERTY, JcrConstants.NT_UNSTRUCTURED);
+
+        stats.put(GenerationStatsProps.PN_LAST_GENERATED,
+                ZonedDateTime.now().format(DateTimeFormatter.RFC_1123_DATE_TIME));
+        stats.put(GenerationStatsProps.PN_SEARCH_PATH, searchPath);
+        stats.put(GenerationStatsProps.PN_EXCLUDED_PATHS, excludedPaths);
+        stats.put(GenerationStatsProps.PN_CHECK_ACTIVATION, checkActivation);
+        stats.put(GenerationStatsProps.PN_LAST_MODIFIED_BOUNDARY, dateToIsoDateTimeString(lastModifiedBoundary));
+        stats.put(GenerationStatsProps.PN_EXCLUDED_PROPERTIES, excludedProperties);
+
+        stats.put(GenerationStatsProps.PN_REPORT_LINKS_TYPE, reportLinksType);
+        stats.put(GenerationStatsProps.PN_EXCLUDED_LINK_PATTERNS, excludedLinksPatterns);
+        stats.put(GenerationStatsProps.PN_EXCLUDED_TAGS, excludeTags);
+        stats.put(GenerationStatsProps.PN_ALLOWED_STATUS_CODES, allowedStatusCodes);
+
+        stats.put(GenerationStatsProps.PN_ALL_INTERNAL_LINKS, allLinksCounter.getInternalLinks());
+        stats.put(GenerationStatsProps.PN_BROKEN_INTERNAL_LINKS, brokenLinksCounter.getInternalLinks());
+        stats.put(GenerationStatsProps.PN_ALL_EXTERNAL_LINKS, allLinksCounter.getExternalLinks());
+        stats.put(GenerationStatsProps.PN_BROKEN_EXTERNAL_LINKS, brokenLinksCounter.getExternalLinks());
+
+        return stats;
+    }
+
+    private String dateToIsoDateTimeString(ZonedDateTime zonedDateTime) {
+        return Optional.ofNullable(zonedDateTime)
+                .map(date -> date.format(DateTimeFormatter.ISO_DATE_TIME))
+                .orElse(StringUtils.EMPTY);
     }
 
     @Deactivate

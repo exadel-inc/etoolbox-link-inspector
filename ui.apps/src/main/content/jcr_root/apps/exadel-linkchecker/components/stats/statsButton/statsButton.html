@@ -1,0 +1,8 @@
+<sly data-sly-use.model="${'com.exadel.linkchecker.core.models.ui.StatsButton' @ statsResourcePath=properties.path}"
+     data-sly-test="${model.isStatsResourceExist}">
+    <button is="coral-button" id="statsPopover">Stats</button>
+    <coral-popover placement="bottom" target="#statsPopover" class="elc-coral-popover">
+        <sly data-sly-resource="${properties.path @ resourceType='/apps/exadel-linkchecker/components/stats/statsModal'}"></sly>
+        <coral-popover-header>Last Run Details</coral-popover-header>
+    </coral-popover>
+</sly>

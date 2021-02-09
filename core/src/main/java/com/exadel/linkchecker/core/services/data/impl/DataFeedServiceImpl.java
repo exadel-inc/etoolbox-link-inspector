@@ -1,7 +1,7 @@
 package com.exadel.linkchecker.core.services.data.impl;
 
 import com.adobe.granite.ui.components.ds.ValueMapResource;
-import com.exadel.linkchecker.core.models.GridViewItem;
+import com.exadel.linkchecker.core.models.ui.GridViewItem;
 import com.exadel.linkchecker.core.services.helpers.RepositoryHelper;
 import com.exadel.linkchecker.core.services.data.models.GridResource;
 import com.exadel.linkchecker.core.services.data.DataFeedService;

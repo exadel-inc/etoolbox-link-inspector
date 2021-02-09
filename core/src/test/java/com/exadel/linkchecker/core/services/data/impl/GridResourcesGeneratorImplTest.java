@@ -4,6 +4,7 @@ import com.day.cq.replication.ReplicationStatus;
 import com.exadel.linkchecker.core.models.Link;
 import com.exadel.linkchecker.core.services.ExternalLinkChecker;
 import com.exadel.linkchecker.core.services.data.DataFeedService;
+import com.exadel.linkchecker.core.services.data.GenerationStatsProps;
 import com.exadel.linkchecker.core.services.data.models.GridResource;
 import com.exadel.linkchecker.core.services.helpers.LinkHelper;
 import com.exadel.linkchecker.core.services.helpers.RepositoryHelper;
@@ -14,7 +15,7 @@ import io.wcm.testing.mock.aem.junit5.AemContextExtension;
 import junitx.util.PrivateAccessor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.httpclient.HttpStatus;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
@@ -281,6 +282,8 @@ class GridResourcesGeneratorImplTest {
     private void setUpConfigNoExcludedPaths(GridResourcesGeneratorImpl gridResourcesGenerator) {
         GridResourcesGeneratorImpl.Configuration config = mockConfig();
 
+        when(config.excluded_paths()).thenReturn(ArrayUtils.EMPTY_STRING_ARRAY);
+
         int[] defaultStatusCodes = {HttpStatus.SC_NOT_FOUND};
         when(config.allowed_status_codes()).thenReturn(defaultStatusCodes);
 
@@ -292,11 +295,19 @@ class GridResourcesGeneratorImplTest {
 
         when(config.check_activation()).thenReturn(true);
 
+        int[] defaultStatusCodes = {HttpStatus.SC_NOT_FOUND};
+        when(config.allowed_status_codes()).thenReturn(defaultStatusCodes);
+
+        String[] excludedPaths = {TEST_EXCLUDED_PATH};
+        when(config.excluded_paths()).thenReturn(excludedPaths);
+
         gridResourcesGenerator.activate(config);
     }
 
     private void setUpConfigNoStatusCodes(GridResourcesGeneratorImpl gridResourcesGenerator) {
         GridResourcesGeneratorImpl.Configuration config = mockConfig();
+
+        when(config.allowed_status_codes()).thenReturn(ArrayUtils.EMPTY_INT_ARRAY);
 
         String[] excludedPaths = {TEST_EXCLUDED_PATH};
         when(config.excluded_paths()).thenReturn(excludedPaths);
@@ -308,7 +319,7 @@ class GridResourcesGeneratorImplTest {
         GridResourcesGeneratorImpl.Configuration config = mock(GridResourcesGeneratorImpl.Configuration.class);
         when(config.search_path()).thenReturn(TEST_FOLDER_PATH);
 
-        when(config.links_type()).thenReturn(StringUtils.EMPTY);
+        when(config.links_type()).thenReturn(GenerationStatsProps.REPORT_LINKS_TYPE_ALL);
         when(config.threads_per_core()).thenReturn(60);
 
         String[] excludedProps = {TEST_EXCLUDED_PROPERTY};

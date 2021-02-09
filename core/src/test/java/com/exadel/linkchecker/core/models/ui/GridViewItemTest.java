@@ -1,10 +1,10 @@
-package com.exadel.linkchecker.core.models;
+package com.exadel.linkchecker.core.models.ui;
 
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.wcm.api.NameConstants;
 import com.day.cq.wcm.api.Page;
+import com.exadel.linkchecker.core.models.Link;
 import com.exadel.linkchecker.core.services.data.models.GridResource;
-import com.exadel.linkchecker.core.services.util.constants.CommonConstants;
 import io.wcm.testing.mock.aem.junit5.AemContext;
 import io.wcm.testing.mock.aem.junit5.AemContextExtension;
 import junitx.util.PrivateAccessor;
@@ -27,6 +27,7 @@ class GridViewItemTest {
     private static final String MODELS_PACKAGE = "com.exadel.linkchecker.core.models";
     private static final String COMPONENT_TYPE_FIELD = "componentType";
     private static final String GRID_RESOURCE_TYPE = "exadel-linkchecker/components/gridConfig";
+    private static final String HTML_EXTENSION = ".html";
 
     private static final String TEST_COMPONENT_TYPE = "/apps/exadel-linkchecker/components/test-component";
     private static final String TEST_COMPONENT_NAME = "Test Component";
@@ -121,7 +122,7 @@ class GridViewItemTest {
     @Test
     void testPagePath() {
         setupFullParamSet();
-        String expectedPath = GridViewItem.EDITOR_LINK + TEST_PAGE_PATH + CommonConstants.HTML_EXTENSION;
+        String expectedPath = GridViewItem.EDITOR_LINK + TEST_PAGE_PATH + HTML_EXTENSION;
         assertEquals(expectedPath, viewItem.getPagePath());
     }
 

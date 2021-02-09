@@ -1,0 +1,30 @@
+<sly data-sly-use.model="com.exadel.linkchecker.core.models.ui.StatsModal">
+        <coral-popover-content>
+            <sly data-sly-call="${field @ title='Last generated', value=model.lastGenerated}"></sly>
+            <sly data-sly-call="${field @ title='Search path', value=model.searchPath}"></sly>
+            <sly data-sly-call="${field @ title='Excluded paths', value=model.excludedPaths}"></sly>
+            <sly data-sly-call="${field @ title='Activated content only', value=model.checkActivation}"></sly>
+            <sly data-sly-call="${field @ title='Last Modified Boundary', value=model.lastModifiedBoundary}"></sly>
+            <sly data-sly-call="${field @ title='Excluded Properties', value=model.excludedProperties}"></sly>
+
+            <sly data-sly-call="${field @ title='Links Type', value=model.reportLinksType}"></sly>
+            <sly data-sly-call="${field @ title='Excluded Links Patterns', value=model.excludedLinksPatterns}"></sly>
+            <sly data-sly-call="${field @ title='Exclude Tags', value=model.excludeTags}"></sly>
+            <sly data-sly-call="${field @ title='HTTP Status Codes', value=model.allowedStatusCodes}"></sly>
+
+            <sly data-sly-call="${linkField @ title='Internal Links (All/Broken)', allLinksNumber=model.allInternalLinks, brokenLinksNumber=model.brokenInternalLinks}"></sly>
+            <sly data-sly-call="${linkField @ title='External Links (All/Broken)', allLinksNumber=model.allExternalLinks, brokenLinksNumber=model.brokenExternalLinks}"></sly>
+        </coral-popover-content>
+</sly>
+
+<template data-sly-template.field="${@ title, value}">
+    <p class="u-coral-margin" data-sly-test="${value}">
+        ${title}: <em>${value}</em>
+    </p>
+</template>
+
+<template data-sly-template.linkField="${@ title, allLinksNumber, brokenLinksNumber}">
+    <p class="u-coral-margin" data-sly-test="${allLinksNumber}">
+        ${title}: <strong><em>${allLinksNumber}/${brokenLinksNumber}</em></strong>
+    </p>
+</template>

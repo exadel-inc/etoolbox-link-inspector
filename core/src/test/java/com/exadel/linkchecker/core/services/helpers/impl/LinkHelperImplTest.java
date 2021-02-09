@@ -3,12 +3,10 @@ package com.exadel.linkchecker.core.services.helpers.impl;
 import com.exadel.linkchecker.core.models.Link;
 import com.exadel.linkchecker.core.models.LinkStatus;
 import com.exadel.linkchecker.core.services.ExternalLinkChecker;
-import com.exadel.linkchecker.core.services.util.constants.CommonConstants;
 import io.wcm.testing.mock.aem.junit5.AemContext;
 import io.wcm.testing.mock.aem.junit5.AemContextExtension;
 import junitx.util.PrivateAccessor;
 import org.apache.commons.httpclient.HttpStatus;
-import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,7 +34,6 @@ class LinkHelperImplTest {
 
     private static final String VALID_INTERNAL = "/content/test";
     private static final String VALID_INTERNAL_EXTENSION = "/content/test.png";
-    private static final String VALID_INTERNAL_HTML_EXTENSION = "/content/test.html";
     private static final String VALID_INTERNAL_SPACES = "/content/test with spaces";
     private static final String VALID_INTERNAL_SPACES_EXTENSION = "/content/test with spaces.png";
     private static final String INVALID_INTERNAL = "/test";
