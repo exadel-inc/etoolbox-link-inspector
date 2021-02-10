@@ -31,12 +31,24 @@ tr.elc-card {
   }
 }
 .els-component-col {
-  max-width: 450px;
+  max-width: 350px;
+  // Fallback for browsers that not support word-break: break-word
+  word-break: normal;
+  word-break: break-word;
+}
+.els-page-col {
+  max-width: 250px;
+  overflow: hidden;
+}
+.els-status-msg-col {
+  max-width: 200px;
 }
 .els-property-col {
   margin: 0.2rem 0;
-  max-width: 450px;
-  overflow: hidden;
+  max-width: 550px;
+  // Fallback for browsers that not support word-break: break-word
+  word-break: normal;
+  word-break: break-word;
 }
 
 .elc-coral-alert {

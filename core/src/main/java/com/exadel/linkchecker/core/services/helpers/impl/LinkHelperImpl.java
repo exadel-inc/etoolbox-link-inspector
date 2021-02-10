@@ -16,8 +16,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.SocketTimeoutException;
 import java.net.URISyntaxException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Optional;
@@ -33,7 +36,7 @@ public class LinkHelperImpl implements LinkHelper {
     private static final Logger LOG = LoggerFactory.getLogger(LinkHelper.class);
 
     private static final Pattern PATTERN_EXTERNAL_LINK = Pattern.compile("(https?://(?:www\\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\\.[^\\s\"'<]{2,}|www\\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\\.[^\\s\"'<]{2,}|https?://(?:www\\.|(?!www))[a-zA-Z0-9]+\\.[^\\s\"'<]{2,}|www\\.[a-zA-Z0-9]+\\.[^\\s\"'<]{2,})");
-    private static final Pattern PATTERN_INTERNAL_LINK = Pattern.compile("(^|(?<=\"))/content/([-a-zA-Z0-9:%_+.~#?&/=\\s]*)");
+    private static final Pattern PATTERN_INTERNAL_LINK = Pattern.compile("(^|(?<=\"))/content/([-a-zA-Z0-9():%_+.~#?&/=\\s]*)");
 
     @Reference
     private ExternalLinkChecker externalLinkChecker;
@@ -63,10 +66,14 @@ public class LinkHelperImpl implements LinkHelper {
 
     @Override
     public LinkStatus validateInternalLink(String link, ResourceResolver resourceResolver) {
-        return Optional.of(resourceResolver.resolve(link))
-                .filter(resource -> !ResourceUtil.isNonExistingResource(resource))
-                .map(resource -> new LinkStatus(HttpStatus.SC_OK, HttpStatus.getStatusText(HttpStatus.SC_OK)))
-                .orElse(new LinkStatus(HttpStatus.SC_NOT_FOUND, HttpStatus.getStatusText(HttpStatus.SC_NOT_FOUND)));
+        LinkStatus status = resolveInternalLink(link, resourceResolver);
+        if (!status.isValid()) {
+            String decodedLink = decodeLink(link);
+            if (!decodedLink.equals(link)) {
+                status = resolveInternalLink(decodedLink, resourceResolver);
+            }
+        }
+        return status;
     }
 
     @Override
@@ -122,6 +129,13 @@ public class LinkHelperImpl implements LinkHelper {
                 .orElse(false);
     }
 
+    private LinkStatus resolveInternalLink(String link, ResourceResolver resourceResolver) {
+        return Optional.of(resourceResolver.resolve(link))
+                .filter(resource -> !ResourceUtil.isNonExistingResource(resource))
+                .map(resource -> new LinkStatus(HttpStatus.SC_OK, HttpStatus.getStatusText(HttpStatus.SC_OK)))
+                .orElse(new LinkStatus(HttpStatus.SC_NOT_FOUND, HttpStatus.getStatusText(HttpStatus.SC_NOT_FOUND)));
+    }
+
     private Stream<Link> getLinksStream(String text) {
         Stream<Link> internalLinksStream = getInternalLinksFromString(text)
                 .map(linkString -> new Link(linkString, Link.Type.INTERNAL))
@@ -162,6 +176,15 @@ public class LinkHelperImpl implements LinkHelper {
                 .map(currentLinkToReplace ->
                         LinkCheckerResourceUtil.replaceStringInPropValue(value, currentLinkToReplace, newLink))
                 .orElse(null);
+    }
+
+    private String decodeLink(String link) {
+        try {
+            return URLDecoder.decode(link, StandardCharsets.UTF_8.name());
+        } catch (UnsupportedEncodingException e) {
+            LOG.error("Failed to decode a link", e);
+        }
+        return link;
     }
 
     private String logValidationError(Exception e, String link) {

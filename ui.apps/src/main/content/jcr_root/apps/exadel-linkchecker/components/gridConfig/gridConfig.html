@@ -21,19 +21,23 @@
     </td>
 
     <td class="foundation-collection-item-keys" is="coral-table-cell">
-        ${model.linkStatusMessage}
+        <div class="els-status-msg-col">
+            ${model.linkStatusMessage}
+        </div>
     </td>
 
     <td class="foundation-collection-item-keys" is="coral-table-cell">
-        <sly data-sly-test.isValidPage="${model.isValidPage}">
-            <a href="${model.pagePath}" target="_blank"
-               x-cq-linkchecker="skip">
-                ${model.pageTitle}
-            </a>
-        </sly>
-        <sly data-sly-test="${!isValidPage}">
-            <span>${model.pagePath}</span>
-        </sly>
+        <div class="els-page-col">
+            <sly data-sly-test.isValidPage="${model.isValidPage}">
+                <a href="${model.pagePath}" target="_blank"
+                   x-cq-linkchecker="skip">
+                    ${model.pageTitle}
+                </a>
+            </sly>
+            <sly data-sly-test="${!isValidPage}">
+                <span>${model.pagePath}</span>
+            </sly>
+        </div>
     </td>
 
     <td class="foundation-collection-item-keys" is="coral-table-cell">

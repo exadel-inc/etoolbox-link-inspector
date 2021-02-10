@@ -12,10 +12,13 @@ import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.MockedStatic;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.SocketTimeoutException;
 import java.net.URISyntaxException;
+import java.net.URLDecoder;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -25,7 +28,10 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(AemContextExtension.class)
@@ -37,6 +43,8 @@ class LinkHelperImplTest {
     private static final String VALID_INTERNAL_SPACES = "/content/test with spaces";
     private static final String VALID_INTERNAL_SPACES_EXTENSION = "/content/test with spaces.png";
     private static final String INVALID_INTERNAL = "/test";
+    private static final String VALID_INTERNAL_ENCODED = "/content/test%20link";
+    private static final String VALID_INTERNAL_DECODED = "/content/test link";
 
     private static final String VALID_EXTERNAL = "https://www.google.com";
     private static final String INVALID_EXTERNAL = "htt://google.com";
@@ -136,10 +144,32 @@ class LinkHelperImplTest {
     }
 
     @Test
+    void testValidateInternalEncodedLink_valid() {
+        context.create().resource(VALID_INTERNAL_DECODED);
+
+        LinkStatus linkStatus = linkHelper.validateInternalLink(VALID_INTERNAL_ENCODED, context.resourceResolver());
+
+        testLinkStatus(HttpStatus.SC_OK, linkStatus);
+    }
+
+    @Test
     void testValidateInternalLink_invalid() {
         LinkStatus linkStatus = linkHelper.validateInternalLink(VALID_INTERNAL, context.resourceResolver());
 
         testLinkStatus(HttpStatus.SC_NOT_FOUND, linkStatus);
+    }
+
+    @Test
+    void testValidateInternalEncodedLink_decodeException() {
+        try (MockedStatic<URLDecoder> urlDecoder = mockStatic(URLDecoder.class)) {
+            urlDecoder.when(() ->
+                    URLDecoder.decode(eq(VALID_INTERNAL_ENCODED), anyString())
+            ).thenThrow(new UnsupportedEncodingException());
+
+            LinkStatus linkStatus = linkHelper.validateInternalLink(VALID_INTERNAL_ENCODED, context.resourceResolver());
+
+            testLinkStatus(HttpStatus.SC_NOT_FOUND, linkStatus);
+        }
     }
 
     @Test
