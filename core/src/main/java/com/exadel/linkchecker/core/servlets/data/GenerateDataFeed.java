@@ -24,7 +24,7 @@ import java.util.Optional;
 
 @Component(service = {Servlet.class})
 @SlingServletResourceTypes(
-        resourceTypes = "/bin/exadel/datafeed/generate",
+        resourceTypes = "/bin/aembox/datafeed/generate",
         methods = HttpConstants.METHOD_GET
 )
 @ServiceDescription("The servlet for manual triggering data feed generation")

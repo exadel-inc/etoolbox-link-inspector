@@ -37,7 +37,7 @@ public class GridViewItem {
     public static final String CRX_DE_LINK = "/crx/de/index.jsp#";
 
     public static final String THUMBNAIL_PATH =
-            "/etc.clientlibs/exadel-linkchecker/clientlibs/link-checker-ui/resources/thumbnail.png";
+            "/etc.clientlibs/aembox-linkchecker/clientlibs/link-checker-ui/resources/thumbnail.png";
     public static final String SLASH_CHAR = "/";
     public static final String HTML_EXTENSION = ".html";
 

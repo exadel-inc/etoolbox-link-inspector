@@ -22,7 +22,7 @@ import java.util.Optional;
 
 @Component(service = {Servlet.class})
 @SlingServletResourceTypes(
-        resourceTypes = "/bin/exadel/acl-check",
+        resourceTypes = "/bin/aembox/acl-check",
         methods = HttpConstants.METHOD_POST
 )
 @ServiceDescription("The servlet for checking ACLs")

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <workspaceFilter version="1.0">
-    <filter root="/home/users/system/exadel-linkchecker" mode="merge"/>
+    <filter root="/home/users/system/aembox" mode="merge"/>
     <filter root="/content/rep:policy" mode="merge"/>
-    <filter root="/content/exadel-linkchecker/linkchecker" mode="replace"/>
-    <filter root="/content/exadel-linkchecker" mode="merge"/>
+    <filter root="/content/aembox-linkchecker/linkchecker" mode="replace"/>
+    <filter root="/content/aembox-linkchecker" mode="merge"/>
 </workspaceFilter>

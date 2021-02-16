@@ -55,13 +55,13 @@ import java.util.stream.Collectors;
  */
 @Component(service = {Servlet.class})
 @SlingServletResourceTypes(
-        resourceTypes = "/bin/exadel/replace-links-by-pattern",
+        resourceTypes = "/bin/aembox/replace-links-by-pattern",
         methods = HttpConstants.METHOD_POST
 )
 @Designate(ocd = ReplaceByPatternServlet.Configuration.class)
 public class ReplaceByPatternServlet extends SlingAllMethodsServlet {
     @ObjectClassDefinition(
-            name = "Exadel Link Checker - Replace By Pattern Servlet",
+            name = "AEMBox Link Checker - Replace By Pattern Servlet",
             description = "The servlet for replacement the detected broken links by pattern"
     )
     @interface Configuration {

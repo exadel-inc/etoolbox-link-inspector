@@ -47,12 +47,12 @@ public class DataFeedServiceImpl implements DataFeedService {
     @Reference
     private GridResourcesGenerator gridResourcesGenerator;
 
-    private static final String GRID_RESOURCE_TYPE = "exadel-linkchecker/components/gridConfig";
+    private static final String GRID_RESOURCE_TYPE = "aembox-linkchecker/components/gridConfig";
     public static final int UI_ITEMS_LIMIT = 500;
 
-    public static final String JSON_FEED_PATH = "/content/exadel-linkchecker/data/datafeed.json";
+    public static final String JSON_FEED_PATH = "/content/aembox-linkchecker/data/datafeed.json";
 
-    public static final String CSV_REPORT_PATH = "/content/exadel-linkchecker/download/report.csv";
+    public static final String CSV_REPORT_PATH = "/content/aembox-linkchecker/download/report.csv";
     private static final String[] CSV_COLUMNS = {
             "Link",
             "Type",
@@ -93,7 +93,7 @@ public class DataFeedServiceImpl implements DataFeedService {
             List<Resource> resources = toSlingResourcesStream(dataFeedToGridResources(serviceResourceResolver, true),
                     repositoryHelper.getThreadResourceResolver())
                     .collect(Collectors.toList());
-            LOG.info("Exadel Link Checker - the number of items shown on UI is {}", resources.size());
+            LOG.info("AEMBox Link Checker - the number of items shown on UI is {}", resources.size());
             return resources;
         }
     }

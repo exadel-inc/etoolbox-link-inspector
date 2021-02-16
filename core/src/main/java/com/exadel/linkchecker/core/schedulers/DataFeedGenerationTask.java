@@ -22,7 +22,7 @@ import java.util.Collections;
 @Component(service = Runnable.class)
 public class DataFeedGenerationTask implements Runnable {
 
-    @ObjectClassDefinition(name = "Exadel Link Checker - Data Feed Generation Task")
+    @ObjectClassDefinition(name = "AEMBox Link Checker - Data Feed Generation Task")
     public @interface Config {
 
         @AttributeDefinition(name = "Cron-job expression")

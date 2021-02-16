@@ -60,7 +60,7 @@ import java.util.stream.Stream;
 @Designate(ocd = GridResourcesGeneratorImpl.Configuration.class)
 public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
     @ObjectClassDefinition(
-            name = "Exadel Link Checker - Grid Resources Generator",
+            name = "AEMBox Link Checker - Grid Resources Generator",
             description = "Finds broken links below the specified path for further outputting them in a report"
     )
     @interface Configuration {
@@ -151,7 +151,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
     private static final int DEFAULT_THREADS_PER_CORE = 60;
 
     private static final String TAGS_LOCATION = "/content/cq:tags";
-    public static final String STATS_RESOURCE_PATH = "/content/exadel-linkchecker/data/stats";
+    public static final String STATS_RESOURCE_PATH = "/content/aembox-linkchecker/data/stats";
 
     @Reference
     private LinkHelper linkHelper;

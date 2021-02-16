@@ -26,10 +26,10 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 class GridViewItemTest {
     private static final String MODELS_PACKAGE = "com.exadel.linkchecker.core.models";
     private static final String COMPONENT_TYPE_FIELD = "componentType";
-    private static final String GRID_RESOURCE_TYPE = "exadel-linkchecker/components/gridConfig";
+    private static final String GRID_RESOURCE_TYPE = "aembox-linkchecker/components/gridConfig";
     private static final String HTML_EXTENSION = ".html";
 
-    private static final String TEST_COMPONENT_TYPE = "/apps/exadel-linkchecker/components/test-component";
+    private static final String TEST_COMPONENT_TYPE = "/apps/aembox-linkchecker/components/test-component";
     private static final String TEST_COMPONENT_NAME = "Test Component";
 
     private static final String TEST_PAGE_NAME = "test-page";

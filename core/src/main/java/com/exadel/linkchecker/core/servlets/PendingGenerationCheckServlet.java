@@ -24,7 +24,7 @@ import java.util.Optional;
  */
 @Component(service = {Servlet.class})
 @SlingServletResourceTypes(
-        resourceTypes = "/bin/exadel/datafeed/pending-generation-check",
+        resourceTypes = "/bin/aembox/datafeed/pending-generation-check",
         methods = HttpConstants.METHOD_POST
 )
 @ServiceDescription("The servlet for checking if the pending generation node exists")

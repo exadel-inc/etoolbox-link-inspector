@@ -54,10 +54,10 @@ class GridResourcesGeneratorImplTest {
     private static final String RESOURCE_RESOLVER_FACTORY_FIELD = "resourceResolverFactory";
     private static final String REPOSITORY_HELPER_FIELD = "repositoryHelper";
     private static final String LINK_HELPER_FIELD = "linkHelper";
-    private static final String REAL_DATAFEED_PATH = "/content/exadel-linkchecker/data/datafeed.json";
+    private static final String REAL_DATAFEED_PATH = "/content/aembox-linkchecker/data/datafeed.json";
     private static final String EXECUTOR_SERVICE_FIELD = "executorService";
     private static final String EXTERNAL_LINK_CHECKER_FIELD = "externalLinkChecker";
-    private static final String GRID_RESOURCE_TYPE = "exadel-linkchecker/components/gridConfig";
+    private static final String GRID_RESOURCE_TYPE = "aembox-linkchecker/components/gridConfig";
 
     private static final String TEST_DATAFEED_PATH = "/com/exadel/linkchecker/core/services/data/impl/expectedResources.json";
     private static final String TEST_RESOURCES_TREE_PATH = "/com/exadel/linkchecker/core/services/data/impl/resources.json";

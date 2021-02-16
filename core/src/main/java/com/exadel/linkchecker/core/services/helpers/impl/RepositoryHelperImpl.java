@@ -19,7 +19,7 @@ import javax.jcr.Session;
 public class RepositoryHelperImpl implements RepositoryHelper {
     private static final Logger LOG = LoggerFactory.getLogger(RepositoryHelper.class);
 
-    private static final String LINK_CHECKER_SERVICE_NAME = "exadel-linkchecker-service";
+    private static final String LINK_CHECKER_SERVICE_NAME = "aembox-linkchecker-service";
 
     private static final String READ_WRITE_PERMISSIONS = String.join(",", Session.ACTION_READ, Session.ACTION_SET_PROPERTY);
 

@@ -36,7 +36,7 @@ import java.util.Optional;
 @Designate(ocd = ExternalLinkCheckerImpl.Configuration.class)
 public class ExternalLinkCheckerImpl implements ExternalLinkChecker {
     @ObjectClassDefinition(
-            name = "Exadel Link Checker - External Links Validator",
+            name = "AEMBox Link Checker - External Links Validator",
             description = "Validates external links"
     )
     @interface Configuration {
