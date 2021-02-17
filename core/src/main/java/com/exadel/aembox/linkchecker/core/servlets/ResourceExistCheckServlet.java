@@ -19,7 +19,7 @@ import java.util.Optional;
 
 @Component(service = {Servlet.class})
 @SlingServletResourceTypes(
-        resourceTypes = "/bin/aembox/resource-exist-check",
+        resourceTypes = "/bin/aembox/linkchecker/resource-exist-check",
         methods = HttpConstants.METHOD_POST
 )
 @ServiceDescription("The servlet for checking if resource exists")

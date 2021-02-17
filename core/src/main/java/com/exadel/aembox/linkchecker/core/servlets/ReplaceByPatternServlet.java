@@ -55,7 +55,7 @@ import java.util.stream.Collectors;
  */
 @Component(service = {Servlet.class})
 @SlingServletResourceTypes(
-        resourceTypes = "/bin/aembox/replace-links-by-pattern",
+        resourceTypes = "/bin/aembox/linkchecker/replace-links-by-pattern",
         methods = HttpConstants.METHOD_POST
 )
 @Designate(ocd = ReplaceByPatternServlet.Configuration.class)

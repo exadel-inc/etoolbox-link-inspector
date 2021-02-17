@@ -2,7 +2,7 @@
 <jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
           jcr:primaryType="sling:OsgiConfig"
           queue.name="Data Feed Generation sling job queue config"
-          queue.topics="[aembox/job/datafeed/generate]"
+          queue.topics="[aembox/linkchecker/job/datafeed/generate]"
           queue.type="ORDERED"
           queue.maxparallel="{Long}-1"
           queue.retries="{Long}1"

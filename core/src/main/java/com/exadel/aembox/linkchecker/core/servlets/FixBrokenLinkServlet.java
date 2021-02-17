@@ -30,7 +30,7 @@ import javax.servlet.Servlet;
  */
 @Component(service = {Servlet.class})
 @SlingServletResourceTypes(
-        resourceTypes = "/bin/aembox/fix-broken-link",
+        resourceTypes = "/bin/aembox/linkchecker/fix-broken-link",
         methods = HttpConstants.METHOD_POST
 )
 public class FixBrokenLinkServlet extends SlingAllMethodsServlet {

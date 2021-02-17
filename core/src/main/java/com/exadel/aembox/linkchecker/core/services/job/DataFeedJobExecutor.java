@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 public class DataFeedJobExecutor implements JobExecutor {
     private static final Logger LOG = LoggerFactory.getLogger(DataFeedJobExecutor.class);
 
-    public static final String GENERATE_DATA_FEED_TOPIC = "aembox/job/datafeed/generate";
+    public static final String GENERATE_DATA_FEED_TOPIC = "aembox/linkchecker/job/datafeed/generate";
 
     @Reference
     private DataFeedService dataFeedService;

@@ -24,7 +24,7 @@ import java.util.Optional;
 
 @Component(service = {Servlet.class})
 @SlingServletResourceTypes(
-        resourceTypes = "/bin/aembox/datafeed/generate",
+        resourceTypes = "/bin/aembox/linkchecker/datafeed/generate",
         methods = HttpConstants.METHOD_GET
 )
 @ServiceDescription("The servlet for manual triggering data feed generation")
