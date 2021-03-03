@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:rep="internal"
+    jcr:primaryType="rep:SystemUser"
+    jcr:uuid="8c23021d-dcc7-39ad-a292-6c10667035e4"
+    rep:authorizableId="aembox-linkchecker-service-user"
+    rep:principalName="aembox-linkchecker-service-user"/>

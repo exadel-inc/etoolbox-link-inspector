@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<jcr:root xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:rep="internal"
-    jcr:primaryType="rep:SystemUser"
-    jcr:uuid="7592f5e4-8e7f-39b6-b2d4-360333fecd85"
-    rep:authorizableId="exadel-linkchecker-service-user"
-    rep:principalName="exadel-linkchecker-service-user"/>

@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:granite="http://www.adobe.com/jcr/granite/1.0"
+          xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
+          xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+          jcr:primaryType="cq:Page">
+    <jcr:content
+            jcr:mixinTypes="[sling:VanityPath]"
+            jcr:primaryType="nt:unstructured"
+            jcr:title="Advanced Link Checker"
+            sling:resourceType="granite/ui/components/shell/collectionpage"
+            currentView="list"
+            modeGroup="aembox-link-checker"
+            sling:vanityPath="/tools/aembox/advanced-linkchecker"
+            pageURITemplate="#"
+            targetCollection=".aembox-link-checker">
+        <head jcr:primaryType="nt:unstructured">
+            <viewport
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/admin/page/viewport"/>
+            <meta
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/meta"
+                    content="chrome=1"
+                    name="X-UA-Compatible"/>
+            <winmode
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="cq/gui/components/siteadmin/admin/page/winmode"/>
+            <title
+                    jcr:primaryType="nt:unstructured"
+                    jcr:title="Advanced Link Checker"
+                    sling:resourceType="cq/gui/components/siteadmin/admin/page/title"/>
+            <favicon
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/page/favicon"/>
+            <clientlibs
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/includeclientlibs"
+                    categories="[coralui3,granite.ui.coral.foundation,link-checker-ui]"/>
+        </head>
+        <views jcr:primaryType="nt:unstructured">
+            <list
+                    granite:rel="aembox-link-checker"
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/table"
+                    itemprop="item"
+                    layoutId="list"
+                    maximized="{Boolean}true"
+                    modeGroup="aembox-link-checker"
+                    path="${requestPathInfo.suffix}"
+                    selectionMode="row"
+                    sortMode="local"
+                    stateId="link-checker-ui">
+                <columns
+                        jcr:primaryType="nt:unstructured"
+                        class="elc-card">
+                    <select
+                            jcr:primaryType="nt:unstructured"
+                            select="{Boolean}true"/>
+                    <title
+                            jcr:primaryType="nt:unstructured"
+                            jcr:title="Link"
+                            class="link"
+                            sortable="{Boolean}true"/>
+                    <linkStatusCode
+                            jcr:primaryType="nt:unstructured"
+                            jcr:title="Code"
+                            class="statusCode"
+                            sortType="numeric"
+                            sortable="{Boolean}true"/>
+                    <linkStatusMessage
+                            jcr:primaryType="nt:unstructured"
+                            jcr:title="Status Message"
+                            class="statusMessage"
+                            sortable="{Boolean}true"/>
+                    <pagePath
+                            jcr:primaryType="nt:unstructured"
+                            jcr:title="Page"
+                            class="pagePath"
+                            sortable="{Boolean}true"/>
+                    <component
+                            jcr:primaryType="nt:unstructured"
+                            jcr:title="Component"
+                            class="component"
+                            sortable="{Boolean}true"/>
+                    <property
+                            jcr:primaryType="nt:unstructured"
+                            jcr:title="Property"
+                            class="propertyName"
+                            sortable="{Boolean}true"/>
+                </columns>
+                <datasource
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="aembox-linkchecker/components/gridDatasource"
+                        itemResourceType="aembox-linkchecker/components/gridConfig"
+                        limit="100000"
+                        offset="100"/>
+            </list>
+        </views>
+        <actions jcr:primaryType="nt:unstructured">
+            <selection jcr:primaryType="nt:unstructured">
+                <fixBrokenLink
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="granite/ui/components/coral/foundation/collection/action"
+                        action="cq-admin.aembox.linkchecker.action.fix-broken-link"
+                        activeCondition="cq-admin.aembox.linkchecker.actioncondition.fix-broken-link"
+                        activeSelectionCount="single"
+                        icon="linkCheck"
+                        rel="aembox-link-checker-fix-broken-link"
+                        target=".aembox-link-checker"
+                        text="Fix Broken Link"
+                        title="Fix Broken Link"
+                        variant="actionBar">
+                </fixBrokenLink>
+            </selection>
+            <primary jcr:primaryType="nt:unstructured">
+                <replaceByPattern
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="granite/ui/components/coral/foundation/collection/action"
+                        action="cq-admin.aembox.linkchecker.action.replace-by-pattern"
+                        disabled="{Boolean}true"
+                        icon="linkGlobe"
+                        rel="aembox-link-checker-fix-by-pattern"
+                        target=".aembox-link-checker"
+                        text="Replace By Pattern"
+                        title="Replace By Pattern"
+                        granite:id="elc-replace-by-pattern"
+                        variant="minimal">
+                </replaceByPattern>
+            </primary>
+            <secondary jcr:primaryType="nt:unstructured">
+                <stats
+                        jcr:primaryType="nt:unstructured"
+                        path="/content/aembox-linkchecker/data/stats"
+                        sling:resourceType="aembox-linkchecker/components/stats/statsButton"/>
+                <download
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="granite/ui/components/coral/foundation/anchorbutton"
+                        text="Download Full Report"
+                        variant="primary"
+                        granite:class="elc-download-report-button"
+                        x-cq-linkchecker="skip"/>
+            </secondary>
+        </actions>
+    </jcr:content>
+</jcr:root>
