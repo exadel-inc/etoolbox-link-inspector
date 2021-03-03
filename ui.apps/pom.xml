@@ -43,6 +43,11 @@
                             <artifactId>aembox-linkchecker.ui.apps.structure</artifactId>
                         </repositoryStructurePackage>
                     </repositoryStructurePackages>
+                    <validatorsSettings>
+                        <jackrabbit-nodetypes>
+                            <isDisabled>true</isDisabled>
+                        </jackrabbit-nodetypes>
+                    </validatorsSettings>
                 </configuration>
             </plugin>
             <plugin>

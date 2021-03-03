@@ -2,5 +2,5 @@
 <workspaceFilter version="1.0">
     <filter root="/apps/aembox-linkchecker/clientlibs"/>
     <filter root="/apps/aembox-linkchecker/components"/>
-    <filter root="/apps/cq/core/content/nav" mode="update"/>
+    <filter root="/apps/cq/core/content/nav/tools/aembox/linkchecker" mode="update"/>
 </workspaceFilter>
