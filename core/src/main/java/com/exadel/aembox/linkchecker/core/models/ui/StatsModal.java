@@ -1,3 +1,17 @@
+/*
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.exadel.aembox.linkchecker.core.models.ui;
 
 import com.exadel.aembox.linkchecker.core.models.Link;
@@ -24,50 +38,50 @@ public class StatsModal {
     private static final String ARRAY_VALUES_SEPARATOR = ", ";
     private static final String ALL_STATUS_CODES_MSG = "All error codes outside the range '200-207'";
 
-    @ValueMapValue (name = GenerationStatsProps.PN_LAST_GENERATED)
+    @ValueMapValue(name = GenerationStatsProps.PN_LAST_GENERATED)
     private String lastGenerated;
 
-    @ValueMapValue (name = GenerationStatsProps.PN_SEARCH_PATH)
+    @ValueMapValue(name = GenerationStatsProps.PN_SEARCH_PATH)
     private String searchPath;
 
-    @ValueMapValue (name = GenerationStatsProps.PN_EXCLUDED_PATHS)
+    @ValueMapValue(name = GenerationStatsProps.PN_EXCLUDED_PATHS)
     private String[] excludedPaths;
 
-    @ValueMapValue (name = GenerationStatsProps.PN_CHECK_ACTIVATION)
+    @ValueMapValue(name = GenerationStatsProps.PN_CHECK_ACTIVATION)
     private boolean checkActivation;
 
-    @ValueMapValue (name = GenerationStatsProps.PN_SKIP_MODIFIED_AFTER_ACTIVATION)
+    @ValueMapValue(name = GenerationStatsProps.PN_SKIP_MODIFIED_AFTER_ACTIVATION)
     private boolean skipModifiedAfterActivation;
 
-    @ValueMapValue (name = GenerationStatsProps.PN_LAST_MODIFIED_BOUNDARY)
+    @ValueMapValue(name = GenerationStatsProps.PN_LAST_MODIFIED_BOUNDARY)
     private String lastModifiedBoundary;
 
-    @ValueMapValue (name = GenerationStatsProps.PN_EXCLUDED_PROPERTIES)
+    @ValueMapValue(name = GenerationStatsProps.PN_EXCLUDED_PROPERTIES)
     private String[] excludedProperties;
 
-    @ValueMapValue (name = GenerationStatsProps.PN_REPORT_LINKS_TYPE)
+    @ValueMapValue(name = GenerationStatsProps.PN_REPORT_LINKS_TYPE)
     @Default(values = StringUtils.EMPTY)
     private String reportLinksType;
 
-    @ValueMapValue (name = GenerationStatsProps.PN_EXCLUDED_LINK_PATTERNS)
+    @ValueMapValue(name = GenerationStatsProps.PN_EXCLUDED_LINK_PATTERNS)
     private String[] excludedLinksPatterns;
 
-    @ValueMapValue (name = GenerationStatsProps.PN_EXCLUDED_TAGS)
+    @ValueMapValue(name = GenerationStatsProps.PN_EXCLUDED_TAGS)
     private String excludeTags;
 
-    @ValueMapValue (name = GenerationStatsProps.PN_ALLOWED_STATUS_CODES)
+    @ValueMapValue(name = GenerationStatsProps.PN_ALLOWED_STATUS_CODES)
     private Integer[] allowedStatusCodes;
 
-    @ValueMapValue (name = GenerationStatsProps.PN_ALL_INTERNAL_LINKS)
+    @ValueMapValue(name = GenerationStatsProps.PN_ALL_INTERNAL_LINKS)
     private String allInternalLinks;
 
-    @ValueMapValue (name = GenerationStatsProps.PN_BROKEN_INTERNAL_LINKS)
+    @ValueMapValue(name = GenerationStatsProps.PN_BROKEN_INTERNAL_LINKS)
     private String brokenInternalLinks;
 
-    @ValueMapValue (name = GenerationStatsProps.PN_ALL_EXTERNAL_LINKS)
+    @ValueMapValue(name = GenerationStatsProps.PN_ALL_EXTERNAL_LINKS)
     private String allExternalLinks;
 
-    @ValueMapValue (name = GenerationStatsProps.PN_BROKEN_EXTERNAL_LINKS)
+    @ValueMapValue(name = GenerationStatsProps.PN_BROKEN_EXTERNAL_LINKS)
     private String brokenExternalLinks;
 
     public String getLastGenerated() {
