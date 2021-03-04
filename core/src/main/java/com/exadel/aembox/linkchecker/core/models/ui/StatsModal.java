@@ -34,7 +34,10 @@ public class StatsModal {
     private String[] excludedPaths;
 
     @ValueMapValue (name = GenerationStatsProps.PN_CHECK_ACTIVATION)
-    private String checkActivation;
+    private boolean checkActivation;
+
+    @ValueMapValue (name = GenerationStatsProps.PN_SKIP_MODIFIED_AFTER_ACTIVATION)
+    private boolean skipModifiedAfterActivation;
 
     @ValueMapValue (name = GenerationStatsProps.PN_LAST_MODIFIED_BOUNDARY)
     private String lastModifiedBoundary;
@@ -79,8 +82,12 @@ public class StatsModal {
         return arrayToStringValue(excludedPaths);
     }
 
-    public String getCheckActivation() {
+    public boolean getCheckActivation() {
         return checkActivation;
+    }
+
+    public boolean getSkipModifiedAfterActivation() {
+        return checkActivation && skipModifiedAfterActivation;
     }
 
     public String getLastModifiedBoundary() {
