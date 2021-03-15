@@ -1,3 +1,17 @@
+/*
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.exadel.aembox.linkchecker.core.services.impl;
 
 import com.exadel.aembox.linkchecker.core.services.ExternalLinkChecker;
@@ -29,8 +43,7 @@ import java.net.URISyntaxException;
 import java.util.Optional;
 
 /**
- * The service leverages the PoolingHttpClientConnectionManager for sending HEAD requests concurrently
- * to validate external links.
+ * Validates external links via sending HEAD requests concurrently using {@link PoolingHttpClientConnectionManager}
  */
 @Component(service = ExternalLinkChecker.class)
 @Designate(ocd = ExternalLinkCheckerImpl.Configuration.class)
@@ -56,9 +69,11 @@ public class ExternalLinkCheckerImpl implements ExternalLinkChecker {
         ) String user_agent() default StringUtils.EMPTY;
     }
 
-    private static final Logger LOG = LoggerFactory.getLogger(ExternalLinkChecker.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ExternalLinkCheckerImpl.class);
     private static final int DEFAULT_CONNECTION_TIMEOUT = 5000;
     private static final int DEFAULT_SOCKET_TIMEOUT = 15000;
+    private static final int DEFAULT_MAX_TOTAL = 1000;
+    private static final int DEFAULT_MAX_PER_ROUTE = 1000;
 
     @Reference
     private HttpClientBuilderFactory httpClientBuilderFactory;
@@ -117,8 +132,8 @@ public class ExternalLinkCheckerImpl implements ExternalLinkChecker {
 
     private void buildCloseableHttpClient() {
         connectionManager = new PoolingHttpClientConnectionManager();
-        connectionManager.setMaxTotal(1000);
-        connectionManager.setDefaultMaxPerRoute(1000);
+        connectionManager.setMaxTotal(DEFAULT_MAX_TOTAL);
+        connectionManager.setDefaultMaxPerRoute(DEFAULT_MAX_PER_ROUTE);
         HttpClientBuilder clientBuilder = this.httpClientBuilderFactory.newBuilder()
                 .setConnectionManager(connectionManager);
         Optional.of(userAgent)

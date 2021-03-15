@@ -1,3 +1,17 @@
+/*
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.exadel.aembox.linkchecker.core.models.ui;
 
 import com.day.crx.JcrConstants;
@@ -20,6 +34,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @ExtendWith(AemContextExtension.class)
 class StatsModalTest {
@@ -29,7 +44,8 @@ class StatsModalTest {
     private static final String[] TEST_EXCLUDED_PATHS =
             {"/content/search-path/excluded-1", "/content/search-path/excluded-2"};
     private static final String EXPECTED_EXCLUDED_PATHS = "/content/search-path/excluded-1, /content/search-path/excluded-2";
-    private static final String TEST_CHECK_ACTIVATION = "true";
+    private static final boolean TEST_CHECK_ACTIVATION = true;
+    private static final boolean TEST_SKIP_MODIFIED_AFTER_ACTIVATION = true;
     private static final String TEST_LAST_MOD_BOUNDARY = "2011-12-03T10:15:30+01:00";
     private static final String[] TEST_EXCLUDED_PROPS = {"excluded-1", "excluded-2"};
     private static final String EXPECTED_EXCLUDED_PROPS = "excluded-1, excluded-2";
@@ -61,7 +77,8 @@ class StatsModalTest {
         assertNull(model.getLastGenerated());
         assertNull(model.getSearchPath());
         assertEquals(StringUtils.EMPTY, model.getExcludedPaths());
-        assertNull(model.getCheckActivation());
+        assertFalse(model.getCheckActivation());
+        assertFalse(model.getSkipModifiedAfterActivation());
         assertNull(model.getLastModifiedBoundary());
         assertEquals(StringUtils.EMPTY, model.getExcludedProperties());
         assertEquals(StringUtils.EMPTY, model.getReportLinksType());
@@ -84,6 +101,7 @@ class StatsModalTest {
         stats.put(GenerationStatsProps.PN_SEARCH_PATH, TEST_SEARCH_PATH);
         stats.put(GenerationStatsProps.PN_EXCLUDED_PATHS, TEST_EXCLUDED_PATHS);
         stats.put(GenerationStatsProps.PN_CHECK_ACTIVATION, TEST_CHECK_ACTIVATION);
+        stats.put(GenerationStatsProps.PN_SKIP_MODIFIED_AFTER_ACTIVATION, TEST_SKIP_MODIFIED_AFTER_ACTIVATION);
         stats.put(GenerationStatsProps.PN_LAST_MODIFIED_BOUNDARY, TEST_LAST_MOD_BOUNDARY);
         stats.put(GenerationStatsProps.PN_EXCLUDED_PROPERTIES, TEST_EXCLUDED_PROPS);
 
@@ -106,6 +124,7 @@ class StatsModalTest {
         assertEquals(TEST_SEARCH_PATH, model.getSearchPath());
         assertEquals(EXPECTED_EXCLUDED_PATHS, model.getExcludedPaths());
         assertEquals(TEST_CHECK_ACTIVATION, model.getCheckActivation());
+        assertEquals(TEST_SKIP_MODIFIED_AFTER_ACTIVATION, model.getSkipModifiedAfterActivation());
         assertEquals(TEST_LAST_MOD_BOUNDARY, model.getLastModifiedBoundary());
         assertEquals(EXPECTED_EXCLUDED_PROPS, model.getExcludedProperties());
         assertEquals(TEST_REPORT_LINKS_TYPE, model.getReportLinksType());

@@ -103,5 +103,61 @@
         }
       }
     }
+  },
+  "test-page-active-after-modified": {
+    "jcr:primaryType": "cq:Page",
+    "jcr:content": {
+      "jcr:primaryType": "cq:PageContent",
+      "jcr:lastModified": "2021-06-20T21:23:32.056Z",
+      "cq:lastReplicationAction": "Activate",
+      "cq:lastReplicated": "2021-06-29T21:23:32.056Z",
+      "cq:lastReplicatedBy": "admin",
+      "jcr:title": "test-page-active",
+      "single_prop_internal": "/content/test-link-active-7"
+    }
+  },
+  "test-page-active-before-modified-1": {
+    "jcr:primaryType": "cq:Page",
+    "jcr:content": {
+      "jcr:primaryType": "cq:PageContent",
+      "jcr:lastModified": "2021-06-30T21:23:32.056Z",
+      "cq:lastReplicationAction": "Activate",
+      "cq:lastReplicated": "2021-06-29T21:23:32.056Z",
+      "cq:lastReplicatedBy": "admin",
+      "jcr:title": "test-page-active",
+      "single_prop_internal": "/content/test-link-inactive-3"
+    }
+  },
+  "test-page-active-before-modified-2": {
+    "jcr:primaryType": "cq:Page",
+    "jcr:content": {
+      "jcr:primaryType": "cq:PageContent",
+      "jcr:lastModified": "2021-06-28T21:23:32.056Z",
+      "cq:lastModified": "2021-06-30T21:23:32.056Z",
+      "cq:lastReplicationAction": "Activate",
+      "cq:lastReplicated": "2021-06-29T21:23:32.056Z",
+      "cq:lastReplicatedBy": "admin",
+      "jcr:title": "test-page-active",
+      "single_prop_internal": "/content/test-link-inactive-4"
+    }
+  },
+  "test-resource-active-1": {
+    "jcr:primaryType": "nt:unstructured",
+    "cq:lastReplicationAction": "Activate",
+    "jcr:lastModified": "2021-06-28T21:23:32.056Z",
+    "single_prop_internal": "/content/test-link-active-8"
+  },
+  "test-resource-active-2": {
+    "jcr:primaryType": "nt:unstructured",
+    "cq:lastReplicationAction": "Activate",
+    "cq:lastReplicated": "2021-06-29T21:23:32.056Z",
+    "single_prop_internal": "/content/test-link-active-9"
+  },
+  "test-resource-active-3": {
+    "jcr:primaryType": "nt:unstructured",
+    "cq:lastReplicationAction": "Activate",
+    "cq:lastReplicated": "2021-06-29T21:23:32.056Z",
+    "jcr:lastModified": "2021-06-28T21:23:32.056Z",
+    "single_prop_internal": "/content/test-link-active-10"
   }
 }

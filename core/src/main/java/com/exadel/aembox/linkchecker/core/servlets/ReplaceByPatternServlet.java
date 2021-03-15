@@ -1,3 +1,17 @@
+/*
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.exadel.aembox.linkchecker.core.servlets;
 
 import com.day.crx.JcrConstants;
@@ -50,8 +64,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
- * The servlet for replacement the detected broken links by pattern.
- * The link pattern and replacement are retrieved from UI dialog and passed from js during ajax call.
+ * Performs replacement by pattern within the detected broken links scope.
+ * The link pattern and replacement are retrieved from the UI dialog and passed to the servlet via an ajax call.
  */
 @Component(service = {Servlet.class})
 @SlingServletResourceTypes(
@@ -88,7 +102,7 @@ public class ReplaceByPatternServlet extends SlingAllMethodsServlet {
     private static final String OUTPUT_AS_CSV_PARAM = "isOutputAsCsv";
     private static final String ITEMS_COUNT_RESP_PARAM = "updatedItemsCount";
 
-    private static final String BACKUP_PACKAGE_GROUP = "AEMBox Link Checker";
+    private static final String BACKUP_PACKAGE_GROUP = "AEMBox_Advanced_Linkchecker";
     private static final String BACKUP_PACKAGE_NAME = "replace_by_pattern_backup_%s";
     private static final String BACKUP_PACKAGE_VERSION = "1.0";
 

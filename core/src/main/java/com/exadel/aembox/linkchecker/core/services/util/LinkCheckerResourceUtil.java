@@ -1,10 +1,28 @@
+/*
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.exadel.aembox.linkchecker.core.services.util;
 
 import com.day.cq.commons.jcr.JcrUtil;
+import com.day.cq.dam.api.DamConstants;
+import com.day.cq.replication.ReplicationStatus;
+import com.day.cq.wcm.api.NameConstants;
 import com.day.crx.JcrConstants;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ValueMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,8 +33,14 @@ import javax.jcr.Session;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 public class LinkCheckerResourceUtil {
     private LinkCheckerResourceUtil() {}
@@ -82,5 +106,43 @@ public class LinkCheckerResourceUtil {
             }
         }
         return null;
+    }
+
+    public static Instant getLastModified(Resource resource) {
+        ValueMap properties = resource.getValueMap();
+        Date cqLastModified = properties.get(NameConstants.PN_PAGE_LAST_MOD, Date.class);
+        Date jcrLastModified = properties.get(JcrConstants.JCR_LASTMODIFIED, Date.class);
+
+        return Stream.of(cqLastModified, jcrLastModified)
+                .filter(Objects::nonNull)
+                .sorted(Comparator.reverseOrder())
+                .map(Date::toInstant)
+                .findFirst()
+                .orElse(null);
+    }
+
+    public static Instant getCqReplicated(Resource resource) {
+        return Optional.of(resource.getValueMap())
+                .map(valueMap -> valueMap.get(ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED, Date.class))
+                .map(Date::toInstant)
+                .orElse(null);
+    }
+
+    public static boolean isPageOrAsset(Resource resource) {
+        return Optional.of(resource.getValueMap())
+                .map(valueMap -> valueMap.get(JcrConstants.JCR_PRIMARYTYPE))
+                .filter(type -> NameConstants.NT_PAGE.equals(type) || DamConstants.NT_DAM_ASSET.equals(type))
+                .isPresent();
+    }
+
+    public static boolean isModifiedBeforeActivation(Resource resource) {
+        return isModifiedBeforeActivation(getLastModified(resource), getCqReplicated(resource));
+    }
+
+    public static boolean isModifiedBeforeActivation(Instant lastModified, Instant lastReplicated) {
+        if (lastModified != null && lastReplicated != null) {
+            return lastModified.isBefore(lastReplicated);
+        }
+        return true;
     }
 }

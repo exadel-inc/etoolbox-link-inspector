@@ -1,9 +1,21 @@
+/*
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.exadel.aembox.linkchecker.core.services.data.impl;
 
-import com.day.cq.dam.api.DamConstants;
 import com.day.cq.replication.ReplicationActionType;
 import com.day.cq.replication.ReplicationStatus;
-import com.day.cq.wcm.api.NameConstants;
 import com.day.crx.JcrConstants;
 import com.exadel.aembox.linkchecker.core.models.Link;
 import com.exadel.aembox.linkchecker.core.models.LinkStatus;
@@ -21,7 +33,6 @@ import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceUtil;
-import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.apache.sling.jcr.resource.api.JcrResourceConstants;
 import org.osgi.service.component.annotations.Activate;
@@ -36,16 +47,16 @@ import org.osgi.service.metatype.annotations.Option;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -77,8 +88,15 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
 
         @AttributeDefinition(
                 name = "Activated Content",
-                description = "If checked, links fill be retrieved from replicated (Activate) content only"
+                description = "If checked, links will be retrieved from replicated (Activate) content only"
         ) boolean check_activation() default false;
+
+        @AttributeDefinition(
+                name = "Skip content modified after activation",
+                description = "Works in conjunction with the 'Activated Content' checkbox only. If checked, links " +
+                        "will be retrieved from replicated (Activate) content that is not modified after activation " +
+                        "(lastModified is before lastReplicated)"
+        ) boolean skip_modified_after_activation() default false;
 
         @AttributeDefinition(
                 name = "Last Modified",
@@ -145,7 +163,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
         ) int threads_per_core() default DEFAULT_THREADS_PER_CORE;
     }
 
-    private static final Logger LOG = LoggerFactory.getLogger(GridResourcesGenerator.class);
+    private static final Logger LOG = LoggerFactory.getLogger(GridResourcesGeneratorImpl.class);
 
     private static final String DEFAULT_SEARCH_PATH = "/content";
     private static final int DEFAULT_THREADS_PER_CORE = 60;
@@ -161,6 +179,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
     private String searchPath;
     private String[] excludedPaths;
     private boolean checkActivation;
+    private boolean skipModifiedAfterActivation;
     private ZonedDateTime lastModifiedBoundary;
     private String[] excludedProperties;
     private String reportLinksType;
@@ -175,6 +194,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
         searchPath = configuration.search_path();
         excludedPaths = PropertiesUtil.toStringArray(configuration.excluded_paths());
         checkActivation = configuration.check_activation();
+        skipModifiedAfterActivation = configuration.skip_modified_after_activation();
         lastModifiedBoundary = Optional.of(configuration.last_modified_boundary())
                 .filter(StringUtils::isNotBlank)
                 .map(dateString -> ZonedDateTime.parse(dateString, DateTimeFormatter.ISO_DATE_TIME))
@@ -321,15 +341,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
         if (lastModifiedBoundary == null) {
             return true;
         }
-        ValueMap properties = resource.getValueMap();
-        Date cqLastModified = properties.get(NameConstants.PN_PAGE_LAST_MOD, Date.class);
-        Date jcrLastModified = properties.get(JcrConstants.JCR_LASTMODIFIED, Date.class);
-
-        return Stream.of(cqLastModified, jcrLastModified)
-                .filter(Objects::nonNull)
-                .sorted(Comparator.reverseOrder())
-                .map(Date::toInstant)
-                .findFirst()
+        return Optional.ofNullable(LinkCheckerResourceUtil.getLastModified(resource))
                 .map(lastModified -> lastModifiedBoundary.toInstant().isBefore(lastModified))
                 .orElse(true);
     }
@@ -375,28 +387,38 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
 
     private boolean isAllowedReplicationStatus(Resource resource) {
         if (checkActivation) {
-            boolean isPageOrAsset = Optional.of(resource.getValueMap())
-                    .map(valueMap -> valueMap.get(JcrConstants.JCR_PRIMARYTYPE))
-                    .filter(type -> NameConstants.NT_PAGE.equals(type) || DamConstants.NT_DAM_ASSET.equals(type))
-                    .isPresent();
-            if (isPageOrAsset) {
-                return isActivatedResource(resource);
+            if (LinkCheckerResourceUtil.isPageOrAsset(resource)) {
+                return isActivatedPageOrAsset(resource);
             } else {
                 Optional<String> replicationAction = Optional.of(resource.getValueMap())
                         .map(valueMap -> valueMap.get(ReplicationStatus.NODE_PROPERTY_LAST_REPLICATION_ACTION, String.class));
                 if (replicationAction.isPresent()) {
-                    return replicationAction.filter(ReplicationActionType.ACTIVATE.getName()::equals)
-                            .isPresent();
+                    return ReplicationActionType.ACTIVATE.getName().equals(replicationAction.get()) &&
+                            (!skipModifiedAfterActivation || LinkCheckerResourceUtil.isModifiedBeforeActivation(resource));
                 }
             }
         }
         return true;
     }
 
-    private boolean isActivatedResource(Resource resource) {
-        return Optional.ofNullable(resource.adaptTo(ReplicationStatus.class))
-                .filter(ReplicationStatus::isActivated)
-                .isPresent();
+    private boolean isActivatedPageOrAsset(Resource pageOrAssetResource) {
+        Optional<ReplicationStatus> replicationStatus =
+                Optional.ofNullable(pageOrAssetResource.adaptTo(ReplicationStatus.class))
+                        .filter(ReplicationStatus::isActivated);
+        if (!replicationStatus.isPresent()) {
+            return false;
+        }
+        return !skipModifiedAfterActivation || replicationStatus.map(ReplicationStatus::getLastPublished)
+                .map(Calendar::toInstant)
+                .map(instant -> isModifiedBeforeActivation(pageOrAssetResource, instant))
+                .orElse(true);
+    }
+
+    private boolean isModifiedBeforeActivation(Resource pageOrAssetResource, Instant lastReplicated) {
+        Resource resourceToCheck = Optional.ofNullable(pageOrAssetResource.getChild(JcrConstants.JCR_CONTENT))
+                .orElse(pageOrAssetResource);
+        Instant lastModified = LinkCheckerResourceUtil.getLastModified(resourceToCheck);
+        return LinkCheckerResourceUtil.isModifiedBeforeActivation(lastModified, lastReplicated);
     }
 
     private boolean isStringMatchAnyPattern(String value, String[] patterns) {
@@ -436,6 +458,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
         stats.put(GenerationStatsProps.PN_SEARCH_PATH, searchPath);
         stats.put(GenerationStatsProps.PN_EXCLUDED_PATHS, excludedPaths);
         stats.put(GenerationStatsProps.PN_CHECK_ACTIVATION, checkActivation);
+        stats.put(GenerationStatsProps.PN_SKIP_MODIFIED_AFTER_ACTIVATION, skipModifiedAfterActivation);
         stats.put(GenerationStatsProps.PN_LAST_MODIFIED_BOUNDARY, dateToIsoDateTimeString(lastModifiedBoundary));
         stats.put(GenerationStatsProps.PN_EXCLUDED_PROPERTIES, excludedProperties);
 

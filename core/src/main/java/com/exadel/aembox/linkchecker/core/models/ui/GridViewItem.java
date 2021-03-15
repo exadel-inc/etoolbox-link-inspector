@@ -1,3 +1,17 @@
+/*
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.exadel.aembox.linkchecker.core.models.ui;
 
 import com.day.cq.commons.jcr.JcrUtil;
@@ -23,7 +37,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
- * The model represents a separate row in the grid.
+ * Represents a row in the UI grid.
  */
 @Model(
         adaptables = {SlingHttpServletRequest.class, Resource.class},
@@ -33,8 +47,7 @@ public class GridViewItem {
     private static final Logger LOG = LoggerFactory.getLogger(GridViewItem.class);
 
     public static final String EDITOR_LINK = "/editor.html";
-    //Note: CRX DE is not available in AEMaaCS
-    public static final String CRX_DE_LINK = "/crx/de/index.jsp#";
+    public static final String CRX_DE_PATH = "/crx/de/index.jsp#";
 
     public static final String THUMBNAIL_PATH =
             "/etc.clientlibs/aembox-linkchecker/clientlibs/link-checker-ui/resources/thumbnail.png";
@@ -146,6 +159,10 @@ public class GridViewItem {
 
     public boolean isValidPage() {
         return isValidPage;
+    }
+
+    public String getCrxDePath() {
+        return CRX_DE_PATH;
     }
 
     private static String encodePath(String path) {

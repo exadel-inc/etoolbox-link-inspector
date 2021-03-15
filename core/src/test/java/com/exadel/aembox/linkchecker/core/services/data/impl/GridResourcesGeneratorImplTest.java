@@ -1,3 +1,17 @@
+/*
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.exadel.aembox.linkchecker.core.services.data.impl;
 
 import com.day.cq.replication.ReplicationStatus;
@@ -28,7 +42,10 @@ import org.mockito.MockedStatic;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -83,6 +100,14 @@ class GridResourcesGeneratorImplTest {
     private static final String TEST_COMPONENT_INACTIVE_RES = "test-component-inactive";
     private static final String TEST_ASSET_RES = "test-asset-active";
     private static final String TEST_ASSET_INACTIVE_RES = "test-asset-inactive";
+    private static final String TEST_PAGE_ACTIVE_AFTER_MODIFIED = "test-page-active-after-modified";
+    private static final String TEST_PAGE_ACTIVE_BEFORE_MODIFIED_1 = "test-page-active-before-modified-1";
+    private static final String TEST_PAGE_ACTIVE_BEFORE_MODIFIED_2 = "test-page-active-before-modified-2";
+    private static final String TEST_ACTIVE_RES_1 = "test-resource-active-1";
+    private static final String TEST_ACTIVE_RES_2 = "test-resource-active-2";
+    private static final String TEST_ACTIVE_RES_3 = "test-resource-active-3";
+    private static final String JCR_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
+    private static final String TEST_LAST_REPLICATED = "2021-06-29T21:23:32.056Z";
     private static final List<String> EXPECTED_LINKS_ACTIVE = Arrays.asList(
             "/content/test-link-active-0",
             "/content/test-link-active-1",
@@ -90,7 +115,11 @@ class GridResourcesGeneratorImplTest {
             "/content/test-link-active-3",
             "/content/test-link-active-4",
             "/content/test-link-active-5",
-            "/content/test-link-active-6"
+            "/content/test-link-active-6",
+            "/content/test-link-active-7",
+            "/content/test-link-active-8",
+            "/content/test-link-active-9",
+            "/content/test-link-active-10"
     );
 
     private final AemContext context = new AemContext(ResourceResolverType.JCR_MOCK);
@@ -196,7 +225,7 @@ class GridResourcesGeneratorImplTest {
     }
 
     @Test
-    void testActivationCheck() {
+    void testActivationCheck() throws ParseException {
         setUpConfigCheckActivation(fixture);
         context.load().json(TEST_REPLICATED_RESOURCES_TREE_PATH, TEST_FOLDER_PATH);
 
@@ -294,6 +323,7 @@ class GridResourcesGeneratorImplTest {
         GridResourcesGeneratorImpl.Configuration config = mockConfig();
 
         when(config.check_activation()).thenReturn(true);
+        when(config.skip_modified_after_activation()).thenReturn(true);
 
         int[] defaultStatusCodes = {HttpStatus.SC_NOT_FOUND};
         when(config.allowed_status_codes()).thenReturn(defaultStatusCodes);
@@ -354,7 +384,7 @@ class GridResourcesGeneratorImplTest {
         return repositoryHelper;
     }
 
-    private Resource initSpyResources(Resource rootResource) {
+    private Resource initSpyResources(Resource rootResource) throws ParseException {
         Resource spyRootResource = spy(rootResource);
 
         Resource activePageRes = getChildSpyResource(rootResource, TEST_PAGE_ACTIVE_RES);
@@ -366,12 +396,25 @@ class GridResourcesGeneratorImplTest {
         Resource activeAssetRes = getChildSpyResource(rootResource, TEST_ASSET_RES);
         Resource inactiveAssetRes = getChildSpyResource(rootResource, TEST_ASSET_INACTIVE_RES);
 
-        Iterator<Resource> spyChildrenResources
-                = Arrays.asList(inactivePageRes1, activePageRes, componentRes1, componentRes2, activeAssetRes, inactiveAssetRes).iterator();
+        Resource pageActivateAfterModified = getChildSpyResource(rootResource, TEST_PAGE_ACTIVE_AFTER_MODIFIED);
+        Resource pageActivateBeforeModified1 = getChildSpyResource(rootResource, TEST_PAGE_ACTIVE_BEFORE_MODIFIED_1);
+        Resource pageActivateBeforeModified2 = getChildSpyResource(rootResource, TEST_PAGE_ACTIVE_BEFORE_MODIFIED_2);
+        Resource activeRes1 = getChildSpyResource(rootResource, TEST_ACTIVE_RES_1);
+        Resource activeRes2 = getChildSpyResource(rootResource, TEST_ACTIVE_RES_2);
+        Resource activeRes3 = getChildSpyResource(rootResource, TEST_ACTIVE_RES_3);
+
+        Iterator<Resource> spyChildrenResources = Arrays.asList(inactivePageRes1, activePageRes, componentRes1,
+                componentRes2, activeAssetRes, inactiveAssetRes, pageActivateAfterModified, pageActivateBeforeModified1,
+                pageActivateBeforeModified2, activeRes1, activeRes2, activeRes3).iterator();
         doReturn(spyChildrenResources).when(spyRootResource).listChildren();
 
         ReplicationStatus replicationStatusActivate = mock(ReplicationStatus.class);
         when(replicationStatusActivate.isActivated()).thenReturn(true);
+
+        Calendar lastReplicated = Calendar.getInstance();
+        SimpleDateFormat sdf = new SimpleDateFormat(JCR_DATE_FORMAT);
+        lastReplicated.setTime(sdf.parse(TEST_LAST_REPLICATED));
+        when(replicationStatusActivate.getLastPublished()).thenReturn(lastReplicated);
 
         ReplicationStatus replicationStatusDeactivate = mock(ReplicationStatus.class);
         when(replicationStatusDeactivate.isActivated()).thenReturn(false);
@@ -382,6 +425,10 @@ class GridResourcesGeneratorImplTest {
 
         doReturn(replicationStatusActivate).when(activeAssetRes).adaptTo(ReplicationStatus.class);
         doReturn(replicationStatusDeactivate).when(inactiveAssetRes).adaptTo(ReplicationStatus.class);
+
+        doReturn(replicationStatusActivate).when(pageActivateAfterModified).adaptTo(ReplicationStatus.class);
+        doReturn(replicationStatusActivate).when(pageActivateBeforeModified1).adaptTo(ReplicationStatus.class);
+        doReturn(replicationStatusActivate).when(pageActivateBeforeModified2).adaptTo(ReplicationStatus.class);
 
         return spyRootResource;
     }
