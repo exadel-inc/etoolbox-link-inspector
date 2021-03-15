@@ -37,7 +37,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
- * The model represents a separate row in the grid.
+ * Represents a row in the UI grid.
  */
 @Model(
         adaptables = {SlingHttpServletRequest.class, Resource.class},
@@ -47,8 +47,7 @@ public class GridViewItem {
     private static final Logger LOG = LoggerFactory.getLogger(GridViewItem.class);
 
     public static final String EDITOR_LINK = "/editor.html";
-    //Note: CRX DE is not available in AEMaaCS
-    public static final String CRX_DE_LINK = "/crx/de/index.jsp#";
+    public static final String CRX_DE_PATH = "/crx/de/index.jsp#";
 
     public static final String THUMBNAIL_PATH =
             "/etc.clientlibs/aembox-linkchecker/clientlibs/link-checker-ui/resources/thumbnail.png";
@@ -160,6 +159,10 @@ public class GridViewItem {
 
     public boolean isValidPage() {
         return isValidPage;
+    }
+
+    public String getCrxDePath() {
+        return CRX_DE_PATH;
     }
 
     private static String encodePath(String path) {

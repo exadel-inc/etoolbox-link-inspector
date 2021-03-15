@@ -28,7 +28,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
- * The model represents content of the stats popover.
+ * Represents the content of the Stats popover.
  */
 @Model(
         adaptables = Resource.class,

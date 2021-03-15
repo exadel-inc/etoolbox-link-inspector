@@ -38,13 +38,11 @@ public class LinksCounter {
 
     public synchronized void countValidatedLinks(Link link) {
         switch (link.getType()) {
-            case INTERNAL: {
+            case INTERNAL:
                 this.incrementInternal();
                 break;
-            }
-            case EXTERNAL: {
+            case EXTERNAL:
                 this.incrementExternal();
-            }
         }
     }
 }

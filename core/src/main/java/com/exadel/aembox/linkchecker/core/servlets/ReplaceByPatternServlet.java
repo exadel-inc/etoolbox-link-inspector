@@ -64,8 +64,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
- * The servlet for replacement the detected broken links by pattern.
- * The link pattern and replacement are retrieved from UI dialog and passed from js during ajax call.
+ * Performs replacement by pattern within the detected broken links scope.
+ * The link pattern and replacement are retrieved from the UI dialog and passed to the servlet via an ajax call.
  */
 @Component(service = {Servlet.class})
 @SlingServletResourceTypes(

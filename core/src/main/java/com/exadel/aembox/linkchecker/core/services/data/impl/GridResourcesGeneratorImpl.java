@@ -163,7 +163,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
         ) int threads_per_core() default DEFAULT_THREADS_PER_CORE;
     }
 
-    private static final Logger LOG = LoggerFactory.getLogger(GridResourcesGenerator.class);
+    private static final Logger LOG = LoggerFactory.getLogger(GridResourcesGeneratorImpl.class);
 
     private static final String DEFAULT_SEARCH_PATH = "/content";
     private static final int DEFAULT_THREADS_PER_CORE = 60;

@@ -25,7 +25,7 @@ import javax.inject.Inject;
 import java.util.Optional;
 
 /**
- * The model representing the stats button.
+ * Represents the Stats button in the UI grid.
  */
 @Model(
         adaptables = SlingHttpServletRequest.class,

@@ -31,7 +31,7 @@ import javax.jcr.Session;
 
 @Component(service = RepositoryHelper.class)
 public class RepositoryHelperImpl implements RepositoryHelper {
-    private static final Logger LOG = LoggerFactory.getLogger(RepositoryHelper.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RepositoryHelperImpl.class);
 
     private static final String LINK_CHECKER_SERVICE_NAME = "aembox-linkchecker-service";
 

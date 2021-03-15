@@ -53,7 +53,7 @@ import java.util.stream.Stream;
 
 @Component(service = DataFeedService.class)
 public class DataFeedServiceImpl implements DataFeedService {
-    private static final Logger LOG = LoggerFactory.getLogger(DataFeedService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DataFeedServiceImpl.class);
 
     @Reference
     private RepositoryHelper repositoryHelper;

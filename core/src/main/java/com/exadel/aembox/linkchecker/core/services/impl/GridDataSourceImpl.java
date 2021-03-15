@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
 
 @Component(service = GridDataSource.class)
 public class GridDataSourceImpl implements GridDataSource {
-    private static final Logger LOG = LoggerFactory.getLogger(GridDataSource.class);
+    private static final Logger LOG = LoggerFactory.getLogger(GridDataSourceImpl.class);
 
     @Reference
     private DataFeedService dataFeedService;

@@ -9,6 +9,18 @@
     <version>1.0-SNAPSHOT</version>
     <description>AEMBox Link Checker</description>
 
+    <organization>
+        <name>Exadel, Inc.</name>
+        <url>https://exadel.com</url>
+    </organization>
+
+    <licenses>
+        <license>
+            <name>The Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+
     <modules>
         <module>all</module>
         <module>core</module>
@@ -516,6 +528,23 @@ Bundle-DocURL:
                                     </configuration>
                                 </execution>
                             </executions>
+                        </plugin>
+                    </plugins>
+                </pluginManagement>
+            </build>
+        </profile>
+        <profile>
+            <id>test</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <build>
+                <pluginManagement>
+                    <plugins>
+                        <plugin>
+                            <groupId>org.jacoco</groupId>
+                            <artifactId>jacoco-maven-plugin</artifactId>
+                            <version>0.8.6</version>
                         </plugin>
                     </plugins>
                 </pluginManagement>
