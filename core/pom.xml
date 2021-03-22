@@ -11,6 +11,11 @@
     <artifactId>aembox-linkchecker.core</artifactId>
     <name>AEMBox Link Checker - Core</name>
     <description>Core bundle for AEMBox Link Checker</description>
+    <properties>
+        <sonar.java.binaries>target/classes</sonar.java.binaries>
+        <sonar.junit.reportPaths>target/surefire-reports</sonar.junit.reportPaths>
+        <sonar.coverage.jacoco.xmlReportPaths>target/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+    </properties>
     <build>
         <plugins>
             <plugin>
