@@ -33,7 +33,6 @@ import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceUtil;
-import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.apache.sling.jcr.resource.api.JcrResourceConstants;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -72,7 +71,7 @@ import java.util.stream.Stream;
 public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
     @ObjectClassDefinition(
             name = "AEMBox Link Checker - Grid Resources Generator",
-            description = "Finds broken links below the specified path for further outputting them in a report"
+            description = "Finds broken links under the specified path for further outputting them in a report"
     )
     @interface Configuration {
         @AttributeDefinition(
@@ -88,13 +87,13 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
 
         @AttributeDefinition(
                 name = "Activated Content",
-                description = "If checked, links will be retrieved from replicated (Activate) content only"
+                description = "If checked, links will be retrieved from activated content only"
         ) boolean check_activation() default false;
 
         @AttributeDefinition(
                 name = "Skip content modified after activation",
                 description = "Works in conjunction with the 'Activated Content' checkbox only. If checked, links " +
-                        "will be retrieved from replicated (Activate) content that is not modified after activation " +
+                        "will be retrieved from activated content that is not modified after activation " +
                         "(lastModified is before lastReplicated)"
         ) boolean skip_modified_after_activation() default false;
 
@@ -169,7 +168,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
     private static final int DEFAULT_THREADS_PER_CORE = 60;
 
     private static final String TAGS_LOCATION = "/content/cq:tags";
-    public static final String STATS_RESOURCE_PATH = "/content/aembox-linkchecker/data/stats";
+    private static final String STATS_RESOURCE_PATH = "/content/aembox-linkchecker/data/stats";
 
     @Reference
     private LinkHelper linkHelper;
@@ -192,16 +191,16 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
     @Modified
     protected void activate(Configuration configuration) {
         searchPath = configuration.search_path();
-        excludedPaths = PropertiesUtil.toStringArray(configuration.excluded_paths());
+        excludedPaths = configuration.excluded_paths();
         checkActivation = configuration.check_activation();
         skipModifiedAfterActivation = configuration.skip_modified_after_activation();
         lastModifiedBoundary = Optional.of(configuration.last_modified_boundary())
                 .filter(StringUtils::isNotBlank)
                 .map(dateString -> ZonedDateTime.parse(dateString, DateTimeFormatter.ISO_DATE_TIME))
                 .orElse(null);
-        excludedProperties = PropertiesUtil.toStringArray(configuration.excluded_properties());
+        excludedProperties = configuration.excluded_properties();
         reportLinksType = configuration.links_type();
-        excludedLinksPatterns = PropertiesUtil.toStringArray(configuration.excluded_links_patterns());
+        excludedLinksPatterns = configuration.excluded_links_patterns();
         excludeTags = configuration.exclude_tags();
         allowedStatusCodes = configuration.allowed_status_codes();
         threadsPerCore = configuration.threads_per_core();
@@ -243,66 +242,25 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
         return sortedGridResources;
     }
 
-    private Set<GridResource> validateLinksInParallel(Map<Link, List<GridResource>> linkToGridResourcesMap,
-                                                      ResourceResolver resourceResolver) {
-        LinksCounter allLinksCounter = new LinksCounter();
-        LinksCounter brokenLinksCounter = new LinksCounter();
-        executorService =
-                Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() * threadsPerCore);
-        Set<GridResource> gridResources = new CopyOnWriteArraySet<>();
-        try {
-            linkToGridResourcesMap.forEach((link, resources) -> {
-                        allLinksCounter.countValidatedLinks(link);
-                        executorService.submit(() -> {
-                                    LinkStatus status = linkHelper.validateLink(link, resourceResolver);
-                                    if (!status.isValid() && isAllowedErrorCode(status.getStatusCode())) {
-                                        resources.forEach(resource -> resource.setLink(link));
-                                        gridResources.addAll(resources);
-                                        brokenLinksCounter.countValidatedLinks(link);
-                                    }
-                                }
-                        );
-                    }
-            );
-        } finally {
-            executorService.shutdown();
-        }
-        try {
-            boolean terminated = executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
-            LOG.trace("ExecutorService terminated: {}", terminated);
-        } catch (InterruptedException e) {
-            LOG.error("Parallel links validation failed", e);
-            executorService.shutdownNow();
-            Thread.currentThread().interrupt();
-        }
-        LOG.debug("Checked internal links count: {}", allLinksCounter.getInternalLinks());
-        LOG.debug("Checked external links count: {}", allLinksCounter.getExternalLinks());
-
-        LOG.debug("Broken internal links count: {}", brokenLinksCounter.getInternalLinks());
-        LOG.debug("Broken external links count: {}", brokenLinksCounter.getExternalLinks());
-
-        saveStatsToJcr(allLinksCounter, brokenLinksCounter, resourceResolver);
-
-        return gridResources;
-    }
-
-    private int getGridResourcesViaTraversing(Resource resource, String gridResourceType,
+    private int getGridResourcesViaTraversing(Resource resource,
+                                              String gridResourceType,
                                               Map<Link, List<GridResource>> allLinkToGridResourcesMap) {
         int traversedNodesCount = 0;
-        if (isAllowedResource(resource)) {
-            traversedNodesCount++;
-            getLinkToGridResourcesMap(resource, gridResourceType).forEach((k, v) ->
-                    allLinkToGridResourcesMap.merge(k, v,
-                            (existing, newValue) -> {
-                                existing.addAll(newValue);
-                                return existing;
-                            })
-            );
-            Iterator<Resource> children = resource.listChildren();
-            while (children.hasNext()) {
-                Resource child = children.next();
-                traversedNodesCount += getGridResourcesViaTraversing(child, gridResourceType, allLinkToGridResourcesMap);
-            }
+        if (!isAllowedResource(resource)) {
+            return traversedNodesCount;
+        }
+        getLinkToGridResourcesMap(resource, gridResourceType).forEach((k, v) ->
+                allLinkToGridResourcesMap.merge(k, v,
+                        (existing, newValue) -> {
+                            existing.addAll(newValue);
+                            return existing;
+                        })
+        );
+        traversedNodesCount++;
+        Iterator<Resource> children = resource.listChildren();
+        while (children.hasNext()) {
+            Resource child = children.next();
+            traversedNodesCount += getGridResourcesViaTraversing(child, gridResourceType, allLinkToGridResourcesMap);
         }
         return traversedNodesCount;
     }
@@ -325,11 +283,74 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
                 .filter(this::isAllowedLinkType)
                 .filter(this::isAllowedLink)
                 .collect(Collectors.toMap(Function.identity(),
-                        link -> new GridResource(resource.getPath(), property, gridResourceType),
+                        link -> new GridResource(link, resource.getPath(), property, gridResourceType),
                         (existingValue, newValue) -> existingValue
                 ))
                 .entrySet()
                 .stream();
+    }
+
+    private Set<GridResource> validateLinksInParallel(Map<Link, List<GridResource>> linkToGridResourcesMap,
+                                                      ResourceResolver resourceResolver) {
+        LinksCounter allLinksCounter = new LinksCounter();
+        LinksCounter brokenLinksCounter = new LinksCounter();
+        Set<GridResource> allBrokenLinkResources = new CopyOnWriteArraySet<>();
+        try {
+            executorService =
+                    Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() * threadsPerCore);
+            linkToGridResourcesMap.forEach((link, resources) ->
+                    submitLinkForValidation(
+                            link,
+                            resources,
+                            allBrokenLinkResources,
+                            allLinksCounter,
+                            brokenLinksCounter,
+                            resourceResolver
+                    )
+            );
+        } finally {
+            executorService.shutdown();
+        }
+
+        awaitExecutorServiceTermination();
+
+        LOG.debug("Checked internal links count: {}", allLinksCounter.getInternalLinks());
+        LOG.debug("Checked external links count: {}", allLinksCounter.getExternalLinks());
+
+        LOG.debug("Broken internal links count: {}", brokenLinksCounter.getInternalLinks());
+        LOG.debug("Broken external links count: {}", brokenLinksCounter.getExternalLinks());
+
+        saveStatsToJcr(allLinksCounter, brokenLinksCounter, resourceResolver);
+
+        return allBrokenLinkResources;
+    }
+
+    private void submitLinkForValidation(Link link,
+                                         List<GridResource> currentLinkResources,
+                                         Set<GridResource> allBrokenLinkResources,
+                                         LinksCounter allLinksCounter,
+                                         LinksCounter brokenLinksCounter,
+                                         ResourceResolver resourceResolver) {
+        allLinksCounter.countLink(link);
+        executorService.submit(() -> {
+                    LinkStatus status = linkHelper.validateLink(link, resourceResolver);
+                    if (!status.isValid() && isAllowedErrorCode(status.getStatusCode())) {
+                        allBrokenLinkResources.addAll(currentLinkResources);
+                        brokenLinksCounter.countLink(link);
+                    }
+                }
+        );
+    }
+
+    private void awaitExecutorServiceTermination() {
+        try {
+            boolean terminated = executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+            LOG.trace("ExecutorService terminated: {}", terminated);
+        } catch (InterruptedException e) {
+            LOG.error("Parallel links validation failed", e);
+            executorService.shutdownNow();
+            Thread.currentThread().interrupt();
+        }
     }
 
     private boolean isAllowedResource(Resource resource) {

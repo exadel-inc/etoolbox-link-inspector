@@ -41,7 +41,7 @@ public class ResourceExistCheckServlet extends SlingAllMethodsServlet {
     private static final Logger LOG = LoggerFactory.getLogger(ResourceExistCheckServlet.class);
 
     private static final String PATH_PARAM = "path";
-    private static final String RESOURCE_EXISTS_RESP_PARAM = "isResourceExist";
+    private static final String RESOURCE_EXISTS_RESP_PARAM = "resourceExists";
 
     @Override
     protected void doPost(final SlingHttpServletRequest request, final SlingHttpServletResponse response) {
@@ -51,11 +51,11 @@ public class ResourceExistCheckServlet extends SlingAllMethodsServlet {
             LOG.warn("Path is blank, resource existence check failed");
             return;
         }
-        boolean isResourceExist = Optional.of(request.getResourceResolver())
+        boolean resourceExists = Optional.of(request.getResourceResolver())
                 .map(resourceResolver -> resourceResolver.getResource(path))
                 .isPresent();
         String jsonResponse = Json.createObjectBuilder()
-                .add(RESOURCE_EXISTS_RESP_PARAM, isResourceExist)
+                .add(RESOURCE_EXISTS_RESP_PARAM, resourceExists)
                 .build()
                 .toString();
         ServletUtil.writeJsonResponse(response, jsonResponse);

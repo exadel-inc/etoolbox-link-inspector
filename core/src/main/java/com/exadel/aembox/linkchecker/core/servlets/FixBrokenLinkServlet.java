@@ -60,10 +60,10 @@ public class FixBrokenLinkServlet extends SlingAllMethodsServlet {
     private static final String STATUS_MSG_RESP_PARAM = "statusMessage";
 
     @Reference
-    private LinkHelper linkHelper;
+    private transient LinkHelper linkHelper;
 
     @Reference
-    private RepositoryHelper repositoryHelper;
+    private transient RepositoryHelper repositoryHelper;
 
     @Override
     protected void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response) {

@@ -33,11 +33,11 @@ import java.util.Collection;
 import java.util.Optional;
 
 public class JsonUtil {
-    private JsonUtil() {}
-
     private static final Logger LOG = LoggerFactory.getLogger(JsonUtil.class);
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
+    private JsonUtil() {}
 
     public static JSONArray objectsToJsonArray(Collection<?> objects) {
         JSONArray jsonArray = new JSONArray();

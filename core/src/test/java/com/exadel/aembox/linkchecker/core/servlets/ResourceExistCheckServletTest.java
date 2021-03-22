@@ -31,7 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class ResourceExistCheckServletTest {
     private static final String PATH_REQUEST_PARAM = "path";
     private static final String TEST_PATH = "/content/test";
-    private static final String RESOURCE_EXISTS_RESP_PARAM = "isResourceExist";
+    private static final String RESOURCE_EXISTS_RESP_PARAM = "resourceExists";
 
     private final AemContext context = new AemContext();
 

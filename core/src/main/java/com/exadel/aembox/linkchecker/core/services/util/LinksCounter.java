@@ -16,33 +16,38 @@ package com.exadel.aembox.linkchecker.core.services.util;
 
 import com.exadel.aembox.linkchecker.core.models.Link;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 public class LinksCounter {
-    private int internalLinks;
-    private int externalLinks;
+    private final AtomicInteger internalLinks;
+    private final AtomicInteger externalLinks;
+
+    public LinksCounter() {
+        this.internalLinks = new AtomicInteger();
+        this.externalLinks = new AtomicInteger();
+    }
 
     public int getInternalLinks() {
-        return internalLinks;
+        return internalLinks.get();
     }
 
     public int getExternalLinks() {
-        return externalLinks;
+        return externalLinks.get();
     }
 
     public void incrementInternal() {
-        this.internalLinks++;
+        this.internalLinks.incrementAndGet();
     }
 
     public void incrementExternal() {
-        this.externalLinks++;
+        this.externalLinks.incrementAndGet();
     }
 
-    public synchronized void countValidatedLinks(Link link) {
-        switch (link.getType()) {
-            case INTERNAL:
-                this.incrementInternal();
-                break;
-            case EXTERNAL:
-                this.incrementExternal();
+    public void countLink(Link link) {
+        if (link.getType() == Link.Type.INTERNAL) {
+            this.incrementInternal();
+        } else if (link.getType() == Link.Type.EXTERNAL) {
+            this.incrementExternal();
         }
     }
 }

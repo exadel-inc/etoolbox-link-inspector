@@ -46,7 +46,7 @@ public class PackageHelperImpl implements PackageHelper {
                                             boolean excludeChildren, boolean assemble)
             throws IOException, RepositoryException, PackageException {
         final JcrPackageManager jcrPackageManager = packaging.getPackageManager(session);
-        try (final JcrPackage jcrPackage = jcrPackageManager.create(groupName, name, version)) {
+        try (JcrPackage jcrPackage = jcrPackageManager.create(groupName, name, version)) {
             final DefaultWorkspaceFilter workspaceFilter = new DefaultWorkspaceFilter();
             paths.stream()
                     .map(path -> pathToFilterSet(path, excludeChildren))

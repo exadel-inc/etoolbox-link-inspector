@@ -25,7 +25,8 @@ import javax.inject.Inject;
 import java.util.Optional;
 
 /**
- * Represents the Stats button in the UI grid.
+ * Represents the Stats button in the UI grid. After clicking this button, the popover represented
+ * by {@link StatsModal} is displayed.
  */
 @Model(
         adaptables = SlingHttpServletRequest.class,
@@ -33,12 +34,17 @@ import java.util.Optional;
 )
 public class StatsButton {
     @SlingObject
-    ResourceResolver resourceResolver;
+    private ResourceResolver resourceResolver;
 
     @Inject
-    String statsResourcePath;
+    private String statsResourcePath;
 
-    public boolean isStatsResourceExist() {
+    /**
+     * Checks existence of the resource that encloses generation statistics data.
+     *
+     * @return true, if the resource exists
+     */
+    public boolean statsResourceExists() {
         return Optional.ofNullable(statsResourcePath)
                 .filter(StringUtils::isNotBlank)
                 .map(resourceResolver::getResource)

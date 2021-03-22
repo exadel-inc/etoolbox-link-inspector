@@ -51,11 +51,11 @@ class StatsButtonTest {
         context.create().resource(TEST_RESOURCE_PATH,
                 JcrResourceConstants.SLING_RESOURCE_TYPE_PROPERTY, JcrConstants.NT_UNSTRUCTURED);
 
-        assertTrue(fixture.isStatsResourceExist());
+        assertTrue(fixture.statsResourceExists());
     }
 
     @Test
     void testResourceNotExist() {
-        assertFalse(fixture.isStatsResourceExist());
+        assertFalse(fixture.statsResourceExists());
     }
 }

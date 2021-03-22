@@ -164,7 +164,7 @@
      * @returns {boolean}
      */
     function resourceExistCheck(path) {
-        var isResourceExist = false;
+        var resourceExists = false;
         $.ajax({
             url: RESOURCE_EXIST_CHECK_COMMAND,
             type: 'POST',
@@ -174,10 +174,10 @@
                 path: path
             },
             success: function (data) {
-                isResourceExist = data && data.isResourceExist;
+                resourceExists = data && data.resourceExists;
             }
         });
-        return isResourceExist;
+        return resourceExists;
     }
     Utils.resourceExistCheck = resourceExistCheck;
 

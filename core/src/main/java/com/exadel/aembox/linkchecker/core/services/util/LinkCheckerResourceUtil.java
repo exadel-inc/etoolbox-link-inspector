@@ -43,9 +43,9 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 public class LinkCheckerResourceUtil {
-    private LinkCheckerResourceUtil() {}
-
     private static final Logger LOG = LoggerFactory.getLogger(LinkCheckerResourceUtil.class);
+
+    private LinkCheckerResourceUtil() {}
 
     public static void removeResource(String path, ResourceResolver resourceResolver) {
         try {
@@ -61,12 +61,12 @@ public class LinkCheckerResourceUtil {
 
     public static void saveFileToJCR(String path, byte[] contentBytes, String mimeType, ResourceResolver resolver) {
         if (contentBytes == null) {
-            LOG.warn("File is null, saving in JCR is interrupted");
+            LOG.warn("File is null, saving to JCR is interrupted");
             return;
         }
         Session session = resolver.adaptTo(Session.class);
         if (session == null) {
-            LOG.warn("Session is null, saving in JCR is interrupted");
+            LOG.warn("Session is null, saving to JCR is interrupted");
             return;
         }
         try (InputStream inputData = new ByteArrayInputStream(contentBytes)) {

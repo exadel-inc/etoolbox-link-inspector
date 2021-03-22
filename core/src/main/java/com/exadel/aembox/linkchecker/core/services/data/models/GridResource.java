@@ -31,7 +31,7 @@ import java.util.Optional;
  */
 public class GridResource {
     /**
-     * Property names
+     * JCR property names
      */
     public static final String PN_LINK = "link";
     public static final String PN_LINK_TYPE = "linkType";
@@ -40,6 +40,17 @@ public class GridResource {
     public static final String PN_RESOURCE_PATH = "resourcePath";
     public static final String PN_PROPERTY_NAME = "propertyName";
 
+    /**
+     * Json field names
+     */
+    private static final String JSON_PROPERTY_NAME = PN_PROPERTY_NAME;
+    private static final String JSON_RESOURCE_PATH = PN_RESOURCE_PATH;
+    private static final String JSON_HREF = "href";
+    private static final String JSON_TYPE = "type";
+    private static final String JSON_STATUS_MESSAGE = "statusMessage";
+    private static final String JSON_RESOURCE_TYPE = "resourceType";
+    private static final String JSON_STATUS_CODE = "statusCode";
+
     @JsonIgnore
     private Link link;
 
@@ -47,27 +58,28 @@ public class GridResource {
     private final String propertyName;
     private final String resourceType;
 
-    public GridResource(String resourcePath, String propertyName, String resourceType) {
+    public GridResource(Link link, String resourcePath, String propertyName, String resourceType) {
+        this.link = link;
         this.resourcePath = resourcePath;
         this.propertyName = propertyName;
         this.resourceType = resourceType;
     }
 
     @JsonCreator
-    public GridResource(@JsonProperty("propertyName") String propertyName,
-                        @JsonProperty("resourcePath") String resourcePath,
-                        @JsonProperty("href") String href,
-                        @JsonProperty("type") String type,
-                        @JsonProperty("statusMessage") String statusMessage,
-                        @JsonProperty("resourceType") String resourceType,
-                        @JsonProperty("statusCode") String statusCode) {
+    public GridResource(@JsonProperty(JSON_PROPERTY_NAME) String propertyName,
+                        @JsonProperty(JSON_RESOURCE_PATH) String resourcePath,
+                        @JsonProperty(JSON_HREF) String href,
+                        @JsonProperty(JSON_TYPE) String type,
+                        @JsonProperty(JSON_STATUS_MESSAGE) String statusMessage,
+                        @JsonProperty(JSON_RESOURCE_TYPE) String resourceType,
+                        @JsonProperty(JSON_STATUS_CODE) String statusCode) {
         this.resourcePath = resourcePath;
         this.propertyName = propertyName;
         this.resourceType = resourceType;
 
-        Link link = new Link(href, Link.Type.valueOf(type.toUpperCase()));
-        link.setStatus(new LinkStatus(Integer.parseInt(statusCode), statusMessage));
-        this.link = link;
+        Link newLink = new Link(href, Link.Type.valueOf(type.toUpperCase()));
+        newLink.setStatus(new LinkStatus(Integer.parseInt(statusCode), statusMessage));
+        this.link = newLink;
     }
 
     public Link getLink() {

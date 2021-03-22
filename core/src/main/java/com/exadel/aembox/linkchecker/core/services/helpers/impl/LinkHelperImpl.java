@@ -49,8 +49,8 @@ import java.util.stream.Stream;
 public class LinkHelperImpl implements LinkHelper {
     private static final Logger LOG = LoggerFactory.getLogger(LinkHelperImpl.class);
 
-    private static final Pattern PATTERN_EXTERNAL_LINK = Pattern.compile("(https?://(?:www\\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\\.[^\\s\"'<]{2,}|www\\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\\.[^\\s\"'<]{2,}|https?://(?:www\\.|(?!www))[a-zA-Z0-9]+\\.[^\\s\"'<]{2,}|www\\.[a-zA-Z0-9]+\\.[^\\s\"'<]{2,})");
-    private static final Pattern PATTERN_INTERNAL_LINK = Pattern.compile("(^|(?<=\"))/content/([-a-zA-Z0-9():%_+.~#?&/=\\s]*)");
+    private static final Pattern PATTERN_EXTERNAL_LINK = Pattern.compile("https?://[\\w\\d-]+\\.[^\\s\"'<]{2,}|www\\d*\\.[\\w\\d-]+\\.[^\\s\"'<]{2,}");
+    private static final Pattern PATTERN_INTERNAL_LINK = Pattern.compile("(^|(?<=\"))/content/([-\\w\\d():%_+.~#?&/=\\s]*)");
 
     @Reference
     private ExternalLinkChecker externalLinkChecker;
@@ -70,12 +70,12 @@ public class LinkHelperImpl implements LinkHelper {
 
     @Override
     public Stream<String> getExternalLinksFromString(String text) {
-        return getLinksByPattern(text, PATTERN_EXTERNAL_LINK);
+        return getLinksStreamByPattern(text, PATTERN_EXTERNAL_LINK);
     }
 
     @Override
     public Stream<String> getInternalLinksFromString(String text) {
-        return getLinksByPattern(text, PATTERN_INTERNAL_LINK);
+        return getLinksStreamByPattern(text, PATTERN_INTERNAL_LINK);
     }
 
     @Override
@@ -107,14 +107,12 @@ public class LinkHelperImpl implements LinkHelper {
 
     @Override
     public LinkStatus validateLink(Link link, ResourceResolver resourceResolver) {
-        switch (link.getType()) {
-            case INTERNAL:
-                link.setStatus(validateInternalLink(link.getHref(), resourceResolver));
-                break;
-            case EXTERNAL:
-                LOG.trace("Start validation of the external link {}", link.getHref());
-                link.setStatus(validateExternalLink(link.getHref()));
-                LOG.trace("Completed validation of the external link {}", link.getHref());
+        if (link.getType() == Link.Type.INTERNAL) {
+            link.setStatus(validateInternalLink(link.getHref(), resourceResolver));
+        } else if (link.getType() == Link.Type.EXTERNAL) {
+            LOG.trace("Start validation of the external link {}", link.getHref());
+            link.setStatus(validateExternalLink(link.getHref()));
+            LOG.trace("Completed validation of the external link {}", link.getHref());
         }
         return link.getStatus();
     }
@@ -158,7 +156,7 @@ public class LinkHelperImpl implements LinkHelper {
         return Stream.concat(internalLinksStream, externalLinksStream);
     }
 
-    private Stream<String> getLinksByPattern(String text, Pattern pattern) {
+    private Stream<String> getLinksStreamByPattern(String text, Pattern pattern) {
         Set<String> links = new HashSet<>();
         Matcher matcher = pattern.matcher(text);
         while (matcher.find()) {

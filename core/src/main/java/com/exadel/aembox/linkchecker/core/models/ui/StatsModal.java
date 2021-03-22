@@ -28,7 +28,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
- * Represents the content of the Stats popover.
+ * Represents content of the Stats popover that contains the generation statistics data.
  */
 @Model(
         adaptables = Resource.class,
@@ -141,7 +141,7 @@ public class StatsModal {
             return ALL_STATUS_CODES_MSG;
         } else {
             return Arrays.stream(allowedStatusCodes)
-                    .map(statusCode -> statusCode + StringUtils.EMPTY)
+                    .map(String::valueOf)
                     .collect(Collectors.joining(ARRAY_VALUES_SEPARATOR));
         }
     }

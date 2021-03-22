@@ -48,7 +48,7 @@ public class AclCheckServlet extends SlingAllMethodsServlet {
     private static final String HAS_PERMISSIONS_RESPONSE_PARAM = "hasPermissions";
 
     @Reference
-    private RepositoryHelper repositoryHelper;
+    private transient RepositoryHelper repositoryHelper;
 
     @Override
     protected void doPost(final SlingHttpServletRequest request, final SlingHttpServletResponse response) {

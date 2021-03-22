@@ -19,7 +19,7 @@
     <linkchecker
             jcr:primaryType="nt:unstructured"
             jcr:title="Advanced Link Checker"
-            jcr:description="Collects broken links (external/internal) below the specified content path and generates a comprehensive report"
+            jcr:description="Collects broken links (external/internal) under the specified content path and generates a comprehensive report"
             href="/tools/aembox/advanced-linkchecker.html"
             consoleId="aembox-link-checker"
             icon="box"

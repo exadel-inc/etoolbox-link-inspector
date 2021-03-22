@@ -19,7 +19,13 @@ import org.apache.commons.httpclient.HttpStatus;
 
 import java.util.List;
 
+/**
+ * Represents a status of the {@link Link} based on a result of checking link's validity
+ */
 public final class LinkStatus {
+    /**
+     * The range of Http status codes indicating that a link is valid
+     */
     public static final List<Integer> HTTP_CODES_SUCCESS = ImmutableList.of(
             HttpStatus.SC_OK,
             HttpStatus.SC_CREATED,
@@ -31,8 +37,17 @@ public final class LinkStatus {
             HttpStatus.SC_MULTI_STATUS
     );
 
+    /**
+     * Http status code
+     */
     private final int statusCode;
+    /**
+     * Http status message
+     */
     private final String statusMessage;
+    /**
+     * Indicates if a link is valid
+     */
     private final boolean isValid;
 
     public LinkStatus(int statusCode, String statusMessage) {
@@ -41,14 +56,26 @@ public final class LinkStatus {
         this.isValid = HTTP_CODES_SUCCESS.contains(statusCode);
     }
 
+    /**
+     * Gets the status code of a link
+     * @return the Http status code based on a result of checking link's validity
+     */
     public int getStatusCode() {
         return statusCode;
     }
 
+    /**
+     * Gets the status message that corresponds to the {@link #statusCode}
+     * @return the status message based on a result of checking link's validity
+     */
     public String getStatusMessage() {
         return statusMessage;
     }
 
+    /**
+     * Indicates if a link is valid.
+     * @return true if the Http status code of a link is found in the range {@link #HTTP_CODES_SUCCESS}
+     */
     public boolean isValid() {
         return isValid;
     }

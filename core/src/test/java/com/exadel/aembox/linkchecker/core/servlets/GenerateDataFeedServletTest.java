@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-package com.exadel.aembox.linkchecker.core.servlets.data;
+package com.exadel.aembox.linkchecker.core.servlets;
 
 import com.exadel.aembox.linkchecker.core.services.job.DataFeedJobExecutor;
 import com.exadel.aembox.linkchecker.core.services.job.SlingJobUtil;
@@ -41,13 +41,13 @@ import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(AemContextExtension.class)
-class GenerateDataFeedTest {
+class GenerateDataFeedServletTest {
     private static final String JOB_MANAGER_FIELD = "jobManager";
 
     private static final String ADMIN_GROUP_ID = "administrators";
     private static final String TEST_GROUP_ID = "test";
 
-    private final GenerateDataFeed fixture = new GenerateDataFeed();
+    private final GenerateDataFeedServlet fixture = new GenerateDataFeedServlet();
 
     SlingHttpServletRequest requestMock;
     SlingHttpServletResponse responseMock;

@@ -19,7 +19,13 @@ import org.apache.commons.httpclient.HttpStatus;
 import java.util.Objects;
 import java.util.Optional;
 
+/**
+ * Represents a link.
+ */
 public final class Link {
+    /**
+     * Lists available types of this link.
+     */
     public enum Type {
         INTERNAL("Internal"),
         EXTERNAL("External");
@@ -35,8 +41,17 @@ public final class Link {
         }
     }
 
+    /**
+     * Address of this link
+     */
     private final String href;
+    /**
+     * The {@link Type} is initialized based on link's address
+     */
     private final Type type;
+    /**
+     * The status is set based on a result of checking link's validity
+     */
     private LinkStatus status;
 
     public Link(String href, Type type) {
@@ -52,22 +67,38 @@ public final class Link {
         return type;
     }
 
+    /**
+     * Gets the http status code that is set based on a result of checking link's validity.
+     * @return the status code if presents, or 404 otherwise
+     */
     public int getStatusCode() {
         return Optional.ofNullable(status)
                 .map(LinkStatus::getStatusCode)
                 .orElse(HttpStatus.SC_NOT_FOUND);
     }
 
+    /**
+     * Gets the status message that is set based on a result of checking link's validity.
+     * @return the status message if presents, or 404 message otherwise
+     */
     public String getStatusMessage() {
         return Optional.ofNullable(status)
                 .map(LinkStatus::getStatusMessage)
                 .orElse(HttpStatus.getStatusText(HttpStatus.SC_NOT_FOUND));
     }
 
+    /**
+     * Gets the {@link LinkStatus} representing the status of this link
+     * @return the status based on a result of checking link's validity
+     */
     public LinkStatus getStatus() {
         return status;
     }
 
+    /**
+     * Sets status based on a result of checking link's validity.
+     * @param status - {@link LinkStatus}
+     */
     public void setStatus(LinkStatus status) {
         this.status = status;
     }

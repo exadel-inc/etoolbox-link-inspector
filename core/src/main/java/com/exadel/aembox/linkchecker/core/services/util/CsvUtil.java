@@ -28,8 +28,6 @@ import java.util.Collection;
 import java.util.function.BiConsumer;
 
 public class CsvUtil {
-    private CsvUtil() {}
-
     private static final Logger LOG = LoggerFactory.getLogger(CsvUtil.class);
 
     public static final String CSV_MIME_TYPE = "text/csv";
@@ -37,6 +35,8 @@ public class CsvUtil {
     public static final String SEMICOLON = ";";
     public static final String QUOTE = "\"";
     public static final String AT_SIGN = "@";
+
+    private CsvUtil() {}
 
     public static String wrapIfContainsSemicolon(String value) {
         if (value.contains(SEMICOLON)) {

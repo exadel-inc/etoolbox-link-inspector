@@ -28,7 +28,7 @@ public class SlingJobUtil {
 
     private static final Logger LOG = LoggerFactory.getLogger(SlingJobUtil.class);
 
-    public static void addJob(final JobManager jobManager, final String jobTopic, final Map<String, Object> payload) {
+    public static void addJob(JobManager jobManager, String jobTopic, Map<String, Object> payload) {
         boolean jobAdded = Optional.ofNullable(jobManager.addJob(jobTopic, payload))
                 .isPresent();
         if (jobAdded) {
@@ -39,7 +39,7 @@ public class SlingJobUtil {
     }
 
     @SuppressWarnings("unchecked")
-    public static void stopAndRemoveJobs(final JobManager jobManager, String topic) {
+    public static void stopAndRemoveJobs(JobManager jobManager, String topic) {
         Collection<Job> jobs = jobManager.findJobs(JobManager.QueryType.ALL, topic, -1);
         if (!jobs.isEmpty()) {
             LOG.debug("The sling jobs to be stopped and removed: {}", jobs);

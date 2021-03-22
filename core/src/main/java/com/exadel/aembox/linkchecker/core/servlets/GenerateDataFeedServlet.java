@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-package com.exadel.aembox.linkchecker.core.servlets.data;
+package com.exadel.aembox.linkchecker.core.servlets;
 
 import com.exadel.aembox.linkchecker.core.services.job.DataFeedJobExecutor;
 import com.exadel.aembox.linkchecker.core.services.job.SlingJobUtil;
@@ -42,13 +42,13 @@ import java.util.Optional;
         methods = HttpConstants.METHOD_GET
 )
 @ServiceDescription("The servlet for manual triggering data feed generation")
-public class GenerateDataFeed extends SlingSafeMethodsServlet {
-    private static final Logger LOG = LoggerFactory.getLogger(GenerateDataFeed.class);
+public class GenerateDataFeedServlet extends SlingSafeMethodsServlet {
+    private static final Logger LOG = LoggerFactory.getLogger(GenerateDataFeedServlet.class);
 
     private static final String ADMIN_GROUP_ID = "administrators";
 
     @Reference
-    private JobManager jobManager;
+    private transient JobManager jobManager;
 
     @Override
     protected void doGet(final SlingHttpServletRequest request, final SlingHttpServletResponse response) {
@@ -63,7 +63,7 @@ public class GenerateDataFeed extends SlingSafeMethodsServlet {
                     Collections.emptyMap()
             );
         } else {
-            LOG.debug("Data feed generation wsa not triggered, user is not admin nor a member of '{}' group",
+            LOG.debug("Data feed generation was not triggered, user is not admin nor a member of '{}' group",
                     ADMIN_GROUP_ID);
         }
     }

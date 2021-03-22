@@ -46,7 +46,7 @@ public class PendingGenerationCheckServlet extends SlingAllMethodsServlet {
     private static final Logger LOG = LoggerFactory.getLogger(PendingGenerationCheckServlet.class);
 
     @Reference
-    private RepositoryHelper repositoryHelper;
+    private transient RepositoryHelper repositoryHelper;
 
     @Override
     protected void doPost(final SlingHttpServletRequest request, final SlingHttpServletResponse response) {

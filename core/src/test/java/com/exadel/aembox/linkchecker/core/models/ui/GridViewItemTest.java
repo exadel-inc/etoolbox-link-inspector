@@ -42,6 +42,7 @@ class GridViewItemTest {
     private static final String COMPONENT_TYPE_FIELD = "componentType";
     private static final String GRID_RESOURCE_TYPE = "aembox-linkchecker/components/gridConfig";
     private static final String HTML_EXTENSION = ".html";
+    private static final String EDITOR_LINK = "/editor.html";
 
     private static final String TEST_COMPONENT_TYPE = "/apps/aembox-linkchecker/components/test-component";
     private static final String TEST_COMPONENT_NAME = "Test Component";
@@ -136,7 +137,7 @@ class GridViewItemTest {
     @Test
     void testPagePath() {
         setupFullParamSet();
-        String expectedPath = GridViewItem.EDITOR_LINK + TEST_PAGE_PATH + HTML_EXTENSION;
+        String expectedPath = EDITOR_LINK + TEST_PAGE_PATH + HTML_EXTENSION;
         assertEquals(expectedPath, viewItem.getPagePath());
     }
 

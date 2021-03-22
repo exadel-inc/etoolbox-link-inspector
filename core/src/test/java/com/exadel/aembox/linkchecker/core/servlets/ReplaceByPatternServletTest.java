@@ -80,6 +80,7 @@ class ReplaceByPatternServletTest {
     private static final String REPOSITORY_HELPER_FIELD = "repositoryHelper";
     private static final String PACKAGE_HELPER_FIELD = "packageHelper";
     private static final String RESOURCE_RESOLVER_FACTORY_FIELD = "resourceResolverFactory";
+    private static final String IS_DEACTIVATED_FIELD = "isDeactivated";
 
     private static final int DEFAULT_COMMIT_THRESHOLD = 1000;
     private static final int DEFAULT_MAX_UPDATED_ITEMS_COUNT = 10000;
@@ -127,6 +128,8 @@ class ReplaceByPatternServletTest {
 
         packageHelper = mock(PackageHelper.class);
         PrivateAccessor.setField(fixture, PACKAGE_HELPER_FIELD, packageHelper);
+
+        PrivateAccessor.setField(fixture, IS_DEACTIVATED_FIELD, false);
 
         request = context.request();
         response = context.response();
@@ -182,6 +185,21 @@ class ReplaceByPatternServletTest {
         assertEquals(HttpStatus.SC_OK, response.getStatus());
         assertTrue(isReplacementDone(TEST_RESOURCE_PATH_1, TEST_PROPERTY_1, TEST_REPLACEMENT));
         assertTrue(isReplacementDone(TEST_RESOURCE_PATH_3, TEST_PROPERTY_3, TEST_REPLACEMENT));
+    }
+
+    @Test
+    void testDeactivate() throws NoSuchFieldException {
+        setUpHelpersResources();
+        setUpRequestParamsLinks();
+
+        when(repositoryHelper.hasReadWritePermissions(any(Session.class), anyString())).thenReturn(true);
+
+        fixture.deactivate();
+        fixture.doPost(request, response);
+
+        assertEquals(HttpStatus.SC_NO_CONTENT, response.getStatus());
+        verifyNoInteractions(packageHelper);
+        verifyNoInteractions(linkHelper);
     }
 
     @Test

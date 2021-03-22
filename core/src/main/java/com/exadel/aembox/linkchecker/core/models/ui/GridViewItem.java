@@ -46,11 +46,22 @@ import java.util.stream.Collectors;
 public class GridViewItem {
     private static final Logger LOG = LoggerFactory.getLogger(GridViewItem.class);
 
-    public static final String EDITOR_LINK = "/editor.html";
+    /**
+     * The prefix for building a page link on Author instance
+     */
+    private static final String EDITOR_LINK = "/editor.html";
+
+    /**
+     * The CRX DE path prefix for building a component link
+     */
     public static final String CRX_DE_PATH = "/crx/de/index.jsp#";
 
+    /**
+     * Vanity path for the grid item thumbnail
+     */
     public static final String THUMBNAIL_PATH =
             "/etc.clientlibs/aembox-linkchecker/clientlibs/link-checker-ui/resources/thumbnail.png";
+
     public static final String SLASH_CHAR = "/";
     public static final String HTML_EXTENSION = ".html";
 

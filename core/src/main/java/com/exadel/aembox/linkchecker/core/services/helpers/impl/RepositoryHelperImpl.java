@@ -40,6 +40,7 @@ public class RepositoryHelperImpl implements RepositoryHelper {
     @Reference
     private ResourceResolverFactory resourceResolverFactory;
 
+    @Override
     public ResourceResolver getServiceResourceResolver() {
         try {
             return resourceResolverFactory.getServiceResourceResolver(
@@ -50,10 +51,12 @@ public class RepositoryHelperImpl implements RepositoryHelper {
         return null;
     }
 
+    @Override
     public ResourceResolver getThreadResourceResolver() {
         return resourceResolverFactory.getThreadResourceResolver();
     }
 
+    @Override
     public boolean hasPermissions(Session session, String path, String permissions) {
         try {
             return session.hasPermission(path, permissions);
@@ -63,10 +66,12 @@ public class RepositoryHelperImpl implements RepositoryHelper {
         return false;
     }
 
+    @Override
     public boolean hasReadWritePermissions(Session session, String path) {
         return hasPermissions(session, path, READ_WRITE_PERMISSIONS);
     }
 
+    @Override
     public void createResourceIfNotExist(String path, String resourceType, String intermediateResourceType) {
         try (ResourceResolver serviceResourceResolver = getServiceResourceResolver()) {
             ResourceUtil.getOrCreateResource(

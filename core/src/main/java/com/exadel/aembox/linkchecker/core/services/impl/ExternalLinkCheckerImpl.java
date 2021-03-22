@@ -126,8 +126,8 @@ public class ExternalLinkCheckerImpl implements ExternalLinkChecker {
                 LOG.error("Failed to close httpClient", e);
             }
         }
-        Optional.ofNullable(connectionManager).
-                ifPresent(PoolingHttpClientConnectionManager::close);
+        Optional.ofNullable(connectionManager)
+                .ifPresent(PoolingHttpClientConnectionManager::close);
     }
 
     private void buildCloseableHttpClient() {

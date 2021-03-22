@@ -27,9 +27,9 @@ import java.io.IOException;
 import java.util.Optional;
 
 public class ServletUtil {
-    private ServletUtil() {}
-
     private static final Logger LOG = LoggerFactory.getLogger(ServletUtil.class);
+
+    private ServletUtil() {}
 
     public static String getRequestParamString(SlingHttpServletRequest request, String param) {
         return Optional.ofNullable(request.getRequestParameter(param))

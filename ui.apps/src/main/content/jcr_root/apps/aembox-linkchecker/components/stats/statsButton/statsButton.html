@@ -1,5 +1,5 @@
 <sly data-sly-use.model="${'com.exadel.aembox.linkchecker.core.models.ui.StatsButton' @ statsResourcePath=properties.path}"
-     data-sly-test="${model.isStatsResourceExist}">
+     data-sly-test="${model.statsResourceExists}">
     <button is="coral-button" id="statsPopover">Stats</button>
     <coral-popover placement="bottom" target="#statsPopover" class="elc-coral-popover">
         <sly data-sly-resource="${properties.path @ resourceType='/apps/aembox-linkchecker/components/stats/statsModal'}"></sly>

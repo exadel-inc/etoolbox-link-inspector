@@ -62,11 +62,11 @@ public class DataFeedServiceImpl implements DataFeedService {
     private GridResourcesGenerator gridResourcesGenerator;
 
     private static final String GRID_RESOURCE_TYPE = "aembox-linkchecker/components/gridConfig";
-    public static final int UI_ITEMS_LIMIT = 500;
+    private static final int UI_ITEMS_LIMIT = 500;
 
-    public static final String JSON_FEED_PATH = "/content/aembox-linkchecker/data/datafeed.json";
+    private static final String JSON_FEED_PATH = "/content/aembox-linkchecker/data/datafeed.json";
 
-    public static final String CSV_REPORT_PATH = "/content/aembox-linkchecker/download/report.csv";
+    private static final String CSV_REPORT_PATH = "/content/aembox-linkchecker/download/report.csv";
     private static final String[] CSV_COLUMNS = {
             "Link",
             "Type",
@@ -107,7 +107,7 @@ public class DataFeedServiceImpl implements DataFeedService {
             List<Resource> resources = toSlingResourcesStream(dataFeedToGridResources(serviceResourceResolver, true),
                     repositoryHelper.getThreadResourceResolver())
                     .collect(Collectors.toList());
-            LOG.info("AEMBox Link Checker - the number of items shown on UI is {}", resources.size());
+            LOG.info("AEMBox Link Checker - the number of items shown is {}", resources.size());
             return resources;
         }
     }
@@ -149,9 +149,9 @@ public class DataFeedServiceImpl implements DataFeedService {
             saveGridResourcesToJcr(resourceResolver, resourcesJsonArray);
             removePendingNode(resourceResolver);
             resourceResolver.commit();
-            LOG.debug("Saving data feed json in jcr completed, path {}", JSON_FEED_PATH);
+            LOG.debug("Saving data feed json to jcr completed, path {}", JSON_FEED_PATH);
         } catch (PersistenceException e) {
-            LOG.error("Saving data feed json in jcr failed", e);
+            LOG.error("Saving data feed json to jcr failed", e);
         }
     }
 
@@ -160,8 +160,12 @@ public class DataFeedServiceImpl implements DataFeedService {
     }
 
     private void saveGridResourcesToJcr(ResourceResolver resourceResolver, JSONArray jsonArray) {
-        LinkCheckerResourceUtil.saveFileToJCR(JSON_FEED_PATH, jsonArray.toString().getBytes(),
-                ContentTypeUtil.TYPE_JSON, resourceResolver);
+        LinkCheckerResourceUtil.saveFileToJCR(
+                JSON_FEED_PATH,
+                jsonArray.toString().getBytes(),
+                ContentTypeUtil.TYPE_JSON,
+                resourceResolver
+        );
     }
 
     private void removePendingNode(ResourceResolver resourceResolver) {

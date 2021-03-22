@@ -58,6 +58,9 @@ public class DataFeedGenerationTask implements Runnable {
 
     private boolean enabled;
 
+    /**
+     * Add the data feed generation sling job to the ordered queue.
+     */
     @Override
     public void run() {
         if (!enabled) {
@@ -68,11 +71,18 @@ public class DataFeedGenerationTask implements Runnable {
         SlingJobUtil.addJob(jobManager, DataFeedJobExecutor.GENERATE_DATA_FEED_TOPIC, Collections.emptyMap());
     }
 
+    /**
+     * Inits fields based on the service's configuration
+     * @param config - the service's configuration
+     */
     @Activate
-    protected void activate(final Config config) {
+    protected void activate(Config config) {
         enabled = config.enabled();
     }
 
+    /**
+     * Finds all sling jobs related to the data feed generation and stops/removes them.
+     */
     @Deactivate
     protected void deactivate() {
         LOG.debug("Deactivating DataFeedGenerationTask, sling jobs with the topic {} will be stopped and removed",
