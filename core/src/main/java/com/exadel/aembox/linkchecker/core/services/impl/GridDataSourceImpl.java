@@ -30,6 +30,9 @@ public class GridDataSourceImpl implements GridDataSource {
     @Reference
     private DataFeedService dataFeedService;
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public DataSource getDataSource() {
         LOG.debug("GridDataSource initialization");

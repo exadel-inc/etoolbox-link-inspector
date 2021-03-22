@@ -85,10 +85,10 @@ class StatsModalTest {
         assertEquals(StringUtils.EMPTY, model.getExcludedLinksPatterns());
         assertNull(model.getExcludeTags());
         assertEquals(StringUtils.EMPTY, model.getAllowedStatusCodes());
-        assertNull(model.getAllInternalLinks());
-        assertNull(model.getBrokenInternalLinks());
-        assertNull(model.getAllExternalLinks());
-        assertNull(model.getBrokenExternalLinks());
+        assertNull(model.getAllInternalLinksCount());
+        assertNull(model.getBrokenInternalLinksCount());
+        assertNull(model.getAllExternalLinksCount());
+        assertNull(model.getBrokenExternalLinksCount());
     }
 
     @Test
@@ -131,10 +131,10 @@ class StatsModalTest {
         assertEquals(EXPECTED_EXCLUDED_LINKS_PATTERNS, model.getExcludedLinksPatterns());
         assertEquals(TEST_EXCLUDE_TAGS, model.getExcludeTags());
         assertEquals(EXPECTED_STATUS_CODES, model.getAllowedStatusCodes());
-        assertEquals(TEST_ALL_INTERNAL_LINKS, model.getAllInternalLinks());
-        assertEquals(TEST_BROKEN_INTERNAL_LINKS, model.getBrokenInternalLinks());
-        assertEquals(TEST_ALL_EXTERNAL_LINKS, model.getAllExternalLinks());
-        assertEquals(TEST_BROKEN_EXTERNAL_LINKS, model.getBrokenExternalLinks());
+        assertEquals(TEST_ALL_INTERNAL_LINKS, model.getAllInternalLinksCount());
+        assertEquals(TEST_BROKEN_INTERNAL_LINKS, model.getBrokenInternalLinksCount());
+        assertEquals(TEST_ALL_EXTERNAL_LINKS, model.getAllExternalLinksCount());
+        assertEquals(TEST_BROKEN_EXTERNAL_LINKS, model.getBrokenExternalLinksCount());
     }
 
     @Test
@@ -158,7 +158,7 @@ class StatsModalTest {
         StatsModal model = statsResource.adaptTo(StatsModal.class);
         assertNotNull(model);
 
-        assertEquals(StringUtils.EMPTY, model.getAllExternalLinks());
+        assertEquals(StringUtils.EMPTY, model.getAllExternalLinksCount());
     }
 
     @Test
@@ -170,6 +170,6 @@ class StatsModalTest {
         StatsModal model = statsResource.adaptTo(StatsModal.class);
         assertNotNull(model);
 
-        assertEquals(StringUtils.EMPTY, model.getAllInternalLinks());
+        assertEquals(StringUtils.EMPTY, model.getAllInternalLinksCount());
     }
 }

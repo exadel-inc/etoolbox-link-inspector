@@ -41,6 +41,10 @@ public class PackageHelperImpl implements PackageHelper {
 
     private static final String EXCLUDE_CHILDREN_PATTERN = "/.*";
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public JcrPackage createPackageForPaths(Collection<String> paths, Session session,
                                             String groupName, String name, String version,
                                             boolean excludeChildren, boolean assemble)

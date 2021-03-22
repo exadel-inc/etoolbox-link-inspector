@@ -55,6 +55,9 @@ public class LinkHelperImpl implements LinkHelper {
     @Reference
     private ExternalLinkChecker externalLinkChecker;
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Stream<Link> getLinkStreamFromProperty(Object propertyValue) {
         Stream<Link> linkStream = Stream.empty();
@@ -68,16 +71,25 @@ public class LinkHelperImpl implements LinkHelper {
         return linkStream;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Stream<String> getExternalLinksFromString(String text) {
         return getLinksStreamByPattern(text, PATTERN_EXTERNAL_LINK);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Stream<String> getInternalLinksFromString(String text) {
         return getLinksStreamByPattern(text, PATTERN_INTERNAL_LINK);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public LinkStatus validateInternalLink(String link, ResourceResolver resourceResolver) {
         LinkStatus status = resolveInternalLink(link, resourceResolver);
@@ -90,6 +102,9 @@ public class LinkHelperImpl implements LinkHelper {
         return status;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public LinkStatus validateExternalLink(String link) {
         try {
@@ -105,6 +120,9 @@ public class LinkHelperImpl implements LinkHelper {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public LinkStatus validateLink(Link link, ResourceResolver resourceResolver) {
         if (link.getType() == Link.Type.INTERNAL) {
@@ -117,6 +135,9 @@ public class LinkHelperImpl implements LinkHelper {
         return link.getStatus();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public LinkStatus validateLink(String link, ResourceResolver resourceResolver) {
         Optional<Link> detectedLink = getLinkStreamFromProperty(link)
@@ -127,6 +148,9 @@ public class LinkHelperImpl implements LinkHelper {
         return validateLink(detectedLink.get(), resourceResolver);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean replaceLink(ResourceResolver resourceResolver,
                                String resourcePath, String propertyName, String currentLink, String newLink) {

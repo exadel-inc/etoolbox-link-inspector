@@ -206,6 +206,9 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
         threadsPerCore = configuration.threads_per_core();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<GridResource> generateGridResources(String gridResourceType, ResourceResolver resourceResolver) {
         StopWatch stopWatch = StopWatch.createStarted();
@@ -471,7 +474,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
         }
     }
 
-    public Map<String, Object> getGenerationStatsMap(LinksCounter allLinksCounter, LinksCounter brokenLinksCounter) {
+    private Map<String, Object> getGenerationStatsMap(LinksCounter allLinksCounter, LinksCounter brokenLinksCounter) {
         Map<String, Object> stats = new HashMap<>();
 
         stats.put(JcrResourceConstants.SLING_RESOURCE_TYPE_PROPERTY, JcrConstants.NT_UNSTRUCTURED);

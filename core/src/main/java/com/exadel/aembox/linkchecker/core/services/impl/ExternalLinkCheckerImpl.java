@@ -85,6 +85,9 @@ public class ExternalLinkCheckerImpl implements ExternalLinkChecker {
     private int socketTimeout;
     private String userAgent;
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public int checkLink(String url) throws URISyntaxException, IOException {
         HttpHead headMethod = null;

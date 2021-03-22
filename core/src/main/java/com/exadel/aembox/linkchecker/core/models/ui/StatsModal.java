@@ -28,7 +28,10 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
- * Represents content of the Stats popover that contains the generation statistics data.
+ * Represents content of the Stats popover that contains the generation statistics data written
+ * by {@link com.exadel.aembox.linkchecker.core.services.data.GridResourcesGenerator#generateGridResources}. Most of the
+ * fields correspond to the configuration values from the
+ * {@link com.exadel.aembox.linkchecker.core.services.data.GridResourcesGenerator} service
  */
 @Model(
         adaptables = Resource.class,
@@ -73,16 +76,16 @@ public class StatsModal {
     private Integer[] allowedStatusCodes;
 
     @ValueMapValue(name = GenerationStatsProps.PN_ALL_INTERNAL_LINKS)
-    private String allInternalLinks;
+    private String allInternalLinksCount;
 
     @ValueMapValue(name = GenerationStatsProps.PN_BROKEN_INTERNAL_LINKS)
-    private String brokenInternalLinks;
+    private String brokenInternalLinksCount;
 
     @ValueMapValue(name = GenerationStatsProps.PN_ALL_EXTERNAL_LINKS)
-    private String allExternalLinks;
+    private String allExternalLinksCount;
 
     @ValueMapValue(name = GenerationStatsProps.PN_BROKEN_EXTERNAL_LINKS)
-    private String brokenExternalLinks;
+    private String brokenExternalLinksCount;
 
     public String getLastGenerated() {
         return lastGenerated;
@@ -112,6 +115,13 @@ public class StatsModal {
         return arrayToStringValue(excludedProperties);
     }
 
+    /**
+     * Repeats the value of the link type field from the configuration of
+     * {@link com.exadel.aembox.linkchecker.core.services.data.GridResourcesGenerator} used during data feed generation
+     *
+     * @return the String representation of the selected link type. Can be either 'Internal', or 'External',
+     * or 'Internal + External'
+     */
     public String getReportLinksType() {
         if (StringUtils.isBlank(reportLinksType)) {
             return StringUtils.EMPTY;
@@ -146,26 +156,36 @@ public class StatsModal {
         }
     }
 
-    public String getAllInternalLinks() {
+    /**
+     * Gets the count of all the inspected internal links
+     *
+     * @return the count of all internal links or empty String, if the report contains 'External' link only
+     */
+    public String getAllInternalLinksCount() {
         if (Link.Type.EXTERNAL.getValue().equalsIgnoreCase(reportLinksType)) {
             return StringUtils.EMPTY;
         }
-        return allInternalLinks;
+        return allInternalLinksCount;
     }
 
-    public String getBrokenInternalLinks() {
-        return brokenInternalLinks;
+    public String getBrokenInternalLinksCount() {
+        return brokenInternalLinksCount;
     }
 
-    public String getAllExternalLinks() {
+    /**
+     * Gets the count of all the inspected external links
+     *
+     * @return the count of all external links or empty String, if the report contains 'Internal' link only
+     */
+    public String getAllExternalLinksCount() {
         if (Link.Type.INTERNAL.getValue().equalsIgnoreCase(reportLinksType)) {
             return StringUtils.EMPTY;
         }
-        return allExternalLinks;
+        return allExternalLinksCount;
     }
 
-    public String getBrokenExternalLinks() {
-        return brokenExternalLinks;
+    public String getBrokenExternalLinksCount() {
+        return brokenExternalLinksCount;
     }
 
     private String arrayToStringValue(String[] stringArray) {

@@ -14,6 +14,11 @@
 
 package com.exadel.aembox.linkchecker.core.services.data;
 
+/**
+ * Lists the JCR property names for generation statistics data written
+ * by {@link GridResourcesGenerator#generateGridResources}. Further, these property names are used to map the statistics
+ * values to the {@link com.exadel.aembox.linkchecker.core.models.ui.StatsModal} fields
+ */
 public final class GenerationStatsProps {
     private GenerationStatsProps() {}
 

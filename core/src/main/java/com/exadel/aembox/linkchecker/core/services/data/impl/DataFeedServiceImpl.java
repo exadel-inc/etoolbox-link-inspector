@@ -51,6 +51,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * Implements {@link DataFeedService} interface to provide an OSGi service that is responsible for the data feed
+ * generation and further adaptation the data feed to the models for building the UI grid
+ */
 @Component(service = DataFeedService.class)
 public class DataFeedServiceImpl implements DataFeedService {
     private static final Logger LOG = LoggerFactory.getLogger(DataFeedServiceImpl.class);
@@ -79,6 +83,9 @@ public class DataFeedServiceImpl implements DataFeedService {
             "Property Location"
     };
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void generateDataFeed() {
         LOG.info("Start link checker data feed generation");
@@ -96,6 +103,9 @@ public class DataFeedServiceImpl implements DataFeedService {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<Resource> dataFeedToResources() {
         LOG.debug("Start data feed to resources conversion");
@@ -112,6 +122,9 @@ public class DataFeedServiceImpl implements DataFeedService {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<GridResource> dataFeedToGridResources() {
         try (ResourceResolver serviceResourceResolver = repositoryHelper.getServiceResourceResolver()) {

@@ -40,6 +40,9 @@ public class RepositoryHelperImpl implements RepositoryHelper {
     @Reference
     private ResourceResolverFactory resourceResolverFactory;
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public ResourceResolver getServiceResourceResolver() {
         try {
@@ -51,11 +54,17 @@ public class RepositoryHelperImpl implements RepositoryHelper {
         return null;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public ResourceResolver getThreadResourceResolver() {
         return resourceResolverFactory.getThreadResourceResolver();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean hasPermissions(Session session, String path, String permissions) {
         try {
@@ -66,11 +75,17 @@ public class RepositoryHelperImpl implements RepositoryHelper {
         return false;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean hasReadWritePermissions(Session session, String path) {
         return hasPermissions(session, path, READ_WRITE_PERMISSIONS);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void createResourceIfNotExist(String path, String resourceType, String intermediateResourceType) {
         try (ResourceResolver serviceResourceResolver = getServiceResourceResolver()) {
