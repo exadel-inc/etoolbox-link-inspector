@@ -277,8 +277,10 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
                 );
     }
 
-    private Stream<Map.Entry<Link, GridResource>> getLinkToGridResourceMap(String property, Object propertyValue,
-                                                                           Resource resource, String gridResourceType) {
+    private Stream<Map.Entry<Link, GridResource>> getLinkToGridResourceMap(String property,
+                                                                           Object propertyValue,
+                                                                           Resource resource,
+                                                                           String gridResourceType) {
         return linkHelper.getLinkStreamFromProperty(propertyValue)
                 .filter(this::isAllowedLinkType)
                 .filter(this::isAllowedLink)
