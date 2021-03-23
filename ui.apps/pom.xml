@@ -19,6 +19,11 @@
     <packaging>content-package</packaging>
     <name>AEMBox Link Checker - UI apps</name>
     <description>UI apps package for AEMBox Link Checker</description>
+    <properties>
+        <sonar.coverage.exclusions>
+            **/**.js
+        </sonar.coverage.exclusions>
+    </properties>
 
     <!-- ====================================================================== -->
     <!-- B U I L D   D E F I N I T I O N                                        -->
