@@ -55,7 +55,19 @@ Import-Package: javax.annotation;version=0.0.0,*
             </plugin>
         </plugins>
     </build>
-
+    <profiles>
+        <profile>
+            <id>test</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
     <dependencies>
         <dependency>
             <groupId>uk.org.lidalia</groupId>
