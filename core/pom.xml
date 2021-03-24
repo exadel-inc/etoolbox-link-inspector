@@ -3,14 +3,14 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>com.exadel.aembox</groupId>
-        <artifactId>aembox-linkchecker</artifactId>
+        <groupId>com.exadel.etoolbox</groupId>
+        <artifactId>etoolbox-link-inspector</artifactId>
         <version>1.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
-    <artifactId>aembox-linkchecker.core</artifactId>
-    <name>AEMBox Link Checker - Core</name>
-    <description>Core bundle for AEMBox Link Checker</description>
+    <artifactId>etoolbox-link-inspector.core</artifactId>
+    <name>EToolbox Link Inspector - Core</name>
+    <description>Core bundle for EToolbox Link Inspector</description>
     <properties>
         <sonar.java.binaries>target/classes</sonar.java.binaries>
         <sonar.junit.reportPaths>target/surefire-reports</sonar.junit.reportPaths>

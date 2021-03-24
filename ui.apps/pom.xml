@@ -6,8 +6,8 @@
     <!-- P A R E N T  P R O J E C T  D E S C R I P T I O N                      -->
     <!-- ====================================================================== -->
     <parent>
-        <groupId>com.exadel.aembox</groupId>
-        <artifactId>aembox-linkchecker</artifactId>
+        <groupId>com.exadel.etoolbox</groupId>
+        <artifactId>etoolbox-link-inspector</artifactId>
         <version>1.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
@@ -15,10 +15,10 @@
     <!-- ====================================================================== -->
     <!-- P R O J E C T  D E S C R I P T I O N                                   -->
     <!-- ====================================================================== -->
-    <artifactId>aembox-linkchecker.ui.apps</artifactId>
+    <artifactId>etoolbox-link-inspector.ui.apps</artifactId>
     <packaging>content-package</packaging>
-    <name>AEMBox Link Checker - UI apps</name>
-    <description>UI apps package for AEMBox Link Checker</description>
+    <name>EToolbox Link Inspector - UI apps</name>
+    <description>UI apps package for EToolbox Link Inspector</description>
     <properties>
         <sonar.coverage.exclusions>
             **/**.js
@@ -38,14 +38,14 @@
                 <groupId>org.apache.jackrabbit</groupId>
                 <artifactId>filevault-package-maven-plugin</artifactId>
                 <configuration>
-                    <group>com.exadel.aembox</group>
-                    <name>aembox-linkchecker.ui.apps</name>
+                    <group>com.exadel.etoolbox</group>
+                    <name>etoolbox-link-inspector.ui.apps</name>
                     <packageType>application</packageType>
                     <accessControlHandling>merge</accessControlHandling>
                     <repositoryStructurePackages>
                         <repositoryStructurePackage>
-                            <groupId>com.exadel.aembox</groupId>
-                            <artifactId>aembox-linkchecker.ui.apps.structure</artifactId>
+                            <groupId>com.exadel.etoolbox</groupId>
+                            <artifactId>etoolbox-link-inspector.ui.apps.structure</artifactId>
                         </repositoryStructurePackage>
                     </repositoryStructurePackages>
                     <validatorsSettings>
@@ -96,15 +96,15 @@
     <!-- ====================================================================== -->
     <dependencies>
         <dependency>
-            <groupId>com.exadel.aembox</groupId>
-            <artifactId>aembox-linkchecker.core</artifactId>
+            <groupId>com.exadel.etoolbox</groupId>
+            <artifactId>etoolbox-link-inspector.core</artifactId>
             <version>${project.version}</version>
         </dependency>
 
 
         <dependency>
-            <groupId>com.exadel.aembox</groupId>
-            <artifactId>aembox-linkchecker.ui.apps.structure</artifactId>
+            <groupId>com.exadel.etoolbox</groupId>
+            <artifactId>etoolbox-link-inspector.ui.apps.structure</artifactId>
             <version>${project.version}</version>
             <type>zip</type>
         </dependency>

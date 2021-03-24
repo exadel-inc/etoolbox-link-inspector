@@ -13,5 +13,5 @@
   ~ limitations under the License.
   -->
 <workspaceFilter version="1.0">
-    <filter root="/apps/aembox-linkchecker-packages"/>
+    <filter root="/apps/etoolbox-link-inspector-packages"/>
 </workspaceFilter>

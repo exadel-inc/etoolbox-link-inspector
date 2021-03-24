@@ -13,8 +13,8 @@
   ~ limitations under the License.
   -->
 <workspaceFilter version="1.0">
-    <filter root="/home/users/system/aembox" mode="merge"/>
+    <filter root="/home/users/system/etoolbox" mode="merge"/>
     <filter root="/content/rep:policy" mode="merge"/>
-    <filter root="/content/aembox-linkchecker/linkchecker" mode="replace"/>
-    <filter root="/content/aembox-linkchecker" mode="merge"/>
+    <filter root="/content/etoolbox-link-inspector/link-inspector" mode="replace"/>
+    <filter root="/content/etoolbox-link-inspector" mode="merge"/>
 </workspaceFilter>
