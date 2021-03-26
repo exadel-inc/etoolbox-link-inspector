@@ -19,10 +19,13 @@ import org.apache.sling.api.resource.ResourceResolver;
 
 import java.util.List;
 
+/**
+ * Provides the service responsible for collecting broken links and building models necessary for data feed creation.
+ */
 public interface GridResourcesGenerator {
     /**
      * Collects broken links and builds the list of models {@link GridResource} for each link.
-     * The model encloses all necessary data for saving it in the data feed and further usage in the Link Inspector grid.     *
+     * The model encloses all necessary data for saving it in the data feed and further usage in the Link Inspector grid.
      * Each model instance contains data for a single row in the grid.
      *
      * @param gridResourceType - the resource type of items displayed in the Link Inspector grid

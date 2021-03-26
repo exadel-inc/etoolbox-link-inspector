@@ -21,13 +21,16 @@ import org.apache.sling.api.resource.ResourceResolver;
 
 import java.util.stream.Stream;
 
+/**
+ * Contains methods that assist in links processing.
+ */
 public interface LinkHelper {
     /**
-     * If propertyValue is String or String[], the value is parsed based on the regex to extract links
-     * which are instantiated as {@link Link} objects.
+     * Parses JCR property value to fetch links based on regex. Applies to String or String[] property types only.
+     * The extracted links are instantiated as {@link Link} objects.
      *
-     * @param propertyValue - the value to be parsed
-     * @return The Stream<Link> of extract links, or Stream.empty()
+     * @param propertyValue - the JCR property value to be parsed
+     * @return The Stream<Link> of extracted links, or Stream.empty()
      */
     Stream<Link> getLinkStreamFromProperty(Object propertyValue);
 
@@ -48,11 +51,12 @@ public interface LinkHelper {
     Stream<String> getInternalLinksFromString(String text);
 
     /**
-     * Checks the given internal link validity using {@link ResourceResolver}
+     * Checks the given internal link validity using {@link ResourceResolver}. Basically the existence of a resource
+     * in the repository is checked
      *
      * @param link             - the link href to be checked
      * @param resourceResolver - {@link ResourceResolver}
-     * @return the {@link LinkStatus} exposing http code and status message of the response
+     * @return the {@link LinkStatus} representing http code and status message of the response
      */
     LinkStatus validateInternalLink(String link, ResourceResolver resourceResolver);
 
@@ -60,32 +64,32 @@ public interface LinkHelper {
      * Checks the given external link validity using {@link ExternalLinkChecker}
      *
      * @param link - the link href to be checked
-     * @return the {@link LinkStatus} exposing http code and status message of the response
+     * @return the {@link LinkStatus} representing http code and status message of the response
      */
     LinkStatus validateExternalLink(String link);
 
     /**
-     * Checks the given link validity using {@link ExternalLinkChecker} for an external
+     * Checks the given link validity using {@link ExternalLinkChecker} for an external link
      * or {@link ResourceResolver} for an internal link.
      *
      * @param link             - the link href to be checked
      * @param resourceResolver - {@link ResourceResolver}
-     * @return the {@link LinkStatus} exposing http code and status message of the response
+     * @return the {@link LinkStatus} representing http code and status message of the response
      */
     LinkStatus validateLink(Link link, ResourceResolver resourceResolver);
 
     /**
-     * Checks the given String link validity using {@link ExternalLinkChecker} for an external
+     * Checks the given String link validity using {@link ExternalLinkChecker} for an external link
      * or {@link ResourceResolver} for an internal link.
      *
      * @param link             - the link href to be checked
      * @param resourceResolver - {@link ResourceResolver}
-     * @return the {@link LinkStatus} exposing http code and status message of the response
+     * @return the {@link LinkStatus} representing http code and status message of the response
      */
     LinkStatus validateLink(String link, ResourceResolver resourceResolver);
 
     /**
-     * Replaces the given link stored in the specified location (resourcePath + propertyName)
+     * Replaces the given link stored at the specified location (resourcePath + propertyName)
      * with the given replacement.
      * <p>
      * All the links contained within the specified property are retrieved

@@ -46,7 +46,7 @@ public final class Link {
      */
     private final String href;
     /**
-     * The {@link Type} is initialized based on link's address
+     * The {@link Type} is detected based on link's address
      */
     private final Type type;
     /**

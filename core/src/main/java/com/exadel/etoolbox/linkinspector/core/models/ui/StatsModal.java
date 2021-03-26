@@ -117,8 +117,8 @@ public class StatsModal {
     }
 
     /**
-     * Repeats the value of the link type field from the configuration of
-     * {@link GridResourcesGenerator} used during data feed generation
+     * Represents the value of the 'Link type' field from the {@link GridResourcesGenerator} configuration used during
+     * data feed generation
      *
      * @return the String representation of the selected link type. Can be either 'Internal', or 'External',
      * or 'Internal + External'
@@ -140,6 +140,13 @@ public class StatsModal {
         return excludeTags;
     }
 
+    /**
+     * Represents the value of the 'Status codes' field from the {@link GridResourcesGenerator} configuration used
+     * during data feed generation
+     *
+     * @return the String comma separated representation of the specified status codes. If the status codes array
+     * contains a single negative value, then this indicates that all status codes allowed.
+     */
     public String getAllowedStatusCodes() {
         if (allowedStatusCodes == null) {
             return StringUtils.EMPTY;
@@ -189,6 +196,11 @@ public class StatsModal {
         return brokenExternalLinksCount;
     }
 
+    /**
+     * Transforms array of Strings to a single comma separated String
+     * @param stringArray - the input array
+     * @return comma separated representation of the array values as String
+     */
     private String arrayToStringValue(String[] stringArray) {
         return Optional.ofNullable(stringArray)
                 .map(array -> String.join(ARRAY_VALUES_SEPARATOR, array))

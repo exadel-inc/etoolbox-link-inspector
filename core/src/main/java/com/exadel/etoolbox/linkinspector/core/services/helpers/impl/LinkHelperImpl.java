@@ -43,6 +43,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+/**
+ * Implements {@link LinkHelper} interface to provide an OSGi service which provides helper methods for links processing
+ */
 @Component(
         service = LinkHelper.class
 )

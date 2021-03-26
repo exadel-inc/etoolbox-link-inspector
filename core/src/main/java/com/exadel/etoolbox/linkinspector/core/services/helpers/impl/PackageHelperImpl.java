@@ -33,12 +33,18 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Optional;
 
+/**
+ * Implements {@link PackageHelper} interface to provide an OSGi service which handles JCR packages creation.
+ */
 @Component(service = PackageHelper.class)
 public class PackageHelperImpl implements PackageHelper {
 
     @Reference
     private Packaging packaging;
 
+    /**
+     * The path filter for child nodes exclusion
+     */
     private static final String EXCLUDE_CHILDREN_PATTERN = "/.*";
 
     /**

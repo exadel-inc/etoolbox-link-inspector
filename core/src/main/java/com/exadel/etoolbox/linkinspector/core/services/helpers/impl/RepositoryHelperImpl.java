@@ -29,6 +29,9 @@ import org.slf4j.LoggerFactory;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 
+/**
+ * Implements {@link RepositoryHelper} interface to provide an OSGi service which handles repository related operations.
+ */
 @Component(service = RepositoryHelper.class)
 public class RepositoryHelperImpl implements RepositoryHelper {
     private static final Logger LOG = LoggerFactory.getLogger(RepositoryHelperImpl.class);

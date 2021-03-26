@@ -59,7 +59,7 @@ public class DataFeedGenerationTask implements Runnable {
     private boolean enabled;
 
     /**
-     * Add the data feed generation sling job to the ordered queue.
+     * Adds the data feed generation sling job to the ordered queue.
      */
     @Override
     public void run() {

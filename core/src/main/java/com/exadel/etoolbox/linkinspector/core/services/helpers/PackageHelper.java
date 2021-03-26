@@ -22,7 +22,25 @@ import javax.jcr.Session;
 import java.io.IOException;
 import java.util.Collection;
 
+/**
+ * Handles JCR packages creation
+ */
 public interface PackageHelper {
+    /**
+     * Creates a JCR package based on the specified parameters.
+     *
+     * @param paths           - the collection of path for adding to the package
+     * @param session         - a JCR session associated to the user who initialized package creation
+     * @param groupName       - group of the new package
+     * @param name            - name of the new package
+     * @param version         - version of the new package; can be null
+     * @param excludeChildren - indicates if child nodes should be exclude from the package paths
+     * @param assemble        - indicates if the package should be assembled after creation
+     * @return a new JCR package
+     * @throws IOException         - if an I/O exception occurs
+     * @throws RepositoryException - if a repository error occurs
+     * @throws PackageException    - if an internal error occurs
+     */
     JcrPackage createPackageForPaths(Collection<String> paths, Session session,
                                      String groupName, String name, String version,
                                      boolean excludeChildren, boolean assemble)

@@ -19,6 +19,10 @@ import org.apache.sling.api.resource.Resource;
 
 import java.util.List;
 
+/**
+ * Provides the service responsible for managing the data feed based on the set of resources generated
+ * by ${@link GridResourcesGenerator}
+ */
 public interface DataFeedService {
     /**
      * If the node presents, users are informed that data feed regeneration is required
@@ -32,8 +36,8 @@ public interface DataFeedService {
     void generateDataFeed();
 
     /**
-     * Parses the data feed to the list of resources({@link Resource}) for further adapting to view models
-     * and displaying them in the Link Inspector grid. The number of output items is limited.
+     * Parses the data feed to the list of resources({@link Resource}) for further adapting them to view models
+     * and displaying in the Link Inspector grid. The number of output items is limited for the sake of UX consistency.
      *
      * @return the list of resources({@link Resource}) based on the data feed
      */

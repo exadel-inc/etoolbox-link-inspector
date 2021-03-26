@@ -18,10 +18,15 @@ import org.apache.sling.api.resource.ResourceResolver;
 
 import javax.jcr.Session;
 
+/**
+ * Provides methods for assisting with the repository related operations.
+ */
 public interface RepositoryHelper {
     ResourceResolver getServiceResourceResolver();
 
     /**
+     * Returns the {@link ResourceResolver} for the current thread
+     *
      * @see org.apache.sling.api.resource.ResourceResolverFactory#getThreadResourceResolver()
      */
     ResourceResolver getThreadResourceResolver();

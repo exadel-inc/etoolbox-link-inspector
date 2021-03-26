@@ -26,8 +26,8 @@ import java.util.Objects;
 import java.util.Optional;
 
 /**
- * The model encloses all necessary data for saving it in the data feed and further usage in the Link Inspector grid.
- * Each model instance contains data for a single row in the grid.
+ * Data model used for building data feed and further adaptation to sling resources for rendering
+ * the Link Inspector grid. Represents data for a single row in the grid.
  */
 public class GridResource {
     /**
@@ -65,6 +65,17 @@ public class GridResource {
         this.resourceType = resourceType;
     }
 
+    /**
+     * Creates an instance of grid resource based on the data feed json fields
+     *
+     * @param propertyName  - data feed json field
+     * @param resourcePath  - data feed json field
+     * @param href          - data feed json field
+     * @param type          - data feed json field
+     * @param statusMessage - data feed json field
+     * @param resourceType  - data feed json field
+     * @param statusCode    - data feed json field
+     */
     @JsonCreator
     public GridResource(@JsonProperty(JSON_PROPERTY_NAME) String propertyName,
                         @JsonProperty(JSON_RESOURCE_PATH) String resourcePath,

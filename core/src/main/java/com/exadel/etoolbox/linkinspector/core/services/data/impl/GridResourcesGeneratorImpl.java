@@ -66,6 +66,10 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * Implements {@link GridResourcesGenerator} interface to provide an OSGi service which is responsible for the data feed
+ * generation and further adaptation the data feed to the models for building the UI grid
+ */
 @Component(service = GridResourcesGenerator.class)
 @Designate(ocd = GridResourcesGeneratorImpl.Configuration.class)
 public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
@@ -187,6 +191,10 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
     private int[] allowedStatusCodes;
     private int threadsPerCore;
 
+    /**
+     * Inits fields based on the service configuration
+     * @param configuration - the service configuration
+     */
     @Activate
     @Modified
     protected void activate(Configuration configuration) {
