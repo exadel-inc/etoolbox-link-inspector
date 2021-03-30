@@ -298,12 +298,12 @@ class GridResourcesGeneratorImplTest {
         GridResourcesGeneratorImpl.Configuration config = mockConfig();
 
         int[] defaultStatusCodes = {HttpStatus.SC_NOT_FOUND};
-        when(config.allowed_status_codes()).thenReturn(defaultStatusCodes);
+        when(config.allowedStatusCodes()).thenReturn(defaultStatusCodes);
 
         String[] excludedPaths = {TEST_EXCLUDED_PATH};
-        when(config.excluded_paths()).thenReturn(excludedPaths);
+        when(config.excludedPaths()).thenReturn(excludedPaths);
 
-        when(config.check_activation()).thenReturn(false);
+        when(config.checkActivation()).thenReturn(false);
 
         gridResourcesGenerator.activate(config);
     }
@@ -311,10 +311,10 @@ class GridResourcesGeneratorImplTest {
     private void setUpConfigNoExcludedPaths(GridResourcesGeneratorImpl gridResourcesGenerator) {
         GridResourcesGeneratorImpl.Configuration config = mockConfig();
 
-        when(config.excluded_paths()).thenReturn(ArrayUtils.EMPTY_STRING_ARRAY);
+        when(config.excludedPaths()).thenReturn(ArrayUtils.EMPTY_STRING_ARRAY);
 
         int[] defaultStatusCodes = {HttpStatus.SC_NOT_FOUND};
-        when(config.allowed_status_codes()).thenReturn(defaultStatusCodes);
+        when(config.allowedStatusCodes()).thenReturn(defaultStatusCodes);
 
         gridResourcesGenerator.activate(config);
     }
@@ -322,14 +322,14 @@ class GridResourcesGeneratorImplTest {
     private void setUpConfigCheckActivation(GridResourcesGeneratorImpl gridResourcesGenerator) {
         GridResourcesGeneratorImpl.Configuration config = mockConfig();
 
-        when(config.check_activation()).thenReturn(true);
-        when(config.skip_modified_after_activation()).thenReturn(true);
+        when(config.checkActivation()).thenReturn(true);
+        when(config.skipModifiedAfterActivation()).thenReturn(true);
 
         int[] defaultStatusCodes = {HttpStatus.SC_NOT_FOUND};
-        when(config.allowed_status_codes()).thenReturn(defaultStatusCodes);
+        when(config.allowedStatusCodes()).thenReturn(defaultStatusCodes);
 
         String[] excludedPaths = {TEST_EXCLUDED_PATH};
-        when(config.excluded_paths()).thenReturn(excludedPaths);
+        when(config.excludedPaths()).thenReturn(excludedPaths);
 
         gridResourcesGenerator.activate(config);
     }
@@ -337,30 +337,30 @@ class GridResourcesGeneratorImplTest {
     private void setUpConfigNoStatusCodes(GridResourcesGeneratorImpl gridResourcesGenerator) {
         GridResourcesGeneratorImpl.Configuration config = mockConfig();
 
-        when(config.allowed_status_codes()).thenReturn(ArrayUtils.EMPTY_INT_ARRAY);
+        when(config.allowedStatusCodes()).thenReturn(ArrayUtils.EMPTY_INT_ARRAY);
 
         String[] excludedPaths = {TEST_EXCLUDED_PATH};
-        when(config.excluded_paths()).thenReturn(excludedPaths);
+        when(config.excludedPaths()).thenReturn(excludedPaths);
 
         gridResourcesGenerator.activate(config);
     }
 
     private static GridResourcesGeneratorImpl.Configuration mockConfig() {
         GridResourcesGeneratorImpl.Configuration config = mock(GridResourcesGeneratorImpl.Configuration.class);
-        when(config.search_path()).thenReturn(TEST_FOLDER_PATH);
+        when(config.searchPath()).thenReturn(TEST_FOLDER_PATH);
 
-        when(config.links_type()).thenReturn(GenerationStatsProps.REPORT_LINKS_TYPE_ALL);
-        when(config.threads_per_core()).thenReturn(60);
+        when(config.linksType()).thenReturn(GenerationStatsProps.REPORT_LINKS_TYPE_ALL);
+        when(config.threadsPerCore()).thenReturn(60);
 
         String[] excludedProps = {TEST_EXCLUDED_PROPERTY};
-        when(config.excluded_properties()).thenReturn(excludedProps);
+        when(config.excludedProperties()).thenReturn(excludedProps);
 
-        when(config.last_modified_boundary()).thenReturn(TEST_LAST_MODIFIED_BOUNDARY);
+        when(config.lastModifiedBoundary()).thenReturn(TEST_LAST_MODIFIED_BOUNDARY);
 
         String[] excludedPatterns = {TEST_EXCLUDED_PATTERN};
-        when(config.excluded_links_patterns()).thenReturn(excludedPatterns);
+        when(config.excludedLinksPatterns()).thenReturn(excludedPatterns);
 
-        when(config.exclude_tags()).thenReturn(true);
+        when(config.excludeTags()).thenReturn(true);
 
         return config;
     }

@@ -56,17 +56,17 @@ public class ExternalLinkCheckerImpl implements ExternalLinkChecker {
         @AttributeDefinition(
                 name = "Connection timeout",
                 description = "The time (in milliseconds) for connection to disconnect"
-        ) int connection_timeout() default DEFAULT_CONNECTION_TIMEOUT;
+        ) int connectionTimeout() default DEFAULT_CONNECTION_TIMEOUT;
 
         @AttributeDefinition(
                 name = "Socket timeout",
                 description = "The timeout (in milliseconds) for socket"
-        ) int socket_timeout() default DEFAULT_SOCKET_TIMEOUT;
+        ) int socketTimeout() default DEFAULT_SOCKET_TIMEOUT;
 
         @AttributeDefinition(
                 name = "User agent",
                 description = "Example - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.111 Safari/537.36"
-        ) String user_agent() default StringUtils.EMPTY;
+        ) String userAgent() default StringUtils.EMPTY;
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(ExternalLinkCheckerImpl.class);
@@ -114,9 +114,9 @@ public class ExternalLinkCheckerImpl implements ExternalLinkChecker {
     @Activate
     @Modified
     protected void activate(Configuration configuration) {
-        connectionTimeout = configuration.connection_timeout();
-        socketTimeout = configuration.socket_timeout();
-        userAgent = configuration.user_agent();
+        connectionTimeout = configuration.connectionTimeout();
+        socketTimeout = configuration.socketTimeout();
+        userAgent = configuration.userAgent();
         buildCloseableHttpClient();
     }
 

@@ -412,8 +412,8 @@ class ReplaceByPatternServletTest {
 
     private void setUpCommitThreshold(int commitThreshold) {
         ReplaceByPatternServlet.Configuration config = mock(ReplaceByPatternServlet.Configuration.class);
-        when(config.max_updated_items_count()).thenReturn(DEFAULT_MAX_UPDATED_ITEMS_COUNT);
-        when(config.commit_threshold()).thenReturn(commitThreshold);
+        when(config.maxUpdatedItemsCount()).thenReturn(DEFAULT_MAX_UPDATED_ITEMS_COUNT);
+        when(config.commitThreshold()).thenReturn(commitThreshold);
 
         fixture.activate(config);
     }

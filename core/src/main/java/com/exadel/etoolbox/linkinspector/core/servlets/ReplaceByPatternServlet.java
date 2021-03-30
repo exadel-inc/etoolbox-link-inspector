@@ -84,12 +84,12 @@ public class ReplaceByPatternServlet extends SlingAllMethodsServlet {
         @AttributeDefinition(
                 name = "Limit",
                 description = "The maximum number of items which replacement will be applied for"
-        ) int max_updated_items_count() default DEFAULT_MAX_UPDATED_ITEMS_COUNT;
+        ) int maxUpdatedItemsCount() default DEFAULT_MAX_UPDATED_ITEMS_COUNT;
 
         @AttributeDefinition(
                 name = "Commit Threshold",
                 description = "The size of updated items chunks saved via resourceResolver.commit()"
-        ) int commit_threshold() default DEFAULT_COMMIT_THRESHOLD;
+        ) int commitThreshold() default DEFAULT_COMMIT_THRESHOLD;
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(ReplaceByPatternServlet.class);
@@ -134,8 +134,8 @@ public class ReplaceByPatternServlet extends SlingAllMethodsServlet {
     @Activate
     @Modified
     protected void activate(Configuration configuration) {
-        maxUpdatedItemsCount = configuration.max_updated_items_count();
-        commitThreshold = configuration.commit_threshold();
+        maxUpdatedItemsCount = configuration.maxUpdatedItemsCount();
+        commitThreshold = configuration.commitThreshold();
     }
 
     @Override

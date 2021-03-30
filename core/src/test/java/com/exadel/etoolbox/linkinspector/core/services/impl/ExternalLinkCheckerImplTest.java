@@ -92,9 +92,9 @@ class ExternalLinkCheckerImplTest {
 
     private void setUpConfig() {
         ExternalLinkCheckerImpl.Configuration config = mock(ExternalLinkCheckerImpl.Configuration.class);
-        when(config.connection_timeout()).thenReturn(DEFAULT_CONNECTION_TIMEOUT);
-        when(config.socket_timeout()).thenReturn(DEFAULT_SOCKET_TIMEOUT);
-        when(config.user_agent()).thenReturn(TEST_USER_AGENT);
+        when(config.connectionTimeout()).thenReturn(DEFAULT_CONNECTION_TIMEOUT);
+        when(config.socketTimeout()).thenReturn(DEFAULT_SOCKET_TIMEOUT);
+        when(config.userAgent()).thenReturn(TEST_USER_AGENT);
 
         fixture.activate(config);
     }

@@ -81,36 +81,36 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
         @AttributeDefinition(
                 name = "Path",
                 description = "The content path for searching broken links. The search path should be located under /content"
-        ) String search_path() default DEFAULT_SEARCH_PATH;
+        ) String searchPath() default DEFAULT_SEARCH_PATH;
 
         @AttributeDefinition(
                 name = "Excluded paths",
                 description = "The list of paths excluded from processing. The specified path and all its children " +
                         "are excluded. The excluded path should not end with slash. Can be specified as a regex"
-        ) String[] excluded_paths() default {};
+        ) String[] excludedPaths() default {};
 
         @AttributeDefinition(
                 name = "Activated Content",
                 description = "If checked, links will be retrieved from activated content only"
-        ) boolean check_activation() default false;
+        ) boolean checkActivation() default false;
 
         @AttributeDefinition(
                 name = "Skip content modified after activation",
                 description = "Works in conjunction with the 'Activated Content' checkbox only. If checked, links " +
                         "will be retrieved from activated content that is not modified after activation " +
                         "(lastModified is before lastReplicated)"
-        ) boolean skip_modified_after_activation() default false;
+        ) boolean skipModifiedAfterActivation() default false;
 
         @AttributeDefinition(
                 name = "Last Modified",
                 description = "The content modified before the specified date will be excluded. " +
                         "Tha date should has the ISO-like date-time format, such as '2011-12-03T10:15:30+01:00'"
-        ) String last_modified_boundary() default StringUtils.EMPTY;
+        ) String lastModifiedBoundary() default StringUtils.EMPTY;
 
         @AttributeDefinition(
                 name = "Excluded properties",
                 description = "The list of properties excluded from processing. Each value can be specified as a regex"
-        ) String[] excluded_properties() default {
+        ) String[] excludedProperties() default {
                 "dam:Comments",
                 "cq:allowedTemplates",
                 "cq:childrenOrder",
@@ -139,31 +139,31 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
                         ),
                 }
         )
-        String links_type() default GenerationStatsProps.REPORT_LINKS_TYPE_ALL;
+        String linksType() default GenerationStatsProps.REPORT_LINKS_TYPE_ALL;
 
         @AttributeDefinition(
                 name = "Excluded links patterns",
                 description = "Links are excluded from processing if match any of the specified regex patterns"
-        ) String[] excluded_links_patterns() default {};
+        ) String[] excludedLinksPatterns() default {};
 
         @AttributeDefinition(
                 name = "Exclude tags",
                 description = "If checked, the internal links starting with /content/cq:tags will be excluded"
-        ) boolean exclude_tags() default true;
+        ) boolean excludeTags() default true;
 
         @AttributeDefinition(
                 name = "Status codes",
                 description = "The list of status codes allowed for broken links in the report. " +
                         "Set a single negative value to allow all http error codes"
         )
-        int[] allowed_status_codes() default {
+        int[] allowedStatusCodes() default {
                 HttpStatus.SC_NOT_FOUND
         };
 
         @AttributeDefinition(
                 name = "Threads per core",
                 description = "The number of threads created per each CPU core for validating links in parallel"
-        ) int threads_per_core() default DEFAULT_THREADS_PER_CORE;
+        ) int threadsPerCore() default DEFAULT_THREADS_PER_CORE;
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(GridResourcesGeneratorImpl.class);
@@ -198,20 +198,20 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
     @Activate
     @Modified
     protected void activate(Configuration configuration) {
-        searchPath = configuration.search_path();
-        excludedPaths = configuration.excluded_paths();
-        checkActivation = configuration.check_activation();
-        skipModifiedAfterActivation = configuration.skip_modified_after_activation();
-        lastModifiedBoundary = Optional.of(configuration.last_modified_boundary())
+        searchPath = configuration.searchPath();
+        excludedPaths = configuration.excludedPaths();
+        checkActivation = configuration.checkActivation();
+        skipModifiedAfterActivation = configuration.skipModifiedAfterActivation();
+        lastModifiedBoundary = Optional.of(configuration.lastModifiedBoundary())
                 .filter(StringUtils::isNotBlank)
                 .map(dateString -> ZonedDateTime.parse(dateString, DateTimeFormatter.ISO_DATE_TIME))
                 .orElse(null);
-        excludedProperties = configuration.excluded_properties();
-        reportLinksType = configuration.links_type();
-        excludedLinksPatterns = configuration.excluded_links_patterns();
-        excludeTags = configuration.exclude_tags();
-        allowedStatusCodes = configuration.allowed_status_codes();
-        threadsPerCore = configuration.threads_per_core();
+        excludedProperties = configuration.excludedProperties();
+        reportLinksType = configuration.linksType();
+        excludedLinksPatterns = configuration.excludedLinksPatterns();
+        excludeTags = configuration.excludeTags();
+        allowedStatusCodes = configuration.allowedStatusCodes();
+        threadsPerCore = configuration.threadsPerCore();
     }
 
     /**
