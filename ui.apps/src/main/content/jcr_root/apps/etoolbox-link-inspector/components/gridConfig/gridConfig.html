@@ -1,0 +1,60 @@
+<tr data-sly-use.model="com.exadel.etoolbox.linkinspector.core.models.ui.GridViewItem"
+    class="foundation-collection-item elc-card"
+    is="coral-table-row"
+    data-path="${model.path}"
+    data-current-link="${model.link}"
+    data-property-name="${model.propertyName}"
+    data-rootsource="${model.path}">
+    <td is="coral-table-cell" coral-table-rowselect>
+        <img itemprop="thumbnail" width="192" src="${model.thumbnail}" alt="">
+    </td>
+
+    <td class="foundation-collection-item-title" is="coral-table-cell">
+        <div class="elc-complex-col">
+            <h4 class="elc-primary-info" title="${model.link}">${model.link}</h4>
+            <span class="elc-secondary-info">${model.linkType}</span>
+        </div>
+    </td>
+
+    <td class="foundation-collection-item-keys" is="coral-table-cell">
+        ${model.linkStatusCode}
+    </td>
+
+    <td class="foundation-collection-item-keys" is="coral-table-cell">
+        <div class="els-status-msg-col">
+            ${model.linkStatusMessage}
+        </div>
+    </td>
+
+    <td class="foundation-collection-item-keys" is="coral-table-cell">
+        <div class="els-page-col">
+            <sly data-sly-test.isValidPage="${model.isValidPage}">
+                <a href="${model.pagePath}" target="_blank"
+                   x-cq-linkchecker="skip">
+                    ${model.pageTitle}
+                </a>
+            </sly>
+            <sly data-sly-test="${!isValidPage}">
+                <span>${model.pagePath}</span>
+            </sly>
+        </div>
+    </td>
+
+    <td class="foundation-collection-item-keys" is="coral-table-cell">
+        <div class="elc-complex-col els-component-col">
+            <a class="elc-primary-info"
+               href="${'{0}{1}' @ format=[model.crxDePath, model.componentPath]}"
+               target="_blank"
+               x-cq-linkchecker="skip">
+                ${model.componentName}
+            </a>
+            <span class="elc-secondary-info" title="${model.componentType}"><em>${model.componentType}</em></span>
+        </div>
+    </td>
+
+    <td class="foundation-collection-item-keys" is="coral-table-cell">
+        <div class="els-property-col" title="${model.path}@${model.propertyName}">
+            ${model.path}@<strong>${model.propertyName}</strong>
+        </div>
+    </td>
+</tr>

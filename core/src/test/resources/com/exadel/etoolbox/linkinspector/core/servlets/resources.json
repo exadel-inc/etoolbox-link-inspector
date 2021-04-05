@@ -1,0 +1,31 @@
+{
+  "jcr:primaryType": "sling:Folder",
+  "test-resource1": {
+    "jcr:primaryType": "nt:unstructured",
+    "test1": "/content/test-link1/test-pattern",
+    "type": "Internal",
+    "statusMessage": "Not Found",
+    "statusCode": 404
+  },
+  "test-resource2": {
+    "jcr:primaryType": "nt:unstructured",
+    "test2": "/content/test-link1/test",
+    "type": "Internal",
+    "statusMessage": "Not Found",
+    "statusCode": 404
+  },
+  "test-resource3": {
+    "jcr:primaryType": "nt:unstructured",
+    "test3": "https://www.google.com/test-pattern.html",
+    "type": "External",
+    "statusMessage": "Not Found",
+    "statusCode": 404
+  },
+  "test-resource4": {
+    "jcr:primaryType": "nt:unstructured",
+    "test4": "https://www.google.com/test.html",
+    "type": "External",
+    "statusMessage": "Not Found",
+    "statusCode": 404
+  }
+}

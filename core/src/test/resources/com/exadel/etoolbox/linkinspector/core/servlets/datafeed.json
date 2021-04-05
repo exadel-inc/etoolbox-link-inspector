@@ -1,0 +1,38 @@
+[
+  {
+    "propertyName": "test1",
+    "resourcePath": "/content/test-folder/test-resource1",
+    "href": "/content/test-link1/test-pattern",
+    "type": "Internal",
+    "statusMessage": "Not Found",
+    "resourceType": "etoolbox-link-inspector/components/gridConfig",
+    "statusCode": 404
+  },
+  {
+    "propertyName": "test2",
+    "resourcePath": "/content/test-folder/test-resource2",
+    "href": "/content/test-link1/test",
+    "type": "Internal",
+    "statusMessage": "Not Found",
+    "resourceType": "etoolbox-link-inspector/components/gridConfig",
+    "statusCode": 404
+  },
+  {
+    "propertyName": "test3",
+    "resourcePath": "/content/test-folder/test-resource3",
+    "href": "https://www.google.com/test-pattern.html",
+    "type": "External",
+    "statusMessage": "Not Found",
+    "resourceType": "etoolbox-link-inspector/components/gridConfig",
+    "statusCode": 404
+  },
+  {
+    "propertyName": "test4",
+    "resourcePath": "/content/test-folder/test-resource4",
+    "href": "https://www.google.com/test.html",
+    "type": "External",
+    "statusMessage": "Not Found",
+    "resourceType": "etoolbox-link-inspector/components/gridConfig",
+    "statusCode": 404
+  }
+]

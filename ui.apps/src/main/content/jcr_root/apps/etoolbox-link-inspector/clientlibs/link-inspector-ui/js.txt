@@ -1,0 +1,7 @@
+#base=js
+
+console-ui.common.js
+console-ui.pending.js
+console-ui.download.js
+console-ui.fix.js
+console-ui.replace.js
