@@ -40,7 +40,7 @@ AEM 6.5 | AEM 6.4 | Java SE | Maven
 ## Installation
 The tool can be installed using the package or via building the project.
 
-###Package 
+### Package 
 1. Get the latest package version from https://github.com/exadel-inc/etoolbox-link-inspector/releases
 2. Install the package _**etoolbox-link-inspector.all-XX.zip**_ using the _Package Manager_
 3. Ensure that the bundle **_EToolbox Link Inspector - Core (etoolbox-link-inspector.core)_** is in _Active_ state.
