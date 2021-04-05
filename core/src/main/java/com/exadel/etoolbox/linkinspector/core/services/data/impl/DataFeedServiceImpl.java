@@ -40,6 +40,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -190,7 +191,7 @@ public class DataFeedServiceImpl implements DataFeedService {
     private void saveGridResourcesToJcr(ResourceResolver resourceResolver, JSONArray jsonArray) {
         LinkInspectorResourceUtil.saveFileToJCR(
                 JSON_FEED_PATH,
-                jsonArray.toString().getBytes(),
+                jsonArray.toString().getBytes(StandardCharsets.UTF_8),
                 ContentTypeUtil.TYPE_JSON,
                 resourceResolver
         );

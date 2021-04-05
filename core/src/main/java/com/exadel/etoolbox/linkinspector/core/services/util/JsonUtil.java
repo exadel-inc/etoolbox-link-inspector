@@ -53,7 +53,7 @@ public class JsonUtil {
     }
 
     public static <T> T jsonToModel(JSONObject json, Class<T> modelClass) {
-        try (InputStream is = new ByteArrayInputStream(json.toString().getBytes())) {
+        try (InputStream is = new ByteArrayInputStream(json.toString().getBytes(StandardCharsets.UTF_8))) {
             final JavaType type = OBJECT_MAPPER.getTypeFactory().constructType(modelClass);
             return OBJECT_MAPPER.readValue(is, type);
         } catch (IOException e) {

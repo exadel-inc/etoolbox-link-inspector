@@ -23,7 +23,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.function.BiConsumer;
 
@@ -55,7 +56,10 @@ public class CsvUtil {
             return ArrayUtils.EMPTY_BYTE_ARRAY;
         }
         try (ByteArrayOutputStream out = new ByteArrayOutputStream();
-             CSVPrinter csvPrinter = new CSVPrinter(new PrintWriter(out), CSVFormat.DEFAULT.withHeader(columnHeaders))
+             CSVPrinter csvPrinter = new CSVPrinter(
+                     new OutputStreamWriter(out, StandardCharsets.UTF_8),
+                     CSVFormat.DEFAULT.withHeader(columnHeaders)
+             )
         ) {
             items.forEach(item -> printRecord.accept(csvPrinter, item));
             csvPrinter.flush();
