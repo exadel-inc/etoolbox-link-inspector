@@ -5,6 +5,8 @@
 ![GitHub issues](https://img.shields.io/github/issues/exadel-inc/etoolbox-link-inspector)
 [![License](https://img.shields.io/badge/License-Apache%202.0-green.svg)](https://opensource.org/licenses/Apache-2.0)
 
+<img src="_img/logo.svg" width=100>
+
 **EToolbox Link Inspector** is a tool for Adobe Experience Manger (AEM) that collects broken links (external/internal) under the specified content path. The tool generates a comprehensive report with the detailed information about broken links and provides content managers with a possibility to fix batches of broken links via UI dialog.
 
 ## Description
