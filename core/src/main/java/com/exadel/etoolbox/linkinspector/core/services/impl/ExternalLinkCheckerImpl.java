@@ -19,6 +19,7 @@ import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -90,11 +91,17 @@ public class ExternalLinkCheckerImpl implements ExternalLinkChecker {
      */
     @Override
     public int checkLink(String url) throws URISyntaxException, IOException {
-        HttpHead headMethod = null;
+        URI uri = new URI(url);
+        int statusCode = checkLink(url, new HttpHead(uri));
+        if(statusCode != HttpStatus.SC_OK){
+            statusCode = checkLink(url, new HttpGet(uri));
+        }
+        return statusCode;
+    }
+
+    private int checkLink(String url, HttpRequestBase method) throws IOException {
         try {
-            URI uri = new URI(url);
-            headMethod = new HttpHead(uri.toString());
-            try (CloseableHttpResponse httpResp = this.httpClient.execute(headMethod)) {
+            try (CloseableHttpResponse httpResp = this.httpClient.execute(method)) {
                 if (httpResp == null) {
                     LOG.error("Failed to get response from server while performing HEAD request, url: {}", url);
                     return HttpStatus.SC_BAD_REQUEST;
@@ -106,7 +113,7 @@ public class ExternalLinkCheckerImpl implements ExternalLinkChecker {
                 return statusCode;
             }
         } finally {
-            Optional.ofNullable(headMethod)
+            Optional.ofNullable(method)
                     .ifPresent(HttpRequestBase::releaseConnection);
         }
     }
