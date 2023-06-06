@@ -19,6 +19,7 @@ import junitx.util.PrivateAccessor;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -51,11 +52,13 @@ class ExternalLinkCheckerImplTest {
 
     private CloseableHttpClient httpClient;
     private CloseableHttpResponse httpResp;
+    private CloseableHttpResponse httpResp1;
 
     @BeforeEach
     void setup() throws NoSuchFieldException {
         httpClient = mock(CloseableHttpClient.class);
         httpResp = mock(CloseableHttpResponse.class);
+        httpResp1 = mock(CloseableHttpResponse.class);
 
         HttpClientBuilderFactory httpClientBuilderFactory = mock(HttpClientBuilderFactory.class);
         PrivateAccessor.setField(fixture, CLIENT_BUILDER_FACTORY_FIELD, httpClientBuilderFactory);
@@ -75,13 +78,39 @@ class ExternalLinkCheckerImplTest {
     }
 
     @Test
-    void testCheckLink_returnStatusCode() throws IOException, URISyntaxException {
+    void testCheckLink_returnStatusCode404whenAll404() throws IOException, URISyntaxException {
         StatusLine statusLine = mock(StatusLine.class);
         when(httpClient.execute(any(HttpHead.class))).thenReturn(httpResp);
+        when(httpClient.execute(any(HttpGet.class))).thenReturn(httpResp);
         when(httpResp.getStatusLine()).thenReturn(statusLine);
         when(statusLine.getStatusCode()).thenReturn(HttpStatus.SC_NOT_FOUND);
 
         assertEquals(HttpStatus.SC_NOT_FOUND, fixture.checkLink(TEST_EXTERNAL_LINK));
+    }
+
+    @Test
+    void testCheckLink_returnStatusCode200when404Head200Get() throws IOException, URISyntaxException {
+        StatusLine statusLine404 = mock(StatusLine.class);
+        when(statusLine404.getStatusCode()).thenReturn(HttpStatus.SC_NOT_FOUND);
+        when(httpClient.execute(any(HttpHead.class))).thenReturn(httpResp);
+        when(httpResp.getStatusLine()).thenReturn(statusLine404);
+
+        StatusLine statusLine200 = mock(StatusLine.class);
+        when(statusLine200.getStatusCode()).thenReturn(HttpStatus.SC_OK);
+        when(httpClient.execute(any(HttpGet.class))).thenReturn(httpResp1);
+        when(httpResp1.getStatusLine()).thenReturn(statusLine200);
+
+        assertEquals(HttpStatus.SC_OK, fixture.checkLink(TEST_EXTERNAL_LINK));
+    }
+
+    @Test
+    void testCheckLink_returnStatusCode200when200Head() throws IOException, URISyntaxException {
+        StatusLine statusLine = mock(StatusLine.class);
+        when(statusLine.getStatusCode()).thenReturn(HttpStatus.SC_OK);
+        when(httpClient.execute(any(HttpHead.class))).thenReturn(httpResp);
+        when(httpResp.getStatusLine()).thenReturn(statusLine);
+
+        assertEquals(HttpStatus.SC_OK, fixture.checkLink(TEST_EXTERNAL_LINK));
     }
 
     @Test
