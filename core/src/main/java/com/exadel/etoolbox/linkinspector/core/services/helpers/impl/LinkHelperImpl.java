@@ -21,11 +21,17 @@ import com.exadel.etoolbox.linkinspector.core.services.helpers.LinkHelper;
 import com.exadel.etoolbox.linkinspector.core.services.util.LinkInspectorResourceUtil;
 import org.apache.commons.httpclient.ConnectionPoolTimeoutException;
 import org.apache.commons.httpclient.HttpStatus;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.ModifiableValueMap;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceUtil;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,7 +55,19 @@ import java.util.stream.Stream;
 @Component(
         service = LinkHelper.class
 )
+@Designate(ocd = LinkHelperImpl.Config.class)
 public class LinkHelperImpl implements LinkHelper {
+    @ObjectClassDefinition(
+        name = "EToolbox Link Inspector - Link Helper",
+        description = "Assists in link processing"
+    )
+    @interface Config{
+        @AttributeDefinition(
+                name = "Internal Links Host",
+                description = "Host to be used for verifying internal links. " +
+                        "If it is blank internal links will be verified on jcr only.")
+        String internalLinksHost() default StringUtils.EMPTY;
+    }
     private static final Logger LOG = LoggerFactory.getLogger(LinkHelperImpl.class);
 
     private static final Pattern PATTERN_EXTERNAL_LINK = Pattern.compile("https?://[\\w\\d-]+\\.[^\\s\"'<]{2,}|www\\d*\\.[\\w\\d-]+\\.[^\\s\"'<]{2,}");
@@ -57,6 +75,14 @@ public class LinkHelperImpl implements LinkHelper {
 
     @Reference
     private ExternalLinkChecker externalLinkChecker;
+
+    private String internalLinksHost;
+
+    @Activate
+    @Modified
+    protected void activate(Config config){
+        this.internalLinksHost = config.internalLinksHost();
+    }
 
     /**
      * {@inheritDoc}
@@ -129,7 +155,11 @@ public class LinkHelperImpl implements LinkHelper {
     @Override
     public LinkStatus validateLink(Link link, ResourceResolver resourceResolver) {
         if (link.getType() == Link.Type.INTERNAL) {
-            link.setStatus(validateInternalLink(link.getHref(), resourceResolver));
+            LinkStatus status = validateInternalLink(link.getHref(), resourceResolver);
+            if(status.getStatusCode() == HttpStatus.SC_NOT_FOUND && StringUtils.isNotBlank(internalLinksHost)){
+                status = validateExternalLink(internalLinksHost + link.getHref());
+            }
+            link.setStatus(status);
         } else if (link.getType() == Link.Type.EXTERNAL) {
             LOG.trace("Start validation of the external link {}", link.getHref());
             link.setStatus(validateExternalLink(link.getHref()));

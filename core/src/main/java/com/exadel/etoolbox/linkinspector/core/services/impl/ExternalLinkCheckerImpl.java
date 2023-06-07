@@ -103,7 +103,7 @@ public class ExternalLinkCheckerImpl implements ExternalLinkChecker {
         try {
             try (CloseableHttpResponse httpResp = this.httpClient.execute(method)) {
                 if (httpResp == null) {
-                    LOG.error("Failed to get response from server while performing HEAD request, url: {}", url);
+                    LOG.error("Failed to get response from server while performing request, url: {}", url);
                     return HttpStatus.SC_BAD_REQUEST;
                 }
                 int statusCode = httpResp.getStatusLine().getStatusCode();
