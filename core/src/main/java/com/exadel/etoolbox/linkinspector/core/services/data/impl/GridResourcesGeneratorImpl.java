@@ -21,6 +21,7 @@ import com.exadel.etoolbox.linkinspector.core.models.Link;
 import com.exadel.etoolbox.linkinspector.core.models.LinkStatus;
 import com.exadel.etoolbox.linkinspector.core.services.data.GenerationStatsProps;
 import com.exadel.etoolbox.linkinspector.core.services.data.GridResourcesGenerator;
+import com.exadel.etoolbox.linkinspector.core.services.data.UiConfigService;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.LinkHelper;
 import com.exadel.etoolbox.linkinspector.core.services.data.models.GridResource;
 import com.exadel.etoolbox.linkinspector.core.services.util.LinkInspectorResourceUtil;
@@ -49,15 +50,7 @@ import org.slf4j.LoggerFactory;
 import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -176,6 +169,8 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
 
     @Reference
     private LinkHelper linkHelper;
+    @Reference
+    private UiConfigService uiConfigService;
 
     private ExecutorService executorService;
 
@@ -219,6 +214,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
      */
     @Override
     public List<GridResource> generateGridResources(String gridResourceType, ResourceResolver resourceResolver) {
+        uiConfigService.getExcludedLinksPatterns();
         StopWatch stopWatch = StopWatch.createStarted();
         LOG.debug("Start broken links collecting, path: {}", searchPath);
 
@@ -391,7 +387,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
     }
 
     private boolean isExcludedByPattern(String href) {
-        return isStringMatchAnyPattern(href, excludedLinksPatterns);
+        return isStringMatchAnyPattern(href, getExcludedLinksPatterns());
     }
 
     private boolean isExcludedTag(String href) {
@@ -497,7 +493,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
         stats.put(GenerationStatsProps.PN_EXCLUDED_PROPERTIES, excludedProperties);
 
         stats.put(GenerationStatsProps.PN_REPORT_LINKS_TYPE, reportLinksType);
-        stats.put(GenerationStatsProps.PN_EXCLUDED_LINK_PATTERNS, excludedLinksPatterns);
+        stats.put(GenerationStatsProps.PN_EXCLUDED_LINK_PATTERNS, getExcludedLinksPatterns());
         stats.put(GenerationStatsProps.PN_EXCLUDED_TAGS, excludeTags);
         stats.put(GenerationStatsProps.PN_ALLOWED_STATUS_CODES, allowedStatusCodes);
 
@@ -513,6 +509,13 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
         return Optional.ofNullable(zonedDateTime)
                 .map(date -> date.format(DateTimeFormatter.ISO_DATE_TIME))
                 .orElse(StringUtils.EMPTY);
+    }
+
+    public String[] getExcludedLinksPatterns() {
+        List<String> patterns = new ArrayList<>(Arrays.asList(excludedLinksPatterns));
+        String[] uiPatterns = uiConfigService.getExcludedLinksPatterns();
+        patterns.addAll(Arrays.asList(uiPatterns));
+        return patterns.toArray(new String[excludedLinksPatterns.length + uiPatterns.length]);
     }
 
     @Deactivate

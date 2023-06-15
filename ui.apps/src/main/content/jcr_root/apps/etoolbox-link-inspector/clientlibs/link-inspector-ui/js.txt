@@ -5,3 +5,4 @@ console-ui.pending.js
 console-ui.download.js
 console-ui.fix.js
 console-ui.replace.js
+console-ui.filter.js

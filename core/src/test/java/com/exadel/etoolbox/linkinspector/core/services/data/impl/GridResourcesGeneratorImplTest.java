@@ -18,6 +18,7 @@ import com.day.cq.replication.ReplicationStatus;
 import com.exadel.etoolbox.linkinspector.core.models.Link;
 import com.exadel.etoolbox.linkinspector.core.services.ExternalLinkChecker;
 import com.exadel.etoolbox.linkinspector.core.services.data.GenerationStatsProps;
+import com.exadel.etoolbox.linkinspector.core.services.data.UiConfigService;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.LinkHelper;
 import com.exadel.etoolbox.linkinspector.core.services.data.DataFeedService;
 import com.exadel.etoolbox.linkinspector.core.services.data.models.GridResource;
@@ -44,10 +45,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -71,6 +69,7 @@ class GridResourcesGeneratorImplTest {
     private static final String RESOURCE_RESOLVER_FACTORY_FIELD = "resourceResolverFactory";
     private static final String REPOSITORY_HELPER_FIELD = "repositoryHelper";
     private static final String LINK_HELPER_FIELD = "linkHelper";
+    private static final String UI_CONFIG_FIELD = "uiConfigService";
     private static final String REAL_DATAFEED_PATH = "/content/etoolbox-link-inspector/data/datafeed.json";
     private static final String EXECUTOR_SERVICE_FIELD = "executorService";
     private static final String EXTERNAL_LINK_CHECKER_FIELD = "externalLinkChecker";
@@ -135,6 +134,10 @@ class GridResourcesGeneratorImplTest {
         PrivateAccessor.setField(linkHelper, EXTERNAL_LINK_CHECKER_FIELD, externalLinkChecker);
 
         PrivateAccessor.setField(fixture, LINK_HELPER_FIELD, linkHelper);
+
+        UiConfigService uiConfigService = mock(UiConfigServiceImpl.class);
+        when(uiConfigService.getExcludedLinksPatterns()).thenReturn(new String[0]);
+        PrivateAccessor.setField(fixture, UI_CONFIG_FIELD, uiConfigService);
     }
 
     @Test

@@ -15,6 +15,7 @@
 package com.exadel.etoolbox.linkinspector.core.services.data.impl;
 
 import com.exadel.etoolbox.linkinspector.core.services.ExternalLinkChecker;
+import com.exadel.etoolbox.linkinspector.core.services.data.UiConfigService;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.LinkHelper;
 import com.exadel.etoolbox.linkinspector.core.services.util.CsvUtil;
 import com.exadel.etoolbox.linkinspector.core.services.data.GridResourcesGenerator;
@@ -59,6 +60,7 @@ class DataFeedServiceImplTest {
     private static final String RESOURCE_RESOLVER_FACTORY_FIELD = "resourceResolverFactory";
     private static final String REPOSITORY_HELPER_FIELD = "repositoryHelper";
     private static final String LINK_HELPER_FIELD = "linkHelper";
+    private static final String UI_CONFIG_FIELD = "uiConfigService";
     private static final String EXTERNAL_LINK_CHECKER_FIELD = "externalLinkChecker";
 
     private static final String DATAFEED_PATH = "/content/etoolbox-link-inspector/data/datafeed.json";
@@ -182,6 +184,10 @@ class DataFeedServiceImplTest {
         GridResourcesGeneratorImplTest.setUpConfig(gridResourcesGenerator);
 
         when(externalLinkChecker.checkLink(anyString())).thenReturn(HttpStatus.SC_NOT_FOUND);
+
+        UiConfigService uiConfigService = mock(UiConfigServiceImpl.class);
+        when(uiConfigService.getExcludedLinksPatterns()).thenReturn(new String[0]);
+        PrivateAccessor.setField(gridResourcesGenerator, UI_CONFIG_FIELD, uiConfigService);
 
         return gridResourcesGenerator;
     }
