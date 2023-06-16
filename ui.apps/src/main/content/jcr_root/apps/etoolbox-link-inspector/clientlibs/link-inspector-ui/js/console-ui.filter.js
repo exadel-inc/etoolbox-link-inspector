@@ -23,23 +23,32 @@
     var CANCEL_LABEL = Granite.I18n.get('Cancel');
     var SUBMIT_FILTER_LABEL = Granite.I18n.get('Apply');
 
-    /** Root action handler */
+    var successDialog = new Coral.Dialog().set({
+        id : "filter-dialog-success",
+        closable: Coral.Dialog.closable.ON,
+        variant: "success",
+        header :{
+            innerHTML : SUCCESS_DIALOG_TITLE_LABEL
+        },
+        content :{
+            innerHTML: "<p>Filter changes has been applied. Next report will be generated according to the applied settings</p>"
+        },
+        footer :{
+            innerHTML: "<button is=\"coral-button\" variant=\"primary\" coral-close>Ok</button>"
+        }
+    });
+
     function onFilterAction(name, el, config, collection, selections) {
         var dialog = document.querySelector('#filter-dialog');
         dialog.show();
     }
 
-    // Button action handler assignment
-    $(window).adaptTo("foundation-registry").register("foundation.collection.action.action", {
-        name: "cq-admin.etoolbox.linkinspector.action.filter-options",
-        handler: onFilterAction
-    });
-
-    //Dialog initialization
-    $(document).ready(function () {
+    function initActionDialog(){
         var dialog = new Coral.Dialog().set({
             id : "filter-dialog",
             closable: Coral.Dialog.closable.ON,
+            backdrop: Coral.Dialog.backdrop.STATIC,
+            interaction: 'off',
             header :{
                 innerHTML : DIALOG_TITLE_LABEL
             }
@@ -52,7 +61,6 @@
         $updateBtn.appendTo(dialog.footer);
 
         var filterMultifield = new Coral.Multifield();
-        // Use template.content to be able to specify the template content dynamically on IE11.
         filterMultifield.template.content.appendChild(new Coral.Textfield());
 
         var add = new Coral.Button();
@@ -61,22 +69,6 @@
         filterMultifield.appendChild(add);
 
         dialog.content.appendChild(filterMultifield);
-
-        var successDialog = new Coral.Dialog().set({
-            id : "filter-dialog-success",
-            closable: Coral.Dialog.closable.ON,
-            variant: "success",
-            header :{
-                innerHTML : SUCCESS_DIALOG_TITLE_LABEL
-            },
-            content :{
-                innerHTML: "<p>Filter changes has been applied. Next report will be generated according to the applied settings</p>"
-            },
-            footer :{
-                innerHTML: "<button is=\"coral-button\" variant=\"primary\" coral-close>Ok</button>"
-            }
-        });
-
         $.ajax({
             type: "GET",
             url: "/content/etoolbox-link-inspector/data/config.json"
@@ -90,17 +82,18 @@
                     filterMultifield.items.add(item);
                 }
             }
-
         })
 
         function onSubmit(){
             var filterMultifieldValues = filterMultifield.items.getAll().map((item) => item.content.children[0].value);
+            filterMultifieldValues = !!filterMultifieldValues.length ? filterMultifieldValues : "";
             $.ajax({
                 type: "POST",
                 url: "/content/etoolbox-link-inspector/data/config",
                 data: {
                     'jcr:primaryType': "nt:unstructured",
-                    filter: filterMultifieldValues
+                    "filter": filterMultifieldValues,
+                    "filter@TypeHint": "String[]"
                 },
                 dataType: "json",
                 encode: true
@@ -110,8 +103,22 @@
         }
 
         dialog.on('click', '[data-dialog-action]', onSubmit);
-
+        dialog.on('coral-overlay:close', function (event) {
+            dialog.remove();
+            initActionDialog();
+        });
         document.body.appendChild(dialog);
+    }
+
+    // Button action handler assignment
+    $(window).adaptTo("foundation-registry").register("foundation.collection.action.action", {
+        name: "cq-admin.etoolbox.linkinspector.action.filter-options",
+        handler: onFilterAction
+    });
+
+    //Dialog initialization
+    $(document).ready(function () {
+        initActionDialog();
         document.body.appendChild(successDialog);
     });
 
