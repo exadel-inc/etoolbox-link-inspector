@@ -45,7 +45,7 @@
 
     function initActionDialog(){
         var dialog = new Coral.Dialog().set({
-            id : "filter-dialog",
+            id : 'filter-dialog',
             closable: Coral.Dialog.closable.ON,
             backdrop: Coral.Dialog.backdrop.STATIC,
             interaction: 'off',
@@ -74,7 +74,7 @@
             url: "/content/etoolbox-link-inspector/data/config.json"
         }).done(function (data){
             if (data.filter){
-                for (const f of data.filter){
+                for (var f of data.filter){
                     var item = new Coral.Multifield.Item();
                     var textField = new Coral.Textfield();
                     textField.value = f;
