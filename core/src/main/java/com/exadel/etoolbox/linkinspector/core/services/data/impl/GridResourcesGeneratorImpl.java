@@ -56,6 +56,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -515,6 +517,15 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
         List<String> patterns = new ArrayList<>(Arrays.asList(excludedLinksPatterns));
         String[] uiPatterns = uiConfigService.getExcludedLinksPatterns();
         patterns.addAll(Arrays.asList(uiPatterns));
+        patterns = patterns.stream().filter(p->{
+            try {
+                Pattern.compile(p);
+            } catch (PatternSyntaxException exception) {
+                LOG.warn("Excluded Links - Configured invalid regular expression: {}", p);
+                return false;
+            }
+            return true;
+        }).collect(Collectors.toList());
         return patterns.toArray(new String[excludedLinksPatterns.length + uiPatterns.length]);
     }
 
