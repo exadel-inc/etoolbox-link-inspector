@@ -18,6 +18,7 @@ import com.day.cq.replication.ReplicationStatus;
 import com.exadel.etoolbox.linkinspector.core.models.Link;
 import com.exadel.etoolbox.linkinspector.core.services.ExternalLinkChecker;
 import com.exadel.etoolbox.linkinspector.core.services.data.GenerationStatsProps;
+import com.exadel.etoolbox.linkinspector.core.services.data.UiConfigService;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.LinkHelper;
 import com.exadel.etoolbox.linkinspector.core.services.data.DataFeedService;
 import com.exadel.etoolbox.linkinspector.core.services.data.models.GridResource;
@@ -44,17 +45,15 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -71,6 +70,7 @@ class GridResourcesGeneratorImplTest {
     private static final String RESOURCE_RESOLVER_FACTORY_FIELD = "resourceResolverFactory";
     private static final String REPOSITORY_HELPER_FIELD = "repositoryHelper";
     private static final String LINK_HELPER_FIELD = "linkHelper";
+    private static final String UI_CONFIG_FIELD = "uiConfigService";
     private static final String REAL_DATAFEED_PATH = "/content/etoolbox-link-inspector/data/datafeed.json";
     private static final String EXECUTOR_SERVICE_FIELD = "executorService";
     private static final String EXTERNAL_LINK_CHECKER_FIELD = "externalLinkChecker";
@@ -82,6 +82,7 @@ class GridResourcesGeneratorImplTest {
     private static final String TEST_EXCLUDED_PROPERTY = "excluded_prop";
     private static final String TEST_LAST_MODIFIED_BOUNDARY = "2021-04-05T05:00:00Z";
     private static final String TEST_EXCLUDED_PATTERN = "/content(.*)/test-exclude-pattern(.*)";
+    private static final String TEST_UI_EXCLUDED_PATTERN = "/content(.*)/test-link-internal-1$";
     private static final String TEST_EXCLUDED_PATH = "/content/test-folder/excluded_by_path";
     private static final String TEST_EXCLUDED_LINK = "/content/test-link-excluded-1";
     private static final String TEST_EXCLUDED_CHILD_LINK = "/content/test-link-excluded-2";
@@ -127,6 +128,7 @@ class GridResourcesGeneratorImplTest {
     private final GridResourcesGeneratorImpl fixture = new GridResourcesGeneratorImpl();
 
     private ExternalLinkChecker externalLinkChecker;
+    private UiConfigService uiConfigService;
 
     @BeforeEach
     void setup() throws NoSuchFieldException {
@@ -135,6 +137,10 @@ class GridResourcesGeneratorImplTest {
         PrivateAccessor.setField(linkHelper, EXTERNAL_LINK_CHECKER_FIELD, externalLinkChecker);
 
         PrivateAccessor.setField(fixture, LINK_HELPER_FIELD, linkHelper);
+
+        uiConfigService = mock(UiConfigServiceImpl.class);
+        when(uiConfigService.getExcludedLinksPatterns()).thenReturn(new String[0]);
+        PrivateAccessor.setField(fixture, UI_CONFIG_FIELD, uiConfigService);
     }
 
     @Test
@@ -145,6 +151,27 @@ class GridResourcesGeneratorImplTest {
 
         List<GridResource> gridResources = fixture.generateGridResources(GRID_RESOURCE_TYPE, context.resourceResolver());
         List<GridResource> expectedGridResources = buildExpectedGridResources();
+
+        assertTrue(CollectionUtils.isEqualCollection(expectedGridResources, gridResources));
+    }
+
+
+
+    @Test
+    void testGenerateFilteredGridResources() throws NoSuchFieldException, IOException, URISyntaxException {
+        setUpConfig(fixture);
+        context.load().json(TEST_RESOURCES_TREE_PATH, TEST_FOLDER_PATH);
+        when(externalLinkChecker.checkLink(anyString())).thenReturn(HttpStatus.SC_NOT_FOUND);
+        when(uiConfigService.getExcludedLinksPatterns()).thenReturn(new String[]{TEST_UI_EXCLUDED_PATTERN});
+
+        List<GridResource> gridResources = fixture.generateGridResources(GRID_RESOURCE_TYPE, context.resourceResolver());
+        Pattern pattern = Pattern.compile(TEST_UI_EXCLUDED_PATTERN);
+
+        List<GridResource> expectedGridResources = buildExpectedGridResources().stream()
+            .filter(gr -> {
+                Matcher matcher = pattern.matcher(gr.getLink().getHref());
+                return !matcher.matches();
+            }).collect(Collectors.toList());
 
         assertTrue(CollectionUtils.isEqualCollection(expectedGridResources, gridResources));
     }

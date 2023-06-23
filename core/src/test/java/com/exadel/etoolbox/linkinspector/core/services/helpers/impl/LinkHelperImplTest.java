@@ -70,6 +70,8 @@ class LinkHelperImplTest {
     private static final String PROPERTY_NAME = "testProperty";
     private static final String CURRENT_LINK = "/content/link-for-replacement";
     private static final String NEW_LINK = "/content/replacement-link";
+    private static final String INTERNAL_LINKS_HOST_FIELD = "internalLinksHost";
+    private static final String INTERNAL_LINKS_HOST_FIELD_VALUE = "http://example.com";
 
     private final AemContext context = new AemContext(ResourceResolverType.JCR_MOCK);
 
@@ -240,6 +242,16 @@ class LinkHelperImplTest {
         LinkStatus linkStatus = linkHelper.validateLink(linkForValidation, context.resourceResolver());
 
         testLinkStatus(HttpStatus.SC_NOT_FOUND, linkStatus);
+    }
+
+    @Test
+    void testValidateLink_shouldSendRequestForInternal404LinksIfInternalLinksHostIsConfigured() throws NoSuchFieldException, URISyntaxException, IOException {
+        PrivateAccessor.setField(linkHelper, INTERNAL_LINKS_HOST_FIELD, INTERNAL_LINKS_HOST_FIELD_VALUE);
+        when(externalLinkChecker.checkLink(INTERNAL_LINKS_HOST_FIELD_VALUE + VALID_INTERNAL)).thenReturn(HttpStatus.SC_OK);
+        Link linkForValidation = new Link(VALID_INTERNAL, Link.Type.INTERNAL);
+        LinkStatus linkStatus = linkHelper.validateLink(linkForValidation, context.resourceResolver());
+
+        testLinkStatus(HttpStatus.SC_OK, linkStatus);
     }
 
     @Test
