@@ -6,7 +6,7 @@
     <groupId>com.exadel.etoolbox</groupId>
     <artifactId>etoolbox-link-inspector</artifactId>
     <packaging>pom</packaging>
-    <version>1.0</version>
+    <version>1.0.1</version>
     <description>EToolbox Link Inspector</description>
 
     <organization>
