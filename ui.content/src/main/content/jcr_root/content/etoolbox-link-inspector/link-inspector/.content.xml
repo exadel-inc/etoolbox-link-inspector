@@ -51,63 +51,72 @@
                     categories="[coralui3,granite.ui.coral.foundation,link-inspector-ui]"/>
         </head>
         <views jcr:primaryType="nt:unstructured">
-            <list
-                    granite:rel="etoolbox-link-inspector"
+            <stack
                     jcr:primaryType="nt:unstructured"
-                    sling:resourceType="granite/ui/components/coral/foundation/table"
-                    itemprop="item"
-                    layoutId="list"
-                    maximized="{Boolean}true"
-                    modeGroup="etoolbox-link-inspector"
-                    path="${requestPathInfo.suffix}"
-                    selectionMode="row"
-                    sortMode="local"
-                    stateId="link-inspector-ui">
-                <columns
-                        jcr:primaryType="nt:unstructured"
-                        class="elc-card">
-                    <select
+                    sling:resourceType="granite/ui/components/foundation/container">
+                <items jcr:primaryType="nt:unstructured">
+                    <list
+                            granite:rel="etoolbox-link-inspector"
                             jcr:primaryType="nt:unstructured"
-                            select="{Boolean}true"/>
-                    <title
+                            sling:resourceType="granite/ui/components/coral/foundation/table"
+                            itemprop="item"
+                            layoutId="list"
+                            maximized="{Boolean}true"
+                            modeGroup="etoolbox-link-inspector"
+                            path="${requestPathInfo.suffix}"
+                            selectionMode="row"
+                            sortMode="local"
+                            stateId="link-inspector-ui">
+                        <columns
+                                jcr:primaryType="nt:unstructured"
+                                class="elc-card">
+                            <select
+                                    jcr:primaryType="nt:unstructured"
+                                    select="{Boolean}true"/>
+                            <title
+                                    jcr:primaryType="nt:unstructured"
+                                    jcr:title="Link"
+                                    class="link"
+                                    sortable="{Boolean}true"/>
+                            <linkStatusCode
+                                    jcr:primaryType="nt:unstructured"
+                                    jcr:title="Code"
+                                    class="statusCode"
+                                    sortType="numeric"
+                                    sortable="{Boolean}true"/>
+                            <linkStatusMessage
+                                    jcr:primaryType="nt:unstructured"
+                                    jcr:title="Status Message"
+                                    class="statusMessage"
+                                    sortable="{Boolean}true"/>
+                            <pagePath
+                                    jcr:primaryType="nt:unstructured"
+                                    jcr:title="Page"
+                                    class="pagePath"
+                                    sortable="{Boolean}true"/>
+                            <component
+                                    jcr:primaryType="nt:unstructured"
+                                    jcr:title="Component"
+                                    class="component"
+                                    sortable="{Boolean}true"/>
+                            <property
+                                    jcr:primaryType="nt:unstructured"
+                                    jcr:title="Property"
+                                    class="propertyName"
+                                    sortable="{Boolean}true"/>
+                        </columns>
+                        <datasource
+                                jcr:primaryType="nt:unstructured"
+                                sling:resourceType="etoolbox-link-inspector/components/gridDatasource"
+                                itemResourceType="etoolbox-link-inspector/components/gridConfig"
+                                limit="100000"
+                                offset="100"/>
+                    </list>
+                    <pagination
                             jcr:primaryType="nt:unstructured"
-                            jcr:title="Link"
-                            class="link"
-                            sortable="{Boolean}true"/>
-                    <linkStatusCode
-                            jcr:primaryType="nt:unstructured"
-                            jcr:title="Code"
-                            class="statusCode"
-                            sortType="numeric"
-                            sortable="{Boolean}true"/>
-                    <linkStatusMessage
-                            jcr:primaryType="nt:unstructured"
-                            jcr:title="Status Message"
-                            class="statusMessage"
-                            sortable="{Boolean}true"/>
-                    <pagePath
-                            jcr:primaryType="nt:unstructured"
-                            jcr:title="Page"
-                            class="pagePath"
-                            sortable="{Boolean}true"/>
-                    <component
-                            jcr:primaryType="nt:unstructured"
-                            jcr:title="Component"
-                            class="component"
-                            sortable="{Boolean}true"/>
-                    <property
-                            jcr:primaryType="nt:unstructured"
-                            jcr:title="Property"
-                            class="propertyName"
-                            sortable="{Boolean}true"/>
-                </columns>
-                <datasource
-                        jcr:primaryType="nt:unstructured"
-                        sling:resourceType="etoolbox-link-inspector/components/gridDatasource"
-                        itemResourceType="etoolbox-link-inspector/components/gridConfig"
-                        limit="100000"
-                        offset="100"/>
-            </list>
+                            sling:resourceType="etoolbox-link-inspector/components/pagination"/>
+                </items>
+            </stack>
         </views>
         <actions jcr:primaryType="nt:unstructured">
             <selection jcr:primaryType="nt:unstructured">
@@ -162,6 +171,13 @@
                         text="Download Full Report"
                         variant="primary"
                         granite:class="elc-download-report-button"
+                        x-cq-linkchecker="skip"/>
+                <run
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="granite/ui/components/coral/foundation/anchorbutton"
+                        text="Run"
+                        variant="secondary"
+                        granite:class="elc-run-new-report-button"
                         x-cq-linkchecker="skip"/>
             </secondary>
         </actions>

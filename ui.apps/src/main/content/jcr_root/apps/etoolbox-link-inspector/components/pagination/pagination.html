@@ -1,0 +1,12 @@
+<sly data-sly-use.pagination="com.exadel.etoolbox.linkinspector.core.models.ui.PaginationModel"/>
+<div class="pagination coral--light" data-sly-test="${pagination.page > 0 && pagination.page <= pagination.size}">
+    <ul class="pagination-list">
+       <li class="pagination-item ${pagination.page > 1 ? '' : 'disabled'}" data-attr="${pagination.withStepBack}">&#60;</li>
+       <li class="pagination-item" data-sly-test="${pagination.withTwoStepBack > 0}" data-attr="${pagination.withTwoStepBack}">${pagination.withTwoStepBack}</li>
+       <li class="pagination-item" data-sly-test="${pagination.withStepBack > 0}" data-attr="${pagination.withStepBack}">${pagination.withStepBack}</li>
+       <li class="active">${pagination.page}</li>
+       <li class="pagination-item" data-sly-test="${pagination.withStepForward <= pagination.size}" data-attr="${pagination.withStepForward}">${pagination.withStepForward}</li>
+       <li class="pagination-item" data-sly-test="${pagination.withTwoStepForward <= pagination.size}" data-attr="${pagination.withTwoStepForward}">${pagination.withTwoStepForward}</li>
+       <li class="pagination-item ${pagination.page < pagination.size ? '' : 'disabled'}" data-attr="${pagination.withStepForward}">&#62;</li>
+    </ul>
+</div>

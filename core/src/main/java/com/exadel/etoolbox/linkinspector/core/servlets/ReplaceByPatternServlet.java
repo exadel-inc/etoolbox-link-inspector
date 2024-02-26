@@ -15,12 +15,16 @@
 package com.exadel.etoolbox.linkinspector.core.servlets;
 
 import com.day.crx.JcrConstants;
+import com.exadel.etoolbox.linkinspector.core.models.Link;
+import com.exadel.etoolbox.linkinspector.core.models.LinkStatus;
 import com.exadel.etoolbox.linkinspector.core.services.data.DataFeedService;
+import com.exadel.etoolbox.linkinspector.core.services.data.impl.DataFeedServiceImpl;
 import com.exadel.etoolbox.linkinspector.core.services.data.models.GridResource;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.LinkHelper;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.PackageHelper;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.RepositoryHelper;
 import com.exadel.etoolbox.linkinspector.core.services.util.CsvUtil;
+import com.exadel.etoolbox.linkinspector.core.services.util.LinkInspectorResourceUtil;
 import com.exadel.etoolbox.linkinspector.core.services.util.ServletUtil;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.csv.CSVPrinter;
@@ -38,11 +42,7 @@ import org.apache.sling.api.servlets.HttpConstants;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
 import org.apache.sling.jcr.resource.api.JcrResourceConstants;
 import org.apache.sling.servlets.annotations.SlingServletResourceTypes;
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Deactivate;
-import org.osgi.service.component.annotations.Modified;
-import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.*;
 import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
@@ -55,12 +55,7 @@ import javax.json.Json;
 import javax.servlet.Servlet;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -162,9 +157,11 @@ public class ReplaceByPatternServlet extends SlingAllMethodsServlet {
         LOG.info("Starting replacement by pattern, linkPattern: {}, replacement: {}", linkPattern, replacement);
         try {
             ResourceResolver resourceResolver = request.getResourceResolver();
-            List<GridResource> gridResources = dataFeedService.dataFeedToGridResources();
+            List<List<GridResource>> gridResources = dataFeedService.dataFeedToGridResources();
+
             List<UpdatedItem> updatedItems =
                     processResources(gridResources, isDryRun, isBackup, linkPattern, replacement, resourceResolver);
+
             if (CollectionUtils.isEmpty(updatedItems)) {
                 LOG.info("No links were updated, linkPattern: {}, replacement: {}", linkPattern, replacement);
                 response.setStatus(HttpStatus.SC_NO_CONTENT);
@@ -182,7 +179,7 @@ public class ReplaceByPatternServlet extends SlingAllMethodsServlet {
         }
     }
 
-    private List<UpdatedItem> processResources(Collection<GridResource> gridResources,
+    private List<UpdatedItem> processResources(Collection<List<GridResource>> gridResources,
                                                boolean isDryRun,
                                                boolean isBackup,
                                                String linkPattern,
@@ -194,53 +191,74 @@ public class ReplaceByPatternServlet extends SlingAllMethodsServlet {
             LOG.warn("Replacement failed, session is null. Pattern: {}, replacement: {}", linkPattern, replacement);
             return Collections.emptyList();
         }
-        List<GridResource> filteredGridResources = filterGridResources(gridResources, linkPattern, session.get());
+        List<List<GridResource>> filteredGridResources = filterGridResources(gridResources, linkPattern, session.get());
         if (isBackup && !isDeactivated) {
-            createBackupPackage(filteredGridResources, session.get());
+            createBackupPackage(filteredGridResources.stream().flatMap(Collection::stream).collect(Collectors.toList()), session.get());
         }
         return replaceByPattern(filteredGridResources, isDryRun, linkPattern, replacement, resourceResolver);
     }
 
-    private List<GridResource> filterGridResources(Collection<GridResource> gridResources,
-                                                   String linkPattern,
-                                                   Session session) {
+    private List<List<GridResource>> filterGridResources(Collection<List<GridResource>> gridResources,
+                                                         String linkPattern,
+                                                         Session session) {
         Pattern pattern = Pattern.compile(linkPattern);
-        return gridResources.stream()
-                .filter(gridResource ->
-                        StringUtils.isNoneBlank(gridResource.getHref(), gridResource.getResourcePath(), gridResource.getPropertyName())
-                )
-                .filter(gridResource -> pattern.matcher(gridResource.getHref()).find())
-                .filter(gridResource ->
-                        repositoryHelper.hasReadWritePermissions(session, gridResource.getResourcePath()))
-                .limit(maxUpdatedItemsCount)
-                .collect(Collectors.toList());
+        return gridResources.stream().map(resources ->
+                resources.stream()
+                        .filter(gridResource ->
+                                StringUtils.isNoneBlank(gridResource.getHref(), gridResource.getResourcePath(), gridResource.getPropertyName())
+                        )
+                        .filter(gridResource -> pattern.matcher(gridResource.getHref()).find())
+                        .filter(gridResource ->
+                                repositoryHelper.hasReadWritePermissions(session, gridResource.getResourcePath()))
+                        .limit(maxUpdatedItemsCount)
+                        .collect(Collectors.toList())).collect(Collectors.toList());
     }
 
-    private List<UpdatedItem> replaceByPattern(Collection<GridResource> gridResources,
+    private List<UpdatedItem> replaceByPattern(List<List<GridResource>> gridResources,
                                                boolean isDryRun,
                                                String linkPattern,
                                                String replacement,
                                                ResourceResolver resourceResolver) throws PersistenceException {
         List<UpdatedItem> updatedItems = new ArrayList<>();
-        for (GridResource gridResource : gridResources) {
-            if (isDeactivated) {
-                break;
-            }
-            String currentLink = gridResource.getHref();
-            String path = gridResource.getResourcePath();
-            String propertyName = gridResource.getPropertyName();
-            Optional<String> updated = Optional.of(currentLink.replaceAll(linkPattern, replacement))
-                    .filter(updatedLink -> !updatedLink.equals(currentLink))
-                    .filter(updatedLink ->
-                            linkHelper.replaceLink(resourceResolver, path, propertyName, currentLink, updatedLink)
-                    );
-            if (updated.isPresent()) {
-                updatedItems.add(new UpdatedItem(currentLink, updated.get(), path, propertyName));
-                LOG.trace("The link was updated: location - {}@{}, currentLink - {}, updatedLink - {}",
-                        path, propertyName, currentLink, updated.get());
-                if (!isDryRun && updatedItems.size() % commitThreshold == 0) {
-                    resourceResolver.commit();
+        for (int i = 0; i < gridResources.size(); i++) {
+            final Map<String, String> propertyLocationLinkMap = new HashMap<>();
+            for (GridResource gridResource : gridResources.get(i)) {
+                if (isDeactivated) {
+                    break;
                 }
+                String currentLink = gridResource.getHref();
+                String path = gridResource.getResourcePath();
+                String propertyName = gridResource.getPropertyName();
+                Optional<String> updated = Optional.of(currentLink.replaceAll(linkPattern, replacement))
+                        .filter(updatedLink -> !updatedLink.equals(currentLink))
+                        .filter(updatedLink -> {
+                                    propertyLocationLinkMap.put(CsvUtil.buildLocation(gridResource.getResourcePath(), gridResource.getPropertyName()), updatedLink);
+                                    return linkHelper.replaceLink(resourceResolver, path, propertyName, currentLink, updatedLink);
+                                }
+                        );
+                if (updated.isPresent()) {
+                    updatedItems.add(new UpdatedItem(currentLink, updated.get(), path, propertyName));
+                    LOG.trace("The link was updated: location - {}@{}, currentLink - {}, updatedLink - {}",
+                            path, propertyName, currentLink, updated.get());
+                    if (!isDryRun && updatedItems.size() % commitThreshold == 0) {
+                        resourceResolver.commit();
+                    }
+                }
+            }
+            if (!isDryRun && propertyLocationLinkMap.size() > 0) {
+                final String filePath = LinkInspectorResourceUtil.buildResourcePathFromPageNumber(DataFeedServiceImpl.CSV_REPORT_NODE_PATH, i + 1);
+                dataFeedService.modifyCsvRecord(resourceResolver, filePath, gridResource -> {
+                    if (propertyLocationLinkMap.containsKey(gridResource.getPropertyLocation())) {
+                        Optional<Link> optionalLink = linkHelper
+                                .getLinkStreamFromProperty(propertyLocationLinkMap.get(gridResource.getPropertyLocation()))
+                                .findFirst();
+                        if (optionalLink.isPresent()) {
+                            Link link = optionalLink.get();
+                            link.setStatus(new LinkStatus(HttpStatus.SC_OK, "Modified"));
+                            gridResource.setLink(link);
+                        }
+                    }
+                });
             }
         }
         return updatedItems;

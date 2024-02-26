@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.exadel.etoolbox</groupId>
         <artifactId>etoolbox-link-inspector</artifactId>
-        <version>1.0.1</version>
+        <version>1.0.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>etoolbox-link-inspector.core</artifactId>

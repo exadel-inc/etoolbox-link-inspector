@@ -15,16 +15,18 @@
 package com.exadel.etoolbox.linkinspector.core.servlets;
 
 import com.day.crx.JcrConstants;
+import com.exadel.etoolbox.linkinspector.core.models.Link;
 import com.exadel.etoolbox.linkinspector.core.models.LinkStatus;
 import com.exadel.etoolbox.linkinspector.core.services.data.DataFeedService;
+import com.exadel.etoolbox.linkinspector.core.services.data.impl.DataFeedServiceImpl;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.LinkHelper;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.RepositoryHelper;
+import com.exadel.etoolbox.linkinspector.core.services.util.LinkInspectorResourceUtil;
 import com.exadel.etoolbox.linkinspector.core.services.util.ServletUtil;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
-import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.servlets.HttpConstants;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
@@ -37,6 +39,8 @@ import org.slf4j.LoggerFactory;
 
 import javax.json.Json;
 import javax.servlet.Servlet;
+import java.io.IOException;
+import java.util.Optional;
 
 /**
  * The servlet for replacement a broken link with the new one within the specified resource property. The resource path,
@@ -55,12 +59,16 @@ public class FixBrokenLinkServlet extends SlingAllMethodsServlet {
     private static final String CURRENT_LINK_PARAM = "currentLink";
     private static final String NEW_LINK_PARAM = "newLink";
     private static final String IS_SKIP_VALIDATION_PARAM = "isSkipValidation";
+    private static final String PAGE_PARAM = "page";
 
     private static final String STATUS_CODE_RESP_PARAM = "statusCode";
     private static final String STATUS_MSG_RESP_PARAM = "statusMessage";
 
     @Reference
     private transient LinkHelper linkHelper;
+
+    @Reference
+    private transient DataFeedService dataFeedService;
 
     @Reference
     private transient RepositoryHelper repositoryHelper;
@@ -72,6 +80,7 @@ public class FixBrokenLinkServlet extends SlingAllMethodsServlet {
             String propertyName = ServletUtil.getRequestParamString(request, PROPERTY_NAME_PARAM);
             String currentLink = ServletUtil.getRequestParamString(request, CURRENT_LINK_PARAM);
             String newLink = ServletUtil.getRequestParamString(request, NEW_LINK_PARAM);
+            int page = ServletUtil.getRequestParamInt(request, PAGE_PARAM);
             boolean isSkipValidation = ServletUtil.getRequestParamBoolean(request, IS_SKIP_VALIDATION_PARAM);
 
             if (StringUtils.isAnyBlank(path, propertyName, currentLink, newLink)) {
@@ -99,6 +108,20 @@ public class FixBrokenLinkServlet extends SlingAllMethodsServlet {
             if (linkHelper.replaceLink(resourceResolver, path, propertyName, currentLink, newLink)) {
                 repositoryHelper.createResourceIfNotExist(DataFeedService.PENDING_GENERATION_NODE,
                         JcrConstants.NT_UNSTRUCTURED, JcrResourceConstants.NT_SLING_FOLDER);
+                final String filePath = LinkInspectorResourceUtil
+                        .buildResourcePathFromPageNumber(DataFeedServiceImpl.CSV_REPORT_NODE_PATH, page);
+                dataFeedService.modifyCsvRecord(resourceResolver, filePath, gridResource -> {
+                    if (gridResource.getResourcePath().equals(path) && gridResource.getPropertyName().equals(propertyName)) {
+                        Optional<Link> optionalLink = linkHelper
+                                .getLinkStreamFromProperty(newLink)
+                                .findFirst();
+                        if (optionalLink.isPresent()) {
+                            Link link = optionalLink.get();
+                            link.setStatus(new LinkStatus(HttpStatus.SC_OK, "Modified"));
+                            gridResource.setLink(link);
+                        }
+                    }
+                });
                 resourceResolver.commit();
                 LOG.debug("The link was updated: path - {}, propertyName - {}, currentLink - {}, newLink - {}",
                         path, propertyName, currentLink, newLink);
@@ -106,7 +129,7 @@ public class FixBrokenLinkServlet extends SlingAllMethodsServlet {
                 LOG.debug("The current link {} was not updated", currentLink);
                 response.setStatus(HttpStatus.SC_NO_CONTENT);
             }
-        } catch (PersistenceException e) {
+        } catch (IOException e) {
             LOG.error(e.getMessage(), e);
             response.setStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR);
         }

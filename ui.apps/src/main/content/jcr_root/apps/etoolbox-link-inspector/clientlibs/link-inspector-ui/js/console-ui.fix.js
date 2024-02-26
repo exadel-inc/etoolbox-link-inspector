@@ -42,7 +42,8 @@
             var replacementList = selectionItems.map(function (item) {
                 return $.extend({
                     newLink: data.newLink,
-                    isSkipValidation: data.isSkipValidation
+                    isSkipValidation: data.isSkipValidation,
+                    page: new URL(window.location.href).searchParams.get('page')
                 }, item);
             });
             ELC.bulkLinksUpdate(replacementList, buildFixRequest);

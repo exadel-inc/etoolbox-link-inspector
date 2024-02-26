@@ -14,10 +14,10 @@
 
 package com.exadel.etoolbox.linkinspector.core.services.impl;
 
+import com.adobe.granite.ui.components.ds.DataSource;
 import com.adobe.granite.ui.components.ds.SimpleDataSource;
 import com.exadel.etoolbox.linkinspector.core.services.GridDataSource;
 import com.exadel.etoolbox.linkinspector.core.services.data.DataFeedService;
-import com.adobe.granite.ui.components.ds.DataSource;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 @Component(service = GridDataSource.class)
 public class GridDataSourceImpl implements GridDataSource {
     private static final Logger LOG = LoggerFactory.getLogger(GridDataSourceImpl.class);
+    private static final int DEFAULT_PAGE_NUMBER = 1;
 
     @Reference
     private DataFeedService dataFeedService;
@@ -34,8 +35,17 @@ public class GridDataSourceImpl implements GridDataSource {
      * {@inheritDoc}
      */
     @Override
-    public DataSource getDataSource() {
+    public DataSource getDataSource(String page) {
         LOG.debug("GridDataSource initialization");
-        return new SimpleDataSource(dataFeedService.dataFeedToResources().iterator());
+
+        if (page == null) {
+            return new SimpleDataSource(dataFeedService.dataFeedToResources(DEFAULT_PAGE_NUMBER).iterator());
+        }
+
+        try {
+            return new SimpleDataSource(dataFeedService.dataFeedToResources(Integer.parseInt(page)).iterator());
+        } catch (NumberFormatException e) {
+            return new SimpleDataSource(dataFeedService.dataFeedToResources(DEFAULT_PAGE_NUMBER).iterator());
+        }
     }
 }

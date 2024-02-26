@@ -15,14 +15,14 @@
 package com.exadel.etoolbox.linkinspector.core.services.data.impl;
 
 import com.exadel.etoolbox.linkinspector.core.services.ExternalLinkChecker;
-import com.exadel.etoolbox.linkinspector.core.services.data.UiConfigService;
-import com.exadel.etoolbox.linkinspector.core.services.helpers.LinkHelper;
-import com.exadel.etoolbox.linkinspector.core.services.util.CsvUtil;
 import com.exadel.etoolbox.linkinspector.core.services.data.GridResourcesGenerator;
+import com.exadel.etoolbox.linkinspector.core.services.data.UiConfigService;
 import com.exadel.etoolbox.linkinspector.core.services.data.models.GridResource;
+import com.exadel.etoolbox.linkinspector.core.services.helpers.LinkHelper;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.RepositoryHelper;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.impl.LinkHelperImpl;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.impl.RepositoryHelperImpl;
+import com.exadel.etoolbox.linkinspector.core.services.util.CsvUtil;
 import com.exadel.etoolbox.linkinspector.core.services.util.LinkInspectorResourceUtil;
 import io.wcm.testing.mock.aem.junit5.AemContext;
 import io.wcm.testing.mock.aem.junit5.AemContextExtension;
@@ -36,6 +36,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
 
 import java.io.IOException;
@@ -45,14 +46,8 @@ import java.util.function.BiConsumer;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyCollection;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockStatic;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(AemContextExtension.class)
 class DataFeedServiceImplTest {
@@ -63,11 +58,10 @@ class DataFeedServiceImplTest {
     private static final String UI_CONFIG_FIELD = "uiConfigService";
     private static final String EXTERNAL_LINK_CHECKER_FIELD = "externalLinkChecker";
 
-    private static final String DATAFEED_PATH = "/content/etoolbox-link-inspector/data/datafeed.json";
-    private static final String CSV_REPORT_PATH = "/content/etoolbox-link-inspector/download/report.csv";
-
+    private static final String CSV_REPORT_PATH = "/content/etoolbox-link-inspector/data/content/1.csv";
     private static final String TEST_RESOURCES_TREE_PATH = "/com/exadel/etoolbox/linkinspector/core/services/data/impl/resources.json";
     private static final String TEST_FOLDER_PATH = "/content/test-folder";
+    private static final int DEFAULT_PAGE_NUMBER = 1;
 
     private final AemContext context = new AemContext(ResourceResolverType.JCR_MOCK);
 
@@ -88,7 +82,7 @@ class DataFeedServiceImplTest {
 
         fixture.generateDataFeed();
 
-        Resource resource = context.resourceResolver().getResource(DATAFEED_PATH);
+        Resource resource = context.resourceResolver().getResource(CSV_REPORT_PATH);
         assertNotNull(resource);
     }
 
@@ -116,7 +110,7 @@ class DataFeedServiceImplTest {
 
         when(repositoryHelperMock.getServiceResourceResolver()).thenReturn(null);
 
-        List<Resource> resources = fixture.dataFeedToResources();
+        List<Resource> resources = fixture.dataFeedToResources(DEFAULT_PAGE_NUMBER);
         assertTrue(resources.isEmpty());
     }
 
@@ -130,7 +124,7 @@ class DataFeedServiceImplTest {
 
         when(repositoryHelperMock.getServiceResourceResolver()).thenReturn(null);
 
-        List<GridResource> gridResources = fixture.dataFeedToGridResources();
+        List<List<GridResource>> gridResources = fixture.dataFeedToGridResources();
         assertTrue(gridResources.isEmpty());
     }
 
@@ -139,7 +133,7 @@ class DataFeedServiceImplTest {
         context.load().json(TEST_RESOURCES_TREE_PATH, TEST_FOLDER_PATH);
         fixture.generateDataFeed();
 
-        List<GridResource> gridResources = fixture.dataFeedToGridResources();
+        List<List<GridResource>> gridResources = fixture.dataFeedToGridResources();
         assertNotNull(gridResources);
     }
 
@@ -148,7 +142,7 @@ class DataFeedServiceImplTest {
         context.load().json(TEST_RESOURCES_TREE_PATH, TEST_FOLDER_PATH);
         fixture.generateDataFeed();
 
-        assertNotNull(fixture.dataFeedToResources());
+        assertNotNull(fixture.dataFeedToResources(DEFAULT_PAGE_NUMBER));
     }
 
     @Test
@@ -167,10 +161,10 @@ class DataFeedServiceImplTest {
 
             fixture.generateDataFeed();
 
+            resourceUtil.verify(Mockito.times(3), () ->
+                    LinkInspectorResourceUtil.removeResource(anyString(), any(ResourceResolver.class)));
             resourceUtil.verify(() ->
-                    LinkInspectorResourceUtil.removeResource(eq(CSV_REPORT_PATH), any(ResourceResolver.class)));
-            resourceUtil.verify(() ->
-                    LinkInspectorResourceUtil.saveFileToJCR(eq(CSV_REPORT_PATH), any(byte[].class), anyString(), any(ResourceResolver.class))
+                    LinkInspectorResourceUtil.createNode(anyString(), any(ResourceResolver.class))
             );
         }
     }

@@ -6,3 +6,5 @@ console-ui.download.js
 console-ui.fix.js
 console-ui.replace.js
 console-ui.filter.js
+console-ui.pagination.js
+console-ui.run.js

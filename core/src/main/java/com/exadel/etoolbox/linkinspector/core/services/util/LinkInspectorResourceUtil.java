@@ -19,10 +19,7 @@ import com.day.cq.dam.api.DamConstants;
 import com.day.cq.replication.ReplicationStatus;
 import com.day.cq.wcm.api.NameConstants;
 import com.day.crx.JcrConstants;
-import org.apache.sling.api.resource.PersistenceException;
-import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.api.resource.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,18 +31,17 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.Instant;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Stream;
 
 public class LinkInspectorResourceUtil {
     private static final Logger LOG = LoggerFactory.getLogger(LinkInspectorResourceUtil.class);
 
-    private LinkInspectorResourceUtil() {}
+    private static final String SLASH_CHAR = "/";
+    private static final String CSV_EXTENSION = ".csv";
+
+    private LinkInspectorResourceUtil() {
+    }
 
     public static void removeResource(String path, ResourceResolver resourceResolver) {
         try {
@@ -56,6 +52,37 @@ public class LinkInspectorResourceUtil {
             }
         } catch (PersistenceException e) {
             LOG.error(String.format("Failed to delete resource %s", path), e);
+        }
+    }
+
+    public static void createNode(String path, ResourceResolver resourceResolver) {
+        try {
+            Session session = resourceResolver.adaptTo(Session.class);
+            if (session == null) {
+                LOG.warn("Session is null, recreating node is interrupted");
+                return;
+            }
+            JcrUtil.createPath(path, JcrConstants.NT_UNSTRUCTURED, session);
+            session.save();
+        } catch (RepositoryException e) {
+            LOG.error(String.format("Failed to recreate node %s", path), e);
+        }
+    }
+
+    public static void addParamToNode(String path, ResourceResolver resourceResolver, String paramName, Long paramValue) {
+        try {
+            final Session session = resourceResolver.adaptTo(Session.class);
+            if (session == null) {
+                LOG.warn("Session is null, recreating node is interrupted");
+                return;
+            }
+            final Node node = session.getNode(path);
+            if (node != null) {
+                node.setProperty(paramName, paramValue);
+                session.save();
+            }
+        } catch (RepositoryException e) {
+            LOG.error("Failed to add parameter to node", e);
         }
     }
 
@@ -144,5 +171,9 @@ public class LinkInspectorResourceUtil {
             return lastModified.isBefore(lastReplicated);
         }
         return true;
+    }
+
+    public static String buildResourcePathFromPageNumber(String csvReportNodePath, int page) {
+        return csvReportNodePath + SLASH_CHAR + page + CSV_EXTENSION;
     }
 }

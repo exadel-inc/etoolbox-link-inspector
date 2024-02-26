@@ -41,6 +41,10 @@ public class ServletUtil {
         return Boolean.parseBoolean(getRequestParamString(request, param));
     }
 
+    public static int getRequestParamInt(SlingHttpServletRequest request, String param) {
+        return Integer.parseInt(getRequestParamString(request, param));
+    }
+
     public static void writeJsonResponse(SlingHttpServletResponse response, String json) {
         response.setCharacterEncoding(CharEncoding.UTF_8);
         response.setContentType(ContentType.APPLICATION_JSON.getMimeType());

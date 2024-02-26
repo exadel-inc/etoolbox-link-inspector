@@ -16,8 +16,10 @@ package com.exadel.etoolbox.linkinspector.core.services.data;
 
 import com.exadel.etoolbox.linkinspector.core.services.data.models.GridResource;
 import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceResolver;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Provides the service responsible for managing the data feed based on the set of resources generated
@@ -39,14 +41,22 @@ public interface DataFeedService {
      * Parses the data feed to the list of resources({@link Resource}) for further adapting them to view models
      * and displaying in the Link Inspector grid. The number of output items is limited for the sake of UX consistency.
      *
+     * @param page - page number for displaying
      * @return the list of resources({@link Resource}) based on the data feed
      */
-    List<Resource> dataFeedToResources();
+    List<Resource> dataFeedToResources(int page);
 
     /**
      * Parses the data feed to the list of models({@link GridResource}). The number of output items is not limited.
      *
      * @return the list of view items({@link GridResource}) based on the data feed
      */
-    List<GridResource> dataFeedToGridResources();
+    List<List<GridResource>> dataFeedToGridResources();
+
+    /**
+     * Parses the data feed to the list of models({@link GridResource}). The number of output items is not limited.
+     *
+     * @return the list of view items({@link GridResource}) based on the data feed
+     */
+    void modifyCsvRecord(ResourceResolver resourceResolver, String filePath, Consumer<GridResource> modifyConsumer);
 }

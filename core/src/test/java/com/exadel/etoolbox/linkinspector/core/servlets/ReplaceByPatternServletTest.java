@@ -45,6 +45,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.MockedStatic;
 import org.mockito.stubbing.Answer;
 
+import javax.jcr.Node;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.servlet.ServletOutputStream;
@@ -54,24 +55,9 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyCollection;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockStatic;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(AemContextExtension.class)
 class ReplaceByPatternServletTest {
@@ -97,11 +83,16 @@ class ReplaceByPatternServletTest {
     private static final String TEST_PROPERTY_1 = "test1";
     private static final String TEST_RESOURCE_PATH_3 = "/content/test-folder/test-resource3";
     private static final String TEST_PROPERTY_3 = "test3";
-    private static final String TEST_DATAFEED_PATH = "/com/exadel/etoolbox/linkinspector/core/servlets/datafeed.json";
-    private static final String REAL_DATAFEED_PATH = "/content/etoolbox-link-inspector/data/datafeed.json";
     private static final String TEST_RESOURCES_TREE_PATH = "/com/exadel/etoolbox/linkinspector/core/servlets/resources.json";
     private static final String TEST_FOLDER_PATH = "/content/test-folder";
     private static final String TEST_EXCEPTION_MSG = "Test exception message";
+    private static final String TEST_CSV_REPORT_PATH_1 = "/com/exadel/etoolbox/linkinspector/core/servlets/reports/1.csv";
+    private static final String TEST_CSV_REPORT_PATH_2 = "/com/exadel/etoolbox/linkinspector/core/servlets/reports/2.csv";
+    private static final String REAL_CSV_REPORT_PATH_1 = "/content/etoolbox-link-inspector/data/content/1.csv";
+    private static final String REAL_CSV_REPORT_PATH_2 = "/content/etoolbox-link-inspector/data/content/2.csv";
+    private static final String REAL_CSV_REPORT_NODE = "/content/etoolbox-link-inspector/data/content";
+    private static final String TEST_CSV_SIZE_PROPERTY_NAME = "size";
+    private static final int TEST_CSV_SIZE_PROPERTY_VALUE = 2;
 
     private final AemContext context = new AemContext(ResourceResolverType.JCR_MOCK);
 
@@ -173,7 +164,7 @@ class ReplaceByPatternServletTest {
     }
 
     @Test
-    void testReplacementSuccess() throws NoSuchFieldException {
+    void testReplacementSuccess() throws NoSuchFieldException, RepositoryException {
         setUpHelpersResources();
         setUpRequestParamsLinks();
 
@@ -188,7 +179,7 @@ class ReplaceByPatternServletTest {
     }
 
     @Test
-    void testDeactivate() throws NoSuchFieldException {
+    void testDeactivate() throws NoSuchFieldException, RepositoryException {
         setUpHelpersResources();
         setUpRequestParamsLinks();
 
@@ -203,7 +194,7 @@ class ReplaceByPatternServletTest {
     }
 
     @Test
-    void testDryRun() throws NoSuchFieldException, PersistenceException {
+    void testDryRun() throws NoSuchFieldException, PersistenceException, RepositoryException {
         setUpDataFeedService(getRepositoryHelperFromContext());
         setUpCommitThreshold();
         setUpResources();
@@ -254,7 +245,7 @@ class ReplaceByPatternServletTest {
     }
 
     @Test
-    void testCsvOutput() throws NoSuchFieldException {
+    void testCsvOutput() throws NoSuchFieldException, RepositoryException {
         setUpHelpersResources();
         setUpRequestParamsWithCsvOut();
 
@@ -270,7 +261,7 @@ class ReplaceByPatternServletTest {
     }
 
     @Test
-    void testCsvOutput_emptyByteArray() throws NoSuchFieldException {
+    void testCsvOutput_emptyByteArray() throws NoSuchFieldException, RepositoryException {
         setUpHelpersResources();
         setUpRequestParamsWithCsvOut();
 
@@ -287,7 +278,7 @@ class ReplaceByPatternServletTest {
     }
 
     @Test
-    void testCsvOutput_exception() throws NoSuchFieldException, IOException {
+    void testCsvOutput_exception() throws NoSuchFieldException, IOException, RepositoryException {
         setUpHelpersResources();
         setUpRequestParamsWithCsvOut();
         SlingHttpServletResponse responseMock = mock(SlingHttpServletResponse.class);
@@ -302,7 +293,7 @@ class ReplaceByPatternServletTest {
     }
 
     @Test
-    void testCsvOutput_printItemException() throws NoSuchFieldException {
+    void testCsvOutput_printItemException() throws NoSuchFieldException, RepositoryException {
         setUpHelpersResources();
         setUpRequestParamsWithCsvOut();
 
@@ -338,7 +329,7 @@ class ReplaceByPatternServletTest {
     }
 
     @Test
-    void testReplacement_persistenceException() throws NoSuchFieldException, PersistenceException {
+    void testReplacement_persistenceException() throws NoSuchFieldException, PersistenceException, RepositoryException {
         setUpDataFeedService(getRepositoryHelperFromContext());
         setUpCommitThreshold();
         setUpResources();
@@ -358,7 +349,7 @@ class ReplaceByPatternServletTest {
     }
 
     @Test
-    void testReplacement_commitThreshold() throws NoSuchFieldException, PersistenceException {
+    void testReplacement_commitThreshold() throws NoSuchFieldException, RepositoryException, PersistenceException {
         setUpDataFeedService(getRepositoryHelperFromContext());
         setUpCommitThreshold(1);
         setUpResources();
@@ -377,7 +368,7 @@ class ReplaceByPatternServletTest {
         assertEquals(HttpStatus.SC_OK, response.getStatus());
     }
 
-    private void setUpHelpersResources() throws NoSuchFieldException {
+    private void setUpHelpersResources() throws NoSuchFieldException, RepositoryException {
         setUpHelpers();
         setUpCommitThreshold();
         setUpResources();
@@ -418,9 +409,17 @@ class ReplaceByPatternServletTest {
         fixture.activate(config);
     }
 
-    private void setUpResources() {
-        context.load().binaryFile(TEST_DATAFEED_PATH, REAL_DATAFEED_PATH);
-        context.load().json(TEST_RESOURCES_TREE_PATH, TEST_FOLDER_PATH);
+    private void setUpResources() throws RepositoryException {
+        Session session = context.resourceResolver().adaptTo(Session.class);
+        if (session != null) {
+            Node root = session.getRootNode();
+            Node newNode = root.addNode(REAL_CSV_REPORT_NODE);
+            newNode.setProperty(TEST_CSV_SIZE_PROPERTY_NAME, TEST_CSV_SIZE_PROPERTY_VALUE);
+            session.save();
+            context.load().binaryFile(TEST_CSV_REPORT_PATH_1, REAL_CSV_REPORT_PATH_1);
+            context.load().binaryFile(TEST_CSV_REPORT_PATH_2, REAL_CSV_REPORT_PATH_2);
+            context.load().json(TEST_RESOURCES_TREE_PATH, TEST_FOLDER_PATH);
+        }
     }
 
     private void setUpRequestParamsWithCsvOut() {
