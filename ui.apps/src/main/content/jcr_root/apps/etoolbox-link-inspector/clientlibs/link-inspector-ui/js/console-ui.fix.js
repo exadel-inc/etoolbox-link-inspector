@@ -22,6 +22,7 @@
     var CANCEL_LABEL = Granite.I18n.get('Cancel');
     var UPDATE_LABEL = Granite.I18n.get('Fix Broken Link');
     var LINK_TO_UPDATE_LABEL = Granite.I18n.get('The following link will be updated:');
+    var NOT_SELECTED_ITEMS_LABEL = Granite.I18n.get('Not selected items. Please select one or more.');
     var REPLACEMENT_LINK_LABEL = Granite.I18n.get('Please enter the replacement link');
     var SKIP_VALIDATION_LABEL = 'Skip input link check before replacement'
 
@@ -42,7 +43,8 @@
             var replacementList = selectionItems.map(function (item) {
                 return $.extend({
                     newLink: data.newLink,
-                    isSkipValidation: data.isSkipValidation
+                    isSkipValidation: data.isSkipValidation,
+                    page: new URL(window.location.href).searchParams.get('page') || 1
                 }, item);
             });
             ELC.bulkLinksUpdate(replacementList, buildFixRequest);
@@ -141,6 +143,7 @@
 
         return deferred.promise();
     }
+
     function buildSelectionItems(selections) {
         return selections.map(function (v) {
             var row = $(v);
@@ -151,6 +154,7 @@
             };
         });
     }
+
     function buildConfirmationMessage(selections) {
         var list = selections.slice(0, 12).map(function (row) {
             return '<li>' + row.currentLink + '</li>';
@@ -165,11 +169,17 @@
         return $msg;
     }
 
-    function onFixActiveCondition(name, el, config, collection, selections) {
+    function aclCheckPermissions(name, el, config, collection, selections) {
+        //todo check permissions for selection?
         var path = selections.map(function (v) {
             return $(v).data('path');
         });
         return ELC.aclCheck(path, READ_WRITE_PERMISSIONS);
+    }
+
+    function onFixActiveCondition(name, el, config, collection, selections) {
+        selections.length > 0 ? el.removeAttribute('disabled') : el.setAttribute('disabled', true)
+        return true;
     }
 
     // INIT
@@ -177,8 +187,10 @@
         name: "cq-admin.etoolbox.linkinspector.action.fix-broken-link",
         handler: onFixAction
     });
+
     $(window).adaptTo("foundation-registry").register("foundation.collection.action.activecondition", {
-        name: "cq-admin.etoolbox.linkinspector.actioncondition.fix-broken-link",
+        name: "cq-admin.aembox.linkchecker.actioncondition.fix-broken-link",
         handler: onFixActiveCondition
     });
+
 })(window, document, Granite.$, Granite.ELC, Granite);

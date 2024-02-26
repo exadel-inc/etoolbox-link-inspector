@@ -1,8 +1,5 @@
-<%@include file="/libs/granite/ui/global.jsp" %>
-<%@page session="false"
-        import="com.exadel.etoolbox.linkinspector.core.services.GridDataSource,
-                com.adobe.granite.ui.components.ds.DataSource" %>
-<%--
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
   ~ You may obtain a copy of the License at
@@ -14,10 +11,11 @@
   ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
-  --%>
-
-<%
-    GridDataSource service = (GridDataSource) sling.getService(GridDataSource.class);
-    String pageNumber = request.getParameter("page");
-    request.setAttribute(DataSource.class.getName(), service.getDataSource(pageNumber));
-%>
+  -->
+<jcr:root xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:rep="internal"
+          jcr:primaryType="rep:ACL">
+    <allow
+            jcr:primaryType="rep:GrantACE"
+            rep:principalName="everyone"
+            rep:privileges="{Name}[jcr:read]"/>
+</jcr:root>

@@ -12,17 +12,19 @@
  * limitations under the License.
  */
 
-package com.exadel.etoolbox.linkinspector.core.services;
+/**
+ * EToolbox Link Inspector clientlib.
+ * Pagination action definition.
+ */
+(function ($) {
+    'use strict'
 
-import com.adobe.granite.ui.components.ds.DataSource;
+    $(document).on('click', '.pagination-item', function(event) {
+        const $target = $(event.target);
+        if (!$target.hasClass('disabled')) {
+            const page = $target.attr('data-page');
+            window.location = window.location.pathname + '?page=' + page;
+        }
+    });
 
-public interface GridDataSource {
-    /**
-     * Generates {@link DataSource} necessary for displaying items on the Link Inspector's page
-     * within the grid (granite/ui/components/coral/foundation/table)
-     *
-     * @param page - page number from request params
-     * @return the {@link DataSource} object containing data related to grid items
-     */
-    DataSource getDataSource(String page);
-}
+})(Granite.$);

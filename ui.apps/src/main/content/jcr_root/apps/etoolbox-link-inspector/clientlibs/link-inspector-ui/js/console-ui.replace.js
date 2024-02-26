@@ -31,6 +31,7 @@
     var REPLACEMENT_DESCRIPTION = Granite.I18n.get('* Replacement will be applied within the detected broken links scope');
     var REPLACEMENT_ACL_DESCRIPTION = Granite.I18n.get('** User should have sufficient read/write permissions in order to complete replacement successfully and create the backup package');
     var VALIDATION_MSG = Granite.I18n.get('Replacement can\'t be the same as pattern');
+    var LINK_TO_UPDATE_LABEL = Granite.I18n.get('The following link will be updated:');
 
     var PROCESSING_ERROR_MSG = 'Failed to replace by pattern<br/>Pattern: <b>{{pattern}}</b><br/>Replacement: <b>{{replacement}}</b>';
     var PERSISTENCE_ERROR_MSG = 'Replacement was interrupted due to the <b>error</b> occurred during persisting changes. Please see logs for more details';
@@ -49,13 +50,16 @@
 
     /** Root action handler */
     function onFixAction(name, el, config, collection, selections) {
-        showConfirmationModal().then(function (data) {
+        const selectionItems = buildSelectionItems(selections);
+
+        showConfirmationModal(selectionItems).then(function (data) {
             var replacementList = [{
                 pattern: data.pattern,
                 replacement: data.replacement,
                 isDryRun: data.isDryRun,
                 isBackup: data.isBackup,
-                isOutputAsCsv: data.isOutputAsCsv
+                isOutputAsCsv: data.isOutputAsCsv,
+                selected: data.selected
             }].filter(function (item) {
                 return item.pattern && item.replacement && item.pattern !== item.replacement;
             });
@@ -70,7 +74,8 @@
                 type: "POST",
                 data: $.extend({
                     _charset_: "UTF-8",
-                    cmd: "replaceByPattern"
+                    cmd: "replaceByPattern",
+                    page: new URL(window.location.href).searchParams.get('page') || 1
                 }, item)
             }).fail(function (xhr, status, error) {
                 if (xhr.status === 500) {
@@ -126,7 +131,7 @@
     }
 
     // Confirmation dialog common methods
-    function showConfirmationModal() {
+    function showConfirmationModal(selection) {
         var deferred = $.Deferred();
 
         var el = ELC.getSharableDlg();
@@ -139,6 +144,8 @@
         var $updateBtn = $('<button data-dialog-action is="coral-button" variant="primary" coral-close>').text(REPLACE_BUTTON_LABEL);
         $cancelBtn.appendTo(el.footer);
         $updateBtn.appendTo(el.footer);
+
+        buildConfirmationMessage(selection).appendTo(el.content);
 
         // Pattern input group
         var $patternTextField =
@@ -183,7 +190,10 @@
                 replacement: $replacementTextField.val(),
                 isDryRun: $isDryRunCheckbox.prop("checked"),
                 isBackup: $isBackupCheckbox.prop("checked"),
-                isOutputAsCsv: $isCsvOutputCheckbox.prop("checked")
+                isOutputAsCsv: $isCsvOutputCheckbox.prop("checked"),
+                selected: selection.map(item => {
+                    return item.path + '@' + item.propertyName
+                })
             }
             deferred.resolve(data);
         }
@@ -202,10 +212,45 @@
         return deferred.promise();
     }
 
+    function buildConfirmationMessage(selections) {
+        var list = selections.slice(0, 12).map(function (row) {
+            return '<li>' + row.currentLink + '</li>';
+        });
+        if (selections.length > 12) {
+            list.push('<li>&#8230;</li>'); // &#8230; is ellipsis
+        }
+        var $msg = $('<div class="elc-confirmation-msg">');
+        $('<p>').text(LINK_TO_UPDATE_LABEL).appendTo($msg);
+        $('<ul class="elc-processing-link-list">').html(list.join('')).appendTo($msg);
+        $('<br/>').appendTo($msg);
+        return $msg;
+    }
+
+    function buildSelectionItems(selections) {
+        return selections.map(function (v) {
+            var row = $(v);
+            return {
+                path: row.data('path'),
+                currentLink: row.data('currentLink'),
+                propertyName: row.data('propertyName')
+            };
+        });
+    }
+
+    function onFixActiveCondition(name, el, config, collection, selections) {
+        selections.length > 0 ? el.removeAttribute('disabled') : el.setAttribute('disabled', true)
+        return true;
+    }
+
     // INIT
     $(window).adaptTo("foundation-registry").register("foundation.collection.action.action", {
         name: "cq-admin.etoolbox.linkinspector.action.replace-by-pattern",
         handler: onFixAction
+    });
+
+    $(window).adaptTo("foundation-registry").register("foundation.collection.action.activecondition", {
+        name: "cq-admin.aembox.linkchecker.actioncondition.replace-by-pattern",
+        handler: onFixActiveCondition
     });
 
     // ACL check
