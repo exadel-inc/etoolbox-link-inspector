@@ -18,10 +18,10 @@
           jcr:title="EToolbox">
     <link-inspector
             jcr:primaryType="nt:unstructured"
-            jcr:title="Link Inspector"
-            jcr:description="Collects broken links (external/internal) under the specified content path and generates a comprehensive report"
+            jcr:title="EToolbox Link Inspector"
+            jcr:description="Analyzes webpage links and generates comprehensive reports"
             href="/tools/etoolbox/link-inspector.html"
             consoleId="etoolbox-link-inspector"
-            icon="linkCheck"
+            icon="etoolbox-link-inspector"
             order="{Long}100"/>
 </jcr:root>
