@@ -13,17 +13,27 @@ import java.util.Optional;
 public class UiConfigServiceImpl implements UiConfigService {
     private static final String CONFIG_PATH = "/content/etoolbox-link-inspector/data/config";
     private static final String PN_FILTER = "filter";
+    private static final String PN_PATH = "path";
+    private static final String DEFAULT_PATH = "/content";
 
     @Reference
     private RepositoryHelper repositoryHelper;
 
     @Override
     public String[] getExcludedLinksPatterns() {
+        return getProperty(PN_FILTER, String[].class).orElse(new String[0]);
+    }
+
+    @Override
+    public String getSearchPath() {
+        return getProperty(PN_PATH, String.class).orElse(DEFAULT_PATH);
+    }
+
+    private <T> Optional<T> getProperty(String name, Class<T> clazz){
         try(ResourceResolver resourceResolver = repositoryHelper.getServiceResourceResolver()){
             return Optional.ofNullable(resourceResolver.getResource(CONFIG_PATH))
                     .map(Resource::getValueMap)
-                    .map(vm->vm.get(PN_FILTER, String[].class))
-                    .orElse(new String[0]);
+                    .map(vm->vm.get(name, clazz));
         }
     }
 }

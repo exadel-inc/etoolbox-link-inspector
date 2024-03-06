@@ -181,13 +181,13 @@ class DataFeedServiceImplTest {
         ExternalLinkChecker externalLinkChecker = mock(ExternalLinkChecker.class);
         PrivateAccessor.setField(linkHelper, EXTERNAL_LINK_CHECKER_FIELD, externalLinkChecker);
         PrivateAccessor.setField(gridResourcesGenerator, LINK_HELPER_FIELD, linkHelper);
+        UiConfigService uiConfigService = mock(UiConfigServiceImpl.class);
+        when(uiConfigService.getExcludedLinksPatterns()).thenReturn(new String[0]);
+        when(uiConfigService.getSearchPath()).thenReturn(TEST_FOLDER_PATH);
+        PrivateAccessor.setField(gridResourcesGenerator, UI_CONFIG_FIELD, uiConfigService);
         GridResourcesGeneratorImplTest.setUpConfig(gridResourcesGenerator);
 
         when(externalLinkChecker.checkLink(anyString())).thenReturn(HttpStatus.SC_NOT_FOUND);
-
-        UiConfigService uiConfigService = mock(UiConfigServiceImpl.class);
-        when(uiConfigService.getExcludedLinksPatterns()).thenReturn(new String[0]);
-        PrivateAccessor.setField(gridResourcesGenerator, UI_CONFIG_FIELD, uiConfigService);
 
         return gridResourcesGenerator;
     }

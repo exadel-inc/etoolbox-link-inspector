@@ -140,6 +140,7 @@ class GridResourcesGeneratorImplTest {
 
         uiConfigService = mock(UiConfigServiceImpl.class);
         when(uiConfigService.getExcludedLinksPatterns()).thenReturn(new String[0]);
+        when(uiConfigService.getSearchPath()).thenReturn(TEST_FOLDER_PATH);
         PrivateAccessor.setField(fixture, UI_CONFIG_FIELD, uiConfigService);
     }
 
@@ -154,8 +155,6 @@ class GridResourcesGeneratorImplTest {
 
         assertTrue(CollectionUtils.isEqualCollection(expectedGridResources, gridResources));
     }
-
-
 
     @Test
     void testGenerateFilteredGridResources() throws NoSuchFieldException, IOException, URISyntaxException {

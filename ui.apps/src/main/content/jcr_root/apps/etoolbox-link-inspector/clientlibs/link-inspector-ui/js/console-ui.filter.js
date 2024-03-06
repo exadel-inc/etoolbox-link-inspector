@@ -18,12 +18,12 @@
  */
 (function (window, document, $, ELC, Granite, Coral) {
     'use strict';
-    var DIALOG_TITLE_LABEL = Granite.I18n.get('Filter Options');
-    var SUCCESS_DIALOG_TITLE_LABEL = Granite.I18n.get('Filter Options Applied');
-    var CANCEL_LABEL = Granite.I18n.get('Cancel');
-    var SUBMIT_FILTER_LABEL = Granite.I18n.get('Apply');
+    const DIALOG_TITLE_LABEL = Granite.I18n.get('Filter Options');
+    const SUCCESS_DIALOG_TITLE_LABEL = Granite.I18n.get('Filter Options Applied');
+    const CANCEL_LABEL = Granite.I18n.get('Cancel');
+    const SUBMIT_FILTER_LABEL = Granite.I18n.get('Apply');
 
-    var successDialog = new Coral.Dialog().set({
+    const successDialog = new Coral.Dialog().set({
         id : "filter-dialog-success",
         closable: Coral.Dialog.closable.ON,
         variant: "success",
@@ -39,12 +39,12 @@
     });
 
     function onFilterAction(name, el, config, collection, selections) {
-        var dialog = document.querySelector('#filter-dialog');
+        const dialog = document.querySelector('#filter-dialog');
         dialog.show();
     }
 
     function initActionDialog(){
-        var dialog = new Coral.Dialog().set({
+        const dialog = new Coral.Dialog().set({
             id : 'filter-dialog',
             closable: Coral.Dialog.closable.ON,
             backdrop: Coral.Dialog.backdrop.STATIC,
@@ -54,38 +54,42 @@
             }
         });
 
-        var $cancelBtn = $('<button is="coral-button" variant="default" coral-close>').text(CANCEL_LABEL);
-        var $updateBtn =
+        const $cancelBtn = $('<button is="coral-button" variant="default" coral-close>').text(CANCEL_LABEL);
+        const $updateBtn =
             $('<button data-dialog-action is="coral-button" variant="primary" coral-close>').text(SUBMIT_FILTER_LABEL);
         $cancelBtn.appendTo(dialog.footer);
         $updateBtn.appendTo(dialog.footer);
 
-        var filterMultifield = new Coral.Multifield();
+        const filterMultifield = new Coral.Multifield();
         filterMultifield.template.content.appendChild(new Coral.Textfield());
 
-        var add = new Coral.Button();
+        const add = new Coral.Button();
         add.label.textContent = 'Add regexp for filtering';
         add.setAttribute('coral-multifield-add', '');
         filterMultifield.appendChild(add);
 
         dialog.content.appendChild(filterMultifield);
+        const $rootPathField = $('<input is="coral-textfield" class="elc-replacement-input" name="replacement" value="" required>');
+        $('<p>').text("Path").appendTo(dialog.content);
+        $rootPathField.appendTo(dialog.content);
         $.ajax({
             type: "GET",
             url: "/content/etoolbox-link-inspector/data/config.json"
         }).done(function (data){
             if (data.filter){
-                for (var f of data.filter){
-                    var item = new Coral.Multifield.Item();
-                    var textField = new Coral.Textfield();
+                for (let f of data.filter){
+                    const item = new Coral.Multifield.Item();
+                    const textField = new Coral.Textfield();
                     textField.value = f;
                     item.content.appendChild(textField);
                     filterMultifield.items.add(item);
                 }
+                $rootPathField.val(data.path);
             }
         })
 
         function onSubmit(){
-            var filterMultifieldValues = filterMultifield.items.getAll().map((item) => item.content.children[0].value);
+            let filterMultifieldValues = filterMultifield.items.getAll().map((item) => item.content.children[0].value);
             filterMultifieldValues = !!filterMultifieldValues.length ? filterMultifieldValues : "";
             $.ajax({
                 type: "POST",
@@ -93,7 +97,8 @@
                 data: {
                     'jcr:primaryType': "nt:unstructured",
                     "filter": filterMultifieldValues,
-                    "filter@TypeHint": "String[]"
+                    "filter@TypeHint": "String[]",
+                    "path": $rootPathField.val()
                 },
                 dataType: "json",
                 encode: true

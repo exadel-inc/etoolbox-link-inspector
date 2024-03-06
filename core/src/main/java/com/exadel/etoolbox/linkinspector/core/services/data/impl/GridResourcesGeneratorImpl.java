@@ -195,7 +195,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
     @Activate
     @Modified
     protected void activate(Configuration configuration) {
-        searchPath = configuration.searchPath();
+        searchPath = uiConfigService.getSearchPath();
         excludedPaths = configuration.excludedPaths();
         checkActivation = configuration.checkActivation();
         skipModifiedAfterActivation = configuration.skipModifiedAfterActivation();
