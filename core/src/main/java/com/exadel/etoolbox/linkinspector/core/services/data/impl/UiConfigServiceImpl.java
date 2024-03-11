@@ -14,6 +14,7 @@ public class UiConfigServiceImpl implements UiConfigService {
     private static final String CONFIG_PATH = "/content/etoolbox-link-inspector/data/config";
     private static final String PN_FILTER = "filter";
     private static final String PN_EXCLUDED_PATHS = "excludedPaths";
+    private static final String PN_ACTIVATED_CONTENT = "activatedContent";
     private static final String PN_PATH = "path";
     private static final String DEFAULT_PATH = "/content";
 
@@ -33,6 +34,11 @@ public class UiConfigServiceImpl implements UiConfigService {
     @Override
     public String[] getExcludedPaths() {
         return getProperty(PN_EXCLUDED_PATHS, String[].class).orElse(new String[0]);
+    }
+
+    @Override
+    public boolean isActivatedContent() {
+        return getProperty(PN_ACTIVATED_CONTENT, Boolean.class).orElse(false);
     }
 
     private <T> Optional<T> getProperty(String name, Class<T> clazz){

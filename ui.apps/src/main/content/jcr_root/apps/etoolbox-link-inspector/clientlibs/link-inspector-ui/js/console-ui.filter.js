@@ -65,12 +65,15 @@
         dialog.content.appendChild(filterMultifield);
 
         const $rootPathField = $('<input is="coral-textfield" class="elc-replacement-input" name="replacement" value="" required>');
-        $('<p>').text("Path").appendTo(dialog.content);
+        $('<p>').text("Path(The content path for searching broken links. The search path should be located under /content)").appendTo(dialog.content);
         $rootPathField.appendTo(dialog.content);
 
         const excludedPathsMultifield = createMultifield();
-        $('<p>').text("Excluded Paths").appendTo(dialog.content);
+        $('<p>').text("Excluded Paths(The list of paths excluded from processing. The specified path and all its children are excluded. The excluded path should not end with slash. Can be specified as a regex)").appendTo(dialog.content);
         dialog.content.appendChild(excludedPathsMultifield);
+
+        const $activatedContentCheckbox = $('<coral-checkbox value="activatedContent">Activated Content(If checked, links will be retrieved from activated content only)</coral-checkbox>');
+        $activatedContentCheckbox.appendTo(dialog.content);
 
         $.ajax({
             type: "GET",
@@ -79,6 +82,7 @@
             populateMultifield(filterMultifield, data.filter);
             $rootPathField.val(data.path);
             populateMultifield(excludedPathsMultifield, data.excludedPaths);
+            $activatedContentCheckbox.attr("checked", data.activatedContent);
         })
 
         function createMultifield(){
@@ -121,6 +125,8 @@
                     "path": $rootPathField.val(),
                     "excludedPaths": getMultifieldValues(excludedPathsMultifield),
                     "excludedPaths@TypeHint": "String[]",
+                    "activatedContent":!!$activatedContentCheckbox.attr("checked"),
+                    "activatedContent@TypeHint": "Boolean"
                 },
                 dataType: "json",
                 encode: true

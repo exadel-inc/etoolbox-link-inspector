@@ -4,4 +4,5 @@ public interface UiConfigService {
     String[] getExcludedLinksPatterns();
     String getSearchPath();
     String[] getExcludedPaths();
+    boolean isActivatedContent();
 }
