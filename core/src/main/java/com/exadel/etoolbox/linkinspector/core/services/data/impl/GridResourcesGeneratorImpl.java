@@ -176,8 +176,6 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
 
     private ExecutorService executorService;
 
-    private String searchPath;
-    private String[] excludedPaths;
     private boolean checkActivation;
     private boolean skipModifiedAfterActivation;
     private ZonedDateTime lastModifiedBoundary;
@@ -195,8 +193,6 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
     @Activate
     @Modified
     protected void activate(Configuration configuration) {
-        searchPath = uiConfigService.getSearchPath();
-        excludedPaths = configuration.excludedPaths();
         checkActivation = configuration.checkActivation();
         skipModifiedAfterActivation = configuration.skipModifiedAfterActivation();
         lastModifiedBoundary = Optional.of(configuration.lastModifiedBoundary())
@@ -216,8 +212,8 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
      */
     @Override
     public List<GridResource> generateGridResources(String gridResourceType, ResourceResolver resourceResolver) {
-        uiConfigService.getExcludedLinksPatterns();
         StopWatch stopWatch = StopWatch.createStarted();
+        String searchPath = uiConfigService.getSearchPath();
         LOG.debug("Start broken links collecting, path: {}", searchPath);
 
         Resource rootResource = resourceResolver.getResource(searchPath);
@@ -401,7 +397,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
     }
 
     private boolean isExcludedPath(String path) {
-        return isStringMatchAnyPattern(path, excludedPaths);
+        return isStringMatchAnyPattern(path, uiConfigService.getExcludedPaths());
     }
 
     private boolean isAllowedErrorCode(int linkStatusCode) {
@@ -487,8 +483,8 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
 
         stats.put(GenerationStatsProps.PN_LAST_GENERATED,
                 ZonedDateTime.now().format(DateTimeFormatter.RFC_1123_DATE_TIME));
-        stats.put(GenerationStatsProps.PN_SEARCH_PATH, searchPath);
-        stats.put(GenerationStatsProps.PN_EXCLUDED_PATHS, excludedPaths);
+        stats.put(GenerationStatsProps.PN_SEARCH_PATH, uiConfigService.getSearchPath());
+        stats.put(GenerationStatsProps.PN_EXCLUDED_PATHS, uiConfigService.getExcludedPaths());
         stats.put(GenerationStatsProps.PN_CHECK_ACTIVATION, checkActivation);
         stats.put(GenerationStatsProps.PN_SKIP_MODIFIED_AFTER_ACTIVATION, skipModifiedAfterActivation);
         stats.put(GenerationStatsProps.PN_LAST_MODIFIED_BOUNDARY, dateToIsoDateTimeString(lastModifiedBoundary));

@@ -60,45 +60,67 @@
         $cancelBtn.appendTo(dialog.footer);
         $updateBtn.appendTo(dialog.footer);
 
-        const filterMultifield = new Coral.Multifield();
-        filterMultifield.template.content.appendChild(new Coral.Textfield());
-
-        const add = new Coral.Button();
-        add.label.textContent = 'Add regexp for filtering';
-        add.setAttribute('coral-multifield-add', '');
-        filterMultifield.appendChild(add);
-
+        const filterMultifield = createMultifield();
+        $('<p>').text("Filter").appendTo(dialog.content);
         dialog.content.appendChild(filterMultifield);
+
         const $rootPathField = $('<input is="coral-textfield" class="elc-replacement-input" name="replacement" value="" required>');
         $('<p>').text("Path").appendTo(dialog.content);
         $rootPathField.appendTo(dialog.content);
+
+        const excludedPathsMultifield = createMultifield();
+        $('<p>').text("Excluded Paths").appendTo(dialog.content);
+        dialog.content.appendChild(excludedPathsMultifield);
+
         $.ajax({
             type: "GET",
             url: "/content/etoolbox-link-inspector/data/config.json"
         }).done(function (data){
-            if (data.filter){
-                for (let f of data.filter){
-                    const item = new Coral.Multifield.Item();
-                    const textField = new Coral.Textfield();
-                    textField.value = f;
-                    item.content.appendChild(textField);
-                    filterMultifield.items.add(item);
-                }
-                $rootPathField.val(data.path);
-            }
+            populateMultifield(filterMultifield, data.filter);
+            $rootPathField.val(data.path);
+            populateMultifield(excludedPathsMultifield, data.excludedPaths);
         })
 
+        function createMultifield(){
+            const multifield = new Coral.Multifield();
+            multifield.template.content.appendChild(new Coral.Textfield());
+
+            const add = new Coral.Button();
+            add.label.textContent = 'Add';
+            add.setAttribute('coral-multifield-add', '');
+            multifield.appendChild(add);
+            return multifield;
+        }
+
+        function populateMultifield(multifield, data){
+            if(!data){
+                return;
+            }
+            for (let d of data){
+                const item = new Coral.Multifield.Item();
+                const textField = new Coral.Textfield();
+                textField.value = d;
+                item.content.appendChild(textField);
+                multifield.items.add(item);
+            }
+        }
+
+        function getMultifieldValues(multifield){
+            let multifieldValues = multifield.items.getAll().map((item) => item.content.children[0].value);
+            return !!multifieldValues.length ? multifieldValues : "";
+        }
+
         function onSubmit(){
-            let filterMultifieldValues = filterMultifield.items.getAll().map((item) => item.content.children[0].value);
-            filterMultifieldValues = !!filterMultifieldValues.length ? filterMultifieldValues : "";
             $.ajax({
                 type: "POST",
                 url: "/content/etoolbox-link-inspector/data/config",
                 data: {
                     'jcr:primaryType': "nt:unstructured",
-                    "filter": filterMultifieldValues,
+                    "filter": getMultifieldValues(filterMultifield),
                     "filter@TypeHint": "String[]",
-                    "path": $rootPathField.val()
+                    "path": $rootPathField.val(),
+                    "excludedPaths": getMultifieldValues(excludedPathsMultifield),
+                    "excludedPaths@TypeHint": "String[]",
                 },
                 dataType: "json",
                 encode: true

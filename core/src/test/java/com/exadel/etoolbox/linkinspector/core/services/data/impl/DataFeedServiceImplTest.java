@@ -184,6 +184,7 @@ class DataFeedServiceImplTest {
         UiConfigService uiConfigService = mock(UiConfigServiceImpl.class);
         when(uiConfigService.getExcludedLinksPatterns()).thenReturn(new String[0]);
         when(uiConfigService.getSearchPath()).thenReturn(TEST_FOLDER_PATH);
+        when(uiConfigService.getExcludedPaths()).thenReturn(new String[0]);
         PrivateAccessor.setField(gridResourcesGenerator, UI_CONFIG_FIELD, uiConfigService);
         GridResourcesGeneratorImplTest.setUpConfig(gridResourcesGenerator);
 

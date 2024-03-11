@@ -141,6 +141,7 @@ class GridResourcesGeneratorImplTest {
         uiConfigService = mock(UiConfigServiceImpl.class);
         when(uiConfigService.getExcludedLinksPatterns()).thenReturn(new String[0]);
         when(uiConfigService.getSearchPath()).thenReturn(TEST_FOLDER_PATH);
+        when(uiConfigService.getExcludedPaths()).thenReturn(new String[]{TEST_EXCLUDED_PATH});
         PrivateAccessor.setField(fixture, UI_CONFIG_FIELD, uiConfigService);
     }
 
@@ -326,9 +327,6 @@ class GridResourcesGeneratorImplTest {
         int[] defaultStatusCodes = {HttpStatus.SC_NOT_FOUND};
         when(config.allowedStatusCodes()).thenReturn(defaultStatusCodes);
 
-        String[] excludedPaths = {TEST_EXCLUDED_PATH};
-        when(config.excludedPaths()).thenReturn(excludedPaths);
-
         when(config.checkActivation()).thenReturn(false);
 
         gridResourcesGenerator.activate(config);
@@ -337,7 +335,7 @@ class GridResourcesGeneratorImplTest {
     private void setUpConfigNoExcludedPaths(GridResourcesGeneratorImpl gridResourcesGenerator) {
         GridResourcesGeneratorImpl.Configuration config = mockConfig();
 
-        when(config.excludedPaths()).thenReturn(ArrayUtils.EMPTY_STRING_ARRAY);
+        when(uiConfigService.getExcludedPaths()).thenReturn(ArrayUtils.EMPTY_STRING_ARRAY);
 
         int[] defaultStatusCodes = {HttpStatus.SC_NOT_FOUND};
         when(config.allowedStatusCodes()).thenReturn(defaultStatusCodes);
@@ -354,8 +352,7 @@ class GridResourcesGeneratorImplTest {
         int[] defaultStatusCodes = {HttpStatus.SC_NOT_FOUND};
         when(config.allowedStatusCodes()).thenReturn(defaultStatusCodes);
 
-        String[] excludedPaths = {TEST_EXCLUDED_PATH};
-        when(config.excludedPaths()).thenReturn(excludedPaths);
+        when(uiConfigService.getExcludedPaths()).thenReturn(new String[]{TEST_EXCLUDED_PATH});
 
         gridResourcesGenerator.activate(config);
     }
