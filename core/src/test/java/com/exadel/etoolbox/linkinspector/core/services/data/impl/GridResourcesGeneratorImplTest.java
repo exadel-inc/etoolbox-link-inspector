@@ -346,13 +346,12 @@ class GridResourcesGeneratorImplTest {
     private void setUpConfigCheckActivation(GridResourcesGeneratorImpl gridResourcesGenerator) {
         GridResourcesGeneratorImpl.Configuration config = mockConfig();
 
-        when(config.skipModifiedAfterActivation()).thenReturn(true);
-
         int[] defaultStatusCodes = {HttpStatus.SC_NOT_FOUND};
         when(config.allowedStatusCodes()).thenReturn(defaultStatusCodes);
 
         when(uiConfigService.getExcludedPaths()).thenReturn(new String[]{TEST_EXCLUDED_PATH});
         when(uiConfigService.isActivatedContent()).thenReturn(true);
+        when(uiConfigService.isSkipContentModifiedAfterActivation()).thenReturn(true);
 
         gridResourcesGenerator.activate(config);
     }

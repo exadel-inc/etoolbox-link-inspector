@@ -15,6 +15,7 @@ public class UiConfigServiceImpl implements UiConfigService {
     private static final String PN_FILTER = "filter";
     private static final String PN_EXCLUDED_PATHS = "excludedPaths";
     private static final String PN_ACTIVATED_CONTENT = "activatedContent";
+    private static final String PN_SKIP_CONTENT_AFTER_ACTIVATION = "skipContentAfterActivation";
     private static final String PN_PATH = "path";
     private static final String DEFAULT_PATH = "/content";
 
@@ -39,6 +40,11 @@ public class UiConfigServiceImpl implements UiConfigService {
     @Override
     public boolean isActivatedContent() {
         return getProperty(PN_ACTIVATED_CONTENT, Boolean.class).orElse(false);
+    }
+
+    @Override
+    public boolean isSkipContentModifiedAfterActivation() {
+        return getProperty(PN_SKIP_CONTENT_AFTER_ACTIVATION, Boolean.class).orElse(false);
     }
 
     private <T> Optional<T> getProperty(String name, Class<T> clazz){

@@ -5,4 +5,5 @@ public interface UiConfigService {
     String getSearchPath();
     String[] getExcludedPaths();
     boolean isActivatedContent();
+    boolean isSkipContentModifiedAfterActivation();
 }

@@ -75,6 +75,9 @@
         const $activatedContentCheckbox = $('<coral-checkbox value="activatedContent">Activated Content(If checked, links will be retrieved from activated content only)</coral-checkbox>');
         $activatedContentCheckbox.appendTo(dialog.content);
 
+        const $skipContentAfterActivationCheckbox = $('<coral-checkbox value="skipContentAfterActivation">Skip content modified after activation(Works in conjunction with the \'Activated Content\' checkbox only. If checked, links will be retrieved from activated content that is not modified after activation (lastModified is before lastReplicated))</coral-checkbox>');
+        $skipContentAfterActivationCheckbox.appendTo(dialog.content);
+
         $.ajax({
             type: "GET",
             url: "/content/etoolbox-link-inspector/data/config.json"
@@ -83,6 +86,7 @@
             $rootPathField.val(data.path);
             populateMultifield(excludedPathsMultifield, data.excludedPaths);
             $activatedContentCheckbox.attr("checked", data.activatedContent);
+            $skipContentAfterActivationCheckbox.attr("checked", data.skipContentAfterActivation);
         })
 
         function createMultifield(){
@@ -126,7 +130,9 @@
                     "excludedPaths": getMultifieldValues(excludedPathsMultifield),
                     "excludedPaths@TypeHint": "String[]",
                     "activatedContent":!!$activatedContentCheckbox.attr("checked"),
-                    "activatedContent@TypeHint": "Boolean"
+                    "activatedContent@TypeHint": "Boolean",
+                    "skipContentAfterActivation":!!$skipContentAfterActivationCheckbox.attr("checked"),
+                    "skipContentAfterActivation@TypeHint": "Boolean"
                 },
                 dataType: "json",
                 encode: true

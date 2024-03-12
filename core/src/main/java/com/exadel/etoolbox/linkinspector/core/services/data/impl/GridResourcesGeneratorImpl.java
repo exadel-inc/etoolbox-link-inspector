@@ -176,7 +176,6 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
 
     private ExecutorService executorService;
 
-    private boolean skipModifiedAfterActivation;
     private ZonedDateTime lastModifiedBoundary;
     private String[] excludedProperties;
     private String reportLinksType;
@@ -192,7 +191,6 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
     @Activate
     @Modified
     protected void activate(Configuration configuration) {
-        skipModifiedAfterActivation = configuration.skipModifiedAfterActivation();
         lastModifiedBoundary = Optional.of(configuration.lastModifiedBoundary())
                 .filter(StringUtils::isNotBlank)
                 .map(dateString -> ZonedDateTime.parse(dateString, DateTimeFormatter.ISO_DATE_TIME))
@@ -420,7 +418,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
                         .map(valueMap -> valueMap.get(ReplicationStatus.NODE_PROPERTY_LAST_REPLICATION_ACTION, String.class));
                 if (replicationAction.isPresent()) {
                     return ReplicationActionType.ACTIVATE.getName().equals(replicationAction.get()) &&
-                            (!skipModifiedAfterActivation || LinkInspectorResourceUtil.isModifiedBeforeActivation(resource));
+                            (!uiConfigService.isSkipContentModifiedAfterActivation() || LinkInspectorResourceUtil.isModifiedBeforeActivation(resource));
                 }
             }
         }
@@ -434,7 +432,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
         if (!replicationStatus.isPresent()) {
             return false;
         }
-        return !skipModifiedAfterActivation || replicationStatus.map(ReplicationStatus::getLastPublished)
+        return !uiConfigService.isSkipContentModifiedAfterActivation() || replicationStatus.map(ReplicationStatus::getLastPublished)
                 .map(Calendar::toInstant)
                 .map(instant -> isModifiedBeforeActivation(pageOrAssetResource, instant))
                 .orElse(true);
@@ -484,7 +482,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
         stats.put(GenerationStatsProps.PN_SEARCH_PATH, uiConfigService.getSearchPath());
         stats.put(GenerationStatsProps.PN_EXCLUDED_PATHS, uiConfigService.getExcludedPaths());
         stats.put(GenerationStatsProps.PN_CHECK_ACTIVATION, uiConfigService.isActivatedContent());
-        stats.put(GenerationStatsProps.PN_SKIP_MODIFIED_AFTER_ACTIVATION, skipModifiedAfterActivation);
+        stats.put(GenerationStatsProps.PN_SKIP_MODIFIED_AFTER_ACTIVATION, uiConfigService.isSkipContentModifiedAfterActivation());
         stats.put(GenerationStatsProps.PN_LAST_MODIFIED_BOUNDARY, dateToIsoDateTimeString(lastModifiedBoundary));
         stats.put(GenerationStatsProps.PN_EXCLUDED_PROPERTIES, excludedProperties);
 
