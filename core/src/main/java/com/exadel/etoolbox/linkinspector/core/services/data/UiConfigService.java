@@ -11,4 +11,5 @@ public interface UiConfigService {
     ZonedDateTime getLastModified();
     String[] getExcludedProperties();
     String getLinksType();
+    boolean isExcludeTags();
 }

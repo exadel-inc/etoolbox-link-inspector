@@ -72,10 +72,6 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
             description = "Finds broken links under the specified path for further outputting them in a report"
     )
     @interface Configuration {
-        @AttributeDefinition(
-                name = "Exclude tags",
-                description = "If checked, the internal links starting with /content/cq:tags will be excluded"
-        ) boolean excludeTags() default true;
 
         @AttributeDefinition(
                 name = "Status codes",
@@ -107,7 +103,6 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
 
     private ExecutorService executorService;
 
-    private boolean excludeTags;
     private int[] allowedStatusCodes;
     private int threadsPerCore;
 
@@ -118,7 +113,6 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
     @Activate
     @Modified
     protected void activate(Configuration configuration) {
-        excludeTags = configuration.excludeTags();
         allowedStatusCodes = configuration.allowedStatusCodes();
         threadsPerCore = configuration.threadsPerCore();
     }
@@ -307,7 +301,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
     }
 
     private boolean isExcludedTag(String href) {
-        return excludeTags && href.startsWith(TAGS_LOCATION);
+        return uiConfigService.isExcludeTags() && href.startsWith(TAGS_LOCATION);
     }
 
     private boolean isExcludedProperty(String propertyName) {
@@ -410,7 +404,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
 
         stats.put(GenerationStatsProps.PN_REPORT_LINKS_TYPE, uiConfigService.getLinksType());
         stats.put(GenerationStatsProps.PN_EXCLUDED_LINK_PATTERNS, getExcludedLinksPatterns());
-        stats.put(GenerationStatsProps.PN_EXCLUDED_TAGS, excludeTags);
+        stats.put(GenerationStatsProps.PN_EXCLUDED_TAGS, uiConfigService.isExcludeTags());
         stats.put(GenerationStatsProps.PN_ALLOWED_STATUS_CODES, allowedStatusCodes);
 
         stats.put(GenerationStatsProps.PN_ALL_INTERNAL_LINKS, allLinksCounter.getInternalLinks());

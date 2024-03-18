@@ -147,6 +147,7 @@ class GridResourcesGeneratorImplTest {
         when(uiConfigService.getLastModified()).thenReturn(TEST_LAST_MODIFIED_BOUNDARY);
         when(uiConfigService.getExcludedProperties()).thenReturn(new String[]{TEST_EXCLUDED_PROPERTY});
         when(uiConfigService.getLinksType()).thenReturn(GenerationStatsProps.REPORT_LINKS_TYPE_ALL);
+        when(uiConfigService.isExcludeTags()).thenReturn(true);
         PrivateAccessor.setField(fixture, UI_CONFIG_FIELD, uiConfigService);
     }
 
@@ -370,7 +371,6 @@ class GridResourcesGeneratorImplTest {
         GridResourcesGeneratorImpl.Configuration config = mock(GridResourcesGeneratorImpl.Configuration.class);
 
         when(config.threadsPerCore()).thenReturn(60);
-        when(config.excludeTags()).thenReturn(true);
 
         return config;
     }

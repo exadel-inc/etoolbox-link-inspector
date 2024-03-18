@@ -113,6 +113,9 @@
         $('<p>').text("Links type(The type of links in the report)").appendTo(dialog.content);
         dialog.content.appendChild(linksTypeSelect);
 
+        const $excludeTagsCheckbox = $('<coral-checkbox value="excludeTags">Exclude tags(If checked, the internal links starting with /content/cq:tags will be excluded)</coral-checkbox>');
+        $excludeTagsCheckbox.appendTo(dialog.content);
+
         $.ajax({
             type: "GET",
             url: "/content/etoolbox-link-inspector/data/config.json"
@@ -125,6 +128,7 @@
             $lastModifiedContentField.val(data.lastModifiedBoundary);
             populateMultifield(excludedPropertiesMultifield, data.excludedProperties);
             linksTypeSelect.value = data.linksType;
+            $excludeTagsCheckbox.attr("checked", data.excludeTags);
         })
 
         function createMultifield(){
@@ -174,7 +178,9 @@
                     "lastModifiedBoundary": $lastModifiedContentField.val(),
                     "excludedProperties": getMultifieldValues(excludedPropertiesMultifield),
                     "excludedProperties@TypeHint": "String[]",
-                    "linksType": linksTypeSelect.value
+                    "linksType": linksTypeSelect.value,
+                    "excludeTags":!!$excludeTagsCheckbox.attr("checked"),
+                    "excludeTags@TypeHint": "Boolean"
                 },
                 dataType: "json",
                 encode: true
