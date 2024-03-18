@@ -9,4 +9,5 @@ public interface UiConfigService {
     boolean isActivatedContent();
     boolean isSkipContentModifiedAfterActivation();
     ZonedDateTime getLastModified();
+    String[] getExcludedProperties();
 }

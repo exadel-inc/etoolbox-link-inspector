@@ -82,6 +82,10 @@
         $('<p>').text("Last Modified (The content modified before the specified date will be excluded. Tha date should has the ISO-like date-time format, such as '2011-12-03T10:15:30+01:00')").appendTo(dialog.content);
         $lastModifiedContentField.appendTo(dialog.content);
 
+        const excludedPropertiesMultifield = createMultifield();
+        $('<p>').text("Excluded Properties(The list of properties excluded from processing. Each value can be specified as a regex)").appendTo(dialog.content);
+        dialog.content.appendChild(excludedPropertiesMultifield);
+
         $.ajax({
             type: "GET",
             url: "/content/etoolbox-link-inspector/data/config.json"
@@ -92,6 +96,7 @@
             $activatedContentCheckbox.attr("checked", data.activatedContent);
             $skipContentAfterActivationCheckbox.attr("checked", data.skipContentAfterActivation);
             $lastModifiedContentField.val(data.lastModifiedBoundary);
+            populateMultifield(excludedPropertiesMultifield, data.excludedProperties);
         })
 
         function createMultifield(){
@@ -138,7 +143,9 @@
                     "activatedContent@TypeHint": "Boolean",
                     "skipContentAfterActivation":!!$skipContentAfterActivationCheckbox.attr("checked"),
                     "skipContentAfterActivation@TypeHint": "Boolean",
-                    "lastModifiedBoundary": $lastModifiedContentField.val()
+                    "lastModifiedBoundary": $lastModifiedContentField.val(),
+                    "excludedProperties": getMultifieldValues(excludedPropertiesMultifield),
+                    "excludedProperties@TypeHint": "String[]"
                 },
                 dataType: "json",
                 encode: true

@@ -21,6 +21,7 @@ public class UiConfigServiceImpl implements UiConfigService {
     private static final String PN_SKIP_CONTENT_AFTER_ACTIVATION = "skipContentAfterActivation";
     private static final String PN_LAST_MODIFIED = "lastModifiedBoundary";
     private static final String PN_PATH = "path";
+    private static final String PN_EXCLUDED_PROPERTIES = "excludedProperties";
     private static final String DEFAULT_PATH = "/content";
 
     @Reference
@@ -57,6 +58,11 @@ public class UiConfigServiceImpl implements UiConfigService {
                 .filter(StringUtils::isNotBlank)
                 .map(dateString -> ZonedDateTime.parse(dateString, DateTimeFormatter.ISO_DATE_TIME))
                 .orElse(null);
+    }
+
+    @Override
+    public String[] getExcludedProperties() {
+        return getProperty(PN_EXCLUDED_PROPERTIES, String[].class).orElse(new String[0]);
     }
 
     private <T> Optional<T> getProperty(String name, Class<T> clazz){

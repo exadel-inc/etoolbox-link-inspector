@@ -74,55 +74,6 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
     )
     @interface Configuration {
         @AttributeDefinition(
-                name = "Path",
-                description = "The content path for searching broken links. The search path should be located under /content"
-        ) String searchPath() default DEFAULT_SEARCH_PATH;
-
-        @AttributeDefinition(
-                name = "Excluded paths",
-                description = "The list of paths excluded from processing. The specified path and all its children " +
-                        "are excluded. The excluded path should not end with slash. Can be specified as a regex"
-        ) String[] excludedPaths() default {};
-
-        @AttributeDefinition(
-                name = "Activated Content",
-                description = "If checked, links will be retrieved from activated content only"
-        ) boolean checkActivation() default false;
-
-        @AttributeDefinition(
-                name = "Skip content modified after activation",
-                description = "Works in conjunction with the 'Activated Content' checkbox only. If checked, links " +
-                        "will be retrieved from activated content that is not modified after activation " +
-                        "(lastModified is before lastReplicated)"
-        ) boolean skipModifiedAfterActivation() default false;
-
-        @AttributeDefinition(
-                name = "Last Modified",
-                description = "The content modified before the specified date will be excluded. " +
-                        "Tha date should has the ISO-like date-time format, such as '2011-12-03T10:15:30+01:00'"
-        ) String lastModifiedBoundary() default StringUtils.EMPTY;
-
-        @AttributeDefinition(
-                name = "Excluded properties",
-                description = "The list of properties excluded from processing. Each value can be specified as a regex"
-        ) String[] excludedProperties() default {
-                "dam:Comments",
-                "cq:allowedTemplates",
-                "cq:childrenOrder",
-                "cq:designPath",
-                "cq:lastModifiedBy",
-                "cq:lastPublishedBy",
-                "cq:lastReplicatedBy",
-                "cq:lastReplicationAction",
-                "cq:lastReplicationStatus",
-                "cq:lastRolledoutBy",
-                "cq:template",
-                "jcr:createdBy",
-                "sling:resourceType",
-                "sling:resourceSuperType",
-        };
-
-        @AttributeDefinition(
                 name = "Links type",
                 description = "The type of links in the report",
                 options = {
@@ -176,7 +127,6 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
 
     private ExecutorService executorService;
 
-    private String[] excludedProperties;
     private String reportLinksType;
     private String[] excludedLinksPatterns;
     private boolean excludeTags;
@@ -190,7 +140,6 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
     @Activate
     @Modified
     protected void activate(Configuration configuration) {
-        excludedProperties = configuration.excludedProperties();
         reportLinksType = configuration.linksType();
         excludedLinksPatterns = configuration.excludedLinksPatterns();
         excludeTags = configuration.excludeTags();
@@ -385,7 +334,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
     }
 
     private boolean isExcludedProperty(String propertyName) {
-        return isStringMatchAnyPattern(propertyName, excludedProperties);
+        return isStringMatchAnyPattern(propertyName, uiConfigService.getExcludedProperties());
     }
 
     private boolean isExcludedPath(String path) {
@@ -480,7 +429,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
         stats.put(GenerationStatsProps.PN_CHECK_ACTIVATION, uiConfigService.isActivatedContent());
         stats.put(GenerationStatsProps.PN_SKIP_MODIFIED_AFTER_ACTIVATION, uiConfigService.isSkipContentModifiedAfterActivation());
         stats.put(GenerationStatsProps.PN_LAST_MODIFIED_BOUNDARY, dateToIsoDateTimeString(uiConfigService.getLastModified()));
-        stats.put(GenerationStatsProps.PN_EXCLUDED_PROPERTIES, excludedProperties);
+        stats.put(GenerationStatsProps.PN_EXCLUDED_PROPERTIES, uiConfigService.getExcludedProperties());
 
         stats.put(GenerationStatsProps.PN_REPORT_LINKS_TYPE, reportLinksType);
         stats.put(GenerationStatsProps.PN_EXCLUDED_LINK_PATTERNS, getExcludedLinksPatterns());

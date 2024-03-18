@@ -145,6 +145,7 @@ class GridResourcesGeneratorImplTest {
         when(uiConfigService.getSearchPath()).thenReturn(TEST_FOLDER_PATH);
         when(uiConfigService.getExcludedPaths()).thenReturn(new String[]{TEST_EXCLUDED_PATH});
         when(uiConfigService.getLastModified()).thenReturn(TEST_LAST_MODIFIED_BOUNDARY);
+        when(uiConfigService.getExcludedProperties()).thenReturn(new String[]{TEST_EXCLUDED_PROPERTY});
         PrivateAccessor.setField(fixture, UI_CONFIG_FIELD, uiConfigService);
     }
 
@@ -329,9 +330,6 @@ class GridResourcesGeneratorImplTest {
 
         int[] defaultStatusCodes = {HttpStatus.SC_NOT_FOUND};
         when(config.allowedStatusCodes()).thenReturn(defaultStatusCodes);
-
-        when(config.checkActivation()).thenReturn(false);
-
         gridResourcesGenerator.activate(config);
     }
 
@@ -364,21 +362,14 @@ class GridResourcesGeneratorImplTest {
 
         when(config.allowedStatusCodes()).thenReturn(ArrayUtils.EMPTY_INT_ARRAY);
 
-        String[] excludedPaths = {TEST_EXCLUDED_PATH};
-        when(config.excludedPaths()).thenReturn(excludedPaths);
-
         gridResourcesGenerator.activate(config);
     }
 
     private static GridResourcesGeneratorImpl.Configuration mockConfig() {
         GridResourcesGeneratorImpl.Configuration config = mock(GridResourcesGeneratorImpl.Configuration.class);
-        when(config.searchPath()).thenReturn(TEST_FOLDER_PATH);
 
         when(config.linksType()).thenReturn(GenerationStatsProps.REPORT_LINKS_TYPE_ALL);
         when(config.threadsPerCore()).thenReturn(60);
-
-        String[] excludedProps = {TEST_EXCLUDED_PROPERTY};
-        when(config.excludedProperties()).thenReturn(excludedProps);
 
         String[] excludedPatterns = {TEST_EXCLUDED_PATTERN};
         when(config.excludedLinksPatterns()).thenReturn(excludedPatterns);
