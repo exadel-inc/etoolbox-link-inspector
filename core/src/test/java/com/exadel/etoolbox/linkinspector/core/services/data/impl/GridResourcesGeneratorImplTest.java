@@ -141,7 +141,7 @@ class GridResourcesGeneratorImplTest {
         PrivateAccessor.setField(fixture, LINK_HELPER_FIELD, linkHelper);
 
         uiConfigService = mock(UiConfigServiceImpl.class);
-        when(uiConfigService.getExcludedLinksPatterns()).thenReturn(new String[0]);
+        when(uiConfigService.getExcludedLinksPatterns()).thenReturn(new String[]{TEST_EXCLUDED_PATTERN});
         when(uiConfigService.getSearchPath()).thenReturn(TEST_FOLDER_PATH);
         when(uiConfigService.getExcludedPaths()).thenReturn(new String[]{TEST_EXCLUDED_PATH});
         when(uiConfigService.getLastModified()).thenReturn(TEST_LAST_MODIFIED_BOUNDARY);
@@ -167,7 +167,7 @@ class GridResourcesGeneratorImplTest {
         setUpConfig(fixture);
         context.load().json(TEST_RESOURCES_TREE_PATH, TEST_FOLDER_PATH);
         when(externalLinkChecker.checkLink(anyString())).thenReturn(HttpStatus.SC_NOT_FOUND);
-        when(uiConfigService.getExcludedLinksPatterns()).thenReturn(new String[]{TEST_UI_EXCLUDED_PATTERN});
+        when(uiConfigService.getExcludedLinksPatterns()).thenReturn(new String[]{TEST_UI_EXCLUDED_PATTERN, TEST_EXCLUDED_PATTERN});
 
         List<GridResource> gridResources = fixture.generateGridResources(GRID_RESOURCE_TYPE, context.resourceResolver());
         Pattern pattern = Pattern.compile(TEST_UI_EXCLUDED_PATTERN);
@@ -370,10 +370,6 @@ class GridResourcesGeneratorImplTest {
         GridResourcesGeneratorImpl.Configuration config = mock(GridResourcesGeneratorImpl.Configuration.class);
 
         when(config.threadsPerCore()).thenReturn(60);
-
-        String[] excludedPatterns = {TEST_EXCLUDED_PATTERN};
-        when(config.excludedLinksPatterns()).thenReturn(excludedPatterns);
-
         when(config.excludeTags()).thenReturn(true);
 
         return config;

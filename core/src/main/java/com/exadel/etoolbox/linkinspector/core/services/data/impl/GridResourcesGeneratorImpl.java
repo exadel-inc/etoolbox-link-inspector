@@ -43,7 +43,6 @@ import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
-import org.osgi.service.metatype.annotations.Option;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,12 +72,6 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
             description = "Finds broken links under the specified path for further outputting them in a report"
     )
     @interface Configuration {
-
-        @AttributeDefinition(
-                name = "Excluded links patterns",
-                description = "Links are excluded from processing if match any of the specified regex patterns"
-        ) String[] excludedLinksPatterns() default {};
-
         @AttributeDefinition(
                 name = "Exclude tags",
                 description = "If checked, the internal links starting with /content/cq:tags will be excluded"
@@ -114,7 +107,6 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
 
     private ExecutorService executorService;
 
-    private String[] excludedLinksPatterns;
     private boolean excludeTags;
     private int[] allowedStatusCodes;
     private int threadsPerCore;
@@ -126,7 +118,6 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
     @Activate
     @Modified
     protected void activate(Configuration configuration) {
-        excludedLinksPatterns = configuration.excludedLinksPatterns();
         excludeTags = configuration.excludeTags();
         allowedStatusCodes = configuration.allowedStatusCodes();
         threadsPerCore = configuration.threadsPerCore();
@@ -437,10 +428,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
     }
 
     public String[] getExcludedLinksPatterns() {
-        List<String> patterns = new ArrayList<>(Arrays.asList(excludedLinksPatterns));
-        String[] uiPatterns = uiConfigService.getExcludedLinksPatterns();
-        patterns.addAll(Arrays.asList(uiPatterns));
-        patterns = patterns.stream().filter(p->{
+        return Arrays.stream(uiConfigService.getExcludedLinksPatterns()).filter(p -> {
             try {
                 Pattern.compile(p);
             } catch (PatternSyntaxException exception) {
@@ -448,8 +436,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
                 return false;
             }
             return true;
-        }).collect(Collectors.toList());
-        return patterns.toArray(new String[excludedLinksPatterns.length + uiPatterns.length]);
+        }).toArray(String[]::new);
     }
 
     @Deactivate
