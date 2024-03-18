@@ -86,6 +86,33 @@
         $('<p>').text("Excluded Properties(The list of properties excluded from processing. Each value can be specified as a regex)").appendTo(dialog.content);
         dialog.content.appendChild(excludedPropertiesMultifield);
 
+        const linksTypeSelect = new Coral.Select().set({
+            placeholder: "Choose an item"
+        });
+        linksTypeSelect.items.add({
+            content:{
+                innerHTML: "Internal + External"
+            },
+            value: "Internal + External",
+            disabled: false
+        });
+        linksTypeSelect.items.add({
+            content:{
+                innerHTML: "Internal"
+            },
+            value: "INTERNAL",
+            disabled: false
+        });
+        linksTypeSelect.items.add({
+            content:{
+                innerHTML: "External"
+            },
+            value: "EXTERNAL",
+            disabled: false
+        });
+        $('<p>').text("Links type(The type of links in the report)").appendTo(dialog.content);
+        dialog.content.appendChild(linksTypeSelect);
+
         $.ajax({
             type: "GET",
             url: "/content/etoolbox-link-inspector/data/config.json"
@@ -97,6 +124,7 @@
             $skipContentAfterActivationCheckbox.attr("checked", data.skipContentAfterActivation);
             $lastModifiedContentField.val(data.lastModifiedBoundary);
             populateMultifield(excludedPropertiesMultifield, data.excludedProperties);
+            linksTypeSelect.value = data.linksType;
         })
 
         function createMultifield(){
@@ -145,7 +173,8 @@
                     "skipContentAfterActivation@TypeHint": "Boolean",
                     "lastModifiedBoundary": $lastModifiedContentField.val(),
                     "excludedProperties": getMultifieldValues(excludedPropertiesMultifield),
-                    "excludedProperties@TypeHint": "String[]"
+                    "excludedProperties@TypeHint": "String[]",
+                    "linksType": linksTypeSelect.value
                 },
                 dataType: "json",
                 encode: true

@@ -146,6 +146,7 @@ class GridResourcesGeneratorImplTest {
         when(uiConfigService.getExcludedPaths()).thenReturn(new String[]{TEST_EXCLUDED_PATH});
         when(uiConfigService.getLastModified()).thenReturn(TEST_LAST_MODIFIED_BOUNDARY);
         when(uiConfigService.getExcludedProperties()).thenReturn(new String[]{TEST_EXCLUDED_PROPERTY});
+        when(uiConfigService.getLinksType()).thenReturn(GenerationStatsProps.REPORT_LINKS_TYPE_ALL);
         PrivateAccessor.setField(fixture, UI_CONFIG_FIELD, uiConfigService);
     }
 
@@ -368,7 +369,6 @@ class GridResourcesGeneratorImplTest {
     private static GridResourcesGeneratorImpl.Configuration mockConfig() {
         GridResourcesGeneratorImpl.Configuration config = mock(GridResourcesGeneratorImpl.Configuration.class);
 
-        when(config.linksType()).thenReturn(GenerationStatsProps.REPORT_LINKS_TYPE_ALL);
         when(config.threadsPerCore()).thenReturn(60);
 
         String[] excludedPatterns = {TEST_EXCLUDED_PATTERN};

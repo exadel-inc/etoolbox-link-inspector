@@ -1,5 +1,6 @@
 package com.exadel.etoolbox.linkinspector.core.services.data.impl;
 
+import com.exadel.etoolbox.linkinspector.core.services.data.GenerationStatsProps;
 import com.exadel.etoolbox.linkinspector.core.services.data.UiConfigService;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.RepositoryHelper;
 import org.apache.commons.lang3.StringUtils;
@@ -22,6 +23,7 @@ public class UiConfigServiceImpl implements UiConfigService {
     private static final String PN_LAST_MODIFIED = "lastModifiedBoundary";
     private static final String PN_PATH = "path";
     private static final String PN_EXCLUDED_PROPERTIES = "excludedProperties";
+    private static final String PN_LINKS_TYPE = "linksType";
     private static final String DEFAULT_PATH = "/content";
 
     @Reference
@@ -63,6 +65,11 @@ public class UiConfigServiceImpl implements UiConfigService {
     @Override
     public String[] getExcludedProperties() {
         return getProperty(PN_EXCLUDED_PROPERTIES, String[].class).orElse(new String[0]);
+    }
+
+    @Override
+    public String getLinksType() {
+        return getProperty(PN_LINKS_TYPE, String.class).orElse(GenerationStatsProps.REPORT_LINKS_TYPE_ALL);
     }
 
     private <T> Optional<T> getProperty(String name, Class<T> clazz){

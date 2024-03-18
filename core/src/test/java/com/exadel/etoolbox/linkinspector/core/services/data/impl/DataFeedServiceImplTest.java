@@ -15,6 +15,7 @@
 package com.exadel.etoolbox.linkinspector.core.services.data.impl;
 
 import com.exadel.etoolbox.linkinspector.core.services.ExternalLinkChecker;
+import com.exadel.etoolbox.linkinspector.core.services.data.GenerationStatsProps;
 import com.exadel.etoolbox.linkinspector.core.services.data.UiConfigService;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.LinkHelper;
 import com.exadel.etoolbox.linkinspector.core.services.util.CsvUtil;
@@ -186,6 +187,7 @@ class DataFeedServiceImplTest {
         when(uiConfigService.getSearchPath()).thenReturn(TEST_FOLDER_PATH);
         when(uiConfigService.getExcludedPaths()).thenReturn(new String[0]);
         when(uiConfigService.getExcludedProperties()).thenReturn(new String[0]);
+        when(uiConfigService.getLinksType()).thenReturn(GenerationStatsProps.REPORT_LINKS_TYPE_ALL);
         PrivateAccessor.setField(gridResourcesGenerator, UI_CONFIG_FIELD, uiConfigService);
         GridResourcesGeneratorImplTest.setUpConfig(gridResourcesGenerator);
 

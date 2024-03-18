@@ -73,19 +73,6 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
             description = "Finds broken links under the specified path for further outputting them in a report"
     )
     @interface Configuration {
-        @AttributeDefinition(
-                name = "Links type",
-                description = "The type of links in the report",
-                options = {
-                        @Option(label = "Internal", value = "INTERNAL"),
-                        @Option(label = "External", value = "EXTERNAL"),
-                        @Option(
-                                label = GenerationStatsProps.REPORT_LINKS_TYPE_ALL,
-                                value = GenerationStatsProps.REPORT_LINKS_TYPE_ALL
-                        ),
-                }
-        )
-        String linksType() default GenerationStatsProps.REPORT_LINKS_TYPE_ALL;
 
         @AttributeDefinition(
                 name = "Excluded links patterns",
@@ -127,7 +114,6 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
 
     private ExecutorService executorService;
 
-    private String reportLinksType;
     private String[] excludedLinksPatterns;
     private boolean excludeTags;
     private int[] allowedStatusCodes;
@@ -140,7 +126,6 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
     @Activate
     @Modified
     protected void activate(Configuration configuration) {
-        reportLinksType = configuration.linksType();
         excludedLinksPatterns = configuration.excludedLinksPatterns();
         excludeTags = configuration.excludeTags();
         allowedStatusCodes = configuration.allowedStatusCodes();
@@ -316,6 +301,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
     }
 
     private boolean isAllowedLinkType(Link link) {
+        String reportLinksType = uiConfigService.getLinksType();
         return GenerationStatsProps.REPORT_LINKS_TYPE_ALL.equals(reportLinksType) ||
                 Link.Type.valueOf(reportLinksType) == link.getType();
     }
@@ -431,7 +417,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
         stats.put(GenerationStatsProps.PN_LAST_MODIFIED_BOUNDARY, dateToIsoDateTimeString(uiConfigService.getLastModified()));
         stats.put(GenerationStatsProps.PN_EXCLUDED_PROPERTIES, uiConfigService.getExcludedProperties());
 
-        stats.put(GenerationStatsProps.PN_REPORT_LINKS_TYPE, reportLinksType);
+        stats.put(GenerationStatsProps.PN_REPORT_LINKS_TYPE, uiConfigService.getLinksType());
         stats.put(GenerationStatsProps.PN_EXCLUDED_LINK_PATTERNS, getExcludedLinksPatterns());
         stats.put(GenerationStatsProps.PN_EXCLUDED_TAGS, excludeTags);
         stats.put(GenerationStatsProps.PN_ALLOWED_STATUS_CODES, allowedStatusCodes);
