@@ -45,6 +45,8 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -80,7 +82,7 @@ class GridResourcesGeneratorImplTest {
     private static final String TEST_RESOURCES_TREE_PATH = "/com/exadel/etoolbox/linkinspector/core/services/data/impl/resources.json";
     private static final String TEST_FOLDER_PATH = "/content/test-folder";
     private static final String TEST_EXCLUDED_PROPERTY = "excluded_prop";
-    private static final String TEST_LAST_MODIFIED_BOUNDARY = "2021-04-05T05:00:00Z";
+    private static final ZonedDateTime TEST_LAST_MODIFIED_BOUNDARY = ZonedDateTime.parse("2021-04-05T05:00:00Z", DateTimeFormatter.ISO_DATE_TIME);
     private static final String TEST_EXCLUDED_PATTERN = "/content(.*)/test-exclude-pattern(.*)";
     private static final String TEST_UI_EXCLUDED_PATTERN = "/content(.*)/test-link-internal-1$";
     private static final String TEST_EXCLUDED_PATH = "/content/test-folder/excluded_by_path";
@@ -142,6 +144,7 @@ class GridResourcesGeneratorImplTest {
         when(uiConfigService.getExcludedLinksPatterns()).thenReturn(new String[0]);
         when(uiConfigService.getSearchPath()).thenReturn(TEST_FOLDER_PATH);
         when(uiConfigService.getExcludedPaths()).thenReturn(new String[]{TEST_EXCLUDED_PATH});
+        when(uiConfigService.getLastModified()).thenReturn(TEST_LAST_MODIFIED_BOUNDARY);
         PrivateAccessor.setField(fixture, UI_CONFIG_FIELD, uiConfigService);
     }
 
@@ -376,8 +379,6 @@ class GridResourcesGeneratorImplTest {
 
         String[] excludedProps = {TEST_EXCLUDED_PROPERTY};
         when(config.excludedProperties()).thenReturn(excludedProps);
-
-        when(config.lastModifiedBoundary()).thenReturn(TEST_LAST_MODIFIED_BOUNDARY);
 
         String[] excludedPatterns = {TEST_EXCLUDED_PATTERN};
         when(config.excludedLinksPatterns()).thenReturn(excludedPatterns);

@@ -176,7 +176,6 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
 
     private ExecutorService executorService;
 
-    private ZonedDateTime lastModifiedBoundary;
     private String[] excludedProperties;
     private String reportLinksType;
     private String[] excludedLinksPatterns;
@@ -191,10 +190,6 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
     @Activate
     @Modified
     protected void activate(Configuration configuration) {
-        lastModifiedBoundary = Optional.of(configuration.lastModifiedBoundary())
-                .filter(StringUtils::isNotBlank)
-                .map(dateString -> ZonedDateTime.parse(dateString, DateTimeFormatter.ISO_DATE_TIME))
-                .orElse(null);
         excludedProperties = configuration.excludedProperties();
         reportLinksType = configuration.linksType();
         excludedLinksPatterns = configuration.excludedLinksPatterns();
@@ -362,6 +357,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
     }
 
     private boolean isAllowedLastModifiedDate(Resource resource) {
+        ZonedDateTime lastModifiedBoundary = uiConfigService.getLastModified();
         if (lastModifiedBoundary == null) {
             return true;
         }
@@ -483,7 +479,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
         stats.put(GenerationStatsProps.PN_EXCLUDED_PATHS, uiConfigService.getExcludedPaths());
         stats.put(GenerationStatsProps.PN_CHECK_ACTIVATION, uiConfigService.isActivatedContent());
         stats.put(GenerationStatsProps.PN_SKIP_MODIFIED_AFTER_ACTIVATION, uiConfigService.isSkipContentModifiedAfterActivation());
-        stats.put(GenerationStatsProps.PN_LAST_MODIFIED_BOUNDARY, dateToIsoDateTimeString(lastModifiedBoundary));
+        stats.put(GenerationStatsProps.PN_LAST_MODIFIED_BOUNDARY, dateToIsoDateTimeString(uiConfigService.getLastModified()));
         stats.put(GenerationStatsProps.PN_EXCLUDED_PROPERTIES, excludedProperties);
 
         stats.put(GenerationStatsProps.PN_REPORT_LINKS_TYPE, reportLinksType);

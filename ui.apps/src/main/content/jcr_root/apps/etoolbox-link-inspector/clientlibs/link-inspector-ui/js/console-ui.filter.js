@@ -78,6 +78,10 @@
         const $skipContentAfterActivationCheckbox = $('<coral-checkbox value="skipContentAfterActivation">Skip content modified after activation(Works in conjunction with the \'Activated Content\' checkbox only. If checked, links will be retrieved from activated content that is not modified after activation (lastModified is before lastReplicated))</coral-checkbox>');
         $skipContentAfterActivationCheckbox.appendTo(dialog.content);
 
+        const $lastModifiedContentField = $('<input is="coral-textfield" class="elc-replacement-input" name="lastMidified" value="" required>');
+        $('<p>').text("Last Modified (The content modified before the specified date will be excluded. Tha date should has the ISO-like date-time format, such as '2011-12-03T10:15:30+01:00')").appendTo(dialog.content);
+        $lastModifiedContentField.appendTo(dialog.content);
+
         $.ajax({
             type: "GET",
             url: "/content/etoolbox-link-inspector/data/config.json"
@@ -87,6 +91,7 @@
             populateMultifield(excludedPathsMultifield, data.excludedPaths);
             $activatedContentCheckbox.attr("checked", data.activatedContent);
             $skipContentAfterActivationCheckbox.attr("checked", data.skipContentAfterActivation);
+            $lastModifiedContentField.val(data.lastModifiedBoundary);
         })
 
         function createMultifield(){
@@ -132,7 +137,8 @@
                     "activatedContent":!!$activatedContentCheckbox.attr("checked"),
                     "activatedContent@TypeHint": "Boolean",
                     "skipContentAfterActivation":!!$skipContentAfterActivationCheckbox.attr("checked"),
-                    "skipContentAfterActivation@TypeHint": "Boolean"
+                    "skipContentAfterActivation@TypeHint": "Boolean",
+                    "lastModifiedBoundary": $lastModifiedContentField.val()
                 },
                 dataType: "json",
                 encode: true

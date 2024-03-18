@@ -2,11 +2,14 @@ package com.exadel.etoolbox.linkinspector.core.services.data.impl;
 
 import com.exadel.etoolbox.linkinspector.core.services.data.UiConfigService;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.RepositoryHelper;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
 @Component(service = UiConfigService.class)
@@ -16,6 +19,7 @@ public class UiConfigServiceImpl implements UiConfigService {
     private static final String PN_EXCLUDED_PATHS = "excludedPaths";
     private static final String PN_ACTIVATED_CONTENT = "activatedContent";
     private static final String PN_SKIP_CONTENT_AFTER_ACTIVATION = "skipContentAfterActivation";
+    private static final String PN_LAST_MODIFIED = "lastModifiedBoundary";
     private static final String PN_PATH = "path";
     private static final String DEFAULT_PATH = "/content";
 
@@ -45,6 +49,14 @@ public class UiConfigServiceImpl implements UiConfigService {
     @Override
     public boolean isSkipContentModifiedAfterActivation() {
         return getProperty(PN_SKIP_CONTENT_AFTER_ACTIVATION, Boolean.class).orElse(false);
+    }
+
+    @Override
+    public ZonedDateTime getLastModified() {
+        return getProperty(PN_LAST_MODIFIED, String.class)
+                .filter(StringUtils::isNotBlank)
+                .map(dateString -> ZonedDateTime.parse(dateString, DateTimeFormatter.ISO_DATE_TIME))
+                .orElse(null);
     }
 
     private <T> Optional<T> getProperty(String name, Class<T> clazz){
