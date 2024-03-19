@@ -26,6 +26,9 @@ public class UiConfigServiceImpl implements UiConfigService {
     private static final String PN_LINKS_TYPE = "linksType";
     private static final String PN_EXCLUDE_TAGS = "excludeTags";
     private static final String PN_STATUS_CODES = "statusCodes";
+    private static final String PN_THREADS_PER_CORE = "threadsPerCore";
+    private static final int DEFAULT_THREADS_PER_CORE = 60;
+
     private static final String DEFAULT_PATH = "/content";
 
     @Reference
@@ -82,6 +85,11 @@ public class UiConfigServiceImpl implements UiConfigService {
     @Override
     public Integer[] getStatusCodes() {
         return getProperty(PN_STATUS_CODES, Integer[].class).orElse(new Integer[]{});
+    }
+
+    @Override
+    public Integer getThreadsPerCore() {
+        return getProperty(PN_THREADS_PER_CORE, Integer.class).orElse(DEFAULT_THREADS_PER_CORE);
     }
 
     private <T> Optional<T> getProperty(String name, Class<T> clazz){

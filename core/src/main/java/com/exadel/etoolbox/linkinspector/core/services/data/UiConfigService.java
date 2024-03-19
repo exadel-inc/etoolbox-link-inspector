@@ -13,4 +13,5 @@ public interface UiConfigService {
     String getLinksType();
     boolean isExcludeTags();
     Integer[] getStatusCodes();
+    Integer getThreadsPerCore();
 }

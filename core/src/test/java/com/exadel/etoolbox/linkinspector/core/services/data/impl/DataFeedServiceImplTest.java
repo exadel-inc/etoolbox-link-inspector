@@ -189,8 +189,8 @@ class DataFeedServiceImplTest {
         when(uiConfigService.getExcludedProperties()).thenReturn(new String[0]);
         when(uiConfigService.getLinksType()).thenReturn(GenerationStatsProps.REPORT_LINKS_TYPE_ALL);
         when(uiConfigService.getStatusCodes()).thenReturn(new Integer[]{HttpStatus.SC_NOT_FOUND});
+        when(uiConfigService.getThreadsPerCore()).thenReturn(60);
         PrivateAccessor.setField(gridResourcesGenerator, UI_CONFIG_FIELD, uiConfigService);
-        GridResourcesGeneratorImplTest.setUpConfig(gridResourcesGenerator);
 
         when(externalLinkChecker.checkLink(anyString())).thenReturn(HttpStatus.SC_NOT_FOUND);
 

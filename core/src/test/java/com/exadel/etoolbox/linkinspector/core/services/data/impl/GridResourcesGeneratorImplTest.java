@@ -149,12 +149,12 @@ class GridResourcesGeneratorImplTest {
         when(uiConfigService.getLinksType()).thenReturn(GenerationStatsProps.REPORT_LINKS_TYPE_ALL);
         when(uiConfigService.isExcludeTags()).thenReturn(true);
         when(uiConfigService.getStatusCodes()).thenReturn(new Integer[]{HttpStatus.SC_NOT_FOUND});
+        when(uiConfigService.getThreadsPerCore()).thenReturn(60);
         PrivateAccessor.setField(fixture, UI_CONFIG_FIELD, uiConfigService);
     }
 
     @Test
     void testGenerateGridResources() throws NoSuchFieldException, IOException, URISyntaxException {
-        setUpConfig(fixture);
         context.load().json(TEST_RESOURCES_TREE_PATH, TEST_FOLDER_PATH);
         when(externalLinkChecker.checkLink(anyString())).thenReturn(HttpStatus.SC_NOT_FOUND);
 
@@ -166,7 +166,6 @@ class GridResourcesGeneratorImplTest {
 
     @Test
     void testGenerateFilteredGridResources() throws NoSuchFieldException, IOException, URISyntaxException {
-        setUpConfig(fixture);
         context.load().json(TEST_RESOURCES_TREE_PATH, TEST_FOLDER_PATH);
         when(externalLinkChecker.checkLink(anyString())).thenReturn(HttpStatus.SC_NOT_FOUND);
         when(uiConfigService.getExcludedLinksPatterns()).thenReturn(new String[]{TEST_UI_EXCLUDED_PATTERN, TEST_EXCLUDED_PATTERN});
@@ -185,7 +184,6 @@ class GridResourcesGeneratorImplTest {
 
     @Test
     void testAllowedStatusCodes() throws IOException, URISyntaxException {
-        setUpConfig(fixture);
         context.load().json(TEST_RESOURCES_TREE_PATH, TEST_FOLDER_PATH);
         when(externalLinkChecker.checkLink(anyString())).thenReturn(HttpStatus.SC_BAD_REQUEST);
 
@@ -200,7 +198,7 @@ class GridResourcesGeneratorImplTest {
 
     @Test
     void testAllowedStatusCodes_emptyConfig() throws IOException, URISyntaxException, NoSuchFieldException {
-        setUpConfigNoStatusCodes(fixture);
+        when(uiConfigService.getStatusCodes()).thenReturn(new Integer[]{});
 
         context.load().json(TEST_RESOURCES_TREE_PATH, TEST_FOLDER_PATH);
         when(externalLinkChecker.checkLink(anyString())).thenReturn(HttpStatus.SC_BAD_REQUEST);
@@ -213,7 +211,6 @@ class GridResourcesGeneratorImplTest {
 
     @Test
     void testExcludedPaths() throws IOException, URISyntaxException {
-        setUpConfig(fixture);
         context.load().json(TEST_RESOURCES_TREE_PATH, TEST_FOLDER_PATH);
         when(externalLinkChecker.checkLink(anyString())).thenReturn(HttpStatus.SC_BAD_REQUEST);
 
@@ -229,7 +226,6 @@ class GridResourcesGeneratorImplTest {
 
     @Test
     void testLastModified() {
-        setUpConfig(fixture);
         context.load().json(TEST_RESOURCES_TREE_PATH, TEST_FOLDER_PATH);
 
         List<GridResource> gridResources = fixture.generateGridResources(GRID_RESOURCE_TYPE, context.resourceResolver());
@@ -242,7 +238,7 @@ class GridResourcesGeneratorImplTest {
 
     @Test
     void testExcludedPaths_emptyConfig() throws IOException, URISyntaxException {
-        setUpConfigNoExcludedPaths(fixture);
+        when(uiConfigService.getExcludedPaths()).thenReturn(ArrayUtils.EMPTY_STRING_ARRAY);
         context.load().json(TEST_RESOURCES_TREE_PATH, TEST_FOLDER_PATH);
         when(externalLinkChecker.checkLink(anyString())).thenReturn(HttpStatus.SC_BAD_REQUEST);
 
@@ -260,7 +256,9 @@ class GridResourcesGeneratorImplTest {
 
     @Test
     void testActivationCheck() throws ParseException {
-        setUpConfigCheckActivation(fixture);
+        when(uiConfigService.getExcludedPaths()).thenReturn(new String[]{TEST_EXCLUDED_PATH});
+        when(uiConfigService.isActivatedContent()).thenReturn(true);
+        when(uiConfigService.isSkipContentModifiedAfterActivation()).thenReturn(true);
         context.load().json(TEST_REPLICATED_RESOURCES_TREE_PATH, TEST_FOLDER_PATH);
 
         Resource rootResource = context.resourceResolver().getResource(TEST_FOLDER_PATH);
@@ -286,14 +284,12 @@ class GridResourcesGeneratorImplTest {
 
     @Test
     void testGenerateGridResources_rootResourceNull() {
-        setUpConfig(fixture);
         List<GridResource> gridResources = fixture.generateGridResources(GRID_RESOURCE_TYPE, context.resourceResolver());
         assertTrue(gridResources.isEmpty());
     }
 
     @Test
     void testGenerateGridResources_nothingFoundAfterTraversing() {
-        setUpConfig(fixture);
         context.create().resource(TEST_FOLDER_PATH,
                 JcrResourceConstants.SLING_RESOURCE_TYPE_PROPERTY, JcrResourceConstants.NT_SLING_FOLDER);
 
@@ -313,7 +309,6 @@ class GridResourcesGeneratorImplTest {
 
     @Test
     void testGenerateGridResources_interruptionException() throws InterruptedException {
-        setUpConfig(fixture);
         context.load().json(TEST_RESOURCES_TREE_PATH, TEST_FOLDER_PATH);
 
         try (MockedStatic<Executors> executors = mockStatic(Executors.class)) {
@@ -326,37 +321,6 @@ class GridResourcesGeneratorImplTest {
 
             verify(executorService).shutdownNow();
         }
-    }
-
-    static void setUpConfig(GridResourcesGeneratorImpl gridResourcesGenerator) {
-        GridResourcesGeneratorImpl.Configuration config = mockConfig();
-        gridResourcesGenerator.activate(config);
-    }
-
-    private void setUpConfigNoExcludedPaths(GridResourcesGeneratorImpl gridResourcesGenerator) {
-        GridResourcesGeneratorImpl.Configuration config = mockConfig();
-        when(uiConfigService.getExcludedPaths()).thenReturn(ArrayUtils.EMPTY_STRING_ARRAY);
-        gridResourcesGenerator.activate(config);
-    }
-
-    private void setUpConfigCheckActivation(GridResourcesGeneratorImpl gridResourcesGenerator) {
-        GridResourcesGeneratorImpl.Configuration config = mockConfig();
-        when(uiConfigService.getExcludedPaths()).thenReturn(new String[]{TEST_EXCLUDED_PATH});
-        when(uiConfigService.isActivatedContent()).thenReturn(true);
-        when(uiConfigService.isSkipContentModifiedAfterActivation()).thenReturn(true);
-        gridResourcesGenerator.activate(config);
-    }
-
-    private void setUpConfigNoStatusCodes(GridResourcesGeneratorImpl gridResourcesGenerator) {
-        GridResourcesGeneratorImpl.Configuration config = mockConfig();
-        when(uiConfigService.getStatusCodes()).thenReturn(new Integer[]{});
-        gridResourcesGenerator.activate(config);
-    }
-
-    private static GridResourcesGeneratorImpl.Configuration mockConfig() {
-        GridResourcesGeneratorImpl.Configuration config = mock(GridResourcesGeneratorImpl.Configuration.class);
-        when(config.threadsPerCore()).thenReturn(60);
-        return config;
     }
 
     private List<GridResource> buildExpectedGridResources() throws NoSuchFieldException {

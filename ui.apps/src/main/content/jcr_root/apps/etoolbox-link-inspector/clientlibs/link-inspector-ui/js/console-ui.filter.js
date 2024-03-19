@@ -60,11 +60,7 @@
         $cancelBtn.appendTo(dialog.footer);
         $updateBtn.appendTo(dialog.footer);
 
-        const filterMultifield = createMultifield();
-        $('<p>').text("Filter").appendTo(dialog.content);
-        dialog.content.appendChild(filterMultifield);
-
-        const $rootPathField = $('<input is="coral-textfield" class="elc-replacement-input" name="replacement" value="" required>');
+        const $rootPathField = $('<input is="coral-textfield" class="elc-replacement-input" name="replacement" value="">');
         $('<p>').text("Path(The content path for searching broken links. The search path should be located under /content)").appendTo(dialog.content);
         $rootPathField.appendTo(dialog.content);
 
@@ -78,7 +74,11 @@
         const $skipContentAfterActivationCheckbox = $('<coral-checkbox value="skipContentAfterActivation">Skip content modified after activation(Works in conjunction with the \'Activated Content\' checkbox only. If checked, links will be retrieved from activated content that is not modified after activation (lastModified is before lastReplicated))</coral-checkbox>');
         $skipContentAfterActivationCheckbox.appendTo(dialog.content);
 
-        const $lastModifiedContentField = $('<input is="coral-textfield" class="elc-replacement-input" name="lastMidified" value="" required>');
+        const filterMultifield = createMultifield();
+        $('<p>').text("Excluded links patterns(Links are excluded from processing if match any of the specified regex patterns)").appendTo(dialog.content);
+        dialog.content.appendChild(filterMultifield);
+
+        const $lastModifiedContentField = $('<input is="coral-textfield" class="elc-replacement-input" name="lastMidified" value="">');
         $('<p>').text("Last Modified (The content modified before the specified date will be excluded. Tha date should has the ISO-like date-time format, such as '2011-12-03T10:15:30+01:00')").appendTo(dialog.content);
         $lastModifiedContentField.appendTo(dialog.content);
 
@@ -120,6 +120,10 @@
         $('<p>').text("Status codes (The list of status codes allowed for broken links in the report. Set a single negative value to allow all http error codes)").appendTo(dialog.content);
         dialog.content.appendChild(statusCodesMultifield);
 
+        const $threadsPerCoreField = $('<input is="coral-textfield" class="elc-replacement-input" name="threadsPerCore" value="">');
+        $('<p>').text("Threads per core (The number of threads created per each CPU core for validating links in parallel)").appendTo(dialog.content);
+        $threadsPerCoreField.appendTo(dialog.content);
+
         $.ajax({
             type: "GET",
             url: "/content/etoolbox-link-inspector/data/config.json"
@@ -134,6 +138,7 @@
             linksTypeSelect.value = data.linksType;
             $excludeTagsCheckbox.attr("checked", data.excludeTags);
             populateMultifield(statusCodesMultifield, data.statusCodes);
+            $threadsPerCoreField.val(data.threadsPerCore);
         })
 
         function createMultifield(){
@@ -188,6 +193,7 @@
                     "excludeTags@TypeHint": "Boolean",
                     "statusCodes": getMultifieldValues(statusCodesMultifield),
                     "statusCodes@TypeHint": "String[]",
+                    "threadsPerCore": $threadsPerCoreField.val()
                 },
                 dataType: "json",
                 encode: true

@@ -26,7 +26,6 @@ import com.exadel.etoolbox.linkinspector.core.services.helpers.LinkHelper;
 import com.exadel.etoolbox.linkinspector.core.services.data.models.GridResource;
 import com.exadel.etoolbox.linkinspector.core.services.util.LinkInspectorResourceUtil;
 import com.exadel.etoolbox.linkinspector.core.services.util.LinksCounter;
-import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.StopWatch;
@@ -35,14 +34,9 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceUtil;
 import org.apache.sling.jcr.resource.api.JcrResourceConstants;
-import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
-import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.metatype.annotations.AttributeDefinition;
-import org.osgi.service.metatype.annotations.Designate;
-import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,23 +59,8 @@ import java.util.stream.Stream;
  * generation and further adaptation the data feed to the models for building the UI grid
  */
 @Component(service = GridResourcesGenerator.class)
-@Designate(ocd = GridResourcesGeneratorImpl.Configuration.class)
 public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
-    @ObjectClassDefinition(
-            name = "EToolbox Link Inspector - Grid Resources Generator",
-            description = "Finds broken links under the specified path for further outputting them in a report"
-    )
-    @interface Configuration {
-        @AttributeDefinition(
-                name = "Threads per core",
-                description = "The number of threads created per each CPU core for validating links in parallel"
-        ) int threadsPerCore() default DEFAULT_THREADS_PER_CORE;
-    }
-
     private static final Logger LOG = LoggerFactory.getLogger(GridResourcesGeneratorImpl.class);
-
-    private static final String DEFAULT_SEARCH_PATH = "/content";
-    private static final int DEFAULT_THREADS_PER_CORE = 60;
 
     private static final String TAGS_LOCATION = "/content/cq:tags";
     private static final String STATS_RESOURCE_PATH = "/content/etoolbox-link-inspector/data/stats";
@@ -92,18 +71,6 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
     private UiConfigService uiConfigService;
 
     private ExecutorService executorService;
-
-    private int threadsPerCore;
-
-    /**
-     * Inits fields based on the service configuration
-     * @param configuration - the service configuration
-     */
-    @Activate
-    @Modified
-    protected void activate(Configuration configuration) {
-        threadsPerCore = configuration.threadsPerCore();
-    }
 
     /**
      * {@inheritDoc}
@@ -202,7 +169,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
         Set<GridResource> allBrokenLinkResources = new CopyOnWriteArraySet<>();
         try {
             executorService =
-                    Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() * threadsPerCore);
+                    Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() * uiConfigService.getThreadsPerCore());
             linkToGridResourcesMap.forEach((link, resources) ->
                     submitLinkForValidation(
                             link,
