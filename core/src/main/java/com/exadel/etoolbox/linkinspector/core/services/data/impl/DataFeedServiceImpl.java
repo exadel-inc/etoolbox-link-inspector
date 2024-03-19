@@ -129,7 +129,7 @@ public class DataFeedServiceImpl implements DataFeedService {
                             .findFirst();
                     if (optionalLink.isPresent()) {
                         Link link = optionalLink.get();
-                        link.setStatus(new LinkStatus(HttpStatus.SC_OK, "Modified"));
+                        link.setStatus(new LinkStatus(HttpStatus.SC_OK, "Link Modified"));
                         resource.setLink(link);
                     }
                 }
