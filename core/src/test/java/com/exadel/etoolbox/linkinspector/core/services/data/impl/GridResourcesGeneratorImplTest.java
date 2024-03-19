@@ -148,6 +148,7 @@ class GridResourcesGeneratorImplTest {
         when(uiConfigService.getExcludedProperties()).thenReturn(new String[]{TEST_EXCLUDED_PROPERTY});
         when(uiConfigService.getLinksType()).thenReturn(GenerationStatsProps.REPORT_LINKS_TYPE_ALL);
         when(uiConfigService.isExcludeTags()).thenReturn(true);
+        when(uiConfigService.getStatusCodes()).thenReturn(new Integer[]{HttpStatus.SC_NOT_FOUND});
         PrivateAccessor.setField(fixture, UI_CONFIG_FIELD, uiConfigService);
     }
 
@@ -329,49 +330,32 @@ class GridResourcesGeneratorImplTest {
 
     static void setUpConfig(GridResourcesGeneratorImpl gridResourcesGenerator) {
         GridResourcesGeneratorImpl.Configuration config = mockConfig();
-
-        int[] defaultStatusCodes = {HttpStatus.SC_NOT_FOUND};
-        when(config.allowedStatusCodes()).thenReturn(defaultStatusCodes);
         gridResourcesGenerator.activate(config);
     }
 
     private void setUpConfigNoExcludedPaths(GridResourcesGeneratorImpl gridResourcesGenerator) {
         GridResourcesGeneratorImpl.Configuration config = mockConfig();
-
         when(uiConfigService.getExcludedPaths()).thenReturn(ArrayUtils.EMPTY_STRING_ARRAY);
-
-        int[] defaultStatusCodes = {HttpStatus.SC_NOT_FOUND};
-        when(config.allowedStatusCodes()).thenReturn(defaultStatusCodes);
-
         gridResourcesGenerator.activate(config);
     }
 
     private void setUpConfigCheckActivation(GridResourcesGeneratorImpl gridResourcesGenerator) {
         GridResourcesGeneratorImpl.Configuration config = mockConfig();
-
-        int[] defaultStatusCodes = {HttpStatus.SC_NOT_FOUND};
-        when(config.allowedStatusCodes()).thenReturn(defaultStatusCodes);
-
         when(uiConfigService.getExcludedPaths()).thenReturn(new String[]{TEST_EXCLUDED_PATH});
         when(uiConfigService.isActivatedContent()).thenReturn(true);
         when(uiConfigService.isSkipContentModifiedAfterActivation()).thenReturn(true);
-
         gridResourcesGenerator.activate(config);
     }
 
     private void setUpConfigNoStatusCodes(GridResourcesGeneratorImpl gridResourcesGenerator) {
         GridResourcesGeneratorImpl.Configuration config = mockConfig();
-
-        when(config.allowedStatusCodes()).thenReturn(ArrayUtils.EMPTY_INT_ARRAY);
-
+        when(uiConfigService.getStatusCodes()).thenReturn(new Integer[]{});
         gridResourcesGenerator.activate(config);
     }
 
     private static GridResourcesGeneratorImpl.Configuration mockConfig() {
         GridResourcesGeneratorImpl.Configuration config = mock(GridResourcesGeneratorImpl.Configuration.class);
-
         when(config.threadsPerCore()).thenReturn(60);
-
         return config;
     }
 

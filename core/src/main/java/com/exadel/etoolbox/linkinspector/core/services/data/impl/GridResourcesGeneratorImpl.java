@@ -72,16 +72,6 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
             description = "Finds broken links under the specified path for further outputting them in a report"
     )
     @interface Configuration {
-
-        @AttributeDefinition(
-                name = "Status codes",
-                description = "The list of status codes allowed for broken links in the report. " +
-                        "Set a single negative value to allow all http error codes"
-        )
-        int[] allowedStatusCodes() default {
-                HttpStatus.SC_NOT_FOUND
-        };
-
         @AttributeDefinition(
                 name = "Threads per core",
                 description = "The number of threads created per each CPU core for validating links in parallel"
@@ -103,7 +93,6 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
 
     private ExecutorService executorService;
 
-    private int[] allowedStatusCodes;
     private int threadsPerCore;
 
     /**
@@ -113,7 +102,6 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
     @Activate
     @Modified
     protected void activate(Configuration configuration) {
-        allowedStatusCodes = configuration.allowedStatusCodes();
         threadsPerCore = configuration.threadsPerCore();
     }
 
@@ -313,6 +301,8 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
     }
 
     private boolean isAllowedErrorCode(int linkStatusCode) {
+        Integer[] allowedStatusCodes = uiConfigService.getStatusCodes();
+
         if (ArrayUtils.isEmpty(allowedStatusCodes) ||
                 (allowedStatusCodes.length == 1 && allowedStatusCodes[0] < 0)) {
             return true;
@@ -405,7 +395,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
         stats.put(GenerationStatsProps.PN_REPORT_LINKS_TYPE, uiConfigService.getLinksType());
         stats.put(GenerationStatsProps.PN_EXCLUDED_LINK_PATTERNS, getExcludedLinksPatterns());
         stats.put(GenerationStatsProps.PN_EXCLUDED_TAGS, uiConfigService.isExcludeTags());
-        stats.put(GenerationStatsProps.PN_ALLOWED_STATUS_CODES, allowedStatusCodes);
+        stats.put(GenerationStatsProps.PN_ALLOWED_STATUS_CODES, uiConfigService.getStatusCodes());
 
         stats.put(GenerationStatsProps.PN_ALL_INTERNAL_LINKS, allLinksCounter.getInternalLinks());
         stats.put(GenerationStatsProps.PN_BROKEN_INTERNAL_LINKS, brokenLinksCounter.getInternalLinks());

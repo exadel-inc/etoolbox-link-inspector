@@ -12,4 +12,5 @@ public interface UiConfigService {
     String[] getExcludedProperties();
     String getLinksType();
     boolean isExcludeTags();
+    Integer[] getStatusCodes();
 }

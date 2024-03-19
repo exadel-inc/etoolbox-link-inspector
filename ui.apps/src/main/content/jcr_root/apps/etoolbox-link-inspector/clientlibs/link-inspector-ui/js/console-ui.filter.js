@@ -116,6 +116,10 @@
         const $excludeTagsCheckbox = $('<coral-checkbox value="excludeTags">Exclude tags(If checked, the internal links starting with /content/cq:tags will be excluded)</coral-checkbox>');
         $excludeTagsCheckbox.appendTo(dialog.content);
 
+        const statusCodesMultifield = createMultifield();
+        $('<p>').text("Status codes (The list of status codes allowed for broken links in the report. Set a single negative value to allow all http error codes)").appendTo(dialog.content);
+        dialog.content.appendChild(statusCodesMultifield);
+
         $.ajax({
             type: "GET",
             url: "/content/etoolbox-link-inspector/data/config.json"
@@ -129,6 +133,7 @@
             populateMultifield(excludedPropertiesMultifield, data.excludedProperties);
             linksTypeSelect.value = data.linksType;
             $excludeTagsCheckbox.attr("checked", data.excludeTags);
+            populateMultifield(statusCodesMultifield, data.statusCodes);
         })
 
         function createMultifield(){
@@ -180,7 +185,9 @@
                     "excludedProperties@TypeHint": "String[]",
                     "linksType": linksTypeSelect.value,
                     "excludeTags":!!$excludeTagsCheckbox.attr("checked"),
-                    "excludeTags@TypeHint": "Boolean"
+                    "excludeTags@TypeHint": "Boolean",
+                    "statusCodes": getMultifieldValues(statusCodesMultifield),
+                    "statusCodes@TypeHint": "String[]",
                 },
                 dataType: "json",
                 encode: true

@@ -25,6 +25,7 @@ public class UiConfigServiceImpl implements UiConfigService {
     private static final String PN_EXCLUDED_PROPERTIES = "excludedProperties";
     private static final String PN_LINKS_TYPE = "linksType";
     private static final String PN_EXCLUDE_TAGS = "excludeTags";
+    private static final String PN_STATUS_CODES = "statusCodes";
     private static final String DEFAULT_PATH = "/content";
 
     @Reference
@@ -76,6 +77,11 @@ public class UiConfigServiceImpl implements UiConfigService {
     @Override
     public boolean isExcludeTags() {
         return getProperty(PN_EXCLUDE_TAGS, Boolean.class).orElse(true);
+    }
+
+    @Override
+    public Integer[] getStatusCodes() {
+        return getProperty(PN_STATUS_CODES, Integer[].class).orElse(new Integer[]{});
     }
 
     private <T> Optional<T> getProperty(String name, Class<T> clazz){
