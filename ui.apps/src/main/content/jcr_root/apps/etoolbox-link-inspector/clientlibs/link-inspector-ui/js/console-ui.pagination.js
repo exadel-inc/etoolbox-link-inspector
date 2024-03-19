@@ -19,7 +19,7 @@
 (function ($) {
     'use strict'
 
-    $(document).on('click', '.pagination-item', function(event) {
+    $(document).on('click', '.elc-pagination-item', function(event) {
         const $target = $(event.target);
         if (!$target.hasClass('disabled')) {
             const page = $target.attr('data-page');

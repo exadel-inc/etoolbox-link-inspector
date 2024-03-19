@@ -21,8 +21,7 @@
 
     var CANCEL_LABEL = Granite.I18n.get('Cancel');
     var UPDATE_LABEL = Granite.I18n.get('Fix Broken Link');
-    var LINK_TO_UPDATE_LABEL = Granite.I18n.get('The following link will be updated:');
-    var NOT_SELECTED_ITEMS_LABEL = Granite.I18n.get('Not selected items. Please select one or more.');
+    var LINK_TO_UPDATE_LABEL = Granite.I18n.get('The following links will be updated:');
     var REPLACEMENT_LINK_LABEL = Granite.I18n.get('Please enter the replacement link');
     var SKIP_VALIDATION_LABEL = 'Skip input link check before replacement'
 
@@ -170,7 +169,6 @@
     }
 
     function aclCheckPermissions(name, el, config, collection, selections) {
-        //todo check permissions for selection?
         var path = selections.map(function (v) {
             return $(v).data('path');
         });
@@ -189,7 +187,7 @@
     });
 
     $(window).adaptTo("foundation-registry").register("foundation.collection.action.activecondition", {
-        name: "cq-admin.aembox.linkchecker.actioncondition.fix-broken-link",
+        name: "cq-admin.etoolbox.linkinspector.actioncondition.fix-broken-link",
         handler: onFixActiveCondition
     });
 

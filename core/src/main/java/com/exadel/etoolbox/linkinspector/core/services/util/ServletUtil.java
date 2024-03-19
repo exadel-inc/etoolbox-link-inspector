@@ -42,7 +42,7 @@ public class ServletUtil {
                 .orElse(StringUtils.EMPTY);
     }
 
-    public static List<String> getRequestParamStringArray(SlingHttpServletRequest request, String param) {
+    public static List<String> getRequestParamStringList(SlingHttpServletRequest request, String param) {
         return Optional.ofNullable(request.getRequestParameters(param))
                 .map(requestParameters -> Arrays.stream(requestParameters)
                 .map(RequestParameter::getString)

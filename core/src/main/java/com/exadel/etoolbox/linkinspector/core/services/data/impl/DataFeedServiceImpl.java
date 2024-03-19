@@ -47,6 +47,7 @@ import java.util.stream.Stream;
  */
 @Component(service = DataFeedService.class)
 public class DataFeedServiceImpl implements DataFeedService {
+
     private static final Logger LOG = LoggerFactory.getLogger(DataFeedServiceImpl.class);
 
     @Reference
@@ -60,16 +61,6 @@ public class DataFeedServiceImpl implements DataFeedService {
 
     @Reference
     private LinkHelper linkHelper;
-
-    /**
-     * The location of the generated Csv report in the repository
-     */
-    public static final String CSV_REPORT_NODE_PATH = "/content/etoolbox-link-inspector/data/content";
-
-    /**
-     * The sling resource type of grid row items
-     */
-    private static final String GRID_RESOURCE_TYPE = "etoolbox-link-inspector/components/gridConfig";
 
     /**
      * {@inheritDoc}

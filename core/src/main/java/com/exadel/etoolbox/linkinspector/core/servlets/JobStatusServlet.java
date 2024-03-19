@@ -22,7 +22,8 @@ import javax.servlet.Servlet;
 )
 public class JobStatusServlet extends SlingAllMethodsServlet {
 
-    public static final String JOB_STATUS = "status";
+    private static final String JOB_STATUS = "status";
+
     @Reference
     private JobManager jobManager;
 

@@ -31,7 +31,7 @@
     var REPLACEMENT_DESCRIPTION = Granite.I18n.get('* Replacement will be applied within the detected broken links scope');
     var REPLACEMENT_ACL_DESCRIPTION = Granite.I18n.get('** User should have sufficient read/write permissions in order to complete replacement successfully and create the backup package');
     var VALIDATION_MSG = Granite.I18n.get('Replacement can\'t be the same as pattern');
-    var LINK_TO_UPDATE_LABEL = Granite.I18n.get('The following link will be updated:');
+    var LINK_TO_UPDATE_LABEL = Granite.I18n.get('The following links will be updated:');
 
     var PROCESSING_ERROR_MSG = 'Failed to replace by pattern<br/>Pattern: <b>{{pattern}}</b><br/>Replacement: <b>{{replacement}}</b>';
     var PERSISTENCE_ERROR_MSG = 'Replacement was interrupted due to the <b>error</b> occurred during persisting changes. Please see logs for more details';
@@ -213,13 +213,13 @@
     }
 
     function buildConfirmationMessage(selections) {
-        var list = selections.slice(0, 12).map(function (row) {
+        let list = selections.slice(0, 12).map(function (row) {
             return '<li>' + row.currentLink + '</li>';
         });
         if (selections.length > 12) {
             list.push('<li>&#8230;</li>'); // &#8230; is ellipsis
         }
-        var $msg = $('<div class="elc-confirmation-msg">');
+        let $msg = $('<div class="elc-confirmation-msg">');
         $('<p>').text(LINK_TO_UPDATE_LABEL).appendTo($msg);
         $('<ul class="elc-processing-link-list">').html(list.join('')).appendTo($msg);
         $('<br/>').appendTo($msg);
@@ -228,7 +228,7 @@
 
     function buildSelectionItems(selections) {
         return selections.map(function (v) {
-            var row = $(v);
+            let row = $(v);
             return {
                 path: row.data('path'),
                 currentLink: row.data('currentLink'),
@@ -249,7 +249,7 @@
     });
 
     $(window).adaptTo("foundation-registry").register("foundation.collection.action.activecondition", {
-        name: "cq-admin.aembox.linkchecker.actioncondition.replace-by-pattern",
+        name: "cq-admin.etoolbox.linkinspector.actioncondition.replace-by-pattern",
         handler: onFixActiveCondition
     });
 

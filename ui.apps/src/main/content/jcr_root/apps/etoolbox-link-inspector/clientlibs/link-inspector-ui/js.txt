@@ -1,6 +1,5 @@
 #base=js
 
-console-ui.init.js
 console-ui.common.js
 console-ui.pending.js
 console-ui.download.js

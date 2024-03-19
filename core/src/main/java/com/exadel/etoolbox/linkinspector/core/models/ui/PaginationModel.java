@@ -15,13 +15,14 @@ import javax.annotation.PostConstruct;
 import java.util.Optional;
 
 /**
- * Represents the pagination logic model. Based on the number of pages in the current report.
+ * Represents the model with pagination logic. Based on the number of pages in the current report.
  */
 @Model(
         adaptables = SlingHttpServletRequest.class,
         defaultInjectionStrategy = DefaultInjectionStrategy.OPTIONAL
 )
 public class PaginationModel {
+
     private static final String REQUEST_PARAMETER_PAGE = "page";
     private static final String REPORTS_NODE_PROPERTY_SIZE = "size";
     private static final int DEFAULT_PAGE_NUMBER = 1;

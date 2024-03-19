@@ -31,7 +31,10 @@ import java.util.stream.Collectors;
 public class CsvHelperImpl implements CsvHelper {
 
     private static final Logger LOG = LoggerFactory.getLogger(CsvHelperImpl.class);
-    private static final String GRID_RESOURCE_TYPE = "etoolbox-link-inspector/components/gridConfig";
+
+    /**
+     * Max size of page with csv report info.
+     */
     private static final int PAGE_ITEMS_LIMIT = 500;
 
     /**
@@ -93,7 +96,7 @@ public class CsvHelperImpl implements CsvHelper {
         return new GridResource(link,
                 StringUtils.substringBeforeLast(csvRecord.get(CsvUtil.CSV_COLUMN_PROPERTY_LOCATION), CsvUtil.AT_SIGN),
                 StringUtils.substringAfterLast(csvRecord.get(CsvUtil.CSV_COLUMN_PROPERTY_LOCATION), CsvUtil.AT_SIGN),
-                GRID_RESOURCE_TYPE);
+                DataFeedService.GRID_RESOURCE_TYPE);
     }
 
     private void printViewItemToCsv(CSVPrinter csvPrinter, GridViewItem viewItem) {

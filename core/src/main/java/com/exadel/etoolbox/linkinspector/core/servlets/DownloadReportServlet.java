@@ -34,6 +34,7 @@ import java.util.List;
 public class DownloadReportServlet extends SlingAllMethodsServlet {
 
     private static final Logger LOG = LoggerFactory.getLogger(DownloadReportServlet.class);
+
     private static final String CONTENT_DISPOSITION_HEADER_NAME = "Content-Disposition";
     private static final String CONTENT_DISPOSITION_HEADER_VALUE = "attachment; filename=\"report.csv\"";
 

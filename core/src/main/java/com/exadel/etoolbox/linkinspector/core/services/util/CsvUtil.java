@@ -62,8 +62,7 @@ public class CsvUtil {
      */
     public static final String REPORTS_SIZE_PROPERTY_NAME = "size";
 
-    private CsvUtil() {
-    }
+    private CsvUtil() {}
 
     public static String wrapIfContainsSemicolon(String value) {
         if (value.contains(SEMICOLON)) {
@@ -109,7 +108,7 @@ public class CsvUtil {
                 csvRecords.add(linkRecord);
             }
         } catch (IOException e) {
-            LOG.error("Failed to read csv item form jcr.", e);
+            LOG.error("Failed to read csv from jcr.", e);
         }
         return csvRecords;
     }

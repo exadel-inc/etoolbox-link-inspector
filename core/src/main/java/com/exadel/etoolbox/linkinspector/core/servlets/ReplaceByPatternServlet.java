@@ -140,7 +140,7 @@ public class ReplaceByPatternServlet extends SlingAllMethodsServlet {
         boolean isBackup = ServletUtil.getRequestParamBoolean(request, BACKUP_PARAM);
         boolean isOutputAsCsv = ServletUtil.getRequestParamBoolean(request, OUTPUT_AS_CSV_PARAM);
         int page = ServletUtil.getRequestParamInt(request, PAGE_PARAM);
-        List<String> selectedItems = ServletUtil.getRequestParamStringArray(request, SELECTED_PARAM);
+        List<String> selectedItems = ServletUtil.getRequestParamStringList(request, SELECTED_PARAM);
 
         if (StringUtils.isAnyBlank(linkPattern, replacement)) {
             response.setStatus(HttpStatus.SC_BAD_REQUEST);

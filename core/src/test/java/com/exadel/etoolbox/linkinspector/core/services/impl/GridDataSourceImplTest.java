@@ -46,6 +46,6 @@ class GridDataSourceImplTest {
     void testGetDataSource() {
         when(dataFeedService.dataFeedToResources(DEFAULT_PAGE_NUMBER)).thenReturn(Collections.emptyList());
 
-        assertNotNull(gridDataSource.getDataSource(null));
+        assertNotNull(gridDataSource.getDataSource(String.valueOf(DEFAULT_PAGE_NUMBER)));
     }
 }

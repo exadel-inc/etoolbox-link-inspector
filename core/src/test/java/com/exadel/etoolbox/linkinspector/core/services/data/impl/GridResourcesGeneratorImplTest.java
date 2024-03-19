@@ -21,8 +21,10 @@ import com.exadel.etoolbox.linkinspector.core.services.data.DataFeedService;
 import com.exadel.etoolbox.linkinspector.core.services.data.GenerationStatsProps;
 import com.exadel.etoolbox.linkinspector.core.services.data.UiConfigService;
 import com.exadel.etoolbox.linkinspector.core.services.data.models.GridResource;
+import com.exadel.etoolbox.linkinspector.core.services.helpers.CsvHelper;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.LinkHelper;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.RepositoryHelper;
+import com.exadel.etoolbox.linkinspector.core.services.helpers.impl.CsvHelperImpl;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.impl.LinkHelperImpl;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.impl.RepositoryHelperImpl;
 import io.wcm.testing.mock.aem.junit5.AemContext;
@@ -65,6 +67,7 @@ import static org.mockito.Mockito.*;
 class GridResourcesGeneratorImplTest {
     private static final String RESOURCE_RESOLVER_FACTORY_FIELD = "resourceResolverFactory";
     private static final String REPOSITORY_HELPER_FIELD = "repositoryHelper";
+    private static final String CSV_HELPER_FIELD = "csvHelper";
     private static final String LINK_HELPER_FIELD = "linkHelper";
     private static final String UI_CONFIG_FIELD = "uiConfigService";
     private static final String EXECUTOR_SERVICE_FIELD = "executorService";
@@ -121,6 +124,8 @@ class GridResourcesGeneratorImplTest {
             "/content/test-link-active-10"
     );
 
+    private static final int DEFAULT_PAGE_NUMBER = 1;
+
     private final AemContext context = new AemContext(ResourceResolverType.JCR_MOCK);
 
     private final GridResourcesGeneratorImpl fixture = new GridResourcesGeneratorImpl();
@@ -141,38 +146,36 @@ class GridResourcesGeneratorImplTest {
         PrivateAccessor.setField(fixture, UI_CONFIG_FIELD, uiConfigService);
     }
 
-//    @Test
-//    void testGenerateGridResources() throws NoSuchFieldException, IOException, URISyntaxException, RepositoryException {
-//        setUpConfig(fixture);
-//        context.load().json(TEST_RESOURCES_TREE_PATH, TEST_FOLDER_PATH);
-//        when(externalLinkChecker.checkLink(anyString())).thenReturn(HttpStatus.SC_NOT_FOUND);
-//
-//        List<GridResource> gridResources = fixture.generateGridResources(GRID_RESOURCE_TYPE, context.resourceResolver());
-//        List<GridResource> expectedGridResources = buildExpectedGridResources()
-//                .stream().flatMap(Collection::stream).collect(Collectors.toList());
-//
-//        assertTrue(CollectionUtils.isEqualCollection(expectedGridResources, gridResources));
-//    }
+    @Test
+    void testGenerateGridResources() throws NoSuchFieldException, IOException, URISyntaxException, RepositoryException {
+        setUpConfig(fixture);
+        context.load().json(TEST_RESOURCES_TREE_PATH, TEST_FOLDER_PATH);
+        when(externalLinkChecker.checkLink(anyString())).thenReturn(HttpStatus.SC_NOT_FOUND);
+
+        List<GridResource> gridResources = fixture.generateGridResources(GRID_RESOURCE_TYPE, context.resourceResolver());
+        assertTrue(CollectionUtils.isEqualCollection(buildExpectedGridResources(), gridResources));
+    }
 
 
-//    @Test
-//    void testGenerateFilteredGridResources() throws NoSuchFieldException, IOException, URISyntaxException, RepositoryException {
-//        setUpConfig(fixture);
-//        context.load().json(TEST_RESOURCES_TREE_PATH, TEST_FOLDER_PATH);
-//        when(externalLinkChecker.checkLink(anyString())).thenReturn(HttpStatus.SC_NOT_FOUND);
-//        when(uiConfigService.getExcludedLinksPatterns()).thenReturn(new String[]{TEST_UI_EXCLUDED_PATTERN});
-//
-//        List<GridResource> gridResources = fixture.generateGridResources(GRID_RESOURCE_TYPE, context.resourceResolver());
-//        Pattern pattern = Pattern.compile(TEST_UI_EXCLUDED_PATTERN);
-//
-//        List<GridResource> expectedGridResources = buildExpectedGridResources().stream().map(resources -> resources.stream()
-//                .filter(gr -> {
-//                    Matcher matcher = pattern.matcher(gr.getLink().getHref());
-//                    return !matcher.matches();
-//                }).collect(Collectors.toList())).flatMap(Collection::stream).collect(Collectors.toList());
-//
-//        assertTrue(CollectionUtils.isEqualCollection(expectedGridResources, gridResources));
-//    }
+    @Test
+    void testGenerateFilteredGridResources() throws NoSuchFieldException, IOException, URISyntaxException, RepositoryException {
+        setUpConfig(fixture);
+        context.load().json(TEST_RESOURCES_TREE_PATH, TEST_FOLDER_PATH);
+        when(externalLinkChecker.checkLink(anyString())).thenReturn(HttpStatus.SC_NOT_FOUND);
+        when(uiConfigService.getExcludedLinksPatterns()).thenReturn(new String[]{TEST_UI_EXCLUDED_PATTERN});
+
+        List<GridResource> gridResources = fixture.generateGridResources(GRID_RESOURCE_TYPE, context.resourceResolver());
+        Pattern pattern = Pattern.compile(TEST_UI_EXCLUDED_PATTERN);
+
+        List<GridResource> expectedGridResources = buildExpectedGridResources().stream()
+            .filter(gr -> {
+                Matcher matcher = pattern.matcher(gr.getLink().getHref());
+                return !matcher.matches();
+            })
+            .collect(Collectors.toList());
+
+        assertTrue(CollectionUtils.isEqualCollection(expectedGridResources, gridResources));
+    }
 
     @Test
     void testAllowedStatusCodes() throws IOException, URISyntaxException {
@@ -189,17 +192,16 @@ class GridResourcesGeneratorImplTest {
         assertTrue(notContainsExternal);
     }
 
-//    @Test
-//    void testAllowedStatusCodes_emptyConfig() throws IOException, URISyntaxException, NoSuchFieldException, RepositoryException {
-//        setUpConfigNoStatusCodes(fixture);
-//
-//        context.load().json(TEST_RESOURCES_TREE_PATH, TEST_FOLDER_PATH);
-//        when(externalLinkChecker.checkLink(anyString())).thenReturn(HttpStatus.SC_BAD_REQUEST);
-//
-//        List<GridResource> gridResources = fixture.generateGridResources(GRID_RESOURCE_TYPE, context.resourceResolver());
-//        List<GridResource> expectedGridResources = buildExpectedGridResources().stream().flatMap(Collection::stream).collect(Collectors.toList());
-//        assertTrue(CollectionUtils.isEqualCollection(expectedGridResources, gridResources));
-//    }
+    @Test
+    void testAllowedStatusCodes_emptyConfig() throws IOException, URISyntaxException, NoSuchFieldException, RepositoryException {
+        setUpConfigNoStatusCodes(fixture);
+
+        context.load().json(TEST_RESOURCES_TREE_PATH, TEST_FOLDER_PATH);
+        when(externalLinkChecker.checkLink(anyString())).thenReturn(HttpStatus.SC_BAD_REQUEST);
+
+        List<GridResource> gridResources = fixture.generateGridResources(GRID_RESOURCE_TYPE, context.resourceResolver());
+        assertTrue(CollectionUtils.isEqualCollection(buildExpectedGridResources(), gridResources));
+    }
 
 
     @Test
@@ -390,22 +392,23 @@ class GridResourcesGeneratorImplTest {
         return config;
     }
 
-//    private List<List<GridResource>> buildExpectedGridResources() throws NoSuchFieldException, RepositoryException {
-//        Session session = context.resourceResolver().adaptTo(Session.class);
-//        if (session != null) {
-//            Node root = session.getRootNode();
-//            Node newNode = root.addNode(REAL_CSV_REPORT_NODE);
-//            newNode.setProperty(TEST_CSV_SIZE_PROPERTY_NAME, TEST_CSV_SIZE_PROPERTY_VALUE);
-//            session.save();
-//        }
-//        context.load().binaryFile(TEST_CSV_REPORT_EXPECTED_PATH, REAL_CSV_REPORT_EXPECTED_PATH);
-//        DataFeedService dataFeedService = setUpDataFeedService(getRepositoryHelperFromContext());
-//        return dataFeedService.dataFeedToGridResources();
-//    }
+    private List<GridResource> buildExpectedGridResources() throws NoSuchFieldException, RepositoryException {
+        Session session = context.resourceResolver().adaptTo(Session.class);
+        if (session != null) {
+            Node root = session.getRootNode();
+            Node newNode = root.addNode(REAL_CSV_REPORT_NODE);
+            newNode.setProperty(TEST_CSV_SIZE_PROPERTY_NAME, TEST_CSV_SIZE_PROPERTY_VALUE);
+            session.save();
+        }
+        context.load().binaryFile(TEST_CSV_REPORT_EXPECTED_PATH, REAL_CSV_REPORT_EXPECTED_PATH);
+        DataFeedService dataFeedService = setUpDataFeedService(getRepositoryHelperFromContext(), getCsvHelper());
+        return dataFeedService.dataFeedToGridResources(DEFAULT_PAGE_NUMBER);
+    }
 
-    private DataFeedService setUpDataFeedService(RepositoryHelper repositoryHelper) throws NoSuchFieldException {
+    private DataFeedService setUpDataFeedService(RepositoryHelper repositoryHelper, CsvHelper csvHelper) throws NoSuchFieldException {
         DataFeedService dataFeedService = new DataFeedServiceImpl();
         PrivateAccessor.setField(dataFeedService, REPOSITORY_HELPER_FIELD, repositoryHelper);
+        PrivateAccessor.setField(dataFeedService, CSV_HELPER_FIELD, csvHelper);
         return dataFeedService;
     }
 
@@ -414,6 +417,10 @@ class GridResourcesGeneratorImplTest {
         RepositoryHelper repositoryHelper = new RepositoryHelperImpl();
         PrivateAccessor.setField(repositoryHelper, RESOURCE_RESOLVER_FACTORY_FIELD, resourceResolverFactory);
         return repositoryHelper;
+    }
+
+    private CsvHelper getCsvHelper () {
+        return new CsvHelperImpl();
     }
 
     private Resource initSpyResources(Resource rootResource) throws ParseException {
