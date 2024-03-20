@@ -157,13 +157,6 @@
                         text="Filter Options"
                         title="Filter Options"
                         variant="minimal"/>
-                <run
-                        jcr:primaryType="nt:unstructured"
-                        sling:resourceType="granite/ui/components/coral/foundation/anchorbutton"
-                        text="Run"
-                        variant="secondary"
-                        granite:class="elc-run-new-report-button"
-                        x-cq-linkchecker="skip"/>
                 <stats
                         jcr:primaryType="nt:unstructured"
                         path="/content/etoolbox-link-inspector/data/stats"

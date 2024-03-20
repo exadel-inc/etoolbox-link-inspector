@@ -14,29 +14,13 @@
 
 /**
  * EToolbox Link Inspector clientlib.
- * Run new report action.
+ * Job status check and run functionality.
  */
-(function (document, $, Granite) {
+(function (document, $) {
     'use strict';
 
     const TRIGGER_DATA_FEED_GENERATION = '/content/etoolbox-link-inspector/servlet/triggerDataFeedGeneration';
     const CHECK_JOB_STATUS = '/content/etoolbox-link-inspector/servlet/jobStatus';
-    const RUN_REPORT_MSG = Granite.I18n.get('Generation of new report has started.');
-    const JOB_IN_PROGRESS_MESSAGE = Granite.I18n.get('Generation of new report in progress.');
-
-    function addPopup(type, message) {
-         const alertPopup = new Coral.Alert().set({
-             variant: type,
-             header: {
-                 innerHTML: 'INFO'
-             },
-             content: {
-                 textContent: message
-             }
-         });
-         alertPopup.classList.add('elc-coral-alert');
-         document.body.append(alertPopup);
-    }
 
     function jobIsActive() {
         let isActive = false;
@@ -45,29 +29,58 @@
             type: 'GET',
             async: false,
             success: function (data) {
-                isActive = data && data.status && data.status == 'ACTIVE' | 'QUEUED';
+                isActive = data && data.status && data.status == 'ACTIVE' | 'QUEUED' | 'GIVEN_UP' | 'QUEUED';
             }
         });
         return isActive;
     }
 
-    function onRunAction() {
+    function onRunAction(callback) {
         $.ajax({
             url: TRIGGER_DATA_FEED_GENERATION,
             type: 'GET',
-            success: function (data, textStatus, xhr) {
-                if (xhr.status === 200) {
-                    addPopup('success', RUN_REPORT_MSG)
-                }
-            }
+            success: callback
         });
     }
 
-    // INIT
-    $(document).ready(function () {
-        $('.elc-run-new-report-button').click(function (e) {
-            e.preventDefault();
-            jobIsActive() ? addPopup('info', JOB_IN_PROGRESS_MESSAGE) : onRunAction();
+    function createInProgressMessage($popover) {
+        const $container = $('<p class="u-coral-margin"></p>').text('Job status: ');
+        $('<b>...in progress</b>').appendTo($container);
+        $('<br/>').appendTo($container);
+        $('<span>search may take some time to complete</span>').appendTo($container);;
+        $popover.find('coral-popover-content').append($container);
+    }
+
+    function createRunJobMessage($popover) {
+        const $container = $('<p class="u-coral-margin"></p>').text('Job status: ');
+        $('<b>completed.</b>').appendTo($container);
+        $('<button class="elc-run-button">Run Again</button>').appendTo($container);
+        $popover.find('coral-popover-content').append($container);
+    }
+
+    function beforeOpenPopover(e) {
+        jobIsActive() ? createInProgressMessage($(e.currentTarget)) : createRunJobMessage($(e.currentTarget));
+    }
+
+    function beforeClosePopover(e) {
+        removeLastChild($(e.currentTarget));
+    }
+
+    function removeLastChild($popover){
+       const $popoverContent = $popover.find('coral-popover-content');
+       $popoverContent.children().last().remove();
+    }
+
+    $(document).on('coral-overlay:beforeopen', '.elc-coral-popover', beforeOpenPopover);
+
+    $(document).on('coral-overlay:beforeclose', '.elc-coral-popover', beforeClosePopover);
+
+    $(document).on('click', '.elc-run-button', function() {
+        onRunAction(function() {
+            const $popover = $('.elc-coral-popover');
+            removeLastChild($popover);
+            createInProgressMessage($popover);
         });
     });
-})(document, Granite.$, Granite);
+
+})(document, Granite.$);
