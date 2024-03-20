@@ -17,7 +17,10 @@
     </td>
 
     <td class="foundation-collection-item-keys" is="coral-table-cell">
-        ${model.linkStatusCode}
+        <div data-sly-set.statuscode="${model.linkStatusCode == '200' ? 'ok' : 'error'}"
+             class="status" title="HTTP Status ${model.linkStatusCode}">
+            <coral-icon icon="circle" class="elc-link-status--${statuscode}"></coral-icon>
+        </div>
     </td>
 
     <td class="foundation-collection-item-keys" is="coral-table-cell">

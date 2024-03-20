@@ -129,10 +129,10 @@
             deferred.resolve(data);
         };
 
-        el.on('change', 'input', onValidate);
+        el.on('input', 'input', onValidate);
         el.on('click', '[data-dialog-action]', onResolve);
         el.on('coral-overlay:close', function () {
-            el.off('change', 'input', onValidate);
+            el.off('input', 'input', onValidate);
             el.off('click', '[data-dialog-action]', onResolve);
             deferred.reject();
         });
