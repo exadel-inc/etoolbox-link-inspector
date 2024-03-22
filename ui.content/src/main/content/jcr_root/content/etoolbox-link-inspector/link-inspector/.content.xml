@@ -60,7 +60,9 @@
                         granite:rel="etoolbox-link-inspector"
                         jcr:primaryType="nt:unstructured"
                         sling:resourceType="granite/ui/components/coral/foundation/table"
+                        src="/content/etoolbox-link-inspector/link-inspector/jcr:content/views/container/items/table{.offset,limit}.html{+id}?page=${param.page}"
                         itemprop="item"
+                        limit="{Long}50"
                         layoutId="list"
                         maximized="{Boolean}true"
                         modeGroup="etoolbox-link-inspector"
@@ -109,9 +111,7 @@
                         <datasource
                                 jcr:primaryType="nt:unstructured"
                                 sling:resourceType="etoolbox-link-inspector/components/gridDatasource"
-                                itemResourceType="etoolbox-link-inspector/components/gridConfig"
-                                limit="100000"
-                                offset="100"/>
+                                itemResourceType="etoolbox-link-inspector/components/gridConfig"/>
                     </table>
                 </items>
             </container>

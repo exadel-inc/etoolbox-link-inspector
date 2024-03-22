@@ -1,6 +1,7 @@
 <%@include file="/libs/granite/ui/global.jsp" %>
 <%@page session="false"
         import="com.exadel.etoolbox.linkinspector.core.services.GridDataSource,
+                com.adobe.granite.ui.components.Config,
                 com.adobe.granite.ui.components.ds.DataSource" %>
 <%--
   ~ Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,7 +18,18 @@
   --%>
 
 <%
-    GridDataSource service = (GridDataSource) sling.getService(GridDataSource.class);
+    Config cfg = cmp.getConfig();
+    String limit = cfg.get("limit", String.class);
     String pageNumber = request.getParameter("page");
-    request.setAttribute(DataSource.class.getName(), service.getDataSource(pageNumber));
+    String offset = request.getParameter("offset");
+
+    String[] selectors = slingRequest.getRequestPathInfo().getSelectors();
+
+    if (selectors.length == 2) {
+        offset = selectors[0];
+        limit = selectors[1];
+    }
+
+    GridDataSource service = (GridDataSource) sling.getService(GridDataSource.class);
+    request.setAttribute(DataSource.class.getName(), service.getDataSource(pageNumber, limit, offset));
 %>

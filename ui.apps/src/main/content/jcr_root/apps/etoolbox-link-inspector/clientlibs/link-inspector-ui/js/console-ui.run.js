@@ -29,7 +29,7 @@
             type: 'GET',
             async: false,
             success: function (data) {
-                isActive = data && data.status && data.status == 'ACTIVE' | 'QUEUED' | 'GIVEN_UP' | 'QUEUED';
+                isActive = data && data.status && data.status == 'ACTIVE' | 'QUEUED' | 'GIVEN_UP';
             }
         });
         return isActive;
@@ -52,9 +52,8 @@
     }
 
     function createRunJobMessage($popover) {
-        const $container = $('<p class="u-coral-margin"></p>').text('Job status: ');
-        $('<b>completed.</b>').appendTo($container);
-        $('<button class="elc-run-button">Run Again</button>').appendTo($container);
+        const $container = $('<p class="u-coral-margin"></p>');
+        $('<button class="elc-run-button">Run Generation</button>').appendTo($container);
         $popover.find('coral-popover-content').append($container);
     }
 

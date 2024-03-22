@@ -22,7 +22,9 @@ public interface GridDataSource {
      * within the grid (granite/ui/components/coral/foundation/table)
      *
      * @param page - page number of report from request params
+     * @param limit - limit of items for dynamic loading
+     * @param offset - offset for dynamic loading
      * @return the {@link DataSource} object containing data related to grid items
      */
-    DataSource getDataSource(String page);
+    DataSource getDataSource(String page, String limit, String offset);
 }
