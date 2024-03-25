@@ -53,7 +53,7 @@
 
     function createRunJobMessage($popover) {
         const $container = $('<p class="u-coral-margin"></p>');
-        $('<button class="elc-run-button">Run Generation</button>').appendTo($container);
+        $('<button class="elc-run-button">Run</button>').appendTo($container);
         $popover.find('coral-popover-content').append($container);
     }
 

@@ -126,10 +126,11 @@ public class DataFeedServiceImpl implements DataFeedService {
                 if (propertyLocationLinkMap.containsKey(resource.getPropertyLocation())) {
                     Optional<Link> optionalLink = linkHelper
                             .getLinkStreamFromProperty(propertyLocationLinkMap.get(resource.getPropertyLocation()))
+                            .peek(link -> linkHelper.validateLink(link, serviceResourceResolver))
                             .findFirst();
                     if (optionalLink.isPresent()) {
                         Link link = optionalLink.get();
-                        link.setStatus(new LinkStatus(HttpStatus.SC_OK, "Link Modified"));
+                        link.setStatus(new LinkStatus(link.getStatusCode(), "Link Modified"));
                         resource.setLink(link);
                     }
                 }

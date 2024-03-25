@@ -9,7 +9,7 @@
         <img itemprop="thumbnail" width="192" src="${model.thumbnail}" alt="">
     </td>
 
-    <td class="foundation-collection-item-title" is="coral-table-cell">
+    <td class="foundation-collection-item-title collection-item_link_type" is="coral-table-cell">
         <div class="elc-complex-col">
             <h4 class="elc-primary-info" title="${model.link}">${model.link}</h4>
             <span class="elc-secondary-info">${model.linkType}</span>
@@ -29,7 +29,7 @@
         </div>
     </td>
 
-    <td class="foundation-collection-item-keys" is="coral-table-cell">
+    <td class="foundation-collection-item-keys collection-item_page_title" is="coral-table-cell">
         <div class="els-page-col">
             <sly data-sly-test.isValidPage="${model.isValidPage}">
                 <a href="${model.pagePath}" target="_blank"
@@ -43,7 +43,7 @@
         </div>
     </td>
 
-    <td class="foundation-collection-item-keys" is="coral-table-cell">
+    <td class="foundation-collection-item-keys collection-item_component_name" is="coral-table-cell">
         <div class="elc-complex-col els-component-col">
             <a class="elc-primary-info"
                href="${'{0}{1}' @ format=[model.crxDePath, model.componentPath]}"
@@ -55,7 +55,7 @@
         </div>
     </td>
 
-    <td class="foundation-collection-item-keys" is="coral-table-cell">
+    <td class="foundation-collection-item-keys collection-item_property_name" is="coral-table-cell">
         <div class="els-property-col" title="${model.path}@${model.propertyName}">
             ${model.path}@<strong>${model.propertyName}</strong>
         </div>
