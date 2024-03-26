@@ -188,7 +188,7 @@ class DataFeedServiceImplTest {
         when(uiConfigService.getExcludedPaths()).thenReturn(new String[0]);
         when(uiConfigService.getExcludedProperties()).thenReturn(new String[0]);
         when(uiConfigService.getLinksType()).thenReturn(GenerationStatsProps.REPORT_LINKS_TYPE_ALL);
-        when(uiConfigService.getStatusCodes()).thenReturn(new Integer[]{HttpStatus.SC_NOT_FOUND});
+        when(uiConfigService.getStatusCodes()).thenReturn(new int[]{HttpStatus.SC_NOT_FOUND});
         when(uiConfigService.getThreadsPerCore()).thenReturn(60);
         PrivateAccessor.setField(gridResourcesGenerator, UI_CONFIG_FIELD, uiConfigService);
 

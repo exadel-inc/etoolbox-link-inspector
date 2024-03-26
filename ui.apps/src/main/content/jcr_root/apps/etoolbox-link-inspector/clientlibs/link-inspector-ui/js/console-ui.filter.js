@@ -61,11 +61,11 @@
         $updateBtn.appendTo(dialog.footer);
 
         const $rootPathField = $('<input is="coral-textfield" class="elc-replacement-input" name="replacement" value="">');
-        $('<p>').text("Path(The content path for searching broken links. The search path should be located under /content)").appendTo(dialog.content);
+        $('<p>').text("Path (The content path for searching broken links. The search path should be located under /content)").appendTo(dialog.content);
         $rootPathField.appendTo(dialog.content);
 
         const excludedPathsMultifield = createMultifield();
-        $('<p>').text("Excluded Paths(The list of paths excluded from processing. The specified path and all its children are excluded. The excluded path should not end with slash. Can be specified as a regex)").appendTo(dialog.content);
+        $('<p>').text("Excluded Paths (The list of paths excluded from processing. The specified path and all its children are excluded. The excluded path should not end with slash. Can be specified as a regex)").appendTo(dialog.content);
         dialog.content.appendChild(excludedPathsMultifield);
 
         const $activatedContentCheckbox = $('<coral-checkbox value="activatedContent">Activated Content(If checked, links will be retrieved from activated content only)</coral-checkbox>');
@@ -75,7 +75,7 @@
         $skipContentAfterActivationCheckbox.appendTo(dialog.content);
 
         const filterMultifield = createMultifield();
-        $('<p>').text("Excluded links patterns(Links are excluded from processing if match any of the specified regex patterns)").appendTo(dialog.content);
+        $('<p>').text("Excluded links patterns (Links are excluded from processing if match any of the specified regex patterns)").appendTo(dialog.content);
         dialog.content.appendChild(filterMultifield);
 
         const $lastModifiedContentField = $('<input is="coral-textfield" class="elc-replacement-input" name="lastMidified" value="">');
@@ -83,7 +83,7 @@
         $lastModifiedContentField.appendTo(dialog.content);
 
         const excludedPropertiesMultifield = createMultifield();
-        $('<p>').text("Excluded Properties(The list of properties excluded from processing. Each value can be specified as a regex)").appendTo(dialog.content);
+        $('<p>').text("Excluded Properties (The list of properties excluded from processing. Each value can be specified as a regex)").appendTo(dialog.content);
         dialog.content.appendChild(excludedPropertiesMultifield);
 
         const linksTypeSelect = new Coral.Select().set({
@@ -110,7 +110,7 @@
             value: "EXTERNAL",
             disabled: false
         });
-        $('<p>').text("Links type(The type of links in the report)").appendTo(dialog.content);
+        $('<p>').text("Links type (The type of links in the report)").appendTo(dialog.content);
         dialog.content.appendChild(linksTypeSelect);
 
         const $excludeTagsCheckbox = $('<coral-checkbox value="excludeTags">Exclude tags(If checked, the internal links starting with /content/cq:tags will be excluded)</coral-checkbox>');
@@ -126,7 +126,7 @@
 
         $.ajax({
             type: "GET",
-            url: "/content/etoolbox-link-inspector/data/config.json"
+            url: "/conf/etoolbox-link-inspector/data/config.json"
         }).done(function (data){
             populateMultifield(filterMultifield, data.filter);
             $rootPathField.val(data.path);
@@ -173,7 +173,7 @@
         function onSubmit(){
             $.ajax({
                 type: "POST",
-                url: "/content/etoolbox-link-inspector/data/config",
+                url: "/conf/etoolbox-link-inspector/data/config",
                 data: {
                     'jcr:primaryType': "nt:unstructured",
                     "filter": getMultifieldValues(filterMultifield),

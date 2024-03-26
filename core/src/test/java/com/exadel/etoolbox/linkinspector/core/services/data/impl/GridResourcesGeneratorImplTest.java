@@ -148,7 +148,7 @@ class GridResourcesGeneratorImplTest {
         when(uiConfigService.getExcludedProperties()).thenReturn(new String[]{TEST_EXCLUDED_PROPERTY});
         when(uiConfigService.getLinksType()).thenReturn(GenerationStatsProps.REPORT_LINKS_TYPE_ALL);
         when(uiConfigService.isExcludeTags()).thenReturn(true);
-        when(uiConfigService.getStatusCodes()).thenReturn(new Integer[]{HttpStatus.SC_NOT_FOUND});
+        when(uiConfigService.getStatusCodes()).thenReturn(new int[]{HttpStatus.SC_NOT_FOUND});
         when(uiConfigService.getThreadsPerCore()).thenReturn(60);
         PrivateAccessor.setField(fixture, UI_CONFIG_FIELD, uiConfigService);
     }
@@ -198,7 +198,7 @@ class GridResourcesGeneratorImplTest {
 
     @Test
     void testAllowedStatusCodes_emptyConfig() throws IOException, URISyntaxException, NoSuchFieldException {
-        when(uiConfigService.getStatusCodes()).thenReturn(new Integer[]{});
+        when(uiConfigService.getStatusCodes()).thenReturn(new int[]{});
 
         context.load().json(TEST_RESOURCES_TREE_PATH, TEST_FOLDER_PATH);
         when(externalLinkChecker.checkLink(anyString())).thenReturn(HttpStatus.SC_BAD_REQUEST);

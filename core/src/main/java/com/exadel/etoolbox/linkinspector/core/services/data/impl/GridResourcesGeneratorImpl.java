@@ -268,7 +268,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
     }
 
     private boolean isAllowedErrorCode(int linkStatusCode) {
-        Integer[] allowedStatusCodes = uiConfigService.getStatusCodes();
+        int[] allowedStatusCodes = uiConfigService.getStatusCodes();
 
         if (ArrayUtils.isEmpty(allowedStatusCodes) ||
                 (allowedStatusCodes.length == 1 && allowedStatusCodes[0] < 0)) {

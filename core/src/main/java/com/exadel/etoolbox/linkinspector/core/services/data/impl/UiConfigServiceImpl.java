@@ -15,7 +15,7 @@ import java.util.Optional;
 
 @Component(service = UiConfigService.class)
 public class UiConfigServiceImpl implements UiConfigService {
-    private static final String CONFIG_PATH = "/content/etoolbox-link-inspector/data/config";
+    private static final String CONFIG_PATH = "/conf/etoolbox-link-inspector/data/config";
     private static final String PN_FILTER = "filter";
     private static final String PN_EXCLUDED_PATHS = "excludedPaths";
     private static final String PN_ACTIVATED_CONTENT = "activatedContent";
@@ -83,12 +83,12 @@ public class UiConfigServiceImpl implements UiConfigService {
     }
 
     @Override
-    public Integer[] getStatusCodes() {
-        return getProperty(PN_STATUS_CODES, Integer[].class).orElse(new Integer[]{});
+    public int[] getStatusCodes() {
+        return getProperty(PN_STATUS_CODES, int[].class).orElse(new int[]{});
     }
 
     @Override
-    public Integer getThreadsPerCore() {
+    public int getThreadsPerCore() {
         return getProperty(PN_THREADS_PER_CORE, Integer.class).orElse(DEFAULT_THREADS_PER_CORE);
     }
 
