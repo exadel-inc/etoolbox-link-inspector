@@ -12,10 +12,12 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<workspaceFilter version="1.0">
-    <filter root="/home/users/system/etoolbox" mode="merge"/>
-    <filter root="/content/rep:policy" mode="merge"/>
-    <filter root="/content/etoolbox-link-inspector/link-inspector" mode="replace"/>
-    <filter root="/content/etoolbox-link-inspector" mode="merge"/>
-    <filter root="/conf/etoolbox-link-inspector" mode="merge"/>
-</workspaceFilter>
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
+          jcr:primaryType="nt:unstructured"
+          path="/content"
+          excludedProperties="[dam:Comments,cq:allowedTemplates,cq:childrenOrder,cq:designPath,cq:lastModifiedBy,cq:lastPublishedBy,cq:lastReplicatedBy,cq:lastReplicationAction,cq:lastReplicationStatus,cq:lastRolledoutBy,cq:template,jcr:createdBy,sling:resourceType,sling:resourceSuperType]"
+          linksType="Internal + External"
+          excludeTags="{Boolean}true"
+          statusCodes="[404]"
+          threadsPerCore="60">
+</jcr:root>
