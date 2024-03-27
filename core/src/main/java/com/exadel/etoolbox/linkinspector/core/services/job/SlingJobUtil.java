@@ -53,4 +53,12 @@ public class SlingJobUtil {
             LOG.debug("No sling jobs with the topic {} were found", topic);
         }
     }
+
+    public static String getJobStatus(JobManager jobManager, String topic) {
+        Collection<Job> jobs = jobManager.findJobs(JobManager.QueryType.ALL, topic, -1);
+        if (!jobs.isEmpty()) {
+            return jobs.stream().findFirst().get().getJobState().toString();
+        }
+        return Job.JobState.STOPPED.toString();
+    }
 }

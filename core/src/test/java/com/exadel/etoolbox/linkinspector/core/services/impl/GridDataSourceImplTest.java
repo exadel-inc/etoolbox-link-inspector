@@ -30,6 +30,9 @@ import static org.mockito.Mockito.when;
 @ExtendWith(AemContextExtension.class)
 class GridDataSourceImplTest {
     private static final String DATAFEED_SERVICE_FIELD = "dataFeedService";
+    private static final int DEFAULT_PAGE_NUMBER = 1;
+    private static final String DEFAULT_PAGE_LIMIT = "1";
+    private static final String DEFAULT_PAGE_OFFSET = "1";
 
     private final GridDataSourceImpl gridDataSource = new GridDataSourceImpl();
 
@@ -43,8 +46,8 @@ class GridDataSourceImplTest {
 
     @Test
     void testGetDataSource() {
-        when(dataFeedService.dataFeedToResources()).thenReturn(Collections.emptyList());
+        when(dataFeedService.dataFeedToResources(DEFAULT_PAGE_NUMBER)).thenReturn(Collections.emptyList());
 
-        assertNotNull(gridDataSource.getDataSource());
+        assertNotNull(gridDataSource.getDataSource(String.valueOf(DEFAULT_PAGE_NUMBER), DEFAULT_PAGE_LIMIT, DEFAULT_PAGE_OFFSET));
     }
 }
