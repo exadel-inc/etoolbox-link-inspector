@@ -79,34 +79,28 @@
                             <title
                                     jcr:primaryType="nt:unstructured"
                                     jcr:title="Link"
-                                    class="link"
-                                    sortable="{Boolean}true"/>
+                                    class="link"/>
                             <linkStatusCode
                                     jcr:primaryType="nt:unstructured"
                                     jcr:title="Code"
                                     class="statusCode"
-                                    sortType="numeric"
-                                    sortable="{Boolean}true"/>
+                                    sortType="numeric"/>
                             <linkStatusMessage
                                     jcr:primaryType="nt:unstructured"
                                     jcr:title="Status Message"
-                                    class="statusMessage"
-                                    sortable="{Boolean}true"/>
+                                    class="statusMessage"/>
                             <pagePath
                                     jcr:primaryType="nt:unstructured"
                                     jcr:title="Page"
-                                    class="pagePath"
-                                    sortable="{Boolean}true"/>
+                                    class="pagePath"/>
                             <component
                                     jcr:primaryType="nt:unstructured"
                                     jcr:title="Component"
-                                    class="component"
-                                    sortable="{Boolean}true"/>
+                                    class="component"/>
                             <property
                                     jcr:primaryType="nt:unstructured"
                                     jcr:title="Property"
-                                    class="propertyName"
-                                    sortable="{Boolean}true"/>
+                                    class="propertyName"/>
                         </columns>
                         <datasource
                                 jcr:primaryType="nt:unstructured"
