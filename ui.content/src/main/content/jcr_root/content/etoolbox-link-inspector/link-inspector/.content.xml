@@ -150,7 +150,7 @@
                         target=".etoolbox-link-inspector"
                         text="Options"
                         title="Options"
-                        variant="minimal">
+                        variant="minimal"/>
                 <stats
                         jcr:primaryType="nt:unstructured"
                         path="/content/etoolbox-link-inspector/data/stats"

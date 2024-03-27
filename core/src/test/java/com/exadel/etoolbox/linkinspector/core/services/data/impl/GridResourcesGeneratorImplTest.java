@@ -158,8 +158,6 @@ class GridResourcesGeneratorImplTest {
 
     @Test
     void testGenerateGridResources() throws NoSuchFieldException, IOException, URISyntaxException, RepositoryException {
-        //todo
-        setUpConfig(fixture);
         context.load().json(TEST_RESOURCES_TREE_PATH, TEST_FOLDER_PATH);
         when(externalLinkChecker.checkLink(anyString())).thenReturn(HttpStatus.SC_NOT_FOUND);
 
@@ -168,9 +166,7 @@ class GridResourcesGeneratorImplTest {
     }
 
     @Test
-    void testGenerateFilteredGridResources() throws NoSuchFieldException, IOException, URISyntaxException {
-        //todo
-        setUpConfig(fixture);
+    void testGenerateFilteredGridResources() throws NoSuchFieldException, IOException, URISyntaxException, RepositoryException {
         context.load().json(TEST_RESOURCES_TREE_PATH, TEST_FOLDER_PATH);
         when(externalLinkChecker.checkLink(anyString())).thenReturn(HttpStatus.SC_NOT_FOUND);
         when(uiConfigService.getExcludedLinksPatterns()).thenReturn(new String[]{TEST_UI_EXCLUDED_PATTERN, TEST_EXCLUDED_PATTERN});
@@ -203,9 +199,7 @@ class GridResourcesGeneratorImplTest {
     }
 
     @Test
-    void testAllowedStatusCodes_emptyConfig() throws IOException, URISyntaxException, NoSuchFieldException {
-        setUpConfigNoStatusCodes(fixture);
-        //todo
+    void testAllowedStatusCodes_emptyConfig() throws IOException, URISyntaxException, NoSuchFieldException, RepositoryException {
         when(uiConfigService.getStatusCodes()).thenReturn(new int[]{});
 
         context.load().json(TEST_RESOURCES_TREE_PATH, TEST_FOLDER_PATH);
@@ -328,77 +322,6 @@ class GridResourcesGeneratorImplTest {
 
             verify(executorService).shutdownNow();
         }
-    }
-
-    static void setUpConfig(GridResourcesGeneratorImpl gridResourcesGenerator) {
-        GridResourcesGeneratorImpl.Configuration config = mockConfig();
-
-        int[] defaultStatusCodes = {HttpStatus.SC_NOT_FOUND};
-        when(config.allowedStatusCodes()).thenReturn(defaultStatusCodes);
-
-        String[] excludedPaths = {TEST_EXCLUDED_PATH};
-        when(config.excludedPaths()).thenReturn(excludedPaths);
-
-        when(config.checkActivation()).thenReturn(false);
-
-        gridResourcesGenerator.activate(config);
-    }
-
-    private void setUpConfigNoExcludedPaths(GridResourcesGeneratorImpl gridResourcesGenerator) {
-        GridResourcesGeneratorImpl.Configuration config = mockConfig();
-
-        when(config.excludedPaths()).thenReturn(ArrayUtils.EMPTY_STRING_ARRAY);
-
-        int[] defaultStatusCodes = {HttpStatus.SC_NOT_FOUND};
-        when(config.allowedStatusCodes()).thenReturn(defaultStatusCodes);
-
-        gridResourcesGenerator.activate(config);
-    }
-
-    private void setUpConfigCheckActivation(GridResourcesGeneratorImpl gridResourcesGenerator) {
-        GridResourcesGeneratorImpl.Configuration config = mockConfig();
-
-        when(config.checkActivation()).thenReturn(true);
-        when(config.skipModifiedAfterActivation()).thenReturn(true);
-
-        int[] defaultStatusCodes = {HttpStatus.SC_NOT_FOUND};
-        when(config.allowedStatusCodes()).thenReturn(defaultStatusCodes);
-
-        String[] excludedPaths = {TEST_EXCLUDED_PATH};
-        when(config.excludedPaths()).thenReturn(excludedPaths);
-
-        gridResourcesGenerator.activate(config);
-    }
-
-    private void setUpConfigNoStatusCodes(GridResourcesGeneratorImpl gridResourcesGenerator) {
-        GridResourcesGeneratorImpl.Configuration config = mockConfig();
-
-        when(config.allowedStatusCodes()).thenReturn(ArrayUtils.EMPTY_INT_ARRAY);
-
-        String[] excludedPaths = {TEST_EXCLUDED_PATH};
-        when(config.excludedPaths()).thenReturn(excludedPaths);
-
-        gridResourcesGenerator.activate(config);
-    }
-
-    private static GridResourcesGeneratorImpl.Configuration mockConfig() {
-        GridResourcesGeneratorImpl.Configuration config = mock(GridResourcesGeneratorImpl.Configuration.class);
-        when(config.searchPath()).thenReturn(TEST_FOLDER_PATH);
-
-        when(config.linksType()).thenReturn(GenerationStatsProps.REPORT_LINKS_TYPE_ALL);
-        when(config.threadsPerCore()).thenReturn(60);
-
-        String[] excludedProps = {TEST_EXCLUDED_PROPERTY};
-        when(config.excludedProperties()).thenReturn(excludedProps);
-
-        when(config.lastModifiedBoundary()).thenReturn(TEST_LAST_MODIFIED_BOUNDARY);
-
-        String[] excludedPatterns = {TEST_EXCLUDED_PATTERN};
-        when(config.excludedLinksPatterns()).thenReturn(excludedPatterns);
-
-        when(config.excludeTags()).thenReturn(true);
-
-        return config;
     }
 
     private List<GridResource> buildExpectedGridResources() throws NoSuchFieldException, RepositoryException {
