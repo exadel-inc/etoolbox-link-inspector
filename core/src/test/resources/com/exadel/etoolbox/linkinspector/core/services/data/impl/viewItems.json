@@ -1,0 +1,39 @@
+{
+  "jcr:primaryType": "sling:Folder",
+  "item_1": {
+    "jcr:primaryType": "nt:unstructured",
+    "link": "/content/test-folder/img.png",
+    "linkType": "Internal",
+    "linkStatusCode": "404",
+    "linkStatusMessage": "Not Found",
+    "resourcePath": "/content/test-folder/test-resource1",
+    "propertyName": "property_1"
+  },
+  "item_2": {
+    "jcr:primaryType": "nt:unstructured",
+    "link": "/content/test-folder/img.png",
+    "linkType": "Internal",
+    "linkStatusCode": "404",
+    "linkStatusMessage": "Not Found",
+    "resourcePath": "/content/test-folder/test-resource2",
+    "propertyName": "property_2"
+  },
+  "item_3": {
+    "jcr:primaryType": "nt:unstructured",
+    "link": "/content/test-folder/img.png",
+    "linkType": "Internal",
+    "linkStatusCode": "404",
+    "linkStatusMessage": "Not Found",
+    "resourcePath": "/content/test-folder/test-resource3",
+    "propertyName": "property_3"
+  },
+  "item_4": {
+    "jcr:primaryType": "nt:unstructured",
+    "link": "/content/test-folder/img.png",
+    "linkType": "Internal",
+    "linkStatusCode": "404",
+    "linkStatusMessage": "Not Found",
+    "resourcePath": "/content/test-folder/test-resource1",
+    "propertyName": "property_4"
+  }
+}
