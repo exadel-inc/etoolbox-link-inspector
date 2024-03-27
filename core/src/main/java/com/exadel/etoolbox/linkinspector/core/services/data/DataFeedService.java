@@ -27,7 +27,7 @@ import java.util.Map;
 public interface DataFeedService {
 
     /**
-     * The sling resource type of grid row items
+     * The Sling resource type of grid row items
      */
     String GRID_RESOURCE_TYPE = "etoolbox-link-inspector/components/gridConfig";
 

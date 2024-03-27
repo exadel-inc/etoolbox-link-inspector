@@ -15,7 +15,7 @@ import javax.annotation.PostConstruct;
 import java.util.Optional;
 
 /**
- * Represents the model with pagination logic. Based on the number of pages in the current report.
+ * Represents the model with pagination logic.
  */
 @Model(
         adaptables = SlingHttpServletRequest.class,
@@ -66,7 +66,7 @@ public class PaginationModel {
         return page - 1;
     }
 
-    public int getPageBeforeOne() {
+    public int getPageBeforePrevious() {
         return page - 2;
     }
 
@@ -74,7 +74,7 @@ public class PaginationModel {
         return page + 1;
     }
 
-    public int getPageAfterOne() {
+    public int getPageAfterPrevious() {
         return page + 2;
     }
 }

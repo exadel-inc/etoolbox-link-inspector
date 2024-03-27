@@ -25,7 +25,6 @@ import com.exadel.etoolbox.linkinspector.core.services.helpers.CsvHelper;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.LinkHelper;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.RepositoryHelper;
 import com.exadel.etoolbox.linkinspector.core.services.util.LinkInspectorResourceUtil;
-import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -124,22 +123,14 @@ public class DataFeedServiceImpl implements DataFeedService {
         try (ResourceResolver serviceResourceResolver = repositoryHelper.getServiceResourceResolver()) {
             List<GridResource> updatedResources = readGridResources(serviceResourceResolver, page).stream().peek(resource -> {
                 if (propertyLocationLinkMap.containsKey(resource.getPropertyLocation())) {
-                    Optional<Link> optionalLink = linkHelper
-                            .getLinkStreamFromProperty(propertyLocationLinkMap.get(resource.getPropertyLocation()))
-                            .peek(link -> linkHelper.validateLink(link, serviceResourceResolver))
-                            .findFirst();
-                    if (optionalLink.isPresent()) {
-                        Link link = optionalLink.get();
-                        link.setStatus(new LinkStatus(link.getStatusCode(), "Link Modified"));
-                        resource.setLink(link);
-                    }
+                    modifyLink(propertyLocationLinkMap, serviceResourceResolver, resource);
                 }
             }).collect(Collectors.toList());
             List<GridViewItem> gridViewItems = toSlingResourcesStream(updatedResources, serviceResourceResolver)
                     .map(resource -> resource.adaptTo(GridViewItem.class))
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList());
-            csvHelper.modifyCsvReport(serviceResourceResolver, gridViewItems, page);
+            csvHelper.saveCsvReport(serviceResourceResolver, gridViewItems, page);
         }
     }
 
@@ -189,5 +180,17 @@ public class DataFeedServiceImpl implements DataFeedService {
 
     private List<GridResource> readGridResources(ResourceResolver resourceResolver, int page) {
         return csvHelper.readCsvReport(resourceResolver, page);
+    }
+
+    private void modifyLink(Map<String, String> propertyLocationLinkMap, ResourceResolver resourceResolver, GridResource resource) {
+        Optional<Link> optionalLink = linkHelper
+                .getLinkStreamFromProperty(propertyLocationLinkMap.get(resource.getPropertyLocation()))
+                .peek(link -> linkHelper.validateLink(link, resourceResolver))
+                .findFirst();
+        if (optionalLink.isPresent()) {
+            Link link = optionalLink.get();
+            link.setStatus(new LinkStatus(link.getStatusCode(), "Link Modified"));
+            resource.setLink(link);
+        }
     }
 }

@@ -18,7 +18,7 @@ public interface CsvHelper {
     List<GridResource> readCsvReport(ResourceResolver resourceResolver, int page);
 
     /**
-     * Creating csv reports by list of {@link GridViewItem}. Reports are splitting on parts and used as pages.
+     * Creating csv reports by list of {@link GridViewItem}. Reports are split into parts and used as pages.
      *
      * @param resourceResolver - {@link ResourceResolver}
      * @param gridViewItems    - {@link List<GridViewItem>}
@@ -32,5 +32,5 @@ public interface CsvHelper {
      * @param gridViewItems    - {@link List<GridViewItem>}
      * @param page             - page number of csv report
      */
-    void modifyCsvReport(ResourceResolver resourceResolver, List<GridViewItem> gridViewItems, int page);
+    void saveCsvReport(ResourceResolver resourceResolver, List<GridViewItem> gridViewItems, int page);
 }

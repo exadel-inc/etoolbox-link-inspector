@@ -21,7 +21,7 @@ public interface GridDataSource {
      * Generates {@link DataSource} necessary for displaying items on the Link Inspector's page
      * within the grid (granite/ui/components/coral/foundation/table)
      *
-     * @param page - page number of report from request params
+     * @param page - page number of current page
      * @param limit - limit of items for dynamic loading
      * @param offset - offset for dynamic loading
      * @return the {@link DataSource} object containing data related to grid items

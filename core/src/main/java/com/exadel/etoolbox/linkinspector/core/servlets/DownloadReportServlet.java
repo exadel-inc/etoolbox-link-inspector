@@ -55,7 +55,7 @@ public class DownloadReportServlet extends SlingAllMethodsServlet {
                  )
             ) {
                 for (CSVRecord record : records) {
-                    csvPrinter.printRecord((Object[])getValues(record));
+                    csvPrinter.printRecord(getValues(record));
                 }
                 csvPrinter.flush();
             } catch (IOException e) {
@@ -78,7 +78,7 @@ public class DownloadReportServlet extends SlingAllMethodsServlet {
         return records;
     }
 
-    private String[] getValues(CSVRecord record) {
+    private Object[] getValues(CSVRecord record) {
         return Arrays.stream(CsvUtil.CSV_COLUMNS).map(record::get)
                 .toArray(String[]::new);
     }

@@ -57,9 +57,7 @@ public class CsvHelperImpl implements CsvHelper {
                 .addParamToNode(DataFeedService.CSV_REPORT_NODE_PATH, resourceResolver, CsvUtil.REPORTS_SIZE_PROPERTY_NAME, (long) partitionGridViewItems.size());
 
         for (int i = 0; i < partitionGridViewItems.size(); i++) {
-            byte[] csvContentBytes = CsvUtil.itemsToCsvByteArray(partitionGridViewItems.get(i), this::printViewItemToCsv, null);
-            LinkInspectorResourceUtil.saveFileToJCR(CsvUtil.convertPageNumberToPath(DataFeedService.CSV_REPORT_NODE_PATH, i + 1), csvContentBytes,
-                    CsvUtil.CSV_MIME_TYPE, resourceResolver);
+            saveCsvReport(resourceResolver, partitionGridViewItems.get(i), i + 1);
         }
     }
 
@@ -67,7 +65,7 @@ public class CsvHelperImpl implements CsvHelper {
      * {@inheritDoc}
      */
     @Override
-    public void modifyCsvReport(ResourceResolver resourceResolver, List<GridViewItem> gridViewItems, int page) {
+    public void saveCsvReport(ResourceResolver resourceResolver, List<GridViewItem> gridViewItems, int page) {
         byte[] csvContentBytes = CsvUtil.itemsToCsvByteArray(gridViewItems, this::printViewItemToCsv, null);
         String reportPath = CsvUtil.convertPageNumberToPath(DataFeedService.CSV_REPORT_NODE_PATH, page);
         LinkInspectorResourceUtil.removeResource(reportPath, resourceResolver);

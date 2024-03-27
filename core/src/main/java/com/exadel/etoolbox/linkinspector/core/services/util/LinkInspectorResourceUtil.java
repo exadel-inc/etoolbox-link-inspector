@@ -62,7 +62,7 @@ public class LinkInspectorResourceUtil {
             JcrUtil.createPath(path, JcrConstants.NT_UNSTRUCTURED, session);
             session.save();
         } catch (RepositoryException e) {
-            LOG.error(String.format("Failed to recreate node %s", path), e);
+            LOG.error("Failed to recreate node {}", path, e);
         }
     }
 
