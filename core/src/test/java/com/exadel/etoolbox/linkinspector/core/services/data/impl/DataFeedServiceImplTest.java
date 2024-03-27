@@ -15,6 +15,10 @@
 package com.exadel.etoolbox.linkinspector.core.services.data.impl;
 
 import com.exadel.etoolbox.linkinspector.core.services.ExternalLinkChecker;
+import com.exadel.etoolbox.linkinspector.core.services.data.GenerationStatsProps;
+import com.exadel.etoolbox.linkinspector.core.services.data.UiConfigService;
+import com.exadel.etoolbox.linkinspector.core.services.helpers.LinkHelper;
+import com.exadel.etoolbox.linkinspector.core.services.util.CsvUtil;
 import com.exadel.etoolbox.linkinspector.core.services.data.GridResourcesGenerator;
 import com.exadel.etoolbox.linkinspector.core.services.data.UiConfigService;
 import com.exadel.etoolbox.linkinspector.core.services.data.models.GridResource;
@@ -179,13 +183,17 @@ class DataFeedServiceImplTest {
         ExternalLinkChecker externalLinkChecker = mock(ExternalLinkChecker.class);
         PrivateAccessor.setField(linkHelper, EXTERNAL_LINK_CHECKER_FIELD, externalLinkChecker);
         PrivateAccessor.setField(gridResourcesGenerator, LINK_HELPER_FIELD, linkHelper);
-        GridResourcesGeneratorImplTest.setUpConfig(gridResourcesGenerator);
-
-        when(externalLinkChecker.checkLink(anyString())).thenReturn(HttpStatus.SC_NOT_FOUND);
-
         UiConfigService uiConfigService = mock(UiConfigServiceImpl.class);
         when(uiConfigService.getExcludedLinksPatterns()).thenReturn(new String[0]);
+        when(uiConfigService.getSearchPath()).thenReturn(TEST_FOLDER_PATH);
+        when(uiConfigService.getExcludedPaths()).thenReturn(new String[0]);
+        when(uiConfigService.getExcludedProperties()).thenReturn(new String[0]);
+        when(uiConfigService.getLinksType()).thenReturn(GenerationStatsProps.REPORT_LINKS_TYPE_ALL);
+        when(uiConfigService.getStatusCodes()).thenReturn(new int[]{HttpStatus.SC_NOT_FOUND});
+        when(uiConfigService.getThreadsPerCore()).thenReturn(60);
         PrivateAccessor.setField(gridResourcesGenerator, UI_CONFIG_FIELD, uiConfigService);
+
+        when(externalLinkChecker.checkLink(anyString())).thenReturn(HttpStatus.SC_NOT_FOUND);
 
         return gridResourcesGenerator;
     }

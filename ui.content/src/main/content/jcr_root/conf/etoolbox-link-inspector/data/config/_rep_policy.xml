@@ -12,10 +12,10 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<workspaceFilter version="1.0">
-    <filter root="/home/users/system/etoolbox" mode="merge"/>
-    <filter root="/content/rep:policy" mode="merge"/>
-    <filter root="/content/etoolbox-link-inspector/link-inspector" mode="replace"/>
-    <filter root="/content/etoolbox-link-inspector" mode="merge"/>
-    <filter root="/conf/etoolbox-link-inspector" mode="merge"/>
-</workspaceFilter>
+<jcr:root xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:rep="internal"
+          jcr:primaryType="rep:ACL">
+    <allow
+            jcr:primaryType="rep:GrantACE"
+            rep:principalName="everyone"
+            rep:privileges="{Name}[jcr:read]"/>
+</jcr:root>
