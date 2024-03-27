@@ -54,9 +54,9 @@ public class ServletUtil {
         return Boolean.parseBoolean(getRequestParamString(request, param));
     }
 
-    public static int getRequestParamInt(SlingHttpServletRequest request, String param) {
-        String path = getRequestParamString(request, param);
-        return NumberUtils.isNumber(path) ? Integer.parseInt(path) : 0;
+    public static int getRequestParamInt(SlingHttpServletRequest request, String requestParam) {
+        String param = getRequestParamString(request, requestParam);
+        return NumberUtils.isNumber(param) ? Integer.parseInt(param) : 0;
     }
 
     public static void writeJsonResponse(SlingHttpServletResponse response, String json) {
