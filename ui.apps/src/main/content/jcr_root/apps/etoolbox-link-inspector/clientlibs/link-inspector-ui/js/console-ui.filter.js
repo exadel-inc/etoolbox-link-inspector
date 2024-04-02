@@ -61,29 +61,29 @@
         $updateBtn.appendTo(dialog.footer);
 
         const $rootPathField = $('<input is="coral-textfield" class="elc-replacement-input" name="replacement" value="">');
-        $('<p>').text("Path (The content path for searching broken links. The search path should be located under /content)").appendTo(dialog.content);
+        $('<p>').html("Path (<span class='dialog-description'>The content path for searching broken links. The search path should be located under /content</span>)").appendTo(dialog.content);
         $rootPathField.appendTo(dialog.content);
 
         const excludedPathsMultifield = createMultifield();
-        $('<p>').text("Excluded Paths (The list of paths excluded from processing. The specified path and all its children are excluded. The excluded path should not end with slash. Can be specified as a regex)").appendTo(dialog.content);
+        $('<p>').html("Excluded Paths (<span class='dialog-description'>The list of paths excluded from processing. The specified path and all its children are excluded. The excluded path should not end with slash. Can be specified as a regex</span>)").appendTo(dialog.content);
         dialog.content.appendChild(excludedPathsMultifield);
 
-        const $activatedContentCheckbox = $('<coral-checkbox value="activatedContent">Activated Content(If checked, links will be retrieved from activated content only)</coral-checkbox>');
+        const $activatedContentCheckbox = $('<coral-checkbox value="activatedContent">Activated Content(<span class=\'dialog-description\'>If checked, links will be retrieved from activated content only</span>)</coral-checkbox>');
         $activatedContentCheckbox.appendTo(dialog.content);
 
-        const $skipContentAfterActivationCheckbox = $('<coral-checkbox value="skipContentAfterActivation">Skip content modified after activation(Works in conjunction with the \'Activated Content\' checkbox only. If checked, links will be retrieved from activated content that is not modified after activation (lastModified is before lastReplicated))</coral-checkbox>');
+        const $skipContentAfterActivationCheckbox = $('<coral-checkbox value="skipContentAfterActivation">Skip content modified after activation(<span class=\'dialog-description\'>Works in conjunction with the \'Activated Content\' checkbox only. If checked, links will be retrieved from activated content that is not modified after activation (lastModified is before lastReplicated)</span>)</coral-checkbox>');
         $skipContentAfterActivationCheckbox.appendTo(dialog.content);
 
         const filterMultifield = createMultifield();
-        $('<p>').text("Excluded links patterns (Links are excluded from processing if match any of the specified regex patterns)").appendTo(dialog.content);
+        $('<p>').html("Excluded links patterns (<span class='dialog-description'>Links are excluded from processing if match any of the specified regex patterns</span>)").appendTo(dialog.content);
         dialog.content.appendChild(filterMultifield);
 
         const $lastModifiedContentField = $('<input is="coral-textfield" class="elc-replacement-input" name="lastMidified" value="">');
-        $('<p>').text("Last Modified (The content modified before the specified date will be excluded. Tha date should has the ISO-like date-time format, such as '2011-12-03T10:15:30+01:00')").appendTo(dialog.content);
+        $('<p>').html("Last Modified (<span class='dialog-description'>The content modified before the specified date will be excluded. Tha date should has the ISO-like date-time format, such as '2011-12-03T10:15:30+01:00'</span>)").appendTo(dialog.content);
         $lastModifiedContentField.appendTo(dialog.content);
 
         const excludedPropertiesMultifield = createMultifield();
-        $('<p>').text("Excluded Properties (The list of properties excluded from processing. Each value can be specified as a regex)").appendTo(dialog.content);
+        $('<p>').html("Excluded Properties (<span class='dialog-description'>The list of properties excluded from processing. Each value can be specified as a regex</span>)").appendTo(dialog.content);
         dialog.content.appendChild(excludedPropertiesMultifield);
 
         const linksTypeSelect = new Coral.Select().set({
@@ -110,18 +110,18 @@
             value: "EXTERNAL",
             disabled: false
         });
-        $('<p>').text("Links type (The type of links in the report)").appendTo(dialog.content);
+        $('<p>').html("Links type (<span class='dialog-description'>The type of links in the report</span>)").appendTo(dialog.content);
         dialog.content.appendChild(linksTypeSelect);
 
-        const $excludeTagsCheckbox = $('<coral-checkbox value="excludeTags">Exclude tags(If checked, the internal links starting with /content/cq:tags will be excluded)</coral-checkbox>');
+        const $excludeTagsCheckbox = $('<coral-checkbox value="excludeTags">Exclude tags(<span class=\'dialog-description\'>If checked, the internal links starting with /content/cq:tags will be excluded</span>)</coral-checkbox>');
         $excludeTagsCheckbox.appendTo(dialog.content);
 
         const statusCodesMultifield = createMultifield();
-        $('<p>').text("Status codes (The list of status codes allowed for broken links in the report. Set a single negative value to allow all http error codes)").appendTo(dialog.content);
+        $('<p>').html("Status codes (<span class='dialog-description'>The list of status codes allowed for broken links in the report. Set a single negative value to allow all http error codes</span>)").appendTo(dialog.content);
         dialog.content.appendChild(statusCodesMultifield);
 
         const $threadsPerCoreField = $('<input is="coral-textfield" class="elc-replacement-input" name="threadsPerCore" value="">');
-        $('<p>').text("Threads per core (The number of threads created per each CPU core for validating links in parallel)").appendTo(dialog.content);
+        $('<p>').html("Threads per core (<span class='dialog-description'>The number of threads created per each CPU core for validating links in parallel</span>)").appendTo(dialog.content);
         $threadsPerCoreField.appendTo(dialog.content);
 
         $.ajax({
