@@ -11,6 +11,7 @@ public interface UiConfigService {
     ZonedDateTime getLastModified();
     String[] getExcludedProperties();
     String getLinksType();
+    boolean allowedCustomLinkType();
     boolean isExcludeTags();
     int[] getStatusCodes();
     int getThreadsPerCore();

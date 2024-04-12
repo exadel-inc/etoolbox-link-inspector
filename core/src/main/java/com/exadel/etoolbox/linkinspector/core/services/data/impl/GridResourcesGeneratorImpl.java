@@ -18,7 +18,7 @@ import com.day.cq.replication.ReplicationActionType;
 import com.day.cq.replication.ReplicationStatus;
 import com.day.crx.JcrConstants;
 import com.exadel.etoolbox.linkinspector.core.models.Link;
-import com.exadel.etoolbox.linkinspector.core.models.LinkStatus;
+import com.exadel.etoolbox.linkinspector.api.dto.LinkStatus;
 import com.exadel.etoolbox.linkinspector.core.services.data.GenerationStatsProps;
 import com.exadel.etoolbox.linkinspector.core.services.data.GridResourcesGenerator;
 import com.exadel.etoolbox.linkinspector.core.services.data.UiConfigService;
@@ -242,6 +242,9 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
 
     private boolean isAllowedLinkType(Link link) {
         String reportLinksType = uiConfigService.getLinksType();
+        if(link.getType().equals(Link.Type.CUSTOM)){
+            return uiConfigService.allowedCustomLinkType();
+        }
         return GenerationStatsProps.REPORT_LINKS_TYPE_ALL.equals(reportLinksType) ||
                 Link.Type.valueOf(reportLinksType) == link.getType();
     }

@@ -24,6 +24,7 @@ public class UiConfigServiceImpl implements UiConfigService {
     private static final String PN_PATH = "path";
     private static final String PN_EXCLUDED_PROPERTIES = "excludedProperties";
     private static final String PN_LINKS_TYPE = "linksType";
+    private static final String PN_ALLOWED_CUSTOM_TYPE = "allowedCustomLinkType";
     private static final String PN_EXCLUDE_TAGS = "excludeTags";
     private static final String PN_STATUS_CODES = "statusCodes";
     private static final String PN_THREADS_PER_CORE = "threadsPerCore";
@@ -75,6 +76,11 @@ public class UiConfigServiceImpl implements UiConfigService {
     @Override
     public String getLinksType() {
         return getProperty(PN_LINKS_TYPE, String.class).orElse(GenerationStatsProps.REPORT_LINKS_TYPE_ALL);
+    }
+
+    @Override
+    public boolean allowedCustomLinkType(){
+        return getProperty(PN_ALLOWED_CUSTOM_TYPE, Boolean.class).orElse(false);
     }
 
     @Override

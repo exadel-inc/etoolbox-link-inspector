@@ -17,6 +17,7 @@ package com.exadel.etoolbox.linkinspector.core.services.data.impl;
 import com.exadel.etoolbox.linkinspector.core.services.ExternalLinkChecker;
 import com.exadel.etoolbox.linkinspector.core.services.data.GenerationStatsProps;
 import com.exadel.etoolbox.linkinspector.core.services.data.UiConfigService;
+import com.exadel.etoolbox.linkinspector.core.services.ext.CustomLinkResolver;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.LinkHelper;
 import com.exadel.etoolbox.linkinspector.core.services.util.CsvUtil;
 import com.exadel.etoolbox.linkinspector.core.services.data.GridResourcesGenerator;
@@ -41,6 +42,7 @@ import org.mockito.stubbing.Answer;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
 
@@ -62,6 +64,7 @@ class DataFeedServiceImplTest {
     private static final String REPOSITORY_HELPER_FIELD = "repositoryHelper";
     private static final String LINK_HELPER_FIELD = "linkHelper";
     private static final String UI_CONFIG_FIELD = "uiConfigService";
+    private static final String CUSTOM_LINK_FIELD = "customLinkResolver";
     private static final String EXTERNAL_LINK_CHECKER_FIELD = "externalLinkChecker";
 
     private static final String DATAFEED_PATH = "/content/etoolbox-link-inspector/data/datafeed.json";
@@ -181,6 +184,9 @@ class DataFeedServiceImplTest {
         LinkHelper linkHelper = new LinkHelperImpl();
         ExternalLinkChecker externalLinkChecker = mock(ExternalLinkChecker.class);
         PrivateAccessor.setField(linkHelper, EXTERNAL_LINK_CHECKER_FIELD, externalLinkChecker);
+        CustomLinkResolver customLinkResolver = mock(CustomLinkResolver.class);
+        when(customLinkResolver.getLinks(anyString())).thenReturn(new ArrayList<>());
+        PrivateAccessor.setField(linkHelper, CUSTOM_LINK_FIELD, customLinkResolver);
         PrivateAccessor.setField(gridResourcesGenerator, LINK_HELPER_FIELD, linkHelper);
         UiConfigService uiConfigService = mock(UiConfigServiceImpl.class);
         when(uiConfigService.getExcludedLinksPatterns()).thenReturn(new String[0]);

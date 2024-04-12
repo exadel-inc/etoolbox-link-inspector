@@ -14,6 +14,8 @@
 
 package com.exadel.etoolbox.linkinspector.core.models;
 
+import com.exadel.etoolbox.linkinspector.api.dto.LinkStatus;
+import com.exadel.etoolbox.linkinspector.api.service.LinkTypeProvider;
 import org.apache.commons.httpclient.HttpStatus;
 
 import java.util.Objects;
@@ -28,7 +30,8 @@ public final class Link {
      */
     public enum Type {
         INTERNAL("Internal"),
-        EXTERNAL("External");
+        EXTERNAL("External"),
+        CUSTOM("Custom");
 
         private final String value;
 
@@ -53,10 +56,20 @@ public final class Link {
      * The status is set based on a result of checking link's validity
      */
     private LinkStatus status;
+    /**
+     * The custom link type provider
+     */
+    private LinkTypeProvider linkTypeProvider;
 
     public Link(String href, Type type) {
         this.href = href;
         this.type = type;
+    }
+
+    public Link(LinkTypeProvider linkTypeProvider, String href){
+        this.type = Type.CUSTOM;
+        this.linkTypeProvider = linkTypeProvider;
+        this.href = href;
     }
 
     public String getHref() {
@@ -101,6 +114,14 @@ public final class Link {
      */
     public void setStatus(LinkStatus status) {
         this.status = status;
+    }
+
+    /**
+     * Gets the {@link LinkTypeProvider} representing the custom link type of this link
+     * @return custom link type
+     */
+    public LinkTypeProvider getCustomLinkTypeProvider() {
+        return linkTypeProvider;
     }
 
     @Override

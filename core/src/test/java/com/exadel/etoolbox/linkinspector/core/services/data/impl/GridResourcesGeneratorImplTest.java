@@ -19,6 +19,7 @@ import com.exadel.etoolbox.linkinspector.core.models.Link;
 import com.exadel.etoolbox.linkinspector.core.services.ExternalLinkChecker;
 import com.exadel.etoolbox.linkinspector.core.services.data.GenerationStatsProps;
 import com.exadel.etoolbox.linkinspector.core.services.data.UiConfigService;
+import com.exadel.etoolbox.linkinspector.core.services.ext.CustomLinkResolver;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.LinkHelper;
 import com.exadel.etoolbox.linkinspector.core.services.data.DataFeedService;
 import com.exadel.etoolbox.linkinspector.core.services.data.models.GridResource;
@@ -73,6 +74,7 @@ class GridResourcesGeneratorImplTest {
     private static final String REPOSITORY_HELPER_FIELD = "repositoryHelper";
     private static final String LINK_HELPER_FIELD = "linkHelper";
     private static final String UI_CONFIG_FIELD = "uiConfigService";
+    private static final String CUSTOM_LINK_FIELD = "customLinkResolver";
     private static final String REAL_DATAFEED_PATH = "/content/etoolbox-link-inspector/data/datafeed.json";
     private static final String EXECUTOR_SERVICE_FIELD = "executorService";
     private static final String EXTERNAL_LINK_CHECKER_FIELD = "externalLinkChecker";
@@ -137,6 +139,10 @@ class GridResourcesGeneratorImplTest {
         LinkHelper linkHelper = new LinkHelperImpl();
         externalLinkChecker = mock(ExternalLinkChecker.class);
         PrivateAccessor.setField(linkHelper, EXTERNAL_LINK_CHECKER_FIELD, externalLinkChecker);
+
+        CustomLinkResolver customLinkResolver = mock(CustomLinkResolver.class);
+        when(customLinkResolver.getLinks(anyString())).thenReturn(new ArrayList<>());
+        PrivateAccessor.setField(linkHelper, CUSTOM_LINK_FIELD, customLinkResolver);
 
         PrivateAccessor.setField(fixture, LINK_HELPER_FIELD, linkHelper);
 

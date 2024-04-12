@@ -33,6 +33,7 @@
                         </goals>
                         <configuration>
                             <bnd><![CDATA[
+Export-Package: com.exadel.etoolbox.linkinspector.api.*
 Import-Package: javax.annotation;version=0.0.0,*
 -conditionalpackage: org.apache.commons.csv.*
                                 ]]></bnd>
