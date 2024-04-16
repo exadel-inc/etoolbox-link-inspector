@@ -11,6 +11,8 @@ import org.osgi.service.component.annotations.Reference;
 
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+import java.util.Objects;
 import java.util.Optional;
 
 @Component(service = UiConfigService.class)
@@ -90,7 +92,8 @@ public class UiConfigServiceImpl implements UiConfigService {
 
     @Override
     public int[] getStatusCodes() {
-        return getProperty(PN_STATUS_CODES, int[].class).orElse(new int[]{});
+        return Arrays.stream(getProperty(PN_STATUS_CODES, Integer[].class).orElse(new Integer[0]))
+                .filter(Objects::nonNull).mapToInt(Integer::intValue).toArray();
     }
 
     @Override
