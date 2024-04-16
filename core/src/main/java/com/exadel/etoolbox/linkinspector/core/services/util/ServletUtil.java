@@ -15,6 +15,7 @@
 package com.exadel.etoolbox.linkinspector.core.services.util;
 
 import org.apache.commons.lang.CharEncoding;
+import org.apache.commons.lang.math.NumberUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.entity.ContentType;
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -24,7 +25,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class ServletUtil {
     private static final Logger LOG = LoggerFactory.getLogger(ServletUtil.class);
@@ -37,8 +42,21 @@ public class ServletUtil {
                 .orElse(StringUtils.EMPTY);
     }
 
+    public static List<String> getRequestParamStringList(SlingHttpServletRequest request, String param) {
+        return Optional.ofNullable(request.getRequestParameters(param))
+                .map(requestParameters -> Arrays.stream(requestParameters)
+                .map(RequestParameter::getString)
+                .collect(Collectors.toList()))
+                .orElse(Collections.emptyList());
+    }
+
     public static boolean getRequestParamBoolean(SlingHttpServletRequest request, String param) {
         return Boolean.parseBoolean(getRequestParamString(request, param));
+    }
+
+    public static int getRequestParamInt(SlingHttpServletRequest request, String requestParam) {
+        String param = getRequestParamString(request, requestParam);
+        return NumberUtils.isNumber(param) ? Integer.parseInt(param) : 0;
     }
 
     public static void writeJsonResponse(SlingHttpServletResponse response, String json) {

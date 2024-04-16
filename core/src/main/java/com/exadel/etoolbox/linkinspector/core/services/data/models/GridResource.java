@@ -15,10 +15,7 @@
 package com.exadel.etoolbox.linkinspector.core.services.data.models;
 
 import com.exadel.etoolbox.linkinspector.core.models.Link;
-import com.exadel.etoolbox.linkinspector.api.dto.LinkStatus;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.exadel.etoolbox.linkinspector.core.services.util.CsvUtil;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.lang3.StringUtils;
 
@@ -40,18 +37,6 @@ public class GridResource {
     public static final String PN_RESOURCE_PATH = "resourcePath";
     public static final String PN_PROPERTY_NAME = "propertyName";
 
-    /**
-     * Json field names
-     */
-    private static final String JSON_PROPERTY_NAME = PN_PROPERTY_NAME;
-    private static final String JSON_RESOURCE_PATH = PN_RESOURCE_PATH;
-    private static final String JSON_HREF = "href";
-    private static final String JSON_TYPE = "type";
-    private static final String JSON_STATUS_MESSAGE = "statusMessage";
-    private static final String JSON_RESOURCE_TYPE = "resourceType";
-    private static final String JSON_STATUS_CODE = "statusCode";
-
-    @JsonIgnore
     private Link link;
 
     private final String resourcePath;
@@ -63,34 +48,6 @@ public class GridResource {
         this.resourcePath = resourcePath;
         this.propertyName = propertyName;
         this.resourceType = resourceType;
-    }
-
-    /**
-     * Creates an instance of grid resource based on the data feed json fields
-     *
-     * @param propertyName  - data feed json field
-     * @param resourcePath  - data feed json field
-     * @param href          - data feed json field
-     * @param type          - data feed json field
-     * @param statusMessage - data feed json field
-     * @param resourceType  - data feed json field
-     * @param statusCode    - data feed json field
-     */
-    @JsonCreator
-    public GridResource(@JsonProperty(JSON_PROPERTY_NAME) String propertyName,
-                        @JsonProperty(JSON_RESOURCE_PATH) String resourcePath,
-                        @JsonProperty(JSON_HREF) String href,
-                        @JsonProperty(JSON_TYPE) String type,
-                        @JsonProperty(JSON_STATUS_MESSAGE) String statusMessage,
-                        @JsonProperty(JSON_RESOURCE_TYPE) String resourceType,
-                        @JsonProperty(JSON_STATUS_CODE) String statusCode) {
-        this.resourcePath = resourcePath;
-        this.propertyName = propertyName;
-        this.resourceType = resourceType;
-
-        Link newLink = new Link(href, Link.Type.valueOf(type.toUpperCase()));
-        newLink.setStatus(new LinkStatus(Integer.parseInt(statusCode), statusMessage));
-        this.link = newLink;
     }
 
     public Link getLink() {
@@ -136,6 +93,10 @@ public class GridResource {
 
     public String getResourceType() {
         return resourceType;
+    }
+
+    public String getPropertyLocation() {
+        return CsvUtil.buildLocation(resourcePath, propertyName);
     }
 
     @Override

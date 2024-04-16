@@ -14,18 +14,24 @@
 
 package com.exadel.etoolbox.linkinspector.core.services.impl;
 
+import com.adobe.granite.ui.components.ds.DataSource;
 import com.adobe.granite.ui.components.ds.SimpleDataSource;
 import com.exadel.etoolbox.linkinspector.core.services.GridDataSource;
 import com.exadel.etoolbox.linkinspector.core.services.data.DataFeedService;
-import com.adobe.granite.ui.components.ds.DataSource;
+import org.apache.commons.lang.math.NumberUtils;
+import org.apache.sling.api.resource.Resource;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Component(service = GridDataSource.class)
 public class GridDataSourceImpl implements GridDataSource {
     private static final Logger LOG = LoggerFactory.getLogger(GridDataSourceImpl.class);
+    private static final int DEFAULT_PAGE_NUMBER = 1;
 
     @Reference
     private DataFeedService dataFeedService;
@@ -34,8 +40,20 @@ public class GridDataSourceImpl implements GridDataSource {
      * {@inheritDoc}
      */
     @Override
-    public DataSource getDataSource() {
+    public DataSource getDataSource(String page, String limit, String offset) {
         LOG.debug("GridDataSource initialization");
-        return new SimpleDataSource(dataFeedService.dataFeedToResources().iterator());
+
+        List<Resource> resources = NumberUtils.isNumber(page) ? dataFeedService.dataFeedToResources(Integer.parseInt(page))
+                : dataFeedService.dataFeedToResources(DEFAULT_PAGE_NUMBER);
+
+        if (NumberUtils.isNumber(offset)) {
+            resources = resources.stream().skip(Long.parseLong(offset)).collect(Collectors.toList());
+        }
+
+        if (NumberUtils.isNumber(limit)) {
+            resources = resources.stream().limit(Long.parseLong(limit)).collect(Collectors.toList());
+        }
+
+        return new SimpleDataSource(resources.iterator());
     }
 }

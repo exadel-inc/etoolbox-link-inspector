@@ -14,12 +14,12 @@
 
 /**
  * EToolbox Link Inspector clientlib.
- * "Filter Options" action definition.
+ * "Options" action definition.
  */
 (function (window, document, $, ELC, Granite, Coral) {
     'use strict';
-    const DIALOG_TITLE_LABEL = Granite.I18n.get('Filter Options');
-    const SUCCESS_DIALOG_TITLE_LABEL = Granite.I18n.get('Filter Options Applied');
+    const DIALOG_TITLE_LABEL = Granite.I18n.get('Options');
+    const SUCCESS_DIALOG_TITLE_LABEL = Granite.I18n.get('Options Applied');
     const CANCEL_LABEL = Granite.I18n.get('Cancel');
     const SUBMIT_FILTER_LABEL = Granite.I18n.get('Apply');
 
