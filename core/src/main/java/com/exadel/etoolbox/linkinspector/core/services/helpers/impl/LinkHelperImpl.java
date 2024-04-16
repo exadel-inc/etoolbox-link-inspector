@@ -214,8 +214,11 @@ public class LinkHelperImpl implements LinkHelper {
         Stream<Link> externalLinksStream = getExternalLinksFromString(text)
                 .map(linkString -> new Link(linkString, Link.Type.EXTERNAL))
                 .distinct();
-        List<Link> customLinks = customLinkResolver.getLinks(text);
-        return Stream.concat(Stream.concat(internalLinksStream, externalLinksStream), customLinks.stream());
+        if(customLinkResolver != null){
+            List<Link> customLinks = customLinkResolver.getLinks(text);
+            return Stream.concat(Stream.concat(internalLinksStream, externalLinksStream), customLinks.stream());
+        }
+        return Stream.concat(internalLinksStream, externalLinksStream);
     }
 
     private Stream<String> getLinksStreamByPattern(String text, Pattern pattern) {
