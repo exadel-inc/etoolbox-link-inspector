@@ -27,7 +27,7 @@
         dialog.show();
     }
 
-    function initFiltersDialog(){
+    function initFiltersDialog(searchParams){
         const dialog = new Coral.Dialog().set({
             id : 'filters-result-dialog',
             closable: Coral.Dialog.closable.ON,
@@ -39,8 +39,14 @@
         });
 
         const linksTypeSelect = new Coral.Select().set({
-            placeholder: "Choose an item",
-            multiple: true
+            placeholder: "Choose an item"
+        });
+        linksTypeSelect.items.add({
+            content:{
+                innerHTML: "All"
+            },
+            value: "",
+            disabled: false
         });
         linksTypeSelect.items.add({
             content:{
@@ -48,7 +54,7 @@
             },
             value: "internal",
             disabled: false,
-            selected: true,
+            selected: searchParams.get("type") === "internal"
         });
         linksTypeSelect.items.add({
             content:{
@@ -56,9 +62,9 @@
             },
             value: "external",
             disabled: false,
-            selected: true,
+            selected: searchParams.get("type") === "external"
         });
-        $('<p>').html("Links type (<span class='dialog-description'>The type of links in the report</span>)").appendTo(dialog.content);
+        $('<p>').html("Links type").appendTo(dialog.content);
         dialog.content.appendChild(linksTypeSelect);
 
         const $cancelBtn = $('<button is="coral-button" variant="default" coral-close>').text(CANCEL_LABEL);
@@ -69,13 +75,20 @@
         $updateBtn.appendTo(dialog.footer);
 
         function onSubmit(){
-            insertParam("type", linksTypeSelect.value)
+            searchParams.delete('type');
+            if (linksTypeSelect.value) {
+                searchParams.append('type', linksTypeSelect.value);
+            }
+            document.location.search = searchParams
         }
 
         dialog.on('click', '[data-dialog-action]', onSubmit);
+        dialog.on('change', function(event) {
+            linksTypeSelect.value
+        })
         dialog.on('coral-overlay:close', function (event) {
             dialog.remove();
-            initFiltersDialog();
+            initFiltersDialog(new URL(document.location).searchParams);
         });
 
         document.body.appendChild(dialog);
@@ -87,32 +100,11 @@
     });
 
     $(document).ready(function () {
-        initFiltersDialog();
+       let params = new URL(document.location).searchParams;
+       if (params.get('type') != null) {
+         $("#elc-filters").removeClass("coral3-Button--minimal").addClass("coral3-Button--primary");
+       }
+       initFiltersDialog(new URL(document.location).searchParams);
     });
-
-    function insertParam(key, value) {
-        key = encodeURIComponent(key);
-        value = encodeURIComponent(value);
-
-        var kvp = document.location.search.substr(1).split('&');
-        let i=0;
-
-        for(; i<kvp.length; i++){
-            if (kvp[i].startsWith(key + '=')) {
-                let pair = kvp[i].split('=');
-                pair[1] = value;
-                kvp[i] = pair.join('=');
-                break;
-            }
-        }
-
-        if(i >= kvp.length){
-            kvp[kvp.length] = [key,value].join('=');
-        }
-
-        let params = kvp.join('&');
-
-        document.location.search = params;
-    }
 
 })(window, document, Granite.$, Granite.ELC, Granite, Coral);

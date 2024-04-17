@@ -1,6 +1,7 @@
 package com.exadel.etoolbox.linkinspector.core.models.ui;
 
 import com.exadel.etoolbox.linkinspector.core.services.data.DataFeedService;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.request.RequestParameter;
@@ -12,6 +13,8 @@ import org.apache.sling.models.annotations.injectorspecific.Self;
 import org.apache.sling.models.annotations.injectorspecific.SlingObject;
 
 import javax.annotation.PostConstruct;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -49,14 +52,33 @@ public class PaginationModel {
                 .map(Integer::parseInt)
                 .orElse(DEFAULT_PAGE_NUMBER);
 
-        size = Optional
-                .ofNullable(resourceResolver.getResource("/content/etoolbox-link-inspector/data/stats"))
-                .map(Resource::getValueMap)
-                .map(map -> Stream.of(map.get("brokenExternalLinks", Integer.class), map.get("brokenInternalLinks", Integer.class))
-                .filter(Objects::nonNull)
-                .reduce(0, Integer::sum))
-                .map(sum -> sum/500)
-                .orElse(DEFAULT_NUMBER_OF_REPORTS);
+        String type = Optional
+                .ofNullable(request.getRequestParameter("type"))
+                .map(RequestParameter::getString)
+                .orElse(StringUtils.EMPTY);
+
+        if (StringUtils.isNotBlank(type)) {
+            Map<String, String> map = new HashMap<>();
+            map.put("external", "brokenExternalLinks");
+            map.put("internal", "brokenInternalLinks");
+
+            size = Optional
+                    .ofNullable(resourceResolver.getResource("/content/etoolbox-link-inspector/data/stats"))
+                    .map(Resource::getValueMap)
+                    .map(valueMap -> map.get(map.get(type)))
+                    .map(Integer::parseInt)
+                    .map(sum -> (int) Math.ceil((double) sum/500))
+                    .orElse(DEFAULT_NUMBER_OF_REPORTS);
+        } else {
+            size = Optional
+                    .ofNullable(resourceResolver.getResource("/content/etoolbox-link-inspector/data/stats"))
+                    .map(Resource::getValueMap)
+                    .map(map -> Stream.of(map.get("brokenExternalLinks", Integer.class), map.get("brokenInternalLinks", Integer.class))
+                            .filter(Objects::nonNull)
+                            .reduce(0, Integer::sum))
+                    .map(sum -> (int) Math.ceil((double) sum/500))
+                    .orElse(DEFAULT_NUMBER_OF_REPORTS);
+        }
     }
 
     public int getPage() {

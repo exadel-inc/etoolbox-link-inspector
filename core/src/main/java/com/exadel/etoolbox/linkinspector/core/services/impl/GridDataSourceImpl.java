@@ -47,7 +47,7 @@ public class GridDataSourceImpl implements GridDataSource {
         int pageNumber = NumberUtils.isNumber(page) ? Integer.parseInt(page) : DEFAULT_PAGE_NUMBER;
 
         List<Resource> resources = dataFeedService.dataFeedToResources(type).stream()
-                .skip((long) DEFAULT_PAGE_VALUES_SIZE * (--pageNumber))
+                .skip((long) DEFAULT_PAGE_VALUES_SIZE * (pageNumber - 1))
                 .limit(DEFAULT_PAGE_VALUES_SIZE).collect(Collectors.toList());
 
         if (NumberUtils.isNumber(offset)) {

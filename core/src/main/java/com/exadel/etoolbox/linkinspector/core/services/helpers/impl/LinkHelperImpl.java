@@ -197,11 +197,10 @@ public class LinkHelperImpl implements LinkHelper {
     }
 
     private LinkStatus resolveInternalLink(String link, ResourceResolver resourceResolver) {
-        return new LinkStatus(HttpStatus.SC_NOT_FOUND, HttpStatus.getStatusText(HttpStatus.SC_NOT_FOUND));
-//        return Optional.of(resourceResolver.resolve(link))
-//                .filter(resource -> !ResourceUtil.isNonExistingResource(resource))
-//                .map(resource -> new LinkStatus(HttpStatus.SC_OK, HttpStatus.getStatusText(HttpStatus.SC_OK)))
-//                .orElse(new LinkStatus(HttpStatus.SC_NOT_FOUND, HttpStatus.getStatusText(HttpStatus.SC_NOT_FOUND)));
+        return Optional.of(resourceResolver.resolve(link))
+                .filter(resource -> !ResourceUtil.isNonExistingResource(resource))
+                .map(resource -> new LinkStatus(HttpStatus.SC_OK, HttpStatus.getStatusText(HttpStatus.SC_OK)))
+                .orElse(new LinkStatus(HttpStatus.SC_NOT_FOUND, HttpStatus.getStatusText(HttpStatus.SC_NOT_FOUND)));
     }
 
     private Stream<Link> getLinksStream(String text) {
