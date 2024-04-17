@@ -15,7 +15,6 @@
 package com.exadel.etoolbox.linkinspector.core.servlets;
 
 import com.exadel.etoolbox.linkinspector.core.models.LinkStatus;
-import com.exadel.etoolbox.linkinspector.core.services.data.DataFeedService;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.LinkHelper;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.RepositoryHelper;
 import io.wcm.testing.mock.aem.junit5.AemContext;
@@ -43,15 +42,12 @@ import static org.mockito.Mockito.*;
 class FixBrokenLinkServletTest {
     private static final String REPOSITORY_HELPER_FIELD = "repositoryHelper";
     private static final String LINK_HELPER_FIELD = "linkHelper";
-    private static final String DATA_FEED_SERVICE_FIELD = "dataFeedService";
 
     private static final String PATH_PARAM = "path";
     private static final String PROPERTY_NAME_PARAM = "propertyName";
     private static final String CURRENT_LINK_PARAM = "currentLink";
     private static final String NEW_LINK_PARAM = "newLink";
     private static final String IS_SKIP_VALIDATION_PARAM = "isSkipValidation";
-
-    private static final String PAGE = "page";
     private static final String STATUS_CODE_RESP_PARAM = "statusCode";
     private static final String STATUS_MSG_RESP_PARAM = "statusMessage";
 
@@ -60,14 +56,12 @@ class FixBrokenLinkServletTest {
     private static final String TEST_CURRENT_LINK = "/content/link-for-replacement";
     private static final String TEST_NEW_LINK = "/content/replacement-link";
     private static final String TEST_EXCEPTION_MSG = "Test exception message";
-    private static final int DEFAULT_PAGE_NUMBER = 1;
 
     private final AemContext context = new AemContext(ResourceResolverType.JCR_MOCK);
 
     private final FixBrokenLinkServlet fixture = new FixBrokenLinkServlet();
 
     private LinkHelper linkHelper;
-    private DataFeedService dataFeedService;
     private RepositoryHelper repositoryHelper;
     private ResourceResolver resourceResolver;
 
@@ -77,11 +71,9 @@ class FixBrokenLinkServletTest {
     @BeforeEach
     void setup() throws NoSuchFieldException {
         linkHelper = mock(LinkHelper.class);
-        dataFeedService = mock(DataFeedService.class);
         repositoryHelper = mock(RepositoryHelper.class);
         resourceResolver = mock(ResourceResolver.class);
         PrivateAccessor.setField(fixture, LINK_HELPER_FIELD, linkHelper);
-        PrivateAccessor.setField(fixture, DATA_FEED_SERVICE_FIELD, dataFeedService);
         PrivateAccessor.setField(fixture, REPOSITORY_HELPER_FIELD, repositoryHelper);
 
         request = context.request();
@@ -162,7 +154,6 @@ class FixBrokenLinkServletTest {
         request.addRequestParameter(CURRENT_LINK_PARAM, TEST_CURRENT_LINK);
         request.addRequestParameter(NEW_LINK_PARAM, TEST_NEW_LINK);
         request.addRequestParameter(IS_SKIP_VALIDATION_PARAM, Boolean.TRUE.toString());
-        request.addRequestParameter(PAGE, String.valueOf(DEFAULT_PAGE_NUMBER));
         fixture.doPost(request, response);
 
         verify(repositoryHelper, atLeastOnce()).createResourceIfNotExist(anyString(), anyString(), anyString());
@@ -179,7 +170,6 @@ class FixBrokenLinkServletTest {
         mockRequestParam(CURRENT_LINK_PARAM, TEST_CURRENT_LINK, requestMock);
         mockRequestParam(NEW_LINK_PARAM, TEST_NEW_LINK, requestMock);
         mockRequestParam(IS_SKIP_VALIDATION_PARAM, Boolean.TRUE.toString(), requestMock);
-        mockRequestParam(PAGE, String.valueOf(DEFAULT_PAGE_NUMBER), requestMock);
 
         when(requestMock.getResourceResolver()).thenReturn(resourceResolverMock);
         when(linkHelper.replaceLink(eq(resourceResolverMock), anyString(), anyString(), anyString(), anyString()))

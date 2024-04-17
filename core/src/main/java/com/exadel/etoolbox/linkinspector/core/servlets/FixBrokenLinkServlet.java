@@ -135,6 +135,6 @@ public class FixBrokenLinkServlet extends SlingAllMethodsServlet {
     }
 
     private void modifyCsvReport(String path, String propertyName, String newLink, int page) {
-        dataFeedService.modifyDataFeed(Collections.singletonMap(CsvUtil.buildLocation(path, propertyName), newLink), page);
+        dataFeedService.modifyDataFeed(Collections.singletonMap(CsvUtil.buildLocation(path, propertyName), newLink));
     }
 }

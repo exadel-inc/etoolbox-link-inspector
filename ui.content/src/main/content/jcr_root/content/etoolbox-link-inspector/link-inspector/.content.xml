@@ -60,7 +60,7 @@
                         granite:rel="etoolbox-link-inspector"
                         jcr:primaryType="nt:unstructured"
                         sling:resourceType="granite/ui/components/coral/foundation/table"
-                        src="/content/etoolbox-link-inspector/link-inspector/jcr:content/views/container/items/table{.offset,limit}.html{+id}?page=${param.page}"
+                        src="/content/etoolbox-link-inspector/link-inspector/jcr:content/views/container/items/table{.offset,limit}.html{+id}?page=${param.page}&amp;type=${param.type}"
                         itemprop="item"
                         limit="{Long}50"
                         layoutId="list"
@@ -139,12 +139,22 @@
                         title="Replace By Pattern"
                         granite:id="elc-replace-by-pattern"
                         variant="minimal"/>
+                <filters
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="granite/ui/components/coral/foundation/collection/action"
+                        action="cq-admin.etoolbox.linkinspector.action.filter-options"
+                        icon="filter"
+                        rel="etoolbox-link-inspector-filter-options"
+                        target=".etoolbox-link-inspector"
+                        text="Filters"
+                        title="Filters"
+                        variant="primary"/>
             </primary>
             <secondary jcr:primaryType="nt:unstructured">
                 <options
                         jcr:primaryType="nt:unstructured"
                         sling:resourceType="granite/ui/components/coral/foundation/collection/action"
-                        action="cq-admin.etoolbox.linkinspector.action.filter-options"
+                        action="cq-admin.etoolbox.linkinspector.action.conf-options"
                         icon="gears"
                         rel="etoolbox-link-inspector-filter-options"
                         target=".etoolbox-link-inspector"

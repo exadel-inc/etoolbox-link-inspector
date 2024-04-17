@@ -158,8 +158,8 @@ public class ReplaceByPatternServlet extends SlingAllMethodsServlet {
         LOG.info("Starting replacement by pattern, linkPattern: {}, replacement: {}", linkPattern, replacement);
         try {
             ResourceResolver resourceResolver = request.getResourceResolver();
-            List<GridResource> filteredGridResources = dataFeedService.dataFeedToGridResources(page)
-                    .stream().filter(gridResource -> selectedItems.contains(gridResource.getPropertyLocation()))
+            List<GridResource> filteredGridResources = dataFeedService.dataFeedToGridResources()
+                    .stream().filter(gridResource -> selectedItems.contains("ad"))
                     .collect(Collectors.toList());
             List<UpdatedItem> updatedItems =
                     processResources(filteredGridResources, isDryRun, isBackup, linkPattern, replacement, resourceResolver);
@@ -340,7 +340,7 @@ public class ReplaceByPatternServlet extends SlingAllMethodsServlet {
             dataFeedService.modifyDataFeed(updatedItems.stream().collect(Collectors.toMap(
                 UpdatedItem::getPropertyLocation,
                 UpdatedItem::getUpdatedLink
-            )), page);
+            )));
         }
     }
 

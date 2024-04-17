@@ -32,6 +32,7 @@ import java.util.stream.Collectors;
 public class GridDataSourceImpl implements GridDataSource {
     private static final Logger LOG = LoggerFactory.getLogger(GridDataSourceImpl.class);
     private static final int DEFAULT_PAGE_NUMBER = 1;
+    private static final int DEFAULT_PAGE_VALUES_SIZE = 500;
 
     @Reference
     private DataFeedService dataFeedService;
@@ -40,11 +41,14 @@ public class GridDataSourceImpl implements GridDataSource {
      * {@inheritDoc}
      */
     @Override
-    public DataSource getDataSource(String page, String limit, String offset) {
+    public DataSource getDataSource(String page, String limit, String offset, String type) {
         LOG.debug("GridDataSource initialization");
 
-        List<Resource> resources = NumberUtils.isNumber(page) ? dataFeedService.dataFeedToResources(Integer.parseInt(page))
-                : dataFeedService.dataFeedToResources(DEFAULT_PAGE_NUMBER);
+        int pageNumber = NumberUtils.isNumber(page) ? Integer.parseInt(page) : DEFAULT_PAGE_NUMBER;
+
+        List<Resource> resources = dataFeedService.dataFeedToResources(type).stream()
+                .skip((long) DEFAULT_PAGE_VALUES_SIZE * (--pageNumber))
+                .limit(DEFAULT_PAGE_VALUES_SIZE).collect(Collectors.toList());
 
         if (NumberUtils.isNumber(offset)) {
             resources = resources.stream().skip(Long.parseLong(offset)).collect(Collectors.toList());

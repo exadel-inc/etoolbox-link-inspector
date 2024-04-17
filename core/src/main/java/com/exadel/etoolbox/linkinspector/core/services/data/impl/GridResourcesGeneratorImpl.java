@@ -268,18 +268,20 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
     }
 
     private boolean isAllowedErrorCode(int linkStatusCode) {
-        int[] allowedStatusCodes = uiConfigService.getStatusCodes();
+        return true;
 
-        if (ArrayUtils.isEmpty(allowedStatusCodes) ||
-                (allowedStatusCodes.length == 1 && allowedStatusCodes[0] < 0)) {
-            return true;
-        }
-        for (int allowedStatusCode : allowedStatusCodes) {
-            if (allowedStatusCode == linkStatusCode) {
-                return true;
-            }
-        }
-        return false;
+//        int[] allowedStatusCodes = uiConfigService.getStatusCodes();
+//
+//        if (ArrayUtils.isEmpty(allowedStatusCodes) ||
+//                (allowedStatusCodes.length == 1 && allowedStatusCodes[0] < 0)) {
+//            return true;
+//        }
+//        for (int allowedStatusCode : allowedStatusCodes) {
+//            if (allowedStatusCode == linkStatusCode) {
+//                return true;
+//            }
+//        }
+//        return false;
     }
 
     private boolean isAllowedReplicationStatus(Resource resource) {
@@ -362,7 +364,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
         stats.put(GenerationStatsProps.PN_REPORT_LINKS_TYPE, uiConfigService.getLinksType());
         stats.put(GenerationStatsProps.PN_EXCLUDED_LINK_PATTERNS, getExcludedLinksPatterns());
         stats.put(GenerationStatsProps.PN_EXCLUDED_TAGS, uiConfigService.isExcludeTags());
-        stats.put(GenerationStatsProps.PN_ALLOWED_STATUS_CODES, uiConfigService.getStatusCodes());
+//        stats.put(GenerationStatsProps.PN_ALLOWED_STATUS_CODES, uiConfigService.getStatusCodes());
 
         stats.put(GenerationStatsProps.PN_ALL_INTERNAL_LINKS, allLinksCounter.getInternalLinks());
         stats.put(GenerationStatsProps.PN_BROKEN_INTERNAL_LINKS, brokenLinksCounter.getInternalLinks());

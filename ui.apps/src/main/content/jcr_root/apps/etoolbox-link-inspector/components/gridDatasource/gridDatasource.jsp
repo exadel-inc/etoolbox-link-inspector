@@ -22,6 +22,7 @@
     String limit = cfg.get("limit", String.class);
     String pageNumber = request.getParameter("page");
     String offset = request.getParameter("offset");
+    String type = request.getParameter("type");
 
     String[] selectors = slingRequest.getRequestPathInfo().getSelectors();
 
@@ -31,5 +32,5 @@
     }
 
     GridDataSource service = (GridDataSource) sling.getService(GridDataSource.class);
-    request.setAttribute(DataSource.class.getName(), service.getDataSource(pageNumber, limit, offset));
+    request.setAttribute(DataSource.class.getName(), service.getDataSource(pageNumber, limit, offset, type));
 %>

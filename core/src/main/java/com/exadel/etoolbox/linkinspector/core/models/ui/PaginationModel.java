@@ -12,7 +12,9 @@ import org.apache.sling.models.annotations.injectorspecific.Self;
 import org.apache.sling.models.annotations.injectorspecific.SlingObject;
 
 import javax.annotation.PostConstruct;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 /**
  * Represents the model with pagination logic.
@@ -48,9 +50,12 @@ public class PaginationModel {
                 .orElse(DEFAULT_PAGE_NUMBER);
 
         size = Optional
-                .ofNullable(resourceResolver.getResource(DataFeedService.CSV_REPORT_NODE_PATH))
+                .ofNullable(resourceResolver.getResource("/content/etoolbox-link-inspector/data/stats"))
                 .map(Resource::getValueMap)
-                .map(map -> map.get(REPORTS_NODE_PROPERTY_SIZE, Integer.class))
+                .map(map -> Stream.of(map.get("brokenExternalLinks", Integer.class), map.get("brokenInternalLinks", Integer.class))
+                .filter(Objects::nonNull)
+                .reduce(0, Integer::sum))
+                .map(sum -> sum/500)
                 .orElse(DEFAULT_NUMBER_OF_REPORTS);
     }
 
