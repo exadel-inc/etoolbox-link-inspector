@@ -16,20 +16,17 @@ package com.exadel.etoolbox.linkinspector.core.services.data.impl;
 
 import com.exadel.etoolbox.linkinspector.core.services.ExternalLinkChecker;
 import com.exadel.etoolbox.linkinspector.core.services.data.GenerationStatsProps;
-import com.exadel.etoolbox.linkinspector.core.services.data.UiConfigService;
+import com.exadel.etoolbox.linkinspector.core.services.data.ConfigService;
 import com.exadel.etoolbox.linkinspector.core.services.ext.CustomLinkResolver;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.LinkHelper;
 import com.exadel.etoolbox.linkinspector.core.services.util.CsvUtil;
 import com.exadel.etoolbox.linkinspector.core.services.data.GridResourcesGenerator;
-import com.exadel.etoolbox.linkinspector.core.services.data.UiConfigService;
 import com.exadel.etoolbox.linkinspector.core.services.data.models.GridResource;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.CsvHelper;
-import com.exadel.etoolbox.linkinspector.core.services.helpers.LinkHelper;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.RepositoryHelper;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.impl.CsvHelperImpl;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.impl.LinkHelperImpl;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.impl.RepositoryHelperImpl;
-import com.exadel.etoolbox.linkinspector.core.services.util.CsvUtil;
 import com.exadel.etoolbox.linkinspector.core.services.util.LinkInspectorResourceUtil;
 import io.wcm.testing.mock.aem.junit5.AemContext;
 import io.wcm.testing.mock.aem.junit5.AemContextExtension;
@@ -64,7 +61,7 @@ class DataFeedServiceImplTest {
     private static final String REPOSITORY_HELPER_FIELD = "repositoryHelper";
     private static final String CSV_HELPER_FIELD = "csvHelper";
     private static final String LINK_HELPER_FIELD = "linkHelper";
-    private static final String UI_CONFIG_FIELD = "uiConfigService";
+    private static final String CONFIG_FIELD = "configService";
     private static final String CUSTOM_LINK_FIELD = "customLinkResolver";
     private static final String EXTERNAL_LINK_CHECKER_FIELD = "externalLinkChecker";
 
@@ -189,15 +186,15 @@ class DataFeedServiceImplTest {
         when(customLinkResolver.getLinks(anyString())).thenReturn(new ArrayList<>());
         PrivateAccessor.setField(linkHelper, CUSTOM_LINK_FIELD, customLinkResolver);
         PrivateAccessor.setField(gridResourcesGenerator, LINK_HELPER_FIELD, linkHelper);
-        UiConfigService uiConfigService = mock(UiConfigServiceImpl.class);
-        when(uiConfigService.getExcludedLinksPatterns()).thenReturn(new String[0]);
-        when(uiConfigService.getSearchPath()).thenReturn(TEST_FOLDER_PATH);
-        when(uiConfigService.getExcludedPaths()).thenReturn(new String[0]);
-        when(uiConfigService.getExcludedProperties()).thenReturn(new String[0]);
-        when(uiConfigService.getLinksType()).thenReturn(GenerationStatsProps.REPORT_LINKS_TYPE_ALL);
-        when(uiConfigService.getStatusCodes()).thenReturn(new int[]{HttpStatus.SC_NOT_FOUND});
-        when(uiConfigService.getThreadsPerCore()).thenReturn(60);
-        PrivateAccessor.setField(gridResourcesGenerator, UI_CONFIG_FIELD, uiConfigService);
+        ConfigService configService = mock(ConfigServiceImpl.class);
+        when(configService.getExcludedLinksPatterns()).thenReturn(new String[0]);
+        when(configService.getSearchPath()).thenReturn(TEST_FOLDER_PATH);
+        when(configService.getExcludedPaths()).thenReturn(new String[0]);
+        when(configService.getExcludedProperties()).thenReturn(new String[0]);
+        when(configService.getLinksType()).thenReturn(GenerationStatsProps.REPORT_LINKS_TYPE_ALL);
+        when(configService.getStatusCodes()).thenReturn(new int[]{HttpStatus.SC_NOT_FOUND});
+        when(configService.getThreadsPerCore()).thenReturn(60);
+        PrivateAccessor.setField(gridResourcesGenerator, CONFIG_FIELD, configService);
 
         when(externalLinkChecker.checkLink(anyString())).thenReturn(HttpStatus.SC_NOT_FOUND);
 

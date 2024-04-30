@@ -7,6 +7,5 @@ import java.util.List;
 import java.util.stream.Stream;
 
 public interface CustomLinkResolver {
-    List<LinkTypeProvider> getLinkTypeProviders();
     List<Link> getLinks(String text);
 }

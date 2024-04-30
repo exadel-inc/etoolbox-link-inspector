@@ -15,7 +15,7 @@
 package com.exadel.etoolbox.linkinspector.core.services.data.impl;
 
 import com.adobe.granite.ui.components.ds.ValueMapResource;
-import com.exadel.etoolbox.linkinspector.api.dto.LinkStatus;
+import com.exadel.etoolbox.linkinspector.api.entity.LinkStatus;
 import com.exadel.etoolbox.linkinspector.core.models.Link;
 import com.exadel.etoolbox.linkinspector.core.models.ui.GridViewItem;
 import com.exadel.etoolbox.linkinspector.core.services.data.DataFeedService;

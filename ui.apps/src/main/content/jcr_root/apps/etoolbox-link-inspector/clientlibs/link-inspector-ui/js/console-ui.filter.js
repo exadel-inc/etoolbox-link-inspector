@@ -113,8 +113,8 @@
         $('<p>').html("Links type (<span class='dialog-description'>The type of links in the report</span>)").appendTo(dialog.content);
         dialog.content.appendChild(linksTypeSelect);
 
-        const $allowedCustomLinkTypeCheckbox = $('<coral-checkbox value="allowedCustomLinkType">Allow custom link type(<span class=\'dialog-description\'>If checked custom link types will be included to the reports</span>)</coral-checkbox>');
-        $allowedCustomLinkTypeCheckbox.appendTo(dialog.content);
+        const $customTypeAllowedCheckbox = $('<coral-checkbox value="customTypeAllowed">Allow custom link type(<span class=\'dialog-description\'>If checked custom link types will be included to the reports</span>)</coral-checkbox>');
+        $customTypeAllowedCheckbox.appendTo(dialog.content);
 
         const $excludeTagsCheckbox = $('<coral-checkbox value="excludeTags">Exclude tags(<span class=\'dialog-description\'>If checked, the internal links starting with /content/cq:tags will be excluded</span>)</coral-checkbox>');
         $excludeTagsCheckbox.appendTo(dialog.content);
@@ -142,7 +142,7 @@
             $excludeTagsCheckbox.attr("checked", data.excludeTags);
             populateMultifield(statusCodesMultifield, data.statusCodes);
             $threadsPerCoreField.val(data.threadsPerCore);
-            $allowedCustomLinkTypeCheckbox.attr("checked", data.allowedCustomLinkType);
+            $customTypeAllowedCheckbox.attr("checked", data.customTypeAllowed);
         })
 
         function createMultifield(){
@@ -198,8 +198,8 @@
                     "statusCodes": getMultifieldValues(statusCodesMultifield),
                     "statusCodes@TypeHint": "String[]",
                     "threadsPerCore": $threadsPerCoreField.val(),
-                    "allowedCustomLinkType":!!$allowedCustomLinkTypeCheckbox.attr("checked"),
-                    "allowedCustomLinkType@TypeHint": "Boolean"
+                    "customTypeAllowed":!!$customTypeAllowedCheckbox.attr("checked"),
+                    "customTypeAllowed@TypeHint": "Boolean"
                 },
                 dataType: "json",
                 encode: true

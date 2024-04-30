@@ -15,7 +15,7 @@
 package com.exadel.etoolbox.linkinspector.core.services.helpers.impl;
 
 import com.exadel.etoolbox.linkinspector.core.models.Link;
-import com.exadel.etoolbox.linkinspector.api.dto.LinkStatus;
+import com.exadel.etoolbox.linkinspector.api.entity.LinkStatus;
 import com.exadel.etoolbox.linkinspector.core.services.ExternalLinkChecker;
 import com.exadel.etoolbox.linkinspector.core.services.ext.CustomLinkResolver;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.LinkHelper;
@@ -164,10 +164,6 @@ public class LinkHelperImpl implements LinkHelper {
             LOG.trace("Start validation of the external link {}", link.getHref());
             link.setStatus(validateExternalLink(link.getHref()));
             LOG.trace("Completed validation of the external link {}", link.getHref());
-        } else if (link.getType() == Link.Type.CUSTOM){
-            LOG.trace("Start validation of the custom({}) link {}", link.getCustomLinkTypeProvider().getName(), link.getHref());
-            link.setStatus(link.getCustomLinkTypeProvider().validate(link.getHref()));
-            LOG.trace("Completed validation of the custom({}) link {}", link.getCustomLinkTypeProvider().getName(), link.getHref());
         }
         return link.getStatus();
     }

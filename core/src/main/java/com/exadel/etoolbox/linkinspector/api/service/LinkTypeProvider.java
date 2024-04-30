@@ -1,6 +1,6 @@
 package com.exadel.etoolbox.linkinspector.api.service;
 
-import com.exadel.etoolbox.linkinspector.api.dto.LinkStatus;
+import com.exadel.etoolbox.linkinspector.api.entity.LinkStatus;
 
 public interface LinkTypeProvider {
     /**

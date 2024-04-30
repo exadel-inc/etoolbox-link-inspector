@@ -2,7 +2,7 @@ package com.exadel.etoolbox.linkinspector.core.services.data;
 
 import java.time.ZonedDateTime;
 
-public interface UiConfigService {
+public interface ConfigService {
     String[] getExcludedLinksPatterns();
     String getSearchPath();
     String[] getExcludedPaths();
@@ -11,7 +11,7 @@ public interface UiConfigService {
     ZonedDateTime getLastModified();
     String[] getExcludedProperties();
     String getLinksType();
-    boolean allowedCustomLinkType();
+    boolean customTypeAllowed();
     boolean isExcludeTags();
     int[] getStatusCodes();
     int getThreadsPerCore();

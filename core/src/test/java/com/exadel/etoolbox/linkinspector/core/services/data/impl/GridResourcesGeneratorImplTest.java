@@ -19,7 +19,7 @@ import com.exadel.etoolbox.linkinspector.core.models.Link;
 import com.exadel.etoolbox.linkinspector.core.services.ExternalLinkChecker;
 import com.exadel.etoolbox.linkinspector.core.services.data.DataFeedService;
 import com.exadel.etoolbox.linkinspector.core.services.data.GenerationStatsProps;
-import com.exadel.etoolbox.linkinspector.core.services.data.UiConfigService;
+import com.exadel.etoolbox.linkinspector.core.services.data.ConfigService;
 import com.exadel.etoolbox.linkinspector.core.services.data.models.GridResource;
 import com.exadel.etoolbox.linkinspector.core.services.ext.CustomLinkResolver;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.CsvHelper;
@@ -72,7 +72,7 @@ class GridResourcesGeneratorImplTest {
     private static final String REPOSITORY_HELPER_FIELD = "repositoryHelper";
     private static final String CSV_HELPER_FIELD = "csvHelper";
     private static final String LINK_HELPER_FIELD = "linkHelper";
-    private static final String UI_CONFIG_FIELD = "uiConfigService";
+    private static final String CONFIG_FIELD = "configService";
     private static final String CUSTOM_LINK_FIELD = "customLinkResolver";
     private static final String REAL_DATAFEED_PATH = "/content/etoolbox-link-inspector/data/datafeed.json";
     private static final String EXECUTOR_SERVICE_FIELD = "executorService";
@@ -136,7 +136,7 @@ class GridResourcesGeneratorImplTest {
     private final GridResourcesGeneratorImpl fixture = new GridResourcesGeneratorImpl();
 
     private ExternalLinkChecker externalLinkChecker;
-    private UiConfigService uiConfigService;
+    private ConfigService configService;
 
     @BeforeEach
     void setup() throws NoSuchFieldException {
@@ -150,17 +150,17 @@ class GridResourcesGeneratorImplTest {
 
         PrivateAccessor.setField(fixture, LINK_HELPER_FIELD, linkHelper);
 
-        uiConfigService = mock(UiConfigServiceImpl.class);
-        when(uiConfigService.getExcludedLinksPatterns()).thenReturn(new String[]{TEST_EXCLUDED_PATTERN});
-        when(uiConfigService.getSearchPath()).thenReturn(TEST_FOLDER_PATH);
-        when(uiConfigService.getExcludedPaths()).thenReturn(new String[]{TEST_EXCLUDED_PATH});
-        when(uiConfigService.getLastModified()).thenReturn(TEST_LAST_MODIFIED_BOUNDARY);
-        when(uiConfigService.getExcludedProperties()).thenReturn(new String[]{TEST_EXCLUDED_PROPERTY});
-        when(uiConfigService.getLinksType()).thenReturn(GenerationStatsProps.REPORT_LINKS_TYPE_ALL);
-        when(uiConfigService.isExcludeTags()).thenReturn(true);
-        when(uiConfigService.getStatusCodes()).thenReturn(new int[]{HttpStatus.SC_NOT_FOUND});
-        when(uiConfigService.getThreadsPerCore()).thenReturn(60);
-        PrivateAccessor.setField(fixture, UI_CONFIG_FIELD, uiConfigService);
+        configService = mock(ConfigServiceImpl.class);
+        when(configService.getExcludedLinksPatterns()).thenReturn(new String[]{TEST_EXCLUDED_PATTERN});
+        when(configService.getSearchPath()).thenReturn(TEST_FOLDER_PATH);
+        when(configService.getExcludedPaths()).thenReturn(new String[]{TEST_EXCLUDED_PATH});
+        when(configService.getLastModified()).thenReturn(TEST_LAST_MODIFIED_BOUNDARY);
+        when(configService.getExcludedProperties()).thenReturn(new String[]{TEST_EXCLUDED_PROPERTY});
+        when(configService.getLinksType()).thenReturn(GenerationStatsProps.REPORT_LINKS_TYPE_ALL);
+        when(configService.isExcludeTags()).thenReturn(true);
+        when(configService.getStatusCodes()).thenReturn(new int[]{HttpStatus.SC_NOT_FOUND});
+        when(configService.getThreadsPerCore()).thenReturn(60);
+        PrivateAccessor.setField(fixture, CONFIG_FIELD, configService);
     }
 
     @Test
@@ -176,7 +176,7 @@ class GridResourcesGeneratorImplTest {
     void testGenerateFilteredGridResources() throws NoSuchFieldException, IOException, URISyntaxException, RepositoryException {
         context.load().json(TEST_RESOURCES_TREE_PATH, TEST_FOLDER_PATH);
         when(externalLinkChecker.checkLink(anyString())).thenReturn(HttpStatus.SC_NOT_FOUND);
-        when(uiConfigService.getExcludedLinksPatterns()).thenReturn(new String[]{TEST_UI_EXCLUDED_PATTERN, TEST_EXCLUDED_PATTERN});
+        when(configService.getExcludedLinksPatterns()).thenReturn(new String[]{TEST_UI_EXCLUDED_PATTERN, TEST_EXCLUDED_PATTERN});
 
         List<GridResource> gridResources = fixture.generateGridResources(GRID_RESOURCE_TYPE, context.resourceResolver());
         Pattern pattern = Pattern.compile(TEST_UI_EXCLUDED_PATTERN);
@@ -207,7 +207,7 @@ class GridResourcesGeneratorImplTest {
 
     @Test
     void testAllowedStatusCodes_emptyConfig() throws IOException, URISyntaxException, NoSuchFieldException, RepositoryException {
-        when(uiConfigService.getStatusCodes()).thenReturn(new int[]{});
+        when(configService.getStatusCodes()).thenReturn(new int[]{});
 
         context.load().json(TEST_RESOURCES_TREE_PATH, TEST_FOLDER_PATH);
         when(externalLinkChecker.checkLink(anyString())).thenReturn(HttpStatus.SC_BAD_REQUEST);
@@ -246,7 +246,7 @@ class GridResourcesGeneratorImplTest {
 
     @Test
     void testExcludedPaths_emptyConfig() throws IOException, URISyntaxException {
-        when(uiConfigService.getExcludedPaths()).thenReturn(ArrayUtils.EMPTY_STRING_ARRAY);
+        when(configService.getExcludedPaths()).thenReturn(ArrayUtils.EMPTY_STRING_ARRAY);
         context.load().json(TEST_RESOURCES_TREE_PATH, TEST_FOLDER_PATH);
         when(externalLinkChecker.checkLink(anyString())).thenReturn(HttpStatus.SC_BAD_REQUEST);
 
@@ -264,9 +264,9 @@ class GridResourcesGeneratorImplTest {
 
     @Test
     void testActivationCheck() throws ParseException {
-        when(uiConfigService.getExcludedPaths()).thenReturn(new String[]{TEST_EXCLUDED_PATH});
-        when(uiConfigService.isActivatedContent()).thenReturn(true);
-        when(uiConfigService.isSkipContentModifiedAfterActivation()).thenReturn(true);
+        when(configService.getExcludedPaths()).thenReturn(new String[]{TEST_EXCLUDED_PATH});
+        when(configService.isActivatedContent()).thenReturn(true);
+        when(configService.isSkipContentModifiedAfterActivation()).thenReturn(true);
         context.load().json(TEST_REPLICATED_RESOURCES_TREE_PATH, TEST_FOLDER_PATH);
 
         Resource rootResource = context.resourceResolver().getResource(TEST_FOLDER_PATH);

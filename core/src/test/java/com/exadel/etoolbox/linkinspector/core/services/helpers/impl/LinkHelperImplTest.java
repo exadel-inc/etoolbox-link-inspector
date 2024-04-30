@@ -15,7 +15,7 @@
 package com.exadel.etoolbox.linkinspector.core.services.helpers.impl;
 
 import com.exadel.etoolbox.linkinspector.core.models.Link;
-import com.exadel.etoolbox.linkinspector.api.dto.LinkStatus;
+import com.exadel.etoolbox.linkinspector.api.entity.LinkStatus;
 import com.exadel.etoolbox.linkinspector.core.services.ExternalLinkChecker;
 import com.exadel.etoolbox.linkinspector.core.services.ext.CustomLinkResolver;
 import io.wcm.testing.mock.aem.junit5.AemContext;

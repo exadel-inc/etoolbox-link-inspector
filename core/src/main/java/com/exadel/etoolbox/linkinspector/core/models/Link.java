@@ -14,9 +14,11 @@
 
 package com.exadel.etoolbox.linkinspector.core.models;
 
-import com.exadel.etoolbox.linkinspector.api.dto.LinkStatus;
+import com.exadel.etoolbox.linkinspector.api.entity.LinkStatus;
 import com.exadel.etoolbox.linkinspector.api.service.LinkTypeProvider;
 import org.apache.commons.httpclient.HttpStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -43,6 +45,7 @@ public final class Link {
             return value;
         }
     }
+    private static final Logger LOG = LoggerFactory.getLogger(Link.class);
 
     /**
      * Address of this link
@@ -85,7 +88,7 @@ public final class Link {
      * @return the status code if presents, or 404 otherwise
      */
     public int getStatusCode() {
-        return Optional.ofNullable(status)
+        return Optional.ofNullable(getStatus())
                 .map(LinkStatus::getStatusCode)
                 .orElse(HttpStatus.SC_NOT_FOUND);
     }
@@ -95,7 +98,7 @@ public final class Link {
      * @return the status message if presents, or 404 message otherwise
      */
     public String getStatusMessage() {
-        return Optional.ofNullable(status)
+        return Optional.ofNullable(getStatus())
                 .map(LinkStatus::getStatusMessage)
                 .orElse(HttpStatus.getStatusText(HttpStatus.SC_NOT_FOUND));
     }
@@ -105,6 +108,11 @@ public final class Link {
      * @return the status based on a result of checking link's validity
      */
     public LinkStatus getStatus() {
+        if(getType() == Link.Type.CUSTOM && status == null){
+            LOG.trace("Start validation of the custom({}) link {}", getCustomLinkTypeProvider().getName(), getHref());
+            status = getCustomLinkTypeProvider().validate(getHref());
+            LOG.trace("Completed validation of the custom({}) link {}", getCustomLinkTypeProvider().getName(), getHref());
+        }
         return status;
     }
 
