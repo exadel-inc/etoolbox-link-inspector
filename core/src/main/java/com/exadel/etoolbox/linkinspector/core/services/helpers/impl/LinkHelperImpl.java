@@ -15,8 +15,9 @@
 package com.exadel.etoolbox.linkinspector.core.services.helpers.impl;
 
 import com.exadel.etoolbox.linkinspector.core.models.Link;
-import com.exadel.etoolbox.linkinspector.core.models.LinkStatus;
+import com.exadel.etoolbox.linkinspector.api.entity.LinkStatus;
 import com.exadel.etoolbox.linkinspector.core.services.ExternalLinkChecker;
+import com.exadel.etoolbox.linkinspector.core.services.ext.CustomLinkResolver;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.LinkHelper;
 import com.exadel.etoolbox.linkinspector.core.services.util.LinkInspectorResourceUtil;
 import org.apache.commons.httpclient.ConnectionPoolTimeoutException;
@@ -41,10 +42,7 @@ import java.net.SocketTimeoutException;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -75,6 +73,8 @@ public class LinkHelperImpl implements LinkHelper {
 
     @Reference
     private ExternalLinkChecker externalLinkChecker;
+    @Reference
+    private CustomLinkResolver customLinkResolver;
 
     private String internalLinksHost;
 
@@ -210,6 +210,10 @@ public class LinkHelperImpl implements LinkHelper {
         Stream<Link> externalLinksStream = getExternalLinksFromString(text)
                 .map(linkString -> new Link(linkString, Link.Type.EXTERNAL))
                 .distinct();
+        if(customLinkResolver != null){
+            List<Link> customLinks = customLinkResolver.getLinks(text);
+            return Stream.concat(Stream.concat(internalLinksStream, externalLinksStream), customLinks.stream());
+        }
         return Stream.concat(internalLinksStream, externalLinksStream);
     }
 

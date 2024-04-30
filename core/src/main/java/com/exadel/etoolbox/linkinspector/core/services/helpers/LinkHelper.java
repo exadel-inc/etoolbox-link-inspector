@@ -15,7 +15,7 @@
 package com.exadel.etoolbox.linkinspector.core.services.helpers;
 
 import com.exadel.etoolbox.linkinspector.core.models.Link;
-import com.exadel.etoolbox.linkinspector.core.models.LinkStatus;
+import com.exadel.etoolbox.linkinspector.api.entity.LinkStatus;
 import com.exadel.etoolbox.linkinspector.core.services.ExternalLinkChecker;
 import org.apache.sling.api.resource.ResourceResolver;
 

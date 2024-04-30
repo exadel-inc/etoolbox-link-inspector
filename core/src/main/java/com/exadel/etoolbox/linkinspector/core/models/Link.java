@@ -14,7 +14,11 @@
 
 package com.exadel.etoolbox.linkinspector.core.models;
 
+import com.exadel.etoolbox.linkinspector.api.entity.LinkStatus;
+import com.exadel.etoolbox.linkinspector.api.service.LinkTypeProvider;
 import org.apache.commons.httpclient.HttpStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -28,7 +32,8 @@ public final class Link {
      */
     public enum Type {
         INTERNAL("Internal"),
-        EXTERNAL("External");
+        EXTERNAL("External"),
+        CUSTOM("Custom");
 
         private final String value;
 
@@ -40,6 +45,7 @@ public final class Link {
             return value;
         }
     }
+    private static final Logger LOG = LoggerFactory.getLogger(Link.class);
 
     /**
      * Address of this link
@@ -53,10 +59,20 @@ public final class Link {
      * The status is set based on a result of checking link's validity
      */
     private LinkStatus status;
+    /**
+     * The custom link type provider
+     */
+    private LinkTypeProvider linkTypeProvider;
 
     public Link(String href, Type type) {
         this.href = href;
         this.type = type;
+    }
+
+    public Link(LinkTypeProvider linkTypeProvider, String href){
+        this.type = Type.CUSTOM;
+        this.linkTypeProvider = linkTypeProvider;
+        this.href = href;
     }
 
     public String getHref() {
@@ -72,7 +88,7 @@ public final class Link {
      * @return the status code if presents, or 404 otherwise
      */
     public int getStatusCode() {
-        return Optional.ofNullable(status)
+        return Optional.ofNullable(getStatus())
                 .map(LinkStatus::getStatusCode)
                 .orElse(HttpStatus.SC_NOT_FOUND);
     }
@@ -82,7 +98,7 @@ public final class Link {
      * @return the status message if presents, or 404 message otherwise
      */
     public String getStatusMessage() {
-        return Optional.ofNullable(status)
+        return Optional.ofNullable(getStatus())
                 .map(LinkStatus::getStatusMessage)
                 .orElse(HttpStatus.getStatusText(HttpStatus.SC_NOT_FOUND));
     }
@@ -92,6 +108,11 @@ public final class Link {
      * @return the status based on a result of checking link's validity
      */
     public LinkStatus getStatus() {
+        if(getType() == Link.Type.CUSTOM && status == null){
+            LOG.trace("Start validation of the custom({}) link {}", getCustomLinkTypeProvider().getName(), getHref());
+            status = getCustomLinkTypeProvider().validate(getHref());
+            LOG.trace("Completed validation of the custom({}) link {}", getCustomLinkTypeProvider().getName(), getHref());
+        }
         return status;
     }
 
@@ -101,6 +122,14 @@ public final class Link {
      */
     public void setStatus(LinkStatus status) {
         this.status = status;
+    }
+
+    /**
+     * Gets the {@link LinkTypeProvider} representing the custom link type of this link
+     * @return custom link type
+     */
+    public LinkTypeProvider getCustomLinkTypeProvider() {
+        return linkTypeProvider;
     }
 
     @Override

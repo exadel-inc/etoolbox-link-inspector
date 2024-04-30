@@ -15,8 +15,9 @@
 package com.exadel.etoolbox.linkinspector.core.services.helpers.impl;
 
 import com.exadel.etoolbox.linkinspector.core.models.Link;
-import com.exadel.etoolbox.linkinspector.core.models.LinkStatus;
+import com.exadel.etoolbox.linkinspector.api.entity.LinkStatus;
 import com.exadel.etoolbox.linkinspector.core.services.ExternalLinkChecker;
+import com.exadel.etoolbox.linkinspector.core.services.ext.CustomLinkResolver;
 import io.wcm.testing.mock.aem.junit5.AemContext;
 import io.wcm.testing.mock.aem.junit5.AemContextExtension;
 import junitx.util.PrivateAccessor;
@@ -33,6 +34,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.SocketTimeoutException;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -51,6 +53,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(AemContextExtension.class)
 class LinkHelperImplTest {
     private static final String EXTERNAL_LINK_CHECKER_FIELD = "externalLinkChecker";
+    private static final String CUSTOM_LINK_FIELD = "customLinkResolver";
 
     private static final String VALID_INTERNAL = "/content/test";
     private static final String VALID_INTERNAL_EXTENSION = "/content/test.png";
@@ -83,6 +86,10 @@ class LinkHelperImplTest {
     void setup() throws NoSuchFieldException {
         externalLinkChecker = mock(ExternalLinkChecker.class);
         PrivateAccessor.setField(linkHelper, EXTERNAL_LINK_CHECKER_FIELD, externalLinkChecker);
+
+        CustomLinkResolver customLinkResolver = mock(CustomLinkResolver.class);
+        when(customLinkResolver.getLinks(anyString())).thenReturn(new ArrayList<>());
+        PrivateAccessor.setField(linkHelper, CUSTOM_LINK_FIELD, customLinkResolver);
     }
 
     @Test

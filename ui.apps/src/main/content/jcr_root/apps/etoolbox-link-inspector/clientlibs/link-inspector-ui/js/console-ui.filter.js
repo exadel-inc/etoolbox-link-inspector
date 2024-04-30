@@ -113,6 +113,9 @@
         $('<p>').html("Links type (<span class='dialog-description'>The type of links in the report</span>)").appendTo(dialog.content);
         dialog.content.appendChild(linksTypeSelect);
 
+        const $customTypeAllowedCheckbox = $('<coral-checkbox value="customTypeAllowed">Allow custom link type(<span class=\'dialog-description\'>If checked custom link types will be included to the reports</span>)</coral-checkbox>');
+        $customTypeAllowedCheckbox.appendTo(dialog.content);
+
         const $excludeTagsCheckbox = $('<coral-checkbox value="excludeTags">Exclude tags(<span class=\'dialog-description\'>If checked, the internal links starting with /content/cq:tags will be excluded</span>)</coral-checkbox>');
         $excludeTagsCheckbox.appendTo(dialog.content);
 
@@ -139,6 +142,7 @@
             $excludeTagsCheckbox.attr("checked", data.excludeTags);
             populateMultifield(statusCodesMultifield, data.statusCodes);
             $threadsPerCoreField.val(data.threadsPerCore);
+            $customTypeAllowedCheckbox.attr("checked", data.customTypeAllowed);
         })
 
         function createMultifield(){
@@ -193,7 +197,9 @@
                     "excludeTags@TypeHint": "Boolean",
                     "statusCodes": getMultifieldValues(statusCodesMultifield),
                     "statusCodes@TypeHint": "String[]",
-                    "threadsPerCore": $threadsPerCoreField.val()
+                    "threadsPerCore": $threadsPerCoreField.val(),
+                    "customTypeAllowed":!!$customTypeAllowedCheckbox.attr("checked"),
+                    "customTypeAllowed@TypeHint": "Boolean"
                 },
                 dataType: "json",
                 encode: true
