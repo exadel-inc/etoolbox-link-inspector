@@ -14,6 +14,7 @@
 
 package com.exadel.etoolbox.linkinspector.core.services.data;
 
+import com.exadel.etoolbox.linkinspector.core.services.data.models.DataFilter;
 import com.exadel.etoolbox.linkinspector.core.services.data.models.GridResource;
 import org.apache.sling.api.resource.Resource;
 
@@ -42,7 +43,7 @@ public interface DataFeedService {
      *
      * @return the list of resources({@link Resource}) based on the data feed
      */
-    List<Resource> dataFeedToResources(String type);
+    List<Resource> dataFeedToResources(DataFilter filter);
 
     /**
      * Parses the data feed to the list of models({@link GridResource}). The number of output items is not limited.
@@ -52,5 +53,10 @@ public interface DataFeedService {
     List<GridResource> dataFeedToGridResources();
 
 
+    /**
+     * Method for modification links value in the data feed
+     *
+     * @param valuesMap - {@code Map<String, String>} property location as key and new url as value
+     */
     void modifyDataFeed(Map<String, String> valuesMap);
 }

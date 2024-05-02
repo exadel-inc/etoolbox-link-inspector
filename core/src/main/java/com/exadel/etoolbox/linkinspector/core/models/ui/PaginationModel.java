@@ -1,23 +1,21 @@
 package com.exadel.etoolbox.linkinspector.core.models.ui;
 
-import com.exadel.etoolbox.linkinspector.core.services.data.DataFeedService;
+import com.exadel.etoolbox.linkinspector.core.services.cache.GridResourcesCache;
+import com.exadel.etoolbox.linkinspector.core.services.data.models.GridResource;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.request.RequestParameter;
-import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.models.annotations.DefaultInjectionStrategy;
 import org.apache.sling.models.annotations.Model;
+import org.apache.sling.models.annotations.injectorspecific.OSGiService;
 import org.apache.sling.models.annotations.injectorspecific.Self;
 import org.apache.sling.models.annotations.injectorspecific.SlingObject;
 
 import javax.annotation.PostConstruct;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Stream;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Represents the model with pagination logic.
@@ -29,9 +27,13 @@ import java.util.stream.Stream;
 public class PaginationModel {
 
     private static final String REQUEST_PARAMETER_PAGE = "page";
-    private static final String REPORTS_NODE_PROPERTY_SIZE = "size";
+    private static final String REQUEST_PARAMETER_TYPE = "type";
+    private static final String REQUEST_PARAMETER_SUBSTRING = "substring";
     private static final int DEFAULT_PAGE_NUMBER = 1;
-    private static final int DEFAULT_NUMBER_OF_REPORTS = 0;
+    private static final int DEFAULT_PAGE_SIZE = 500;
+
+    @OSGiService
+    private GridResourcesCache cache;
 
     @SlingObject
     private ResourceResolver resourceResolver;
@@ -52,33 +54,24 @@ public class PaginationModel {
                 .map(Integer::parseInt)
                 .orElse(DEFAULT_PAGE_NUMBER);
 
-        String type = Optional
-                .ofNullable(request.getRequestParameter("type"))
+        String type = requestParameterToString(request.getRequestParameter(REQUEST_PARAMETER_TYPE));
+        String substring = requestParameterToString(request.getRequestParameter(REQUEST_PARAMETER_SUBSTRING));
+
+        List<GridResource> resources = cache
+                .getGridResourcesList()
+                .stream()
+                .filter(gridResource -> StringUtils.isBlank(type) || gridResource.getLink().getType().getValue().equalsIgnoreCase(type))
+                .filter(gridResource -> StringUtils.isBlank(substring) || gridResource.getLink().getHref().contains(substring))
+                .collect(Collectors.toList());
+
+        size = (int) Math.ceil((double) resources.size()/DEFAULT_PAGE_SIZE);
+    }
+
+    private String requestParameterToString(RequestParameter parameter) {
+        return Optional
+                .ofNullable(parameter)
                 .map(RequestParameter::getString)
                 .orElse(StringUtils.EMPTY);
-
-        if (StringUtils.isNotBlank(type)) {
-            Map<String, String> map = new HashMap<>();
-            map.put("external", "brokenExternalLinks");
-            map.put("internal", "brokenInternalLinks");
-
-            size = Optional
-                    .ofNullable(resourceResolver.getResource("/content/etoolbox-link-inspector/data/stats"))
-                    .map(Resource::getValueMap)
-                    .map(valueMap -> map.get(map.get(type)))
-                    .map(Integer::parseInt)
-                    .map(sum -> (int) Math.ceil((double) sum/500))
-                    .orElse(DEFAULT_NUMBER_OF_REPORTS);
-        } else {
-            size = Optional
-                    .ofNullable(resourceResolver.getResource("/content/etoolbox-link-inspector/data/stats"))
-                    .map(Resource::getValueMap)
-                    .map(map -> Stream.of(map.get("brokenExternalLinks", Integer.class), map.get("brokenInternalLinks", Integer.class))
-                            .filter(Objects::nonNull)
-                            .reduce(0, Integer::sum))
-                    .map(sum -> (int) Math.ceil((double) sum/500))
-                    .orElse(DEFAULT_NUMBER_OF_REPORTS);
-        }
     }
 
     public int getPage() {

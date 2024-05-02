@@ -138,10 +138,6 @@ public class GridResource {
         return resourceType;
     }
 
-//    public String getPropertyLocation() {
-//        return String.format("%s@%s", resourcePath, propertyName);
-//    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

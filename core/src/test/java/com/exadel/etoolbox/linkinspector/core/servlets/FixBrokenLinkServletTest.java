@@ -15,6 +15,7 @@
 package com.exadel.etoolbox.linkinspector.core.servlets;
 
 import com.exadel.etoolbox.linkinspector.core.models.LinkStatus;
+import com.exadel.etoolbox.linkinspector.core.services.data.DataFeedService;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.LinkHelper;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.RepositoryHelper;
 import io.wcm.testing.mock.aem.junit5.AemContext;
@@ -42,6 +43,7 @@ import static org.mockito.Mockito.*;
 class FixBrokenLinkServletTest {
     private static final String REPOSITORY_HELPER_FIELD = "repositoryHelper";
     private static final String LINK_HELPER_FIELD = "linkHelper";
+    private static final String DATA_FEED_SERVICE_FIELD = "dataFeedService";
 
     private static final String PATH_PARAM = "path";
     private static final String PROPERTY_NAME_PARAM = "propertyName";
@@ -64,6 +66,7 @@ class FixBrokenLinkServletTest {
     private LinkHelper linkHelper;
     private RepositoryHelper repositoryHelper;
     private ResourceResolver resourceResolver;
+    private DataFeedService dataFeedService;
 
     private MockSlingHttpServletRequest request;
     private MockSlingHttpServletResponse response;
@@ -73,7 +76,9 @@ class FixBrokenLinkServletTest {
         linkHelper = mock(LinkHelper.class);
         repositoryHelper = mock(RepositoryHelper.class);
         resourceResolver = mock(ResourceResolver.class);
+        dataFeedService = mock(DataFeedService.class);
         PrivateAccessor.setField(fixture, LINK_HELPER_FIELD, linkHelper);
+        PrivateAccessor.setField(fixture, DATA_FEED_SERVICE_FIELD, dataFeedService);
         PrivateAccessor.setField(fixture, REPOSITORY_HELPER_FIELD, repositoryHelper);
 
         request = context.request();

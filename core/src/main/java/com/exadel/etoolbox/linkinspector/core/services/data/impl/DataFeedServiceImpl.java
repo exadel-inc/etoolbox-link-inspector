@@ -15,15 +15,20 @@
 package com.exadel.etoolbox.linkinspector.core.services.data.impl;
 
 import com.adobe.granite.ui.components.ds.ValueMapResource;
+import com.exadel.etoolbox.linkinspector.core.models.Link;
+import com.exadel.etoolbox.linkinspector.core.models.LinkStatus;
 import com.exadel.etoolbox.linkinspector.core.models.ui.GridViewItem;
-import com.exadel.etoolbox.linkinspector.core.services.cache.LinkCache;
+import com.exadel.etoolbox.linkinspector.core.services.cache.GridResourcesCache;
 import com.exadel.etoolbox.linkinspector.core.services.data.DataFeedService;
 import com.exadel.etoolbox.linkinspector.core.services.data.GridResourcesGenerator;
+import com.exadel.etoolbox.linkinspector.core.services.data.models.DataFilter;
+import com.exadel.etoolbox.linkinspector.core.services.helpers.LinkHelper;
 import com.exadel.etoolbox.linkinspector.core.services.util.CsvUtil;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.RepositoryHelper;
 import com.exadel.etoolbox.linkinspector.core.services.data.models.GridResource;
 import com.exadel.etoolbox.linkinspector.core.services.util.JsonUtil;
 import com.exadel.etoolbox.linkinspector.core.services.util.LinkInspectorResourceUtil;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.StopWatch;
@@ -63,7 +68,10 @@ public class DataFeedServiceImpl implements DataFeedService {
     private GridResourcesGenerator gridResourcesGenerator;
 
     @Reference
-    private LinkCache linkCache;
+    private LinkHelper linkHelper;
+
+    @Reference
+    private GridResourcesCache gridResourcesCache;
 
     /**
      * The sling resource type of grid row items
@@ -106,8 +114,9 @@ public class DataFeedServiceImpl implements DataFeedService {
                 LOG.warn("ResourceResolver is null, data feed generation is stopped");
                 return;
             }
-            Optional.of(gridResourcesGenerator.generateGridResources(GRID_RESOURCE_TYPE, resourceResolver))
+            Optional.ofNullable(gridResourcesGenerator.generateGridResources(GRID_RESOURCE_TYPE, resourceResolver))
                     .ifPresent(gridResources -> {
+                        gridResourcesCache.setGridResourcesList(gridResources);
                         gridResourcesToDataFeed(gridResources, resourceResolver);
                         generateCsvReport(gridResources, resourceResolver);
                     });
@@ -119,24 +128,18 @@ public class DataFeedServiceImpl implements DataFeedService {
      * {@inheritDoc}
      */
     @Override
-    public List<Resource> dataFeedToResources(String type) {
+    public List<Resource> dataFeedToResources(DataFilter filter) {
         LOG.debug("Start data feed to resources conversion");
         try (ResourceResolver serviceResourceResolver = repositoryHelper.getServiceResourceResolver()) {
             if (serviceResourceResolver == null) {
                 LOG.warn("ResourceResolver is null, data feed to resources conversion is stopped");
                 return Collections.emptyList();
             }
-//            if (CollectionUtils.isEmpty(linkCache.getGridResourcesList())) {
-//                linkCache.getGridResourcesList().addAll(dataFeedToGridResources(serviceResourceResolver, true));
-//            }
-            List<GridResource> gridResources = dataFeedToGridResources(serviceResourceResolver)
-                    .stream().filter(gridResource -> {
-                        if (StringUtils.isBlank(type)) {
-                            return true;
-                        }
-                        return gridResource.getLink().getType().getValue().equalsIgnoreCase(type);
-                    }).collect(Collectors.toList());
-            List<Resource> resources = toSlingResourcesStream(gridResources,
+            if (CollectionUtils.isEmpty(gridResourcesCache.getGridResourcesList())) {
+                gridResourcesCache.setGridResourcesList(dataFeedToGridResources(serviceResourceResolver));
+            }
+            List<Resource> resources = toSlingResourcesStream(
+                    doFiltering(gridResourcesCache.getGridResourcesList(), filter),
                     repositoryHelper.getThreadResourceResolver())
                     .collect(Collectors.toList());
             LOG.info("EToolbox Link Inspector - the number of items shown is {}", resources.size());
@@ -160,7 +163,26 @@ public class DataFeedServiceImpl implements DataFeedService {
 
     @Override
     public void modifyDataFeed(Map<String, String> valuesMap) {
-
+        List<GridResource> gridResources = gridResourcesCache.getGridResourcesList();
+        try (ResourceResolver serviceResourceResolver = repositoryHelper.getServiceResourceResolver()) {
+            List<GridResource> modifiedResources = gridResources.stream()
+                    .peek(gridResource -> {
+                        if (valuesMap.containsKey(String.format("%s@%s", gridResource.getResourcePath(), gridResource.getPropertyName()))) {
+                            Optional<Link> optionalLink = linkHelper
+                                    .getLinkStreamFromProperty(valuesMap.get(String
+                                            .format("%s@%s", gridResource.getResourcePath(), gridResource.getPropertyName())))
+                                    .peek(link -> linkHelper.validateLink(link, serviceResourceResolver))
+                                    .findFirst();
+                            if (optionalLink.isPresent()) {
+                                Link link = optionalLink.get();
+                                link.setStatus(new LinkStatus(link.getStatusCode(), "Link Modified"));
+                                gridResource.setLink(link);
+                            }
+                        }
+                    }).collect(Collectors.toList());
+            gridResourcesCache.setGridResourcesList(modifiedResources);
+            gridResourcesToDataFeed(modifiedResources, serviceResourceResolver);
+        }
     }
 
     private List<GridResource> dataFeedToGridResources(ResourceResolver resourceResolver) {
@@ -168,7 +190,6 @@ public class DataFeedServiceImpl implements DataFeedService {
         JSONArray jsonArray = JsonUtil.getJsonArrayFromFile(JSON_FEED_PATH, resourceResolver);
         int allItemsSize = jsonArray.length();
         if (allItemsSize > 0) {
-//            int limit = limited ? Math.min(allItemsSize, UI_ITEMS_LIMIT) : allItemsSize;
             for (int i = 0; i < allItemsSize; i++) {
                 try {
                     JSONObject jsonObject = jsonArray.getJSONObject(i);
@@ -182,7 +203,7 @@ public class DataFeedServiceImpl implements DataFeedService {
         return gridResources;
     }
 
-    private void gridResourcesToDataFeed(Collection<GridResource> gridResources, ResourceResolver resourceResolver) {
+    private synchronized void gridResourcesToDataFeed(Collection<GridResource> gridResources, ResourceResolver resourceResolver) {
         try {
             JSONArray resourcesJsonArray = JsonUtil.objectsToJsonArray(gridResources);
             removePreviousDataFeed(resourceResolver);
@@ -259,5 +280,9 @@ public class DataFeedServiceImpl implements DataFeedService {
         } catch (IOException e) {
             LOG.error(String.format("Failed to build CSV for the grid resource %s", viewItem.getLink()), e);
         }
+    }
+
+    private List<GridResource> doFiltering(List<GridResource> resources, DataFilter filter) {
+        return resources.stream().filter(filter::validate).collect(Collectors.toList());
     }
 }

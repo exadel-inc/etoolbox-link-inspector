@@ -14,7 +14,7 @@
 
 /**
  * EToolbox Link Inspector clientlib.
- * "Filters" action definition.
+ * "Filter" action definition.
  */
 (function (window, document, $, ELC, Granite, Coral) {
     'use strict';
@@ -23,13 +23,13 @@
     const SUBMIT_FILTER_LABEL = Granite.I18n.get('Apply');
 
     function onFilterAction(name, el, config, collection, selections) {
-        const dialog = document.querySelector('#filters-result-dialog');
+        const dialog = document.querySelector('#filter--dialog');
         dialog.show();
     }
 
     function initFiltersDialog(searchParams){
         const dialog = new Coral.Dialog().set({
-            id : 'filters-result-dialog',
+            id : 'filter--dialog',
             closable: Coral.Dialog.closable.ON,
             backdrop: Coral.Dialog.backdrop.STATIC,
             interaction: 'off',
@@ -39,33 +39,38 @@
         });
 
         const linksTypeSelect = new Coral.Select().set({
-            placeholder: "Choose an item"
+            placeholder: 'Choose an item'
         });
         linksTypeSelect.items.add({
             content:{
-                innerHTML: "All"
+                innerHTML: 'All'
             },
-            value: "",
+            value: '',
             disabled: false
         });
         linksTypeSelect.items.add({
             content:{
-                innerHTML: "Internal"
+                innerHTML: 'Internal'
             },
-            value: "internal",
+            value: 'internal',
             disabled: false,
-            selected: searchParams.get("type") === "internal"
+            selected: searchParams.get('type') === 'internal'
         });
         linksTypeSelect.items.add({
             content:{
-                innerHTML: "External"
+                innerHTML: 'External'
             },
-            value: "external",
+            value: 'external',
             disabled: false,
-            selected: searchParams.get("type") === "external"
+            selected: searchParams.get('type') === 'external'
         });
-        $('<p>').html("Links type").appendTo(dialog.content);
+        $('<p>').html('Links type').appendTo(dialog.content);
         dialog.content.appendChild(linksTypeSelect);
+
+        const $linkSubstringField = $('<input is="coral-textfield" class="elc-substring-input" name="substring" value="">');
+        $linkSubstringField.val(searchParams.get("substring"));
+        $('<p>').html('Link Substring').appendTo(dialog.content);
+        $linkSubstringField.appendTo(dialog.content);
 
         const $cancelBtn = $('<button is="coral-button" variant="default" coral-close>').text(CANCEL_LABEL);
         const $updateBtn =
@@ -76,10 +81,15 @@
 
         function onSubmit(){
             searchParams.delete('type');
+            searchParams.delete('substring');
             if (linksTypeSelect.value) {
                 searchParams.append('type', linksTypeSelect.value);
             }
-            document.location.search = searchParams
+            if ($linkSubstringField.val()) {
+                searchParams.append('substring', $linkSubstringField.val());
+            }
+            searchParams.set('page', '1');
+            document.location.search = searchParams;
         }
 
         dialog.on('click', '[data-dialog-action]', onSubmit);
@@ -94,17 +104,17 @@
         document.body.appendChild(dialog);
     }
 
-    $(window).adaptTo("foundation-registry").register("foundation.collection.action.action", {
-        name: "cq-admin.etoolbox.linkinspector.action.filter-options",
+    $(window).adaptTo('foundation-registry').register('foundation.collection.action.action', {
+        name: 'cq-admin.etoolbox.linkinspector.action.filter-options',
         handler: onFilterAction
     });
 
     $(document).ready(function () {
-       let params = new URL(document.location).searchParams;
-       if (params.get('type') != null) {
-         $("#elc-filters").removeClass("coral3-Button--minimal").addClass("coral3-Button--primary");
+       let searchParams = new URL(document.location).searchParams;
+       if (searchParams != null && searchParams.get('type') != null || searchParams.get('substring') != null) {
+         $('#elc-filter-options').attr('variant', 'primary');
        }
-       initFiltersDialog(new URL(document.location).searchParams);
+       initFiltersDialog(searchParams);
     });
 
 })(window, document, Granite.$, Granite.ELC, Granite, Coral);
