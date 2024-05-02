@@ -268,20 +268,20 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
     }
 
     private boolean isAllowedErrorCode(int linkStatusCode) {
-        return true;
+//        return true;
 
-//        int[] allowedStatusCodes = uiConfigService.getStatusCodes();
-//
-//        if (ArrayUtils.isEmpty(allowedStatusCodes) ||
-//                (allowedStatusCodes.length == 1 && allowedStatusCodes[0] < 0)) {
-//            return true;
-//        }
-//        for (int allowedStatusCode : allowedStatusCodes) {
-//            if (allowedStatusCode == linkStatusCode) {
-//                return true;
-//            }
-//        }
-//        return false;
+        int[] allowedStatusCodes = uiConfigService.getStatusCodes();
+
+        if (ArrayUtils.isEmpty(allowedStatusCodes) ||
+                (allowedStatusCodes.length == 1 && allowedStatusCodes[0] < 0)) {
+            return true;
+        }
+        for (int allowedStatusCode : allowedStatusCodes) {
+            if (allowedStatusCode == linkStatusCode) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean isAllowedReplicationStatus(Resource resource) {

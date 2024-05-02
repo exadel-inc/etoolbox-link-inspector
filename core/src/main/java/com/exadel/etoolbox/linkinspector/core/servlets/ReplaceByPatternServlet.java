@@ -340,7 +340,7 @@ public class ReplaceByPatternServlet extends SlingAllMethodsServlet {
             dataFeedService.modifyDataFeed(updatedItems.stream().collect(Collectors.toMap(
                 UpdatedItem::getPropertyLocation,
                 UpdatedItem::getUpdatedLink
-            )));
+                , (r1, r2) -> r1)));
         }
     }
 
