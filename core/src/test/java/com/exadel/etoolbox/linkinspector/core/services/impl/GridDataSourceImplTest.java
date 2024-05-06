@@ -47,6 +47,6 @@ class GridDataSourceImplTest {
     void testGetDataSource() {
         when(dataFeedService.dataFeedToResources(new DataFilter())).thenReturn(Collections.emptyList());
 
-//        assertNotNull(gridDataSource.getDataSource());
+        assertNotNull(gridDataSource.getDataSource("1", "10", "10", "internal", StringUtils.EMPTY));
     }
 }
