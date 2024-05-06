@@ -64,6 +64,15 @@
             disabled: false,
             selected: searchParams.get('type') === 'external'
         });
+        linksTypeSelect.items.add({
+            content:{
+                innerHTML: 'Custom'
+            },
+            value: 'custom',
+            disabled: false,
+            selected: searchParams.get('type') === 'custom'
+        });
+
         $('<p>').html('Links type').appendTo(dialog.content);
         dialog.content.appendChild(linksTypeSelect);
 
