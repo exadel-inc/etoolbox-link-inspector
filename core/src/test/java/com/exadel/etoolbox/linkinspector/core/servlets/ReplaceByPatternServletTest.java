@@ -19,6 +19,7 @@ import com.exadel.etoolbox.linkinspector.core.services.cache.impl.GridResourcesC
 import com.exadel.etoolbox.linkinspector.core.services.data.DataFeedService;
 import com.exadel.etoolbox.linkinspector.core.services.data.impl.DataFeedServiceImpl;
 import com.exadel.etoolbox.linkinspector.core.services.data.models.GridResource;
+import com.exadel.etoolbox.linkinspector.core.services.ext.CustomLinkResolver;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.LinkHelper;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.PackageHelper;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.RepositoryHelper;
@@ -70,6 +71,7 @@ import static org.mockito.Mockito.*;
 class ReplaceByPatternServletTest {
     private static final String DATAFEED_SERVICE_FIELD = "dataFeedService";
     private static final String LINK_HELPER_FIELD = "linkHelper";
+    private static final String CUSTOM_LINK_FIELD = "customLinkResolver";
     private static final String REPOSITORY_HELPER_FIELD = "repositoryHelper";
     private static final String PACKAGE_HELPER_FIELD = "packageHelper";
     private static final String RESOURCE_RESOLVER_FACTORY_FIELD = "resourceResolverFactory";
@@ -393,6 +395,9 @@ class ReplaceByPatternServletTest {
     private void setUpLinkHelper() throws NoSuchFieldException {
         LinkHelper linkHelper = new LinkHelperImpl();
         PrivateAccessor.setField(fixture, LINK_HELPER_FIELD, linkHelper);
+        CustomLinkResolver customLinkResolver = mock(CustomLinkResolver.class);
+        when(customLinkResolver.getLinks(anyString())).thenReturn(new ArrayList<>());
+        PrivateAccessor.setField(linkHelper, CUSTOM_LINK_FIELD, customLinkResolver);
     }
 
     private void setUpDataFeedService(RepositoryHelper repositoryHelper) throws NoSuchFieldException {

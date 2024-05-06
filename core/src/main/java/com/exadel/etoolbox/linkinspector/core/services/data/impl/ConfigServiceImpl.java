@@ -1,7 +1,7 @@
 package com.exadel.etoolbox.linkinspector.core.services.data.impl;
 
 import com.exadel.etoolbox.linkinspector.core.services.data.GenerationStatsProps;
-import com.exadel.etoolbox.linkinspector.core.services.data.UiConfigService;
+import com.exadel.etoolbox.linkinspector.core.services.data.ConfigService;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.RepositoryHelper;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.Resource;
@@ -11,10 +11,12 @@ import org.osgi.service.component.annotations.Reference;
 
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+import java.util.Objects;
 import java.util.Optional;
 
-@Component(service = UiConfigService.class)
-public class UiConfigServiceImpl implements UiConfigService {
+@Component(service = ConfigService.class)
+public class ConfigServiceImpl implements ConfigService {
     private static final String CONFIG_PATH = "/conf/etoolbox-link-inspector/data/config";
     private static final String PN_FILTER = "filter";
     private static final String PN_EXCLUDED_PATHS = "excludedPaths";
@@ -24,6 +26,7 @@ public class UiConfigServiceImpl implements UiConfigService {
     private static final String PN_PATH = "path";
     private static final String PN_EXCLUDED_PROPERTIES = "excludedProperties";
     private static final String PN_LINKS_TYPE = "linksType";
+    private static final String PN_ALLOWED_CUSTOM_TYPE = "customTypeAllowed";
     private static final String PN_EXCLUDE_TAGS = "excludeTags";
     private static final String PN_STATUS_CODES = "statusCodes";
     private static final String PN_THREADS_PER_CORE = "threadsPerCore";
@@ -78,13 +81,19 @@ public class UiConfigServiceImpl implements UiConfigService {
     }
 
     @Override
+    public boolean customTypeAllowed(){
+        return getProperty(PN_ALLOWED_CUSTOM_TYPE, Boolean.class).orElse(false);
+    }
+
+    @Override
     public boolean isExcludeTags() {
         return getProperty(PN_EXCLUDE_TAGS, Boolean.class).orElse(true);
     }
 
     @Override
     public int[] getStatusCodes() {
-        return getProperty(PN_STATUS_CODES, int[].class).orElse(new int[]{});
+        return Arrays.stream(getProperty(PN_STATUS_CODES, Integer[].class).orElse(new Integer[0]))
+                .filter(Objects::nonNull).mapToInt(Integer::intValue).toArray();
     }
 
     @Override

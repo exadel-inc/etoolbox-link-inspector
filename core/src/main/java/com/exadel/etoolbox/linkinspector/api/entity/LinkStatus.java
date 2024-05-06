@@ -12,8 +12,9 @@
  * limitations under the License.
  */
 
-package com.exadel.etoolbox.linkinspector.core.models;
+package com.exadel.etoolbox.linkinspector.api.entity;
 
+import com.exadel.etoolbox.linkinspector.core.models.Link;
 import com.google.common.collect.ImmutableList;
 import org.apache.commons.httpclient.HttpStatus;
 
