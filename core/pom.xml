@@ -216,5 +216,10 @@ Import-Package: javax.annotation;version=0.0.0,*
             <artifactId>commons-csv</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.apache.sling</groupId>
+            <artifactId>org.apache.sling.query</artifactId>
+            <version>4.0.4</version>
+        </dependency>
     </dependencies>
 </project>
