@@ -15,19 +15,22 @@
 package com.exadel.etoolbox.linkinspector.core.services.data.impl;
 
 import com.exadel.etoolbox.linkinspector.core.services.ExternalLinkChecker;
+import com.exadel.etoolbox.linkinspector.core.services.cache.GridResourcesCache;
+import com.exadel.etoolbox.linkinspector.core.services.cache.impl.GridResourcesCacheImpl;
+import com.exadel.etoolbox.linkinspector.core.services.data.GridResourcesGenerator;
+import com.exadel.etoolbox.linkinspector.core.services.data.models.DataFilter;
+import com.exadel.etoolbox.linkinspector.core.services.data.models.GridResource;
+import com.exadel.etoolbox.linkinspector.core.services.helpers.LinkHelper;
 import com.exadel.etoolbox.linkinspector.core.services.data.GenerationStatsProps;
 import com.exadel.etoolbox.linkinspector.core.services.data.ConfigService;
 import com.exadel.etoolbox.linkinspector.core.services.ext.CustomLinkResolver;
-import com.exadel.etoolbox.linkinspector.core.services.helpers.LinkHelper;
 import com.exadel.etoolbox.linkinspector.core.services.util.CsvUtil;
-import com.exadel.etoolbox.linkinspector.core.services.data.GridResourcesGenerator;
-import com.exadel.etoolbox.linkinspector.core.services.data.models.GridResource;
-import com.exadel.etoolbox.linkinspector.core.services.helpers.CsvHelper;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.RepositoryHelper;
-import com.exadel.etoolbox.linkinspector.core.services.helpers.impl.CsvHelperImpl;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.impl.LinkHelperImpl;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.impl.RepositoryHelperImpl;
 import com.exadel.etoolbox.linkinspector.core.services.util.LinkInspectorResourceUtil;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import io.wcm.testing.mock.aem.junit5.AemContext;
 import io.wcm.testing.mock.aem.junit5.AemContextExtension;
 import junitx.util.PrivateAccessor;
@@ -40,13 +43,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -58,17 +62,18 @@ import static org.mockito.Mockito.*;
 class DataFeedServiceImplTest {
     private static final String GRID_RESOURCES_GENERATOR_FIELD = "gridResourcesGenerator";
     private static final String RESOURCE_RESOLVER_FACTORY_FIELD = "resourceResolverFactory";
+    private static final String GRID_RESOURCES_CACHE_FIELD = "gridResourcesCache";
     private static final String REPOSITORY_HELPER_FIELD = "repositoryHelper";
-    private static final String CSV_HELPER_FIELD = "csvHelper";
     private static final String LINK_HELPER_FIELD = "linkHelper";
     private static final String CONFIG_FIELD = "configService";
     private static final String CUSTOM_LINK_FIELD = "customLinkResolver";
     private static final String EXTERNAL_LINK_CHECKER_FIELD = "externalLinkChecker";
 
-    private static final String CSV_REPORT_PATH = "/content/etoolbox-link-inspector/data/content/1.csv";
+    private static final String DATAFEED_PATH = "/content/etoolbox-link-inspector/data/datafeed.json";
+    private static final String CSV_REPORT_PATH = "/content/etoolbox-link-inspector/download/report.csv";
+
     private static final String TEST_RESOURCES_TREE_PATH = "/com/exadel/etoolbox/linkinspector/core/services/data/impl/resources.json";
     private static final String TEST_FOLDER_PATH = "/content/test-folder";
-    private static final int DEFAULT_PAGE_NUMBER = 1;
 
     private final AemContext context = new AemContext(ResourceResolverType.JCR_MOCK);
 
@@ -78,8 +83,7 @@ class DataFeedServiceImplTest {
     @BeforeEach
     void setup() throws NoSuchFieldException, IOException, URISyntaxException {
         PrivateAccessor.setField(fixture, REPOSITORY_HELPER_FIELD, getRepositoryHelperFromContext());
-        PrivateAccessor.setField(fixture, CSV_HELPER_FIELD, getCsvHelperFromContext());
-
+        PrivateAccessor.setField(fixture, GRID_RESOURCES_CACHE_FIELD, getGridResourcesCacheFromContext());
         GridResourcesGeneratorImpl gridResourcesGenerator = getGridResourcesGenerator();
         PrivateAccessor.setField(fixture, GRID_RESOURCES_GENERATOR_FIELD, gridResourcesGenerator);
     }
@@ -90,7 +94,7 @@ class DataFeedServiceImplTest {
 
         fixture.generateDataFeed();
 
-        Resource resource = context.resourceResolver().getResource(CSV_REPORT_PATH);
+        Resource resource = context.resourceResolver().getResource(DATAFEED_PATH);
         assertNotNull(resource);
     }
 
@@ -118,7 +122,7 @@ class DataFeedServiceImplTest {
 
         when(repositoryHelperMock.getServiceResourceResolver()).thenReturn(null);
 
-        List<Resource> resources = fixture.dataFeedToResources(DEFAULT_PAGE_NUMBER);
+        List<Resource> resources = fixture.dataFeedToResources(new DataFilter());
         assertTrue(resources.isEmpty());
     }
 
@@ -132,7 +136,7 @@ class DataFeedServiceImplTest {
 
         when(repositoryHelperMock.getServiceResourceResolver()).thenReturn(null);
 
-        List<GridResource> gridResources = fixture.dataFeedToGridResources(DEFAULT_PAGE_NUMBER);
+        List<GridResource> gridResources = fixture.dataFeedToGridResources();
         assertTrue(gridResources.isEmpty());
     }
 
@@ -141,7 +145,7 @@ class DataFeedServiceImplTest {
         context.load().json(TEST_RESOURCES_TREE_PATH, TEST_FOLDER_PATH);
         fixture.generateDataFeed();
 
-        List<GridResource> gridResources = fixture.dataFeedToGridResources(DEFAULT_PAGE_NUMBER);
+        List<GridResource> gridResources = fixture.dataFeedToGridResources();
         assertNotNull(gridResources);
     }
 
@@ -150,7 +154,7 @@ class DataFeedServiceImplTest {
         context.load().json(TEST_RESOURCES_TREE_PATH, TEST_FOLDER_PATH);
         fixture.generateDataFeed();
 
-        assertNotNull(fixture.dataFeedToResources(DEFAULT_PAGE_NUMBER));
+        assertNotNull(fixture.dataFeedToResources(new DataFilter()));
     }
 
     @Test
@@ -169,10 +173,10 @@ class DataFeedServiceImplTest {
 
             fixture.generateDataFeed();
 
-            resourceUtil.verify(Mockito.times(3), () ->
-                    LinkInspectorResourceUtil.removeResource(anyString(), any(ResourceResolver.class)));
             resourceUtil.verify(() ->
-                    LinkInspectorResourceUtil.createNode(anyString(), any(ResourceResolver.class))
+                    LinkInspectorResourceUtil.removeResource(eq(CSV_REPORT_PATH), any(ResourceResolver.class)));
+            resourceUtil.verify(() ->
+                    LinkInspectorResourceUtil.saveFileToJCR(eq(CSV_REPORT_PATH), any(byte[].class), anyString(), any(ResourceResolver.class))
             );
         }
     }
@@ -186,6 +190,7 @@ class DataFeedServiceImplTest {
         when(customLinkResolver.getLinks(anyString())).thenReturn(new ArrayList<>());
         PrivateAccessor.setField(linkHelper, CUSTOM_LINK_FIELD, customLinkResolver);
         PrivateAccessor.setField(gridResourcesGenerator, LINK_HELPER_FIELD, linkHelper);
+
         ConfigService configService = mock(ConfigServiceImpl.class);
         when(configService.getExcludedLinksPatterns()).thenReturn(new String[0]);
         when(configService.getSearchPath()).thenReturn(TEST_FOLDER_PATH);
@@ -195,8 +200,6 @@ class DataFeedServiceImplTest {
         when(configService.getStatusCodes()).thenReturn(new int[]{HttpStatus.SC_NOT_FOUND});
         when(configService.getThreadsPerCore()).thenReturn(60);
         PrivateAccessor.setField(gridResourcesGenerator, CONFIG_FIELD, configService);
-
-        when(externalLinkChecker.checkLink(anyString())).thenReturn(HttpStatus.SC_NOT_FOUND);
 
         return gridResourcesGenerator;
     }
@@ -208,7 +211,13 @@ class DataFeedServiceImplTest {
         return repositoryHelper;
     }
 
-    private CsvHelper getCsvHelperFromContext() {
-        return new CsvHelperImpl();
+    private GridResourcesCache getGridResourcesCacheFromContext() throws NoSuchFieldException {
+        GridResourcesCache gridResourcesCache = new GridResourcesCacheImpl();
+        Cache<String, CopyOnWriteArrayList<GridResource>> cache = CacheBuilder.newBuilder()
+                .maximumSize(100)
+                .expireAfterWrite(100000, TimeUnit.DAYS)
+                .build();
+        PrivateAccessor.setField(gridResourcesCache, GRID_RESOURCES_CACHE_FIELD, cache);
+        return gridResourcesCache;
     }
 }

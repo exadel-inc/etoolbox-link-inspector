@@ -77,7 +77,6 @@ public class FixBrokenLinkServlet extends SlingAllMethodsServlet {
             String propertyName = ServletUtil.getRequestParamString(request, PROPERTY_NAME_PARAM);
             String currentLink = ServletUtil.getRequestParamString(request, CURRENT_LINK_PARAM);
             String newLink = ServletUtil.getRequestParamString(request, NEW_LINK_PARAM);
-            int page = ServletUtil.getRequestParamInt(request, PAGE_PARAM);
             boolean isSkipValidation = ServletUtil.getRequestParamBoolean(request, IS_SKIP_VALIDATION_PARAM);
 
             if (StringUtils.isAnyBlank(path, propertyName, currentLink, newLink)) {
@@ -105,7 +104,7 @@ public class FixBrokenLinkServlet extends SlingAllMethodsServlet {
             if (linkHelper.replaceLink(resourceResolver, path, propertyName, currentLink, newLink)) {
                 repositoryHelper.createResourceIfNotExist(DataFeedService.PENDING_GENERATION_NODE,
                         JcrConstants.NT_UNSTRUCTURED, JcrResourceConstants.NT_SLING_FOLDER);
-                modifyCsvReport(path, propertyName, newLink, page);
+                modifyDataFeed(path, propertyName, newLink);
                 resourceResolver.commit();
                 LOG.debug("The link was updated: path - {}, propertyName - {}, currentLink - {}, newLink - {}",
                         path, propertyName, currentLink, newLink);
@@ -134,7 +133,7 @@ public class FixBrokenLinkServlet extends SlingAllMethodsServlet {
         ServletUtil.writeJsonResponse(response, jsonResponse);
     }
 
-    private void modifyCsvReport(String path, String propertyName, String newLink, int page) {
-        dataFeedService.modifyDataFeed(Collections.singletonMap(CsvUtil.buildLocation(path, propertyName), newLink), page);
+    private void modifyDataFeed(String path, String propertyName, String newLink) {
+        dataFeedService.modifyDataFeed(Collections.singletonMap(CsvUtil.buildLocation(path, propertyName), newLink));
     }
 }

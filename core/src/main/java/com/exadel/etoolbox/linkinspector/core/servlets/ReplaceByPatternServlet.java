@@ -139,7 +139,6 @@ public class ReplaceByPatternServlet extends SlingAllMethodsServlet {
         boolean isDryRun = ServletUtil.getRequestParamBoolean(request, DRY_RUN_PARAM);
         boolean isBackup = ServletUtil.getRequestParamBoolean(request, BACKUP_PARAM);
         boolean isOutputAsCsv = ServletUtil.getRequestParamBoolean(request, OUTPUT_AS_CSV_PARAM);
-        int page = ServletUtil.getRequestParamInt(request, PAGE_PARAM);
         List<String> selectedItems = ServletUtil.getRequestParamStringList(request, SELECTED_PARAM);
 
         if (StringUtils.isAnyBlank(linkPattern, replacement)) {
@@ -158,8 +157,9 @@ public class ReplaceByPatternServlet extends SlingAllMethodsServlet {
         LOG.info("Starting replacement by pattern, linkPattern: {}, replacement: {}", linkPattern, replacement);
         try {
             ResourceResolver resourceResolver = request.getResourceResolver();
-            List<GridResource> filteredGridResources = dataFeedService.dataFeedToGridResources(page)
-                    .stream().filter(gridResource -> selectedItems.contains(gridResource.getPropertyLocation()))
+            List<GridResource> filteredGridResources = dataFeedService.dataFeedToGridResources()
+                    .stream().filter(gridResource -> selectedItems.contains(String
+                            .format("%s@%s", gridResource.getResourcePath(), gridResource.getPropertyName())))
                     .collect(Collectors.toList());
             List<UpdatedItem> updatedItems =
                     processResources(filteredGridResources, isDryRun, isBackup, linkPattern, replacement, resourceResolver);
@@ -168,7 +168,7 @@ public class ReplaceByPatternServlet extends SlingAllMethodsServlet {
                 response.setStatus(HttpStatus.SC_NO_CONTENT);
                 return;
             }
-            modifyCsvReport(isDryRun, updatedItems, page);
+            modifyDataFeed(isDryRun, updatedItems);
             outputUpdatedItems(updatedItems, isDryRun, isOutputAsCsv, linkPattern, replacement, resourceResolver, response);
             stopWatch.stop();
             LOG.info("Replacement by pattern is finished in {} ms", stopWatch.getTime(TimeUnit.MILLISECONDS));
@@ -335,12 +335,12 @@ public class ReplaceByPatternServlet extends SlingAllMethodsServlet {
         ServletUtil.writeJsonResponse(response, jsonResponse);
     }
 
-    private void modifyCsvReport(boolean isDryRun, List<UpdatedItem> updatedItems, int page) {
+    private void modifyDataFeed(boolean isDryRun, List<UpdatedItem> updatedItems) {
         if (!isDryRun) {
             dataFeedService.modifyDataFeed(updatedItems.stream().collect(Collectors.toMap(
                 UpdatedItem::getPropertyLocation,
                 UpdatedItem::getUpdatedLink
-            )), page);
+                , (r1, r2) -> r1)));
         }
     }
 

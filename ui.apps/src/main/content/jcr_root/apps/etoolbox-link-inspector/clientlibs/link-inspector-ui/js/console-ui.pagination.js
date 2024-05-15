@@ -16,15 +16,17 @@
  * EToolbox Link Inspector clientlib.
  * Pagination action definition.
  */
-(function ($) {
+(function (document, $) {
     'use strict'
 
     $(document).on('click', '.elc-pagination-item', function(event) {
         const $target = $(event.target);
         if (!$target.hasClass('disabled')) {
             const page = $target.attr('data-page');
-            window.location = window.location.pathname + '?page=' + page;
+            let searchParams = new URL(document.location).searchParams;
+            searchParams.set("page", page);
+            document.location.search = searchParams;
         }
     });
 
-})(Granite.$);
+})(document, Granite.$);

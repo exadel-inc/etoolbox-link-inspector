@@ -14,6 +14,7 @@
 
 package com.exadel.etoolbox.linkinspector.core.services.data;
 
+import com.exadel.etoolbox.linkinspector.core.services.data.models.DataFilter;
 import com.exadel.etoolbox.linkinspector.core.services.data.models.GridResource;
 import org.apache.sling.api.resource.Resource;
 
@@ -25,22 +26,11 @@ import java.util.Map;
  * by ${@link GridResourcesGenerator}
  */
 public interface DataFeedService {
-
-    /**
-     * The Sling resource type of grid row items
-     */
-    String GRID_RESOURCE_TYPE = "etoolbox-link-inspector/components/gridConfig";
-
     /**
      * If the node presents, users are informed that data feed regeneration is required
      * in order to display up-to-date results.
      */
     String PENDING_GENERATION_NODE = "/content/etoolbox-link-inspector/data/pendingDataFeedUpdate";
-
-    /**
-     * Default path for saving csv reports.
-     */
-    String CSV_REPORT_NODE_PATH = "/content/etoolbox-link-inspector/data/content";
 
     /**
      * Collects broken links and generates json data feed for further usage in the Link Inspector grid.
@@ -49,26 +39,24 @@ public interface DataFeedService {
 
     /**
      * Parses the data feed to the list of resources({@link Resource}) for further adapting them to view models
-     * and displaying in the Link Inspector grid.
+     * and displaying in the Link Inspector grid. The number of output items is limited for the sake of UX consistency.
      *
-     * @param page - page number of report
      * @return the list of resources({@link Resource}) based on the data feed
      */
-    List<Resource> dataFeedToResources(int page);
+    List<Resource> dataFeedToResources(DataFilter filter);
 
     /**
-     * Parses the data feed to the list of models({@link GridResource}).
+     * Parses the data feed to the list of models({@link GridResource}). The number of output items is not limited.
      *
-     * @param page - page number of report
      * @return the list of view items({@link GridResource}) based on the data feed
      */
-    List<GridResource> dataFeedToGridResources(int page);
+    List<GridResource> dataFeedToGridResources();
+
 
     /**
-     * Process modification the data feed with new values from Map of link location and link new value.
+     * Method for modification links value in the data feed
      *
-     * @param propertyLocationLinkMap - {@link Map} of link location and link new value
-     * @param page                    - page number of report for modification
+     * @param valuesMap - {@code Map<String, String>} property location as key and new url as value
      */
-    void modifyDataFeed(Map<String, String> propertyLocationLinkMap, int page);
+    void modifyDataFeed(Map<String, String> valuesMap);
 }

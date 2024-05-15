@@ -24,7 +24,9 @@ public interface GridDataSource {
      * @param page - page number of current page
      * @param limit - limit of items for dynamic loading
      * @param offset - offset for dynamic loading
+     * @param type - type of link for filtering
+     * @param substring - url substring for filtering
      * @return the {@link DataSource} object containing data related to grid items
      */
-    DataSource getDataSource(String page, String limit, String offset);
+    DataSource getDataSource(String page, String limit, String offset, String type, String substring);
 }

@@ -22,10 +22,8 @@ import com.exadel.etoolbox.linkinspector.core.services.data.GenerationStatsProps
 import com.exadel.etoolbox.linkinspector.core.services.data.ConfigService;
 import com.exadel.etoolbox.linkinspector.core.services.data.models.GridResource;
 import com.exadel.etoolbox.linkinspector.core.services.ext.CustomLinkResolver;
-import com.exadel.etoolbox.linkinspector.core.services.helpers.CsvHelper;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.LinkHelper;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.RepositoryHelper;
-import com.exadel.etoolbox.linkinspector.core.services.helpers.impl.CsvHelperImpl;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.impl.LinkHelperImpl;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.impl.RepositoryHelperImpl;
 import io.wcm.testing.mock.aem.junit5.AemContext;
@@ -182,11 +180,11 @@ class GridResourcesGeneratorImplTest {
         Pattern pattern = Pattern.compile(TEST_UI_EXCLUDED_PATTERN);
 
         List<GridResource> expectedGridResources = buildExpectedGridResources().stream()
-            .filter(gr -> {
-                Matcher matcher = pattern.matcher(gr.getLink().getHref());
-                return !matcher.matches();
-            })
-            .collect(Collectors.toList());
+                .filter(gr -> {
+                    Matcher matcher = pattern.matcher(gr.getLink().getHref());
+                    return !matcher.matches();
+                })
+                .collect(Collectors.toList());
 
         assertTrue(CollectionUtils.isEqualCollection(expectedGridResources, gridResources));
     }
@@ -340,14 +338,13 @@ class GridResourcesGeneratorImplTest {
             session.save();
         }
         context.load().binaryFile(TEST_CSV_REPORT_EXPECTED_PATH, REAL_CSV_REPORT_EXPECTED_PATH);
-        DataFeedService dataFeedService = setUpDataFeedService(getRepositoryHelperFromContext(), getCsvHelper());
-        return dataFeedService.dataFeedToGridResources(DEFAULT_PAGE_NUMBER);
+        DataFeedService dataFeedService = setUpDataFeedService(getRepositoryHelperFromContext());
+        return dataFeedService.dataFeedToGridResources();
     }
 
-    private DataFeedService setUpDataFeedService(RepositoryHelper repositoryHelper, CsvHelper csvHelper) throws NoSuchFieldException {
+    private DataFeedService setUpDataFeedService(RepositoryHelper repositoryHelper) throws NoSuchFieldException {
         DataFeedService dataFeedService = new DataFeedServiceImpl();
         PrivateAccessor.setField(dataFeedService, REPOSITORY_HELPER_FIELD, repositoryHelper);
-        PrivateAccessor.setField(dataFeedService, CSV_HELPER_FIELD, csvHelper);
         return dataFeedService;
     }
 
@@ -356,10 +353,6 @@ class GridResourcesGeneratorImplTest {
         RepositoryHelper repositoryHelper = new RepositoryHelperImpl();
         PrivateAccessor.setField(repositoryHelper, RESOURCE_RESOLVER_FACTORY_FIELD, resourceResolverFactory);
         return repositoryHelper;
-    }
-
-    private CsvHelper getCsvHelper () {
-        return new CsvHelperImpl();
     }
 
     private Resource initSpyResources(Resource rootResource) throws ParseException {

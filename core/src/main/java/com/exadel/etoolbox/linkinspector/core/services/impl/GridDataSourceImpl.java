@@ -18,6 +18,7 @@ import com.adobe.granite.ui.components.ds.DataSource;
 import com.adobe.granite.ui.components.ds.SimpleDataSource;
 import com.exadel.etoolbox.linkinspector.core.services.GridDataSource;
 import com.exadel.etoolbox.linkinspector.core.services.data.DataFeedService;
+import com.exadel.etoolbox.linkinspector.core.services.data.models.DataFilter;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.sling.api.resource.Resource;
 import org.osgi.service.component.annotations.Component;
@@ -32,6 +33,7 @@ import java.util.stream.Collectors;
 public class GridDataSourceImpl implements GridDataSource {
     private static final Logger LOG = LoggerFactory.getLogger(GridDataSourceImpl.class);
     private static final int DEFAULT_PAGE_NUMBER = 1;
+    private static final int DEFAULT_PAGE_VALUES_SIZE = 500;
 
     @Reference
     private DataFeedService dataFeedService;
@@ -40,11 +42,15 @@ public class GridDataSourceImpl implements GridDataSource {
      * {@inheritDoc}
      */
     @Override
-    public DataSource getDataSource(String page, String limit, String offset) {
+    public DataSource getDataSource(String page, String limit, String offset, String type, String substring) {
         LOG.debug("GridDataSource initialization");
 
-        List<Resource> resources = NumberUtils.isNumber(page) ? dataFeedService.dataFeedToResources(Integer.parseInt(page))
-                : dataFeedService.dataFeedToResources(DEFAULT_PAGE_NUMBER);
+        int pageNumber = NumberUtils.isNumber(page) ? Integer.parseInt(page) : DEFAULT_PAGE_NUMBER;
+
+        List<Resource> resources = dataFeedService.dataFeedToResources(new DataFilter(type, substring)).stream()
+                .skip((long) DEFAULT_PAGE_VALUES_SIZE * (pageNumber - 1))
+                .limit(DEFAULT_PAGE_VALUES_SIZE)
+                .collect(Collectors.toList());
 
         if (NumberUtils.isNumber(offset)) {
             resources = resources.stream().skip(Long.parseLong(offset)).collect(Collectors.toList());

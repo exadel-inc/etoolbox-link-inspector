@@ -271,6 +271,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
     }
 
     private boolean isAllowedErrorCode(int linkStatusCode) {
+
         int[] allowedStatusCodes = configService.getStatusCodes();
 
         if (ArrayUtils.isEmpty(allowedStatusCodes) ||
@@ -364,8 +365,9 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
 
         stats.put(GenerationStatsProps.PN_REPORT_LINKS_TYPE, configService.getLinksType());
         stats.put(GenerationStatsProps.PN_EXCLUDED_LINK_PATTERNS, getExcludedLinksPatterns());
+
         stats.put(GenerationStatsProps.PN_EXCLUDED_TAGS, configService.isExcludeTags());
-        stats.put(GenerationStatsProps.PN_ALLOWED_STATUS_CODES, configService.getStatusCodes());
+//        stats.put(GenerationStatsProps.PN_ALLOWED_STATUS_CODES, uiConfigService.getStatusCodes());
 
         stats.put(GenerationStatsProps.PN_ALL_INTERNAL_LINKS, allLinksCounter.getInternalLinks());
         stats.put(GenerationStatsProps.PN_BROKEN_INTERNAL_LINKS, brokenLinksCounter.getInternalLinks());
