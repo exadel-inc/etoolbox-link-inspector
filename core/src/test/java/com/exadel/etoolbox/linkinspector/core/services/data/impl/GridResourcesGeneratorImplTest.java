@@ -68,7 +68,6 @@ import static org.mockito.Mockito.*;
 class GridResourcesGeneratorImplTest {
     private static final String RESOURCE_RESOLVER_FACTORY_FIELD = "resourceResolverFactory";
     private static final String REPOSITORY_HELPER_FIELD = "repositoryHelper";
-    private static final String CSV_HELPER_FIELD = "csvHelper";
     private static final String LINK_HELPER_FIELD = "linkHelper";
     private static final String CONFIG_FIELD = "configService";
     private static final String CUSTOM_LINK_FIELD = "customLinkResolver";
@@ -77,8 +76,7 @@ class GridResourcesGeneratorImplTest {
     private static final String EXTERNAL_LINK_CHECKER_FIELD = "externalLinkChecker";
     private static final String GRID_RESOURCE_TYPE = "etoolbox-link-inspector/components/gridConfig";
     private static final String TEST_RESOURCES_TREE_PATH = "/com/exadel/etoolbox/linkinspector/core/services/data/impl/resources.json";
-    private static final String TEST_CSV_REPORT_EXPECTED_PATH = "/com/exadel/etoolbox/linkinspector/core/services/data/impl/expectedResources/1.csv";
-    private static final String REAL_CSV_REPORT_EXPECTED_PATH = "/content/etoolbox-link-inspector/data/content/1.csv";
+    private static final String TEST_DATAFEED_PATH = "/com/exadel/etoolbox/linkinspector/core/services/data/impl/expectedResources.json";
     private static final String REAL_CSV_REPORT_NODE = "/content/etoolbox-link-inspector/data/content";
     private static final String TEST_CSV_SIZE_PROPERTY_NAME = "size";
     private static final int TEST_CSV_SIZE_PROPERTY_VALUE = 1;
@@ -126,8 +124,6 @@ class GridResourcesGeneratorImplTest {
             "/content/test-link-active-9",
             "/content/test-link-active-10"
     );
-
-    private static final int DEFAULT_PAGE_NUMBER = 1;
 
     private final AemContext context = new AemContext(ResourceResolverType.JCR_MOCK);
 
@@ -337,7 +333,7 @@ class GridResourcesGeneratorImplTest {
             newNode.setProperty(TEST_CSV_SIZE_PROPERTY_NAME, TEST_CSV_SIZE_PROPERTY_VALUE);
             session.save();
         }
-        context.load().binaryFile(TEST_CSV_REPORT_EXPECTED_PATH, REAL_CSV_REPORT_EXPECTED_PATH);
+        context.load().binaryFile(TEST_DATAFEED_PATH, REAL_DATAFEED_PATH);
         DataFeedService dataFeedService = setUpDataFeedService(getRepositoryHelperFromContext());
         return dataFeedService.dataFeedToGridResources();
     }
