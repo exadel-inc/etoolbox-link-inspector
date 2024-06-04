@@ -18,7 +18,7 @@
  */
 (function (window, document, $, ELC, Granite, Coral) {
     'use strict';
-    const DIALOG_TITLE_LABEL = Granite.I18n.get('Filters');
+    const DIALOG_TITLE_LABEL = Granite.I18n.get('Filter Links');
     const CANCEL_LABEL = Granite.I18n.get('Cancel');
     const SUBMIT_FILTER_LABEL = Granite.I18n.get('Apply');
 
@@ -39,14 +39,15 @@
         });
 
         const linksTypeSelect = new Coral.Select().set({
-            placeholder: 'Choose an item'
+            placeholder: 'Choose an item',
         });
         linksTypeSelect.items.add({
             content:{
                 innerHTML: 'All'
             },
             value: '',
-            disabled: false
+            disabled: false,
+            selected: !searchParams.get('type')
         });
         linksTypeSelect.items.add({
             content:{
@@ -73,12 +74,12 @@
             selected: searchParams.get('type') === 'custom'
         });
 
-        $('<p>').html('Links type').appendTo(dialog.content);
+        $('<p>').html('By type').appendTo(dialog.content);
         dialog.content.appendChild(linksTypeSelect);
 
         const $linkSubstringField = $('<input is="coral-textfield" class="elc-substring-input" name="substring" value="">');
         $linkSubstringField.val(searchParams.get("substring"));
-        $('<p>').html('Link Substring').appendTo(dialog.content);
+        $('<p>').html('By text').appendTo(dialog.content);
         $linkSubstringField.appendTo(dialog.content);
 
         const $cancelBtn = $('<button is="coral-button" variant="default" coral-close>').text(CANCEL_LABEL);

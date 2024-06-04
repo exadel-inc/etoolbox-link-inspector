@@ -20,7 +20,7 @@
     'use strict';
 
     var CANCEL_LABEL = Granite.I18n.get('Cancel');
-    var UPDATE_LABEL = Granite.I18n.get('Fix Broken Link');
+    var UPDATE_LABEL = Granite.I18n.get('Fix');
     var LINK_TO_UPDATE_LABEL = Granite.I18n.get('The following links will be updated:');
     var REPLACEMENT_LINK_LABEL = Granite.I18n.get('Please enter the replacement link');
     var SKIP_VALIDATION_LABEL = 'Skip input link check before replacement'

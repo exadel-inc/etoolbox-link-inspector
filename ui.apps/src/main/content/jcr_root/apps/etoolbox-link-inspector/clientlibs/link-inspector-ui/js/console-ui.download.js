@@ -20,7 +20,7 @@
     'use strict';
 
     const NO_REPORT_MSG = Granite.I18n.get('No report found');
-    const REPORT_URL = '/content/etoolbox-link-inspector/servlet/download';
+    const REPORT_URL = '/content/etoolbox-link-inspector/download/report.csv';
 
     function onDownloadAction() {
         if (ELC.resourceExistCheck(REPORT_URL)) {

@@ -175,7 +175,7 @@ public class DataFeedServiceImpl implements DataFeedService {
                                     .findFirst();
                             if (optionalLink.isPresent()) {
                                 Link link = optionalLink.get();
-                                link.setStatus(new LinkStatus(link.getStatusCode(), "Link Modified"));
+                                link.setStatus(new LinkStatus(link.getStatusCode(), "Modified"));
                                 gridResource.setLink(link);
                             }
                         }
