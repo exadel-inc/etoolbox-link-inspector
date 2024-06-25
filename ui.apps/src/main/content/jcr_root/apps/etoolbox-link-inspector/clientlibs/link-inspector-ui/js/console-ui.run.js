@@ -47,13 +47,13 @@
         const $container = $('<p class="u-coral-margin"></p>').text('Job status: ');
         $('<b>...in progress</b>').appendTo($container);
         $('<br/>').appendTo($container);
-        $('<span>search may take some time to complete</span>').appendTo($container);;
+        $('<span>scan may take some time to complete</span>').appendTo($container);;
         $popover.find('coral-popover-content').append($container);
     }
 
     function createRunJobMessage($popover) {
         const $container = $('<p class="u-coral-margin"></p>');
-        $('<button class="elc-run-button">Run</button>').appendTo($container);
+        $('<button class="elc-run-button">Scan</button>').appendTo($container);
         $popover.find('coral-popover-content').append($container);
     }
 
