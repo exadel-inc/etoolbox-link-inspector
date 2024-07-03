@@ -14,15 +14,25 @@
 
 package com.exadel.etoolbox.linkinspector.core.services.helpers.impl;
 
-import com.exadel.etoolbox.linkinspector.core.models.Link;
-import com.exadel.etoolbox.linkinspector.api.entity.LinkStatus;
-import com.exadel.etoolbox.linkinspector.core.services.ExternalLinkChecker;
-import com.exadel.etoolbox.linkinspector.core.services.ext.CustomLinkResolver;
+import com.exadel.etoolbox.linkinspector.api.Link;
+import com.exadel.etoolbox.linkinspector.api.LinkResolver;
+import com.exadel.etoolbox.linkinspector.api.LinkStatus;
+import com.exadel.etoolbox.linkinspector.core.models.LinkImpl;
+import com.exadel.etoolbox.linkinspector.core.services.helpers.LinkHelper;
+import com.exadel.etoolbox.linkinspector.core.services.mocks.MockHttpClientBuilderFactory;
+import com.exadel.etoolbox.linkinspector.core.services.mocks.MockRepositoryHelper;
+import com.exadel.etoolbox.linkinspector.core.services.resolvers.ExternalLinkResolverImpl;
+import com.exadel.etoolbox.linkinspector.core.services.resolvers.InternalLinkResolverImpl;
+import com.google.common.collect.ImmutableMap;
 import io.wcm.testing.mock.aem.junit5.AemContext;
 import io.wcm.testing.mock.aem.junit5.AemContextExtension;
-import junitx.util.PrivateAccessor;
-import org.apache.commons.httpclient.HttpStatus;
+import org.apache.http.HttpStatus;
+import org.apache.http.HttpVersion;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.message.BasicStatusLine;
 import org.apache.sling.api.resource.Resource;
+import org.apache.sling.testing.mock.osgi.MockOsgi;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,10 +42,9 @@ import org.mockito.MockedStatic;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.SocketTimeoutException;
-import java.net.URISyntaxException;
 import java.net.URLDecoder;
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -48,8 +57,6 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(AemContextExtension.class)
 class LinkHelperImplTest {
-    private static final String EXTERNAL_LINK_CHECKER_FIELD = "externalLinkChecker";
-    private static final String CUSTOM_LINK_FIELD = "customLinkResolver";
 
     private static final String VALID_INTERNAL = "/content/test";
     private static final String VALID_INTERNAL_EXTENSION = "/content/test.png";
@@ -63,29 +70,38 @@ class LinkHelperImplTest {
     private static final String INVALID_EXTERNAL = "htt://google.com";
 
     private static final String SINGLE_LINK_HTML_TAG_PLACEHOLDER = "Lorem ipsum dolor sit amet, consectetur adipisicing elit <a href=\"%s\"></a>, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua";
-    private static final String INVALID_SYNTAX_MESSAGE = "The provided link doesn't fit internal nor external link patterns";
+    private static final String INVALID_SYNTAX_MESSAGE = "Unsupported link type";
 
     private static final String RESOURCE_PATH = "/content/test-resource";
     private static final String PROPERTY_NAME = "testProperty";
     private static final String CURRENT_LINK = "/content/link-for-replacement";
     private static final String NEW_LINK = "/content/replacement-link";
     private static final String INTERNAL_LINKS_HOST_FIELD = "internalLinksHost";
-    private static final String INTERNAL_LINKS_HOST_FIELD_VALUE = "http://example.com";
+    private static final String INTERNAL_LINKS_HOST_FIELD_VALUE = "https://example.com";
 
     private final AemContext context = new AemContext(ResourceResolverType.JCR_MOCK);
 
-    private final LinkHelperImpl linkHelper = new LinkHelperImpl();
-
-    private ExternalLinkChecker externalLinkChecker;
+    private LinkHelper fixture;
+    private LinkResolver internalLinkResolver;
+    private CloseableHttpClient httpClient;
 
     @BeforeEach
-    void setup() throws NoSuchFieldException {
-        externalLinkChecker = mock(ExternalLinkChecker.class);
-        PrivateAccessor.setField(linkHelper, EXTERNAL_LINK_CHECKER_FIELD, externalLinkChecker);
+    void setup() throws IOException {
+        context.registerInjectActivateService(new MockRepositoryHelper(context.resourceResolver()));
 
-        CustomLinkResolver customLinkResolver = mock(CustomLinkResolver.class);
-        when(customLinkResolver.getLinks(anyString())).thenReturn(new ArrayList<>());
-        PrivateAccessor.setField(linkHelper, CUSTOM_LINK_FIELD, customLinkResolver);
+        CloseableHttpResponse httpResponse = mock(CloseableHttpResponse.class);
+        when(httpResponse.getStatusLine()).thenReturn(new BasicStatusLine(HttpVersion.HTTP_1_0, HttpStatus.SC_NOT_FOUND, "Not Found"));
+
+        httpClient = mock(CloseableHttpClient.class);
+        when(httpClient.execute(any())).thenReturn(httpResponse);
+        context.registerInjectActivateService(
+                new MockHttpClientBuilderFactory(),
+                Collections.singletonMap(MockHttpClientBuilderFactory.PN_CLIENT, httpClient));
+
+        context.registerInjectActivateService(new ExternalLinkResolverImpl());
+        internalLinkResolver = context.registerInjectActivateService(new InternalLinkResolverImpl());
+
+        fixture = context.registerInjectActivateService(new LinkHelperImpl());
     }
 
     @Test
@@ -101,7 +117,7 @@ class LinkHelperImplTest {
         String[] allLinks = Stream.concat(validLinks.stream(), invalidLinks.stream())
                 .toArray(String[]::new);
 
-        List<String> detectedLinks = linkHelper.getLinkStreamFromProperty(allLinks)
+        List<String> detectedLinks = fixture.getLinkStream(allLinks)
                 .map(Link::getHref)
                 .collect(Collectors.toList());
 
@@ -141,14 +157,14 @@ class LinkHelperImplTest {
 
     @Test
     void shouldReturnEmptyForInvalidInternal() {
-        Optional<Link> linkOptional = linkHelper.getLinkStreamFromProperty(INVALID_INTERNAL).findFirst();
+        Optional<Link> linkOptional = fixture.getLinkStream(INVALID_INTERNAL).findFirst();
 
         assertFalse(linkOptional.isPresent());
     }
 
     @Test
     void shouldReturnEmptyForInvalidExternal() {
-        Optional<Link> linkOptional = linkHelper.getLinkStreamFromProperty(INVALID_EXTERNAL).findFirst();
+        Optional<Link> linkOptional = fixture.getLinkStream(INVALID_EXTERNAL).findFirst();
 
         assertFalse(linkOptional.isPresent());
     }
@@ -157,7 +173,7 @@ class LinkHelperImplTest {
     void testValidateInternalLink_valid() {
         context.create().resource(VALID_INTERNAL);
 
-        LinkStatus linkStatus = linkHelper.validateInternalLink(VALID_INTERNAL, context.resourceResolver());
+        LinkStatus linkStatus = fixture.validateLink(VALID_INTERNAL, context.resourceResolver());
 
         testLinkStatus(HttpStatus.SC_OK, linkStatus);
     }
@@ -166,14 +182,14 @@ class LinkHelperImplTest {
     void testValidateInternalEncodedLink_valid() {
         context.create().resource(VALID_INTERNAL_DECODED);
 
-        LinkStatus linkStatus = linkHelper.validateInternalLink(VALID_INTERNAL_ENCODED, context.resourceResolver());
+        LinkStatus linkStatus = fixture.validateLink(VALID_INTERNAL_ENCODED, context.resourceResolver());
 
         testLinkStatus(HttpStatus.SC_OK, linkStatus);
     }
 
     @Test
     void testValidateInternalLink_invalid() {
-        LinkStatus linkStatus = linkHelper.validateInternalLink(VALID_INTERNAL, context.resourceResolver());
+        LinkStatus linkStatus = fixture.validateLink(VALID_INTERNAL, context.resourceResolver());
 
         testLinkStatus(HttpStatus.SC_NOT_FOUND, linkStatus);
     }
@@ -185,137 +201,89 @@ class LinkHelperImplTest {
                     URLDecoder.decode(eq(VALID_INTERNAL_ENCODED), anyString())
             ).thenThrow(new UnsupportedEncodingException());
 
-            LinkStatus linkStatus = linkHelper.validateInternalLink(VALID_INTERNAL_ENCODED, context.resourceResolver());
+            LinkStatus linkStatus = fixture.validateLink(VALID_INTERNAL_ENCODED, context.resourceResolver());
 
             testLinkStatus(HttpStatus.SC_NOT_FOUND, linkStatus);
         }
     }
 
     @Test
-    void testValidateExternalLink_valid() throws IOException, URISyntaxException {
-        when(externalLinkChecker.checkLink(VALID_EXTERNAL)).thenReturn(HttpStatus.SC_OK);
+    void testValidateExternalLink_socketTimeout() throws IOException {
+        when(httpClient.execute(any())).thenThrow(new SocketTimeoutException());
 
-        LinkStatus linkStatus = linkHelper.validateExternalLink(VALID_EXTERNAL);
+        LinkStatus linkStatus = fixture.validateLink(VALID_EXTERNAL, context.resourceResolver());
 
-        testLinkStatus(HttpStatus.SC_OK, linkStatus);
+        testLinkStatus(HttpStatus.SC_REQUEST_TIMEOUT, "Request Timeout", linkStatus);
     }
 
     @Test
-    void testValidateExternalLink_notFound() throws IOException, URISyntaxException {
-        when(externalLinkChecker.checkLink(INVALID_EXTERNAL)).thenReturn(HttpStatus.SC_NOT_FOUND);
-
-        LinkStatus linkStatus = linkHelper.validateExternalLink(INVALID_EXTERNAL);
-
-        testLinkStatus(HttpStatus.SC_NOT_FOUND, linkStatus);
-    }
-
-    @Test
-    void testValidateExternalLink_socketTimeout() throws IOException, URISyntaxException {
-        Exception e = new SocketTimeoutException();
-        when(externalLinkChecker.checkLink(INVALID_EXTERNAL)).thenThrow(e);
-
-        LinkStatus linkStatus = linkHelper.validateExternalLink(INVALID_EXTERNAL);
-
-        testLinkStatus(HttpStatus.SC_REQUEST_TIMEOUT, e.toString(), linkStatus);
-    }
-
-    @Test
-    void testValidateExternalLink_badRequest() throws IOException, URISyntaxException {
+    void testValidateExternalLink_badRequest() throws IOException {
         Exception e = new IOException();
-        when(externalLinkChecker.checkLink(INVALID_EXTERNAL)).thenThrow(e);
+        when(httpClient.execute(any())).thenThrow(new IOException());
 
-        LinkStatus linkStatus = linkHelper.validateExternalLink(INVALID_EXTERNAL);
+        LinkStatus linkStatus = fixture.validateLink(VALID_EXTERNAL, context.resourceResolver());
 
-        testLinkStatus(HttpStatus.SC_BAD_REQUEST, e.toString(), linkStatus);
+        testLinkStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR, e.toString(), linkStatus);
     }
 
     @Test
     void testValidateLink_validInternal() {
         context.create().resource(VALID_INTERNAL);
 
-        Link linkForValidation = new Link(VALID_INTERNAL, Link.Type.INTERNAL);
-        LinkStatus linkStatus = linkHelper.validateLink(linkForValidation, context.resourceResolver());
+        Link linkForValidation = new LinkImpl("Internal", VALID_INTERNAL);
+        fixture.validateLink(linkForValidation, context.resourceResolver());
 
-        testLinkStatus(HttpStatus.SC_OK, linkStatus);
+        testLinkStatus(HttpStatus.SC_OK, linkForValidation.getStatus());
     }
 
     @Test
     void testValidateLink_invalidInternal() {
-        Link linkForValidation = new Link(VALID_INTERNAL, Link.Type.INTERNAL);
-        LinkStatus linkStatus = linkHelper.validateLink(linkForValidation, context.resourceResolver());
+        Link linkForValidation = new LinkImpl("Internal", VALID_INTERNAL);
+        fixture.validateLink(linkForValidation, context.resourceResolver());
 
-        testLinkStatus(HttpStatus.SC_NOT_FOUND, linkStatus);
+        testLinkStatus(HttpStatus.SC_NOT_FOUND, linkForValidation.getStatus());
     }
 
     @Test
-    void testValidateLink_shouldSendRequestForInternal404LinksIfInternalLinksHostIsConfigured() throws NoSuchFieldException, URISyntaxException, IOException {
-        PrivateAccessor.setField(linkHelper, INTERNAL_LINKS_HOST_FIELD, INTERNAL_LINKS_HOST_FIELD_VALUE);
-        when(externalLinkChecker.checkLink(INTERNAL_LINKS_HOST_FIELD_VALUE + VALID_INTERNAL)).thenReturn(HttpStatus.SC_OK);
-        Link linkForValidation = new Link(VALID_INTERNAL, Link.Type.INTERNAL);
-        LinkStatus linkStatus = linkHelper.validateLink(linkForValidation, context.resourceResolver());
+    void testValidateLink_shouldSendRequestForInternal404LinksIfInternalLinksHostIsConfigured() throws IOException {
+        CloseableHttpResponse response = mock(CloseableHttpResponse.class);
+        when(response.getStatusLine()).thenReturn(new BasicStatusLine(HttpVersion.HTTP_1_0, HttpStatus.SC_OK, "OK"));
+        when(httpClient.execute(any())).thenReturn(response);
+
+        MockOsgi.deactivate(internalLinkResolver, context.bundleContext());
+        MockOsgi.activate(
+                internalLinkResolver,
+                context.bundleContext(),
+                Collections.singletonMap(INTERNAL_LINKS_HOST_FIELD, INTERNAL_LINKS_HOST_FIELD_VALUE));
+
+        Link linkForValidation = new LinkImpl("Internal", VALID_INTERNAL);
+        fixture.validateLink(linkForValidation, context.resourceResolver());
+
+        testLinkStatus(HttpStatus.SC_OK, linkForValidation.getStatus());
+    }
+
+    @Test
+    void testValidateLink_validExternal() throws IOException {
+        CloseableHttpResponse response = mock(CloseableHttpResponse.class);
+        when(response.getStatusLine()).thenReturn(new BasicStatusLine(HttpVersion.HTTP_1_0, HttpStatus.SC_OK, "OK"));
+        when(httpClient.execute(any())).thenReturn(response);
+
+        LinkStatus linkStatus = fixture.validateLink(VALID_EXTERNAL, context.resourceResolver());
 
         testLinkStatus(HttpStatus.SC_OK, linkStatus);
     }
 
     @Test
-    void testValidateLink_validExternal() throws IOException, URISyntaxException {
-        when(externalLinkChecker.checkLink(VALID_EXTERNAL)).thenReturn(HttpStatus.SC_OK);
+    void testValidateLink_invalidExternal() {
+        LinkStatus linkStatus = fixture.validateLink(INVALID_EXTERNAL, context.resourceResolver());
 
-        Link linkForValidation = new Link(VALID_EXTERNAL, Link.Type.EXTERNAL);
-        LinkStatus linkStatus = linkHelper.validateLink(linkForValidation, context.resourceResolver());
-
-        testLinkStatus(HttpStatus.SC_OK, linkStatus);
+        testLinkStatus(HttpStatus.SC_BAD_REQUEST, INVALID_SYNTAX_MESSAGE, linkStatus);
     }
-
-    @Test
-    void testValidateLink_invalidExternal() throws IOException, URISyntaxException {
-        when(externalLinkChecker.checkLink(INVALID_EXTERNAL)).thenReturn(HttpStatus.SC_NOT_FOUND);
-
-        Link linkForValidation = new Link(INVALID_EXTERNAL, Link.Type.EXTERNAL);
-        LinkStatus linkStatus = linkHelper.validateLink(linkForValidation, context.resourceResolver());
-
-        testLinkStatus(HttpStatus.SC_NOT_FOUND, linkStatus);
-    }
-
-    @Test
-    void testValidateLinkString_validInternal() {
-        context.create().resource(VALID_INTERNAL);
-
-        LinkStatus linkStatus = linkHelper.validateLink(VALID_INTERNAL, context.resourceResolver());
-
-        testLinkStatus(HttpStatus.SC_OK, linkStatus);
-    }
-
-    @Test
-    void testValidateLinkString_invalidInternal() {
-        LinkStatus linkStatus = linkHelper.validateLink(VALID_INTERNAL, context.resourceResolver());
-
-        testLinkStatus(HttpStatus.SC_NOT_FOUND, linkStatus);
-    }
-
-    @Test
-    void testValidateLinkString_validExternal() throws IOException, URISyntaxException {
-        when(externalLinkChecker.checkLink(VALID_EXTERNAL)).thenReturn(HttpStatus.SC_OK);
-
-        LinkStatus linkStatus = linkHelper.validateLink(VALID_EXTERNAL, context.resourceResolver());
-
-        testLinkStatus(HttpStatus.SC_OK, linkStatus);
-    }
-
-    @Test
-    void testValidateLinkString_invalidExternal() throws IOException, URISyntaxException {
-        when(externalLinkChecker.checkLink(VALID_EXTERNAL)).thenReturn(HttpStatus.SC_NOT_FOUND);
-
-        LinkStatus linkStatus = linkHelper.validateLink(VALID_EXTERNAL, context.resourceResolver());
-
-        testLinkStatus(HttpStatus.SC_NOT_FOUND, linkStatus);
-    }
-
     @Test
     void testValidateLinkString_invalidSyntax() {
         String linkInsideText = String.format(SINGLE_LINK_HTML_TAG_PLACEHOLDER, VALID_INTERNAL);
 
-        LinkStatus linkStatus = linkHelper.validateLink(linkInsideText, context.resourceResolver());
+        LinkStatus linkStatus = fixture.validateLink(linkInsideText, context.resourceResolver());
 
         testLinkStatus(HttpStatus.SC_BAD_REQUEST, INVALID_SYNTAX_MESSAGE, linkStatus);
     }
@@ -324,7 +292,7 @@ class LinkHelperImplTest {
     void testReplaceLink_singleValue() {
         Resource resource = context.create().resource(RESOURCE_PATH, PROPERTY_NAME, CURRENT_LINK);
 
-        linkHelper.replaceLink(context.resourceResolver(), RESOURCE_PATH, PROPERTY_NAME, CURRENT_LINK, NEW_LINK);
+        fixture.replaceLink(context.resourceResolver(), RESOURCE_PATH, PROPERTY_NAME, CURRENT_LINK, NEW_LINK);
 
         String updatedValue = resource.getValueMap().get(PROPERTY_NAME, String.class);
         assertEquals(NEW_LINK, updatedValue);
@@ -335,9 +303,10 @@ class LinkHelperImplTest {
         String[] multiValue = {CURRENT_LINK, CURRENT_LINK};
         Resource resource = context.create().resource(RESOURCE_PATH, PROPERTY_NAME, multiValue);
 
-        linkHelper.replaceLink(context.resourceResolver(), RESOURCE_PATH, PROPERTY_NAME, CURRENT_LINK, NEW_LINK);
+        fixture.replaceLink(context.resourceResolver(), RESOURCE_PATH, PROPERTY_NAME, CURRENT_LINK, NEW_LINK);
 
         String[] updatedValue = resource.getValueMap().get(PROPERTY_NAME, String[].class);
+        assertNotNull(updatedValue);
         assertTrue(Arrays.stream(updatedValue).allMatch(NEW_LINK::equals));
     }
 
@@ -345,19 +314,19 @@ class LinkHelperImplTest {
     void testReplaceLink_currentLinkNotFound() {
         Resource resource = context.create().resource(RESOURCE_PATH, PROPERTY_NAME, VALID_INTERNAL);
 
-        linkHelper.replaceLink(context.resourceResolver(), RESOURCE_PATH, PROPERTY_NAME, CURRENT_LINK, NEW_LINK);
+        fixture.replaceLink(context.resourceResolver(), RESOURCE_PATH, PROPERTY_NAME, CURRENT_LINK, NEW_LINK);
 
         String updatedValue = resource.getValueMap().get(PROPERTY_NAME, String.class);
         assertEquals(VALID_INTERNAL, updatedValue);
     }
 
     private void testLinkStatus(int expectedCode, LinkStatus linkStatus) {
-        testLinkStatus(expectedCode, HttpStatus.getStatusText(expectedCode), linkStatus);
+        assertEquals(expectedCode, linkStatus.getCode());
     }
 
     private void testLinkStatus(int expectedCode, String expectedMessage, LinkStatus linkStatus) {
-        assertEquals(expectedCode, linkStatus.getStatusCode());
-        assertEquals(expectedMessage, linkStatus.getStatusMessage());
+        assertEquals(expectedCode, linkStatus.getCode());
+        assertEquals(expectedMessage, linkStatus.getMessage());
     }
 
     private void testGetSingleLink(String link) {
@@ -365,7 +334,7 @@ class LinkHelperImplTest {
     }
 
     private void testGetSingleLinkFromText(String text, String expected) {
-        Optional<Link> linkOptional = linkHelper.getLinkStreamFromProperty(text).findFirst();
+        Optional<Link> linkOptional = fixture.getLinkStream(text).findFirst();
 
         assertTrue(linkOptional.isPresent());
         assertEquals(expected, linkOptional.get().getHref());

@@ -11,8 +11,7 @@ public interface ConfigService {
     ZonedDateTime getLastModified();
     String[] getExcludedProperties();
     String getLinksType();
-    boolean customTypeAllowed();
-    boolean isExcludeTags();
+    boolean excludeTagLinks();
     int[] getStatusCodes();
     int getThreadsPerCore();
 }

@@ -14,54 +14,44 @@
 
 package com.exadel.etoolbox.linkinspector.core.services.util;
 
-import com.exadel.etoolbox.linkinspector.core.models.Link;
+import com.exadel.etoolbox.linkinspector.api.Link;
+import com.exadel.etoolbox.linkinspector.core.models.LinkImpl;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 public class LinksCounter {
-    private final AtomicInteger internalLinks;
-    private final AtomicInteger externalLinks;
-    private final Map<String, AtomicInteger> customLinks;
+    private final Map<String, AtomicInteger> statistics;
 
     public LinksCounter() {
-        this.internalLinks = new AtomicInteger();
-        this.externalLinks = new AtomicInteger();
-        this.customLinks = new HashMap<>();
+        statistics = new TreeMap<>();
     }
 
-    public int getInternalLinks() {
-        return internalLinks.get();
+    public Map<String, Integer> getStatistics() {
+        return statistics
+                .entrySet()
+                .stream()
+                .collect(HashMap::new, (m, v) -> m.put(v.getKey(), v.getValue().get()), HashMap::putAll);
     }
 
-    public int getExternalLinks() {
-        return externalLinks.get();
-    }
-
-    public Map<String, AtomicInteger> getCustomLinks() {
-        return customLinks;
-    }
-
-    public void incrementInternal() {
-        this.internalLinks.incrementAndGet();
-    }
-
-    public void incrementExternal() {
-        this.externalLinks.incrementAndGet();
-    }
-
-    public void incrementCustom(Link link) {
-        customLinks.computeIfAbsent(link.getCustomLinkTypeProvider().getName(), k -> new AtomicInteger()).incrementAndGet();
-    }
-
-    public void countLink(Link link) {
-        if (link.getType() == Link.Type.INTERNAL) {
-            this.incrementInternal();
-        } else if (link.getType() == Link.Type.EXTERNAL) {
-            this.incrementExternal();
-        } else if (link.getType() == Link.Type.CUSTOM) {
-            this.incrementCustom(link);
+    public void checkIn(Link link) {
+        String type = StringUtils.defaultIfBlank(link.getType(), LinkImpl.DEFAULT_TYPE);
+        AtomicInteger count = statistics.get(type);
+        if (count == null) {
+            count = new AtomicInteger(0);
+            statistics.put(type, count);
         }
+        count.incrementAndGet();
+    }
+
+    @Override
+    public String toString() {
+        Map<String, Integer> stats = getStatistics();
+        return "Total: " + stats.values().stream().mapToInt(i -> i).sum()
+                + ". By type: " + stats.entrySet().stream().map(entry -> entry.getKey() + ": " + entry.getValue()).collect(Collectors.joining(", "));
     }
 }

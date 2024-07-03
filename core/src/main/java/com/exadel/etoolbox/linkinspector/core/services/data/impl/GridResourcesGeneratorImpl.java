@@ -17,8 +17,7 @@ package com.exadel.etoolbox.linkinspector.core.services.data.impl;
 import com.day.cq.replication.ReplicationActionType;
 import com.day.cq.replication.ReplicationStatus;
 import com.day.crx.JcrConstants;
-import com.exadel.etoolbox.linkinspector.core.models.Link;
-import com.exadel.etoolbox.linkinspector.api.entity.LinkStatus;
+import com.exadel.etoolbox.linkinspector.api.Link;
 import com.exadel.etoolbox.linkinspector.core.services.data.GenerationStatsProps;
 import com.exadel.etoolbox.linkinspector.core.services.data.GridResourcesGenerator;
 import com.exadel.etoolbox.linkinspector.core.services.data.ConfigService;
@@ -93,7 +92,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
                 stopWatch.getTime(TimeUnit.MILLISECONDS), searchPath, traversedNodesCounter);
 
         if (linkToGridResourcesMap.isEmpty()) {
-            LOG.warn("Collecting broken links is completed in {} ms, path: {}. No broken links were found after traversing",
+            LOG.warn("Collecting reported links is completed in {} ms, path: {}. No links reported after traversing",
                     stopWatch.getTime(TimeUnit.MILLISECONDS), searchPath);
             LinksCounter emptyCounter = new LinksCounter();
             saveStatsToJcr(emptyCounter, emptyCounter, resourceResolver);
@@ -151,10 +150,10 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
                                                                            Object propertyValue,
                                                                            Resource resource,
                                                                            String gridResourceType) {
-        return linkHelper.getLinkStreamFromProperty(propertyValue)
-                .filter(this::isAllowedLinkType)
+        return linkHelper.getLinkStream(propertyValue)
                 .filter(this::isAllowedLink)
-                .collect(Collectors.toMap(Function.identity(),
+                .collect(Collectors.toMap(
+                        Function.identity(),
                         link -> new GridResource(link, resource.getPath(), property, gridResourceType),
                         (existingValue, newValue) -> existingValue
                 ))
@@ -165,8 +164,9 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
     private Set<GridResource> validateLinksInParallel(Map<Link, List<GridResource>> linkToGridResourcesMap,
                                                       ResourceResolver resourceResolver) {
         LinksCounter allLinksCounter = new LinksCounter();
-        LinksCounter brokenLinksCounter = new LinksCounter();
-        Set<GridResource> allBrokenLinkResources = new CopyOnWriteArraySet<>();
+        LinksCounter reportedLinksCounter = new LinksCounter();
+        // TODO: VERY slow
+        Set<GridResource> allReportedLinkResources = new CopyOnWriteArraySet<>();
         try {
             executorService =
                     Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() * configService.getThreadsPerCore());
@@ -174,9 +174,9 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
                     submitLinkForValidation(
                             link,
                             resources,
-                            allBrokenLinkResources,
+                            allReportedLinkResources,
                             allLinksCounter,
-                            brokenLinksCounter,
+                            reportedLinksCounter,
                             resourceResolver
                     )
             );
@@ -185,30 +185,27 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
         }
 
         awaitExecutorServiceTermination();
+        LOG.debug("Statistics for all tested links: {}", allLinksCounter);
+        LOG.debug("Statistics for the broken/reported links: {}", reportedLinksCounter);
 
-        LOG.debug("Checked internal links count: {}", allLinksCounter.getInternalLinks());
-        LOG.debug("Checked external links count: {}", allLinksCounter.getExternalLinks());
+        saveStatsToJcr(allLinksCounter, reportedLinksCounter, resourceResolver);
 
-        LOG.debug("Broken internal links count: {}", brokenLinksCounter.getInternalLinks());
-        LOG.debug("Broken external links count: {}", brokenLinksCounter.getExternalLinks());
-
-        saveStatsToJcr(allLinksCounter, brokenLinksCounter, resourceResolver);
-
-        return allBrokenLinkResources;
+        return allReportedLinkResources;
     }
 
     private void submitLinkForValidation(Link link,
                                          List<GridResource> currentLinkResources,
-                                         Set<GridResource> allBrokenLinkResources,
+                                         Set<GridResource> allReportedLinkResources,
                                          LinksCounter allLinksCounter,
-                                         LinksCounter brokenLinksCounter,
+                                         LinksCounter reportedLinksCounter,
                                          ResourceResolver resourceResolver) {
-        allLinksCounter.countLink(link);
+        allLinksCounter.checkIn(link);
         executorService.submit(() -> {
-                    LinkStatus status = linkHelper.validateLink(link, resourceResolver);
-                    if (!status.isValid() && isAllowedErrorCode(status.getStatusCode())) {
-                        allBrokenLinkResources.addAll(currentLinkResources);
-                        brokenLinksCounter.countLink(link);
+                    linkHelper.validateLink(link, resourceResolver);
+                    if (link.isReported() && isAllowedErrorCode(link.getStatus().getCode())) {
+                        currentLinkResources.forEach(gridResource -> gridResource.getLink().setStatus(link.getStatus()));
+                        allReportedLinkResources.addAll(currentLinkResources);
+                        reportedLinksCounter.checkIn(link);
                     }
                 }
         );
@@ -216,6 +213,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
 
     private void awaitExecutorServiceTermination() {
         try {
+            // TODO: better add a meaningful maximum
             boolean terminated = executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
             LOG.trace("ExecutorService terminated: {}", terminated);
         } catch (InterruptedException e) {
@@ -240,26 +238,16 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
                 .orElse(true);
     }
 
-    private boolean isAllowedLinkType(Link link) {
-        String reportLinksType = configService.getLinksType();
-        if(Link.Type.CUSTOM.equals(link.getType())){
-            return configService.customTypeAllowed();
-        }
-        return GenerationStatsProps.REPORT_LINKS_TYPE_ALL.equals(reportLinksType) ||
-                Link.Type.valueOf(reportLinksType) == link.getType();
-    }
-
     private boolean isAllowedLink(Link link) {
-        return !(Link.Type.INTERNAL == link.getType() && isExcludedTag(link.getHref())) &&
-                !isExcludedByPattern(link.getHref());
+        return !isExcludedTagLink(link.getHref()) && !isExcludedByPattern(link.getHref());
     }
 
     private boolean isExcludedByPattern(String href) {
         return isStringMatchAnyPattern(href, getExcludedLinksPatterns());
     }
 
-    private boolean isExcludedTag(String href) {
-        return configService.isExcludeTags() && href.startsWith(TAGS_LOCATION);
+    private boolean isExcludedTagLink(String href) {
+        return configService.excludeTagLinks() && href.startsWith(TAGS_LOCATION);
     }
 
     private boolean isExcludedProperty(String propertyName) {
@@ -363,17 +351,19 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
         stats.put(GenerationStatsProps.PN_LAST_MODIFIED_BOUNDARY, dateToIsoDateTimeString(configService.getLastModified()));
         stats.put(GenerationStatsProps.PN_EXCLUDED_PROPERTIES, configService.getExcludedProperties());
 
-        stats.put(GenerationStatsProps.PN_REPORT_LINKS_TYPE, configService.getLinksType());
         stats.put(GenerationStatsProps.PN_EXCLUDED_LINK_PATTERNS, getExcludedLinksPatterns());
 
-        stats.put(GenerationStatsProps.PN_EXCLUDED_TAGS, configService.isExcludeTags());
+        stats.put(GenerationStatsProps.PN_EXCLUDED_TAGS, configService.excludeTagLinks());
+        // TODO: Why is the next line commented out?
 //        stats.put(GenerationStatsProps.PN_ALLOWED_STATUS_CODES, uiConfigService.getStatusCodes());
 
-        stats.put(GenerationStatsProps.PN_ALL_INTERNAL_LINKS, allLinksCounter.getInternalLinks());
-        stats.put(GenerationStatsProps.PN_BROKEN_INTERNAL_LINKS, brokenLinksCounter.getInternalLinks());
-        stats.put(GenerationStatsProps.PN_ALL_EXTERNAL_LINKS, allLinksCounter.getExternalLinks());
-        stats.put(GenerationStatsProps.PN_BROKEN_EXTERNAL_LINKS, brokenLinksCounter.getExternalLinks());
-
+        List<String> perTypeStatistics = new ArrayList<>();
+        for (String type : allLinksCounter.getStatistics().keySet()) {
+            int countAll = allLinksCounter.getStatistics().get(type);
+            int countBroken = brokenLinksCounter.getStatistics().getOrDefault(type, 0);
+            perTypeStatistics.add(String.format("%s: %d/%d", StringUtils.capitalize(type), countBroken, countAll));
+        }
+        stats.put(GenerationStatsProps.PN_STATISTICS, perTypeStatistics.toArray());
         return stats;
     }
 

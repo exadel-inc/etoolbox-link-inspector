@@ -26,7 +26,6 @@ public class ConfigServiceImpl implements ConfigService {
     private static final String PN_PATH = "path";
     private static final String PN_EXCLUDED_PROPERTIES = "excludedProperties";
     private static final String PN_LINKS_TYPE = "linksType";
-    private static final String PN_ALLOWED_CUSTOM_TYPE = "customTypeAllowed";
     private static final String PN_EXCLUDE_TAGS = "excludeTags";
     private static final String PN_STATUS_CODES = "statusCodes";
     private static final String PN_THREADS_PER_CORE = "threadsPerCore";
@@ -77,16 +76,11 @@ public class ConfigServiceImpl implements ConfigService {
 
     @Override
     public String getLinksType() {
-        return getProperty(PN_LINKS_TYPE, String.class).orElse(GenerationStatsProps.REPORT_LINKS_TYPE_ALL);
+        return getProperty(PN_LINKS_TYPE, String.class).orElse(null);
     }
 
     @Override
-    public boolean customTypeAllowed(){
-        return getProperty(PN_ALLOWED_CUSTOM_TYPE, Boolean.class).orElse(false);
-    }
-
-    @Override
-    public boolean isExcludeTags() {
+    public boolean excludeTagLinks() {
         return getProperty(PN_EXCLUDE_TAGS, Boolean.class).orElse(true);
     }
 

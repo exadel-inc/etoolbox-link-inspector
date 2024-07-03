@@ -14,7 +14,7 @@
 
 package com.exadel.etoolbox.linkinspector.core.servlets;
 
-import com.exadel.etoolbox.linkinspector.api.entity.LinkStatus;
+import com.exadel.etoolbox.linkinspector.api.LinkStatus;
 import com.exadel.etoolbox.linkinspector.core.services.data.DataFeedService;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.LinkHelper;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.RepositoryHelper;
@@ -127,8 +127,8 @@ class FixBrokenLinkServletTest {
         verify(repositoryHelper, never()).createResourceIfNotExist(anyString(), anyString(), anyString());
 
         String expectedJsonResponse = Json.createObjectBuilder()
-                .add(STATUS_CODE_RESP_PARAM, expectedLinkStatus.getStatusCode())
-                .add(STATUS_MSG_RESP_PARAM, expectedLinkStatus.getStatusMessage())
+                .add(STATUS_CODE_RESP_PARAM, expectedLinkStatus.getCode())
+                .add(STATUS_MSG_RESP_PARAM, expectedLinkStatus.getMessage())
                 .build()
                 .toString();
         String jsonResponse = response.getOutputAsString();

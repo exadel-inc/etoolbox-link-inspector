@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component
+        xmlns:scr="http://www.osgi.org/xmlns/scr/v1.3.0"
+        name="com.exadel.etoolbox.linkinspector.core.services.mocks.MockHttpClientBuilderFactory"
+        activate="activate"
+        modified="activate">
+  <service>
+    <provide interface="org.apache.http.osgi.services.HttpClientBuilderFactory"/>
+  </service>
+  <implementation class="com.exadel.etoolbox.linkinspector.core.services.mocks.MockHttpClientBuilderFactory"/>
+</scr:component>

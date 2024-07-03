@@ -14,20 +14,21 @@
 
 package com.exadel.etoolbox.linkinspector.core.services.data.impl;
 
-import com.exadel.etoolbox.linkinspector.core.services.ExternalLinkChecker;
+import com.exadel.etoolbox.linkinspector.api.LinkResolver;
 import com.exadel.etoolbox.linkinspector.core.services.cache.GridResourcesCache;
 import com.exadel.etoolbox.linkinspector.core.services.cache.impl.GridResourcesCacheImpl;
+import com.exadel.etoolbox.linkinspector.core.services.data.ConfigService;
+import com.exadel.etoolbox.linkinspector.core.services.data.GenerationStatsProps;
 import com.exadel.etoolbox.linkinspector.core.services.data.GridResourcesGenerator;
 import com.exadel.etoolbox.linkinspector.core.services.data.models.DataFilter;
 import com.exadel.etoolbox.linkinspector.core.services.data.models.GridResource;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.LinkHelper;
-import com.exadel.etoolbox.linkinspector.core.services.data.GenerationStatsProps;
-import com.exadel.etoolbox.linkinspector.core.services.data.ConfigService;
-import com.exadel.etoolbox.linkinspector.core.services.ext.CustomLinkResolver;
-import com.exadel.etoolbox.linkinspector.core.services.util.CsvUtil;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.RepositoryHelper;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.impl.LinkHelperImpl;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.impl.RepositoryHelperImpl;
+import com.exadel.etoolbox.linkinspector.core.services.resolvers.ExternalLinkResolverImpl;
+import com.exadel.etoolbox.linkinspector.core.services.resolvers.InternalLinkResolverImpl;
+import com.exadel.etoolbox.linkinspector.core.services.util.CsvUtil;
 import com.exadel.etoolbox.linkinspector.core.services.util.LinkInspectorResourceUtil;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -48,6 +49,7 @@ import org.mockito.stubbing.Answer;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
@@ -55,8 +57,14 @@ import java.util.function.BiConsumer;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(AemContextExtension.class)
 class DataFeedServiceImplTest {
@@ -78,7 +86,6 @@ class DataFeedServiceImplTest {
     private final AemContext context = new AemContext(ResourceResolverType.JCR_MOCK);
 
     private final DataFeedServiceImpl fixture = new DataFeedServiceImpl();
-
 
     @BeforeEach
     void setup() throws NoSuchFieldException, IOException, URISyntaxException {
@@ -183,12 +190,13 @@ class DataFeedServiceImplTest {
 
     private GridResourcesGeneratorImpl getGridResourcesGenerator() throws NoSuchFieldException, IOException, URISyntaxException {
         GridResourcesGeneratorImpl gridResourcesGenerator = new GridResourcesGeneratorImpl();
+
+        List<LinkResolver> linkResolvers = Arrays.asList(
+                new ExternalLinkResolverImpl(),
+                new InternalLinkResolverImpl()
+        );
         LinkHelper linkHelper = new LinkHelperImpl();
-        ExternalLinkChecker externalLinkChecker = mock(ExternalLinkChecker.class);
-        PrivateAccessor.setField(linkHelper, EXTERNAL_LINK_CHECKER_FIELD, externalLinkChecker);
-        CustomLinkResolver customLinkResolver = mock(CustomLinkResolver.class);
-        when(customLinkResolver.getLinks(anyString())).thenReturn(new ArrayList<>());
-        PrivateAccessor.setField(linkHelper, CUSTOM_LINK_FIELD, customLinkResolver);
+        PrivateAccessor.setField(linkHelper, "linkResolvers", linkResolvers);
         PrivateAccessor.setField(gridResourcesGenerator, LINK_HELPER_FIELD, linkHelper);
 
         ConfigService configService = mock(ConfigServiceImpl.class);
@@ -196,7 +204,6 @@ class DataFeedServiceImplTest {
         when(configService.getSearchPath()).thenReturn(TEST_FOLDER_PATH);
         when(configService.getExcludedPaths()).thenReturn(new String[0]);
         when(configService.getExcludedProperties()).thenReturn(new String[0]);
-        when(configService.getLinksType()).thenReturn(GenerationStatsProps.REPORT_LINKS_TYPE_ALL);
         when(configService.getStatusCodes()).thenReturn(new int[]{HttpStatus.SC_NOT_FOUND});
         when(configService.getThreadsPerCore()).thenReturn(60);
         PrivateAccessor.setField(gridResourcesGenerator, CONFIG_FIELD, configService);

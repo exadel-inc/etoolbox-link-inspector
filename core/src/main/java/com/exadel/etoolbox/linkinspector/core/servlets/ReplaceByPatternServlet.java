@@ -128,7 +128,7 @@ public class ReplaceByPatternServlet extends SlingAllMethodsServlet {
 
     @Activate
     @Modified
-    protected void activate(Configuration configuration) {
+    void activate(Configuration configuration) {
         commitThreshold = configuration.commitThreshold();
     }
 

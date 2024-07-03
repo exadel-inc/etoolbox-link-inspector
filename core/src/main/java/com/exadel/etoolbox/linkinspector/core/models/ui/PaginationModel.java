@@ -60,7 +60,7 @@ public class PaginationModel {
         List<GridResource> resources = cache
                 .getGridResourcesList()
                 .stream()
-                .filter(gridResource -> StringUtils.isBlank(type) || gridResource.getLink().getType().getValue().equalsIgnoreCase(type))
+                .filter(gridResource -> StringUtils.isBlank(type) || StringUtils.equals(gridResource.getLink().getType(), type))
                 .filter(gridResource -> StringUtils.isBlank(substring) || gridResource.getLink().getHref().contains(substring))
                 .collect(Collectors.toList());
 

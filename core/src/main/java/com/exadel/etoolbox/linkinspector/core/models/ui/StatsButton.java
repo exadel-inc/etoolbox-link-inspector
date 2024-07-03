@@ -36,7 +36,7 @@ public class StatsButton {
     @SlingObject
     private ResourceResolver resourceResolver;
 
-    @Inject
+    @Inject // TODO Do not use Inject
     private String statsResourcePath;
 
     /**

@@ -8,13 +8,13 @@
         <sly data-sly-call="${field @ title='Last Modified Boundary', value=model.lastModifiedBoundary}"></sly>
         <sly data-sly-call="${field @ title='Excluded Properties', value=model.excludedProperties}"></sly>
 
-        <sly data-sly-call="${field @ title='Links Type', value=model.reportLinksType}"></sly>
         <sly data-sly-call="${field @ title='Excluded Links Patterns', value=model.excludedLinksPatterns}"></sly>
         <sly data-sly-call="${field @ title='Exclude Tags', value=model.excludeTags}"></sly>
         <sly data-sly-call="${field @ title='HTTP Status Codes', value=model.allowedStatusCodes}"></sly>
 
-        <sly data-sly-call="${linkField @ title='Internal Links (All/Broken)', allLinksNumber=model.allInternalLinksCount, brokenLinksNumber=model.brokenInternalLinksCount}"></sly>
-        <sly data-sly-call="${linkField @ title='External Links (All/Broken)', allLinksNumber=model.allExternalLinksCount, brokenLinksNumber=model.brokenExternalLinksCount}"></sly>
+        <sly data-sly-list.statKey="${model.statistics}">
+            <sly data-sly-call="${field @ title=statKey, value=model.statistics[statKey]}"></sly>
+        </sly>
         <coral-popover-separator></coral-popover-separator>
     </coral-popover-content>
 </sly>
@@ -22,11 +22,5 @@
 <template data-sly-template.field="${@ title, value}">
     <p class="u-coral-margin" data-sly-test="${value}">
         ${title}: <em>${value}</em>
-    </p>
-</template>
-
-<template data-sly-template.linkField="${@ title, allLinksNumber, brokenLinksNumber}">
-    <p class="u-coral-margin" data-sly-test="${allLinksNumber}">
-        ${title}: <strong><em>${allLinksNumber}/${brokenLinksNumber}</em></strong>
     </p>
 </template>

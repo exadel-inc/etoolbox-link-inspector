@@ -15,8 +15,7 @@
 package com.exadel.etoolbox.linkinspector.core.services.data.impl;
 
 import com.adobe.granite.ui.components.ds.ValueMapResource;
-import com.exadel.etoolbox.linkinspector.api.entity.LinkStatus;
-import com.exadel.etoolbox.linkinspector.core.models.Link;
+import com.exadel.etoolbox.linkinspector.api.Link;
 import com.exadel.etoolbox.linkinspector.core.models.ui.GridViewItem;
 import com.exadel.etoolbox.linkinspector.core.services.cache.GridResourcesCache;
 import com.exadel.etoolbox.linkinspector.core.services.data.DataFeedService;
@@ -30,7 +29,6 @@ import com.exadel.etoolbox.linkinspector.core.services.util.JsonUtil;
 import com.exadel.etoolbox.linkinspector.core.services.util.LinkInspectorResourceUtil;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.csv.CSVPrinter;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
@@ -169,13 +167,12 @@ public class DataFeedServiceImpl implements DataFeedService {
                     .peek(gridResource -> {
                         if (valuesMap.containsKey(String.format("%s@%s", gridResource.getResourcePath(), gridResource.getPropertyName()))) {
                             Optional<Link> optionalLink = linkHelper
-                                    .getLinkStreamFromProperty(valuesMap.get(String
-                                            .format("%s@%s", gridResource.getResourcePath(), gridResource.getPropertyName())))
+                                    .getLinkStream(valuesMap.get(String.format("%s@%s", gridResource.getResourcePath(), gridResource.getPropertyName())))
                                     .peek(link -> linkHelper.validateLink(link, serviceResourceResolver))
                                     .findFirst();
                             if (optionalLink.isPresent()) {
                                 Link link = optionalLink.get();
-                                link.setStatus(new LinkStatus(link.getStatusCode(), "Modified"));
+                                link.setStatus("Modified");
                                 gridResource.setLink(link);
                             }
                         }

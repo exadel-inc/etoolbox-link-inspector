@@ -14,8 +14,9 @@
 
 package com.exadel.etoolbox.linkinspector.core.services.data.models;
 
-import com.exadel.etoolbox.linkinspector.api.entity.LinkStatus;
-import com.exadel.etoolbox.linkinspector.core.models.Link;
+import com.exadel.etoolbox.linkinspector.api.Link;
+import com.exadel.etoolbox.linkinspector.api.LinkStatus;
+import com.exadel.etoolbox.linkinspector.core.models.LinkImpl;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -41,7 +42,7 @@ public class GridResource {
     public static final String PN_PROPERTY_NAME = "propertyName";
 
     /**
-     * Json field names
+     * JSON field names
      */
     private static final String JSON_PROPERTY_NAME = PN_PROPERTY_NAME;
     private static final String JSON_RESOURCE_PATH = PN_RESOURCE_PATH;
@@ -66,15 +67,15 @@ public class GridResource {
     }
 
     /**
-     * Creates an instance of grid resource based on the data feed json fields
+     * Creates an instance of grid resource based on the data feed JSON fields
      *
-     * @param propertyName  - data feed json field
-     * @param resourcePath  - data feed json field
-     * @param href          - data feed json field
-     * @param type          - data feed json field
-     * @param statusMessage - data feed json field
-     * @param resourceType  - data feed json field
-     * @param statusCode    - data feed json field
+     * @param propertyName  - data feed JSON field
+     * @param resourcePath  - data feed JSON field
+     * @param href          - data feed JSON field
+     * @param type          - data feed JSON field
+     * @param statusMessage - data feed JSON field
+     * @param resourceType  - data feed JSON field
+     * @param statusCode    - data feed JSON field
      */
     @JsonCreator
     public GridResource(@JsonProperty(JSON_PROPERTY_NAME) String propertyName,
@@ -87,10 +88,7 @@ public class GridResource {
         this.resourcePath = resourcePath;
         this.propertyName = propertyName;
         this.resourceType = resourceType;
-
-        Link newLink = new Link(href, Link.Type.valueOf(type.toUpperCase()));
-        newLink.setStatus(new LinkStatus(Integer.parseInt(statusCode), statusMessage));
-        this.link = newLink;
+        this.link = new LinkImpl(type, href, new LinkStatus(Integer.parseInt(statusCode), statusMessage));
     }
 
     public Link getLink() {
@@ -110,19 +108,20 @@ public class GridResource {
     public String getType() {
         return Optional.ofNullable(getLink())
                 .map(Link::getType)
-                .map(Link.Type::getValue)
-                .orElse(Link.Type.INTERNAL.getValue());
+                .orElse("internal");
     }
 
     public int getStatusCode() {
         return Optional.ofNullable(getLink())
-                .map(Link::getStatusCode)
+                .map(Link::getStatus)
+                .map(LinkStatus::getCode)
                 .orElse(HttpStatus.SC_NOT_FOUND);
     }
 
     public String getStatusMessage() {
         return Optional.ofNullable(getLink())
-                .map(Link::getStatusMessage)
+                .map(Link::getStatus)
+                .map(LinkStatus::getMessage)
                 .orElse(HttpStatus.getStatusText(HttpStatus.SC_NOT_FOUND));
     }
 

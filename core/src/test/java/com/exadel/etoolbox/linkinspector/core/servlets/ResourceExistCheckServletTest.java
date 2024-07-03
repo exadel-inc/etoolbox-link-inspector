@@ -17,8 +17,6 @@ package com.exadel.etoolbox.linkinspector.core.servlets;
 import io.wcm.testing.mock.aem.junit5.AemContext;
 import io.wcm.testing.mock.aem.junit5.AemContextExtension;
 import org.apache.commons.httpclient.HttpStatus;
-import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletRequest;
-import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,47 +33,43 @@ class ResourceExistCheckServletTest {
 
     private final AemContext context = new AemContext();
 
-    private final ResourceExistCheckServlet fixture = new ResourceExistCheckServlet();
-
-    private MockSlingHttpServletRequest request;
-    private MockSlingHttpServletResponse response;
+    private ResourceExistCheckServlet fixture;
 
     @BeforeEach
     void setup() {
-        request = context.request();
-        response = context.response();
+        fixture = context.registerInjectActivateService(new ResourceExistCheckServlet());
     }
 
     @Test
     void testResourceExists() {
         context.create().resource(TEST_PATH);
-        request.addRequestParameter(PATH_REQUEST_PARAM, TEST_PATH);
+        context.request().addRequestParameter(PATH_REQUEST_PARAM, TEST_PATH);
 
-        fixture.doPost(request, response);
+        fixture.doPost(context.request(), context.response());
 
         String expectedJsonResponse = buildExpectedJsonResponse(true);
-        String jsonResponse = response.getOutputAsString();
+        String jsonResponse = context.response().getOutputAsString();
 
         assertEquals(expectedJsonResponse, jsonResponse);
     }
 
     @Test
     void testResourceNotExist() {
-        request.addRequestParameter(PATH_REQUEST_PARAM, TEST_PATH);
+        context.request().addRequestParameter(PATH_REQUEST_PARAM, TEST_PATH);
 
-        fixture.doPost(request, response);
+        fixture.doPost(context.request(), context.response());
 
         String expectedJsonResponse = buildExpectedJsonResponse(false);
-        String jsonResponse = response.getOutputAsString();
+        String jsonResponse = context.response().getOutputAsString();
 
         assertEquals(expectedJsonResponse, jsonResponse);
     }
 
     @Test
     void testEmptyParams() {
-        fixture.doPost(request, response);
+        fixture.doPost(context.request(), context.response());
 
-        assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatus());
+        assertEquals(HttpStatus.SC_BAD_REQUEST, context.response().getStatus());
     }
 
     private String buildExpectedJsonResponse(boolean expected) {

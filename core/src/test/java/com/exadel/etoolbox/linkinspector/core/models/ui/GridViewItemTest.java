@@ -17,7 +17,6 @@ package com.exadel.etoolbox.linkinspector.core.models.ui;
 import com.day.cq.commons.jcr.JcrConstants;
 import com.day.cq.wcm.api.NameConstants;
 import com.day.cq.wcm.api.Page;
-import com.exadel.etoolbox.linkinspector.core.models.Link;
 import com.exadel.etoolbox.linkinspector.core.services.data.models.GridResource;
 import io.wcm.testing.mock.aem.junit5.AemContext;
 import io.wcm.testing.mock.aem.junit5.AemContextExtension;
@@ -34,7 +33,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(AemContextExtension.class)
-class GridViewItemTest {
+public class GridViewItemTest {
     private static final String MODELS_PACKAGE = "com.exadel.etoolbox.linkinspector.core.models";
     private static final String COMPONENT_TYPE_FIELD = "componentType";
     private static final String GRID_RESOURCE_TYPE = "etoolbox-link-inspector/components/gridConfig";
@@ -59,7 +58,7 @@ class GridViewItemTest {
     private static final String TEST_PROPERTY = "test-prop-with-broken-link";
 
     private static final String TEST_BROKEN_LINK_HREF = "/content/internal-test-link";
-    private static final String TEST_BROKEN_LINK_TYPE = Link.Type.INTERNAL.getValue();
+    private static final String TEST_BROKEN_LINK_TYPE = "internal";
     private static final String TEST_BROKEN_LINK_SC = String.valueOf(HttpStatus.SC_NOT_FOUND);
     private static final String TEST_BROKEN_LINK_STATUS_MESSAGE = HttpStatus.getStatusText(HttpStatus.SC_NOT_FOUND);
 
@@ -74,7 +73,7 @@ class GridViewItemTest {
     }
 
     @Test
-    void testPath() {
+    public void testPath() {
         setupFullParamSet();
         assertEquals(TEST_RESOURCE_PATH, viewItem.getPath());
     }

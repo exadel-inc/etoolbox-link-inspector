@@ -30,15 +30,9 @@ public final class GenerationStatsProps {
     public static final String PN_LAST_MODIFIED_BOUNDARY = "lastModifiedBoundary";
     public static final String PN_EXCLUDED_PROPERTIES = "excludedProperties";
 
-    public static final String PN_REPORT_LINKS_TYPE = "reportLinksType";
     public static final String PN_EXCLUDED_LINK_PATTERNS = "excludedLinksPatterns";
     public static final String PN_EXCLUDED_TAGS = "excludeTags";
     public static final String PN_ALLOWED_STATUS_CODES = "allowedStatusCodes";
 
-    public static final String PN_ALL_INTERNAL_LINKS = "allInternalLinks";
-    public static final String PN_BROKEN_INTERNAL_LINKS = "brokenInternalLinks";
-    public static final String PN_ALL_EXTERNAL_LINKS = "allExternalLinks";
-    public static final String PN_BROKEN_EXTERNAL_LINKS = "brokenExternalLinks";
-
-    public static final String REPORT_LINKS_TYPE_ALL = "Internal + External";
+    public static final String PN_STATISTICS = "statistics";
 }
