@@ -14,19 +14,31 @@
 
 package com.exadel.etoolbox.linkinspector.core.servlets;
 
+import com.exadel.etoolbox.linkinspector.core.services.cache.GridResourcesCache;
+import com.exadel.etoolbox.linkinspector.core.services.cache.impl.GridResourcesCacheImpl;
 import com.exadel.etoolbox.linkinspector.core.services.data.DataFeedService;
 import com.exadel.etoolbox.linkinspector.core.services.data.impl.DataFeedServiceImpl;
+import com.exadel.etoolbox.linkinspector.core.services.data.models.GridResource;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.LinkHelper;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.PackageHelper;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.RepositoryHelper;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.impl.LinkHelperImpl;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.impl.RepositoryHelperImpl;
+import com.exadel.etoolbox.linkinspector.core.services.mocks.MockDataFeedService;
+import com.exadel.etoolbox.linkinspector.core.services.mocks.MockHttpClientBuilderFactory;
+import com.exadel.etoolbox.linkinspector.core.services.mocks.MockRepositoryHelper;
+import com.exadel.etoolbox.linkinspector.core.services.resolvers.ExternalLinkResolverImpl;
+import com.exadel.etoolbox.linkinspector.core.services.resolvers.InternalLinkResolverImpl;
 import com.exadel.etoolbox.linkinspector.core.services.util.CsvUtil;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.collect.ImmutableMap;
 import io.wcm.testing.mock.aem.junit5.AemContext;
 import io.wcm.testing.mock.aem.junit5.AemContextExtension;
 import junitx.util.PrivateAccessor;
 import org.apache.commons.fileupload.FileUploadBase;
-import org.apache.commons.httpclient.HttpStatus;
+import org.apache.http.HttpStatus;
 import org.apache.jackrabbit.vault.packaging.PackageException;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
@@ -48,48 +60,34 @@ import org.mockito.stubbing.Answer;
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.servlet.ServletOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Collections;
-import java.util.Optional;
+import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyCollection;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockStatic;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(AemContextExtension.class)
 class ReplaceByPatternServletTest {
     private static final String DATAFEED_SERVICE_FIELD = "dataFeedService";
     private static final String LINK_HELPER_FIELD = "linkHelper";
     private static final String REPOSITORY_HELPER_FIELD = "repositoryHelper";
-    private static final String PACKAGE_HELPER_FIELD = "packageHelper";
     private static final String RESOURCE_RESOLVER_FACTORY_FIELD = "resourceResolverFactory";
-    private static final String IS_DEACTIVATED_FIELD = "isDeactivated";
 
     private static final int DEFAULT_COMMIT_THRESHOLD = 1000;
-    private static final int DEFAULT_MAX_UPDATED_ITEMS_COUNT = 10000;
 
     private static final String LINK_PATTERN_PARAM = "pattern";
     private static final String REPLACEMENT_PARAM = "replacement";
     private static final String DRY_RUN_PARAM = "isDryRun";
     private static final String BACKUP_PARAM = "isBackup";
     private static final String OUTPUT_AS_CSV_PARAM = "isOutputAsCsv";
+
+    private static final String SELECTED_PARAM = "selected";
 
     private static final String TEST_LINK_PATTERN = "test-pattern";
     private static final String TEST_REPLACEMENT = "test-replacement";
@@ -98,6 +96,7 @@ class ReplaceByPatternServletTest {
     private static final String TEST_RESOURCE_PATH_3 = "/content/test-folder/test-resource3";
     private static final String TEST_PROPERTY_3 = "test3";
     private static final String TEST_DATAFEED_PATH = "/com/exadel/etoolbox/linkinspector/core/servlets/datafeed.json";
+    private static final String TEST_SELECTED_VALUES_PATH = "com/exadel/etoolbox/linkinspector/core/servlets/selected.json";
     private static final String REAL_DATAFEED_PATH = "/content/etoolbox-link-inspector/data/datafeed.json";
     private static final String TEST_RESOURCES_TREE_PATH = "/com/exadel/etoolbox/linkinspector/core/servlets/resources.json";
     private static final String TEST_FOLDER_PATH = "/content/test-folder";
@@ -105,9 +104,8 @@ class ReplaceByPatternServletTest {
 
     private final AemContext context = new AemContext(ResourceResolverType.JCR_MOCK);
 
-    private final ReplaceByPatternServlet fixture = new ReplaceByPatternServlet();
+    private ReplaceByPatternServlet fixture;
 
-    private DataFeedService dataFeedService;
     private LinkHelper linkHelper;
     private RepositoryHelper repositoryHelper;
     private PackageHelper packageHelper;
@@ -117,26 +115,32 @@ class ReplaceByPatternServletTest {
 
     @BeforeEach
     void setup() throws NoSuchFieldException {
-        dataFeedService = mock(DataFeedService.class);
-        PrivateAccessor.setField(fixture, DATAFEED_SERVICE_FIELD, dataFeedService);
-
-        linkHelper = mock(LinkHelper.class);
-        PrivateAccessor.setField(fixture, LINK_HELPER_FIELD, linkHelper);
-
-        repositoryHelper = mock(RepositoryHelper.class);
-        PrivateAccessor.setField(fixture, REPOSITORY_HELPER_FIELD, repositoryHelper);
-
-        packageHelper = mock(PackageHelper.class);
-        PrivateAccessor.setField(fixture, PACKAGE_HELPER_FIELD, packageHelper);
-
-        PrivateAccessor.setField(fixture, IS_DEACTIVATED_FIELD, false);
-
         request = context.request();
         response = context.response();
+
+        context.registerInjectActivateService(new MockDataFeedService());
+        repositoryHelper = context.registerInjectActivateService(new MockRepositoryHelper(context.resourceResolver()));
+        packageHelper = context.registerService(PackageHelper.class, mock(PackageHelper.class));
+
+        context.registerInjectActivateService(
+                new MockHttpClientBuilderFactory(),
+                ImmutableMap.of(
+                        "statusCode", org.apache.http.HttpStatus.SC_NOT_FOUND,
+                        "statusMessage", "Not Found")
+        );
+        context.registerInjectActivateService(new ExternalLinkResolverImpl());
+        context.registerInjectActivateService(new InternalLinkResolverImpl());
+        linkHelper = context.registerInjectActivateService(new LinkHelperImpl());
+
+        fixture = context.registerInjectActivateService(new ReplaceByPatternServlet());
     }
 
     @Test
     void testEmptyParams() {
+        linkHelper = mock(LinkHelper.class);
+        repositoryHelper = mock(RepositoryHelper.class);
+        packageHelper = mock(PackageHelper.class);
+
         fixture.doPost(request, response);
 
         assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatus());
@@ -149,6 +153,9 @@ class ReplaceByPatternServletTest {
     void testCurrentLinkEqualToReplacement() {
         request.addRequestParameter(LINK_PATTERN_PARAM, TEST_LINK_PATTERN);
         request.addRequestParameter(REPLACEMENT_PARAM, TEST_LINK_PATTERN);
+        linkHelper = mock(LinkHelper.class);
+        repositoryHelper = mock(RepositoryHelper.class);
+        packageHelper = mock(PackageHelper.class);
 
         fixture.doPost(request, response);
 
@@ -159,10 +166,11 @@ class ReplaceByPatternServletTest {
     }
 
     @Test
-    void testNoUpdatedItems() {
+    void testNoUpdatedItems() throws IOException {
+        linkHelper = mock(LinkHelper.class);
+        repositoryHelper = mock(RepositoryHelper.class);
+        packageHelper = mock(PackageHelper.class);
         setUpRequestParamsLinks();
-
-        when(dataFeedService.dataFeedToGridResources()).thenReturn(Collections.emptyList());
 
         fixture.doPost(request, response);
 
@@ -173,26 +181,24 @@ class ReplaceByPatternServletTest {
     }
 
     @Test
-    void testReplacementSuccess() throws NoSuchFieldException {
+    void testReplacementSuccess() throws NoSuchFieldException, IOException {
         setUpHelpersResources();
         setUpRequestParamsLinks();
 
-        when(repositoryHelper.hasReadWritePermissions(any(Session.class), anyString())).thenReturn(true);
-
         fixture.doPost(request, response);
 
-        verify(repositoryHelper).createResourceIfNotExist(anyString(), anyString(), anyString());
+        assertEquals(1, ((MockRepositoryHelper) repositoryHelper).getCreationsCount());
         assertEquals(HttpStatus.SC_OK, response.getStatus());
         assertTrue(isReplacementDone(TEST_RESOURCE_PATH_1, TEST_PROPERTY_1, TEST_REPLACEMENT));
         assertTrue(isReplacementDone(TEST_RESOURCE_PATH_3, TEST_PROPERTY_3, TEST_REPLACEMENT));
     }
 
     @Test
-    void testDeactivate() throws NoSuchFieldException {
+    void testDeactivate() throws NoSuchFieldException, IOException {
         setUpHelpersResources();
         setUpRequestParamsLinks();
-
-        when(repositoryHelper.hasReadWritePermissions(any(Session.class), anyString())).thenReturn(true);
+        packageHelper = mock(PackageHelper.class);
+        linkHelper = mock(LinkHelper.class);
 
         fixture.deactivate();
         fixture.doPost(request, response);
@@ -203,7 +209,7 @@ class ReplaceByPatternServletTest {
     }
 
     @Test
-    void testDryRun() throws NoSuchFieldException, PersistenceException {
+    void testDryRun() throws NoSuchFieldException, IOException {
         setUpDataFeedService(getRepositoryHelperFromContext());
         setUpCommitThreshold();
         setUpResources();
@@ -215,13 +221,11 @@ class ReplaceByPatternServletTest {
         mockLinkHelper(resourceResolverMock);
         mockSession(resourceResolverMock);
 
-        when(repositoryHelper.hasReadWritePermissions(any(Session.class), anyString())).thenReturn(true);
         when(resourceResolverMock.hasChanges()).thenReturn(true);
 
         fixture.doPost(requestMock, response);
 
-        verify(repositoryHelper, never())
-                .createResourceIfNotExist(eq(DataFeedService.PENDING_GENERATION_NODE), anyString(), anyString());
+        assertEquals(0, ((MockRepositoryHelper) repositoryHelper).getCreationsCount());
         verify(resourceResolverMock, never()).commit();
     }
 
@@ -230,12 +234,16 @@ class ReplaceByPatternServletTest {
         setUpHelpersResources();
         setUpRequestParamsWithBackup();
 
-        when(repositoryHelper.hasReadWritePermissions(any(Session.class), anyString())).thenReturn(true);
-
         fixture.doPost(request, response);
 
-        verify(packageHelper)
-                .createPackageForPaths(anyCollection(), any(Session.class), anyString(), anyString(), anyString(), eq(true), eq(true));
+        verify(packageHelper).createPackageForPaths(
+                anyCollection(),
+                any(Session.class),
+                anyString(),
+                anyString(),
+                anyString(),
+                eq(true),
+                eq(true));
         assertEquals(HttpStatus.SC_OK, response.getStatus());
     }
 
@@ -244,7 +252,6 @@ class ReplaceByPatternServletTest {
         setUpHelpersResources();
         setUpRequestParamsWithBackup();
 
-        when(repositoryHelper.hasReadWritePermissions(any(Session.class), anyString())).thenReturn(true);
         doThrow(new PackageException()).when(packageHelper)
                 .createPackageForPaths(anyCollection(), any(Session.class), anyString(), anyString(), anyString(), eq(true), eq(true));
 
@@ -254,11 +261,9 @@ class ReplaceByPatternServletTest {
     }
 
     @Test
-    void testCsvOutput() throws NoSuchFieldException {
+    void testCsvOutput() throws NoSuchFieldException, IOException {
         setUpHelpersResources();
         setUpRequestParamsWithCsvOut();
-
-        when(repositoryHelper.hasReadWritePermissions(any(Session.class), anyString())).thenReturn(true);
 
         fixture.doPost(request, response);
 
@@ -270,11 +275,9 @@ class ReplaceByPatternServletTest {
     }
 
     @Test
-    void testCsvOutput_emptyByteArray() throws NoSuchFieldException {
+    void testCsvOutput_emptyByteArray() throws NoSuchFieldException, IOException {
         setUpHelpersResources();
         setUpRequestParamsWithCsvOut();
-
-        when(repositoryHelper.hasReadWritePermissions(any(Session.class), anyString())).thenReturn(true);
 
         try (MockedStatic<CsvUtil> csvUtil = mockStatic(CsvUtil.class)) {
             csvUtil.when(() -> CsvUtil.itemsToCsvByteArray(anyCollection(), any(BiConsumer.class), any(String[].class)))
@@ -293,7 +296,6 @@ class ReplaceByPatternServletTest {
         SlingHttpServletResponse responseMock = mock(SlingHttpServletResponse.class);
         ServletOutputStream outputStreamMock = mock(ServletOutputStream.class);
 
-        when(repositoryHelper.hasReadWritePermissions(any(Session.class), anyString())).thenReturn(true);
         when(responseMock.getOutputStream()).thenReturn(outputStreamMock);
         verifyNoMoreInteractions(responseMock);
         doThrow(new IOException()).when(outputStreamMock).flush();
@@ -302,11 +304,9 @@ class ReplaceByPatternServletTest {
     }
 
     @Test
-    void testCsvOutput_printItemException() throws NoSuchFieldException {
+    void testCsvOutput_printItemException() throws NoSuchFieldException, IOException {
         setUpHelpersResources();
         setUpRequestParamsWithCsvOut();
-
-        when(repositoryHelper.hasReadWritePermissions(any(Session.class), anyString())).thenReturn(true);
 
         try (MockedStatic<CsvUtil> csvUtil = mockStatic(CsvUtil.class)) {
             Answer<Object> answer = invocationOnMock -> {
@@ -323,9 +323,12 @@ class ReplaceByPatternServletTest {
     }
 
     @Test
-    void testEmptySession() {
+    void testEmptySession() throws IOException {
         SlingHttpServletRequest requestMock = mockSlingRequest();
         ResourceResolver resourceResolverMock = mockResourceResolver(requestMock);
+        linkHelper = mock(LinkHelper.class);
+        repositoryHelper = mock(RepositoryHelper.class);
+        packageHelper = mock(PackageHelper.class);
 
         when(resourceResolverMock.adaptTo(Session.class)).thenReturn(null);
 
@@ -338,7 +341,7 @@ class ReplaceByPatternServletTest {
     }
 
     @Test
-    void testReplacement_persistenceException() throws NoSuchFieldException, PersistenceException {
+    void testReplacement_persistenceException() throws NoSuchFieldException, IOException {
         setUpDataFeedService(getRepositoryHelperFromContext());
         setUpCommitThreshold();
         setUpResources();
@@ -348,7 +351,6 @@ class ReplaceByPatternServletTest {
         mockLinkHelper(resourceResolverMock);
         mockSession(resourceResolverMock);
 
-        when(repositoryHelper.hasReadWritePermissions(any(Session.class), anyString())).thenReturn(true);
         when(resourceResolverMock.hasChanges()).thenReturn(true);
         doThrow(new PersistenceException(TEST_EXCEPTION_MSG)).when(resourceResolverMock).commit();
 
@@ -358,7 +360,7 @@ class ReplaceByPatternServletTest {
     }
 
     @Test
-    void testReplacement_commitThreshold() throws NoSuchFieldException, PersistenceException {
+    void testReplacement_commitThreshold() throws NoSuchFieldException, IOException {
         setUpDataFeedService(getRepositoryHelperFromContext());
         setUpCommitThreshold(1);
         setUpResources();
@@ -368,7 +370,6 @@ class ReplaceByPatternServletTest {
         mockLinkHelper(resourceResolverMock);
         mockSession(resourceResolverMock);
 
-        when(repositoryHelper.hasReadWritePermissions(any(Session.class), anyString())).thenReturn(true);
         when(resourceResolverMock.hasChanges()).thenReturn(false);
 
         fixture.doPost(requestMock, response);
@@ -378,14 +379,9 @@ class ReplaceByPatternServletTest {
     }
 
     private void setUpHelpersResources() throws NoSuchFieldException {
-        setUpHelpers();
+        setUpDataFeedService(getRepositoryHelperFromContext());
         setUpCommitThreshold();
         setUpResources();
-    }
-
-    private void setUpHelpers() throws NoSuchFieldException {
-        setUpDataFeedService(getRepositoryHelperFromContext());
-        setUpLinkHelper();
     }
 
     private RepositoryHelper getRepositoryHelperFromContext() throws NoSuchFieldException {
@@ -395,13 +391,15 @@ class ReplaceByPatternServletTest {
         return repositoryHelper;
     }
 
-    private void setUpLinkHelper() throws NoSuchFieldException {
-        LinkHelper linkHelper = new LinkHelperImpl();
-        PrivateAccessor.setField(fixture, LINK_HELPER_FIELD, linkHelper);
-    }
-
     private void setUpDataFeedService(RepositoryHelper repositoryHelper) throws NoSuchFieldException {
         DataFeedService dataFeedService = new DataFeedServiceImpl();
+        GridResourcesCache gridResourcesCache = new GridResourcesCacheImpl();
+        Cache<String, CopyOnWriteArrayList<GridResource>> cache = CacheBuilder.newBuilder()
+                .maximumSize(100)
+                .expireAfterWrite(100000, TimeUnit.DAYS)
+                .build();
+        PrivateAccessor.setField(gridResourcesCache, "gridResourcesCache", cache);
+        PrivateAccessor.setField(dataFeedService, "gridResourcesCache", gridResourcesCache);
         PrivateAccessor.setField(dataFeedService, REPOSITORY_HELPER_FIELD, repositoryHelper);
         PrivateAccessor.setField(fixture, DATAFEED_SERVICE_FIELD, dataFeedService);
     }
@@ -412,7 +410,6 @@ class ReplaceByPatternServletTest {
 
     private void setUpCommitThreshold(int commitThreshold) {
         ReplaceByPatternServlet.Configuration config = mock(ReplaceByPatternServlet.Configuration.class);
-        when(config.maxUpdatedItemsCount()).thenReturn(DEFAULT_MAX_UPDATED_ITEMS_COUNT);
         when(config.commitThreshold()).thenReturn(commitThreshold);
 
         fixture.activate(config);
@@ -423,25 +420,29 @@ class ReplaceByPatternServletTest {
         context.load().json(TEST_RESOURCES_TREE_PATH, TEST_FOLDER_PATH);
     }
 
-    private void setUpRequestParamsWithCsvOut() {
+    private void setUpRequestParamsWithCsvOut() throws IOException {
         setUpRequestParamsLinks();
         request.addRequestParameter(OUTPUT_AS_CSV_PARAM, Boolean.TRUE.toString());
     }
 
-    private void setUpRequestParamsWithBackup() {
+    private void setUpRequestParamsWithBackup() throws IOException {
         setUpRequestParamsLinks();
         request.addRequestParameter(BACKUP_PARAM, Boolean.TRUE.toString());
     }
 
-    private void setUpRequestParamsLinks() {
+    private void setUpRequestParamsLinks() throws IOException {
         request.addRequestParameter(LINK_PATTERN_PARAM, TEST_LINK_PATTERN);
         request.addRequestParameter(REPLACEMENT_PARAM, TEST_REPLACEMENT);
+        Arrays.stream(loadSelectedValues()).forEach(value ->
+                request.addRequestParameter(SELECTED_PARAM, value)
+        );
     }
 
-    private SlingHttpServletRequest mockSlingRequest() {
+    private SlingHttpServletRequest mockSlingRequest() throws IOException {
         SlingHttpServletRequest requestMock = mock(SlingHttpServletRequest.class);
         mockRequestParam(LINK_PATTERN_PARAM, TEST_LINK_PATTERN, requestMock);
         mockRequestParam(REPLACEMENT_PARAM, TEST_REPLACEMENT, requestMock);
+        mockRequestParams(SELECTED_PARAM, loadSelectedValues(), requestMock);
         return requestMock;
     }
 
@@ -480,5 +481,23 @@ class ReplaceByPatternServletTest {
     private int countLines(String str) {
         String[] lines = str.split("\r\n|\r|\n");
         return lines.length;
+    }
+
+    private String[] loadSelectedValues() throws IOException {
+        ClassLoader classLoader = getClass().getClassLoader();
+        File file = new File(classLoader.getResource(TEST_SELECTED_VALUES_PATH).getFile());
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.readValue(file, String[].class);
+    }
+
+    private void mockRequestParams(String paramName, String[] values, SlingHttpServletRequest requestMock) {
+        List<RequestParameter> requestParameters = new ArrayList<>();
+        Arrays.stream(values).forEach(value -> {
+                    RequestParameter requestParameter = mock(RequestParameter.class);
+                    when(requestParameter.getString()).thenReturn(value);
+                    requestParameters.add(requestParameter);
+                }
+        );
+        when(requestMock.getRequestParameters(paramName)).thenReturn(requestParameters.toArray(new RequestParameter[0]));
     }
 }

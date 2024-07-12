@@ -17,16 +17,14 @@ package com.exadel.etoolbox.linkinspector.core.services.data.impl;
 import com.day.cq.replication.ReplicationActionType;
 import com.day.cq.replication.ReplicationStatus;
 import com.day.crx.JcrConstants;
-import com.exadel.etoolbox.linkinspector.core.models.Link;
-import com.exadel.etoolbox.linkinspector.core.models.LinkStatus;
+import com.exadel.etoolbox.linkinspector.api.Link;
 import com.exadel.etoolbox.linkinspector.core.services.data.GenerationStatsProps;
 import com.exadel.etoolbox.linkinspector.core.services.data.GridResourcesGenerator;
-import com.exadel.etoolbox.linkinspector.core.services.data.UiConfigService;
+import com.exadel.etoolbox.linkinspector.core.services.data.ConfigService;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.LinkHelper;
 import com.exadel.etoolbox.linkinspector.core.services.data.models.GridResource;
 import com.exadel.etoolbox.linkinspector.core.services.util.LinkInspectorResourceUtil;
 import com.exadel.etoolbox.linkinspector.core.services.util.LinksCounter;
-import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.StopWatch;
@@ -35,15 +33,9 @@ import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceUtil;
 import org.apache.sling.jcr.resource.api.JcrResourceConstants;
-import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
-import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.metatype.annotations.AttributeDefinition;
-import org.osgi.service.metatype.annotations.Designate;
-import org.osgi.service.metatype.annotations.ObjectClassDefinition;
-import org.osgi.service.metatype.annotations.Option;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,105 +58,8 @@ import java.util.stream.Stream;
  * generation and further adaptation the data feed to the models for building the UI grid
  */
 @Component(service = GridResourcesGenerator.class)
-@Designate(ocd = GridResourcesGeneratorImpl.Configuration.class)
 public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
-    @ObjectClassDefinition(
-            name = "EToolbox Link Inspector - Grid Resources Generator",
-            description = "Finds broken links under the specified path for further outputting them in a report"
-    )
-    @interface Configuration {
-        @AttributeDefinition(
-                name = "Path",
-                description = "The content path for searching broken links. The search path should be located under /content"
-        ) String searchPath() default DEFAULT_SEARCH_PATH;
-
-        @AttributeDefinition(
-                name = "Excluded paths",
-                description = "The list of paths excluded from processing. The specified path and all its children " +
-                        "are excluded. The excluded path should not end with slash. Can be specified as a regex"
-        ) String[] excludedPaths() default {};
-
-        @AttributeDefinition(
-                name = "Activated Content",
-                description = "If checked, links will be retrieved from activated content only"
-        ) boolean checkActivation() default false;
-
-        @AttributeDefinition(
-                name = "Skip content modified after activation",
-                description = "Works in conjunction with the 'Activated Content' checkbox only. If checked, links " +
-                        "will be retrieved from activated content that is not modified after activation " +
-                        "(lastModified is before lastReplicated)"
-        ) boolean skipModifiedAfterActivation() default false;
-
-        @AttributeDefinition(
-                name = "Last Modified",
-                description = "The content modified before the specified date will be excluded. " +
-                        "Tha date should has the ISO-like date-time format, such as '2011-12-03T10:15:30+01:00'"
-        ) String lastModifiedBoundary() default StringUtils.EMPTY;
-
-        @AttributeDefinition(
-                name = "Excluded properties",
-                description = "The list of properties excluded from processing. Each value can be specified as a regex"
-        ) String[] excludedProperties() default {
-                "dam:Comments",
-                "cq:allowedTemplates",
-                "cq:childrenOrder",
-                "cq:designPath",
-                "cq:lastModifiedBy",
-                "cq:lastPublishedBy",
-                "cq:lastReplicatedBy",
-                "cq:lastReplicationAction",
-                "cq:lastReplicationStatus",
-                "cq:lastRolledoutBy",
-                "cq:template",
-                "jcr:createdBy",
-                "sling:resourceType",
-                "sling:resourceSuperType",
-        };
-
-        @AttributeDefinition(
-                name = "Links type",
-                description = "The type of links in the report",
-                options = {
-                        @Option(label = "Internal", value = "INTERNAL"),
-                        @Option(label = "External", value = "EXTERNAL"),
-                        @Option(
-                                label = GenerationStatsProps.REPORT_LINKS_TYPE_ALL,
-                                value = GenerationStatsProps.REPORT_LINKS_TYPE_ALL
-                        ),
-                }
-        )
-        String linksType() default GenerationStatsProps.REPORT_LINKS_TYPE_ALL;
-
-        @AttributeDefinition(
-                name = "Excluded links patterns",
-                description = "Links are excluded from processing if match any of the specified regex patterns"
-        ) String[] excludedLinksPatterns() default {};
-
-        @AttributeDefinition(
-                name = "Exclude tags",
-                description = "If checked, the internal links starting with /content/cq:tags will be excluded"
-        ) boolean excludeTags() default true;
-
-        @AttributeDefinition(
-                name = "Status codes",
-                description = "The list of status codes allowed for broken links in the report. " +
-                        "Set a single negative value to allow all http error codes"
-        )
-        int[] allowedStatusCodes() default {
-                HttpStatus.SC_NOT_FOUND
-        };
-
-        @AttributeDefinition(
-                name = "Threads per core",
-                description = "The number of threads created per each CPU core for validating links in parallel"
-        ) int threadsPerCore() default DEFAULT_THREADS_PER_CORE;
-    }
-
     private static final Logger LOG = LoggerFactory.getLogger(GridResourcesGeneratorImpl.class);
-
-    private static final String DEFAULT_SEARCH_PATH = "/content";
-    private static final int DEFAULT_THREADS_PER_CORE = 60;
 
     private static final String TAGS_LOCATION = "/content/cq:tags";
     private static final String STATS_RESOURCE_PATH = "/content/etoolbox-link-inspector/data/stats";
@@ -172,52 +67,17 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
     @Reference
     private LinkHelper linkHelper;
     @Reference
-    private UiConfigService uiConfigService;
+    private ConfigService configService;
 
     private ExecutorService executorService;
-
-    private String searchPath;
-    private String[] excludedPaths;
-    private boolean checkActivation;
-    private boolean skipModifiedAfterActivation;
-    private ZonedDateTime lastModifiedBoundary;
-    private String[] excludedProperties;
-    private String reportLinksType;
-    private String[] excludedLinksPatterns;
-    private boolean excludeTags;
-    private int[] allowedStatusCodes;
-    private int threadsPerCore;
-
-    /**
-     * Inits fields based on the service configuration
-     * @param configuration - the service configuration
-     */
-    @Activate
-    @Modified
-    protected void activate(Configuration configuration) {
-        searchPath = configuration.searchPath();
-        excludedPaths = configuration.excludedPaths();
-        checkActivation = configuration.checkActivation();
-        skipModifiedAfterActivation = configuration.skipModifiedAfterActivation();
-        lastModifiedBoundary = Optional.of(configuration.lastModifiedBoundary())
-                .filter(StringUtils::isNotBlank)
-                .map(dateString -> ZonedDateTime.parse(dateString, DateTimeFormatter.ISO_DATE_TIME))
-                .orElse(null);
-        excludedProperties = configuration.excludedProperties();
-        reportLinksType = configuration.linksType();
-        excludedLinksPatterns = configuration.excludedLinksPatterns();
-        excludeTags = configuration.excludeTags();
-        allowedStatusCodes = configuration.allowedStatusCodes();
-        threadsPerCore = configuration.threadsPerCore();
-    }
 
     /**
      * {@inheritDoc}
      */
     @Override
     public List<GridResource> generateGridResources(String gridResourceType, ResourceResolver resourceResolver) {
-        uiConfigService.getExcludedLinksPatterns();
         StopWatch stopWatch = StopWatch.createStarted();
+        String searchPath = configService.getSearchPath();
         LOG.debug("Start broken links collecting, path: {}", searchPath);
 
         Resource rootResource = resourceResolver.getResource(searchPath);
@@ -232,7 +92,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
                 stopWatch.getTime(TimeUnit.MILLISECONDS), searchPath, traversedNodesCounter);
 
         if (linkToGridResourcesMap.isEmpty()) {
-            LOG.warn("Collecting broken links is completed in {} ms, path: {}. No broken links were found after traversing",
+            LOG.warn("Collecting reported links is completed in {} ms, path: {}. No links reported after traversing",
                     stopWatch.getTime(TimeUnit.MILLISECONDS), searchPath);
             LinksCounter emptyCounter = new LinksCounter();
             saveStatsToJcr(emptyCounter, emptyCounter, resourceResolver);
@@ -290,10 +150,10 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
                                                                            Object propertyValue,
                                                                            Resource resource,
                                                                            String gridResourceType) {
-        return linkHelper.getLinkStreamFromProperty(propertyValue)
-                .filter(this::isAllowedLinkType)
+        return linkHelper.getLinkStream(propertyValue)
                 .filter(this::isAllowedLink)
-                .collect(Collectors.toMap(Function.identity(),
+                .collect(Collectors.toMap(
+                        Function.identity(),
                         link -> new GridResource(link, resource.getPath(), property, gridResourceType),
                         (existingValue, newValue) -> existingValue
                 ))
@@ -304,18 +164,19 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
     private Set<GridResource> validateLinksInParallel(Map<Link, List<GridResource>> linkToGridResourcesMap,
                                                       ResourceResolver resourceResolver) {
         LinksCounter allLinksCounter = new LinksCounter();
-        LinksCounter brokenLinksCounter = new LinksCounter();
-        Set<GridResource> allBrokenLinkResources = new CopyOnWriteArraySet<>();
+        LinksCounter reportedLinksCounter = new LinksCounter();
+        // TODO: VERY slow
+        Set<GridResource> allReportedLinkResources = new CopyOnWriteArraySet<>();
         try {
             executorService =
-                    Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() * threadsPerCore);
+                    Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() * configService.getThreadsPerCore());
             linkToGridResourcesMap.forEach((link, resources) ->
                     submitLinkForValidation(
                             link,
                             resources,
-                            allBrokenLinkResources,
+                            allReportedLinkResources,
                             allLinksCounter,
-                            brokenLinksCounter,
+                            reportedLinksCounter,
                             resourceResolver
                     )
             );
@@ -324,30 +185,27 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
         }
 
         awaitExecutorServiceTermination();
+        LOG.debug("Statistics for all tested links: {}", allLinksCounter);
+        LOG.debug("Statistics for the broken/reported links: {}", reportedLinksCounter);
 
-        LOG.debug("Checked internal links count: {}", allLinksCounter.getInternalLinks());
-        LOG.debug("Checked external links count: {}", allLinksCounter.getExternalLinks());
+        saveStatsToJcr(allLinksCounter, reportedLinksCounter, resourceResolver);
 
-        LOG.debug("Broken internal links count: {}", brokenLinksCounter.getInternalLinks());
-        LOG.debug("Broken external links count: {}", brokenLinksCounter.getExternalLinks());
-
-        saveStatsToJcr(allLinksCounter, brokenLinksCounter, resourceResolver);
-
-        return allBrokenLinkResources;
+        return allReportedLinkResources;
     }
 
     private void submitLinkForValidation(Link link,
                                          List<GridResource> currentLinkResources,
-                                         Set<GridResource> allBrokenLinkResources,
+                                         Set<GridResource> allReportedLinkResources,
                                          LinksCounter allLinksCounter,
-                                         LinksCounter brokenLinksCounter,
+                                         LinksCounter reportedLinksCounter,
                                          ResourceResolver resourceResolver) {
-        allLinksCounter.countLink(link);
+        allLinksCounter.checkIn(link);
         executorService.submit(() -> {
-                    LinkStatus status = linkHelper.validateLink(link, resourceResolver);
-                    if (!status.isValid() && isAllowedErrorCode(status.getStatusCode())) {
-                        allBrokenLinkResources.addAll(currentLinkResources);
-                        brokenLinksCounter.countLink(link);
+                    linkHelper.validateLink(link, resourceResolver);
+                    if (link.isReported() && isAllowedErrorCode(link.getStatus().getCode())) {
+                        currentLinkResources.forEach(gridResource -> gridResource.getLink().setStatus(link.getStatus()));
+                        allReportedLinkResources.addAll(currentLinkResources);
+                        reportedLinksCounter.checkIn(link);
                     }
                 }
         );
@@ -355,6 +213,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
 
     private void awaitExecutorServiceTermination() {
         try {
+            // TODO: better add a meaningful maximum
             boolean terminated = executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
             LOG.trace("ExecutorService terminated: {}", terminated);
         } catch (InterruptedException e) {
@@ -370,6 +229,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
     }
 
     private boolean isAllowedLastModifiedDate(Resource resource) {
+        ZonedDateTime lastModifiedBoundary = configService.getLastModified();
         if (lastModifiedBoundary == null) {
             return true;
         }
@@ -378,33 +238,30 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
                 .orElse(true);
     }
 
-    private boolean isAllowedLinkType(Link link) {
-        return GenerationStatsProps.REPORT_LINKS_TYPE_ALL.equals(reportLinksType) ||
-                Link.Type.valueOf(reportLinksType) == link.getType();
-    }
-
     private boolean isAllowedLink(Link link) {
-        return !(Link.Type.INTERNAL == link.getType() && isExcludedTag(link.getHref())) &&
-                !isExcludedByPattern(link.getHref());
+        return !isExcludedTagLink(link.getHref()) && !isExcludedByPattern(link.getHref());
     }
 
     private boolean isExcludedByPattern(String href) {
         return isStringMatchAnyPattern(href, getExcludedLinksPatterns());
     }
 
-    private boolean isExcludedTag(String href) {
-        return excludeTags && href.startsWith(TAGS_LOCATION);
+    private boolean isExcludedTagLink(String href) {
+        return configService.excludeTagLinks() && href.startsWith(TAGS_LOCATION);
     }
 
     private boolean isExcludedProperty(String propertyName) {
-        return isStringMatchAnyPattern(propertyName, excludedProperties);
+        return isStringMatchAnyPattern(propertyName, configService.getExcludedProperties());
     }
 
     private boolean isExcludedPath(String path) {
-        return isStringMatchAnyPattern(path, excludedPaths);
+        return isStringMatchAnyPattern(path, configService.getExcludedPaths());
     }
 
     private boolean isAllowedErrorCode(int linkStatusCode) {
+
+        int[] allowedStatusCodes = configService.getStatusCodes();
+
         if (ArrayUtils.isEmpty(allowedStatusCodes) ||
                 (allowedStatusCodes.length == 1 && allowedStatusCodes[0] < 0)) {
             return true;
@@ -418,7 +275,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
     }
 
     private boolean isAllowedReplicationStatus(Resource resource) {
-        if (checkActivation) {
+        if (configService.activatedContent()) {
             if (LinkInspectorResourceUtil.isPageOrAsset(resource)) {
                 return isActivatedPageOrAsset(resource);
             } else {
@@ -426,7 +283,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
                         .map(valueMap -> valueMap.get(ReplicationStatus.NODE_PROPERTY_LAST_REPLICATION_ACTION, String.class));
                 if (replicationAction.isPresent()) {
                     return ReplicationActionType.ACTIVATE.getName().equals(replicationAction.get()) &&
-                            (!skipModifiedAfterActivation || LinkInspectorResourceUtil.isModifiedBeforeActivation(resource));
+                            (!configService.isSkipContentModifiedAfterActivation() || LinkInspectorResourceUtil.isModifiedBeforeActivation(resource));
                 }
             }
         }
@@ -440,7 +297,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
         if (!replicationStatus.isPresent()) {
             return false;
         }
-        return !skipModifiedAfterActivation || replicationStatus.map(ReplicationStatus::getLastPublished)
+        return !configService.isSkipContentModifiedAfterActivation() || replicationStatus.map(ReplicationStatus::getLastPublished)
                 .map(Calendar::toInstant)
                 .map(instant -> isModifiedBeforeActivation(pageOrAssetResource, instant))
                 .orElse(true);
@@ -487,23 +344,26 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
 
         stats.put(GenerationStatsProps.PN_LAST_GENERATED,
                 ZonedDateTime.now().format(DateTimeFormatter.RFC_1123_DATE_TIME));
-        stats.put(GenerationStatsProps.PN_SEARCH_PATH, searchPath);
-        stats.put(GenerationStatsProps.PN_EXCLUDED_PATHS, excludedPaths);
-        stats.put(GenerationStatsProps.PN_CHECK_ACTIVATION, checkActivation);
-        stats.put(GenerationStatsProps.PN_SKIP_MODIFIED_AFTER_ACTIVATION, skipModifiedAfterActivation);
-        stats.put(GenerationStatsProps.PN_LAST_MODIFIED_BOUNDARY, dateToIsoDateTimeString(lastModifiedBoundary));
-        stats.put(GenerationStatsProps.PN_EXCLUDED_PROPERTIES, excludedProperties);
+        stats.put(GenerationStatsProps.PN_SEARCH_PATH, configService.getSearchPath());
+        stats.put(GenerationStatsProps.PN_EXCLUDED_PATHS, configService.getExcludedPaths());
+        stats.put(GenerationStatsProps.PN_CHECK_ACTIVATION, configService.activatedContent());
+        stats.put(GenerationStatsProps.PN_SKIP_MODIFIED_AFTER_ACTIVATION, configService.isSkipContentModifiedAfterActivation());
+        stats.put(GenerationStatsProps.PN_LAST_MODIFIED_BOUNDARY, dateToIsoDateTimeString(configService.getLastModified()));
+        stats.put(GenerationStatsProps.PN_EXCLUDED_PROPERTIES, configService.getExcludedProperties());
 
-        stats.put(GenerationStatsProps.PN_REPORT_LINKS_TYPE, reportLinksType);
         stats.put(GenerationStatsProps.PN_EXCLUDED_LINK_PATTERNS, getExcludedLinksPatterns());
-        stats.put(GenerationStatsProps.PN_EXCLUDED_TAGS, excludeTags);
-        stats.put(GenerationStatsProps.PN_ALLOWED_STATUS_CODES, allowedStatusCodes);
 
-        stats.put(GenerationStatsProps.PN_ALL_INTERNAL_LINKS, allLinksCounter.getInternalLinks());
-        stats.put(GenerationStatsProps.PN_BROKEN_INTERNAL_LINKS, brokenLinksCounter.getInternalLinks());
-        stats.put(GenerationStatsProps.PN_ALL_EXTERNAL_LINKS, allLinksCounter.getExternalLinks());
-        stats.put(GenerationStatsProps.PN_BROKEN_EXTERNAL_LINKS, brokenLinksCounter.getExternalLinks());
+        stats.put(GenerationStatsProps.PN_EXCLUDED_TAGS, configService.excludeTagLinks());
+        // TODO: Why is the next line commented out?
+//        stats.put(GenerationStatsProps.PN_ALLOWED_STATUS_CODES, uiConfigService.getStatusCodes());
 
+        List<String> perTypeStatistics = new ArrayList<>();
+        for (String type : allLinksCounter.getStatistics().keySet()) {
+            int countAll = allLinksCounter.getStatistics().get(type);
+            int countBroken = brokenLinksCounter.getStatistics().getOrDefault(type, 0);
+            perTypeStatistics.add(String.format("%s: %d/%d", StringUtils.capitalize(type), countBroken, countAll));
+        }
+        stats.put(GenerationStatsProps.PN_STATISTICS, perTypeStatistics.toArray());
         return stats;
     }
 
@@ -514,10 +374,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
     }
 
     public String[] getExcludedLinksPatterns() {
-        List<String> patterns = new ArrayList<>(Arrays.asList(excludedLinksPatterns));
-        String[] uiPatterns = uiConfigService.getExcludedLinksPatterns();
-        patterns.addAll(Arrays.asList(uiPatterns));
-        patterns = patterns.stream().filter(p->{
+        return Arrays.stream(configService.getExcludedLinksPatterns()).filter(p -> {
             try {
                 Pattern.compile(p);
             } catch (PatternSyntaxException exception) {
@@ -525,8 +382,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
                 return false;
             }
             return true;
-        }).collect(Collectors.toList());
-        return patterns.toArray(new String[excludedLinksPatterns.length + uiPatterns.length]);
+        }).toArray(String[]::new);
     }
 
     @Deactivate

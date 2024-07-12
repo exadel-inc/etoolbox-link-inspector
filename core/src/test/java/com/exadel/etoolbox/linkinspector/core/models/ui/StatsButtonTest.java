@@ -24,9 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(AemContextExtension.class)
 class StatsButtonTest {
@@ -39,17 +37,17 @@ class StatsButtonTest {
 
     @BeforeEach
     public void setup() {
-        SlingHttpServletRequest request = context.request();
-        request.setAttribute(STATS_RESOURCE_PATH_PARAM, TEST_RESOURCE_PATH);
-
-        fixture = request.adaptTo(StatsButton.class);
-        assertNotNull(fixture);
+        context.request().setAttribute(STATS_RESOURCE_PATH_PARAM, TEST_RESOURCE_PATH);
+        context.addModelsForClasses(StatsButton.class);
+        fixture = context.request().adaptTo(StatsButton.class);
     }
 
     @Test
     void testResourceExists() {
-        context.create().resource(TEST_RESOURCE_PATH,
-                JcrResourceConstants.SLING_RESOURCE_TYPE_PROPERTY, JcrConstants.NT_UNSTRUCTURED);
+        context.create().resource(
+                TEST_RESOURCE_PATH,
+                JcrResourceConstants.SLING_RESOURCE_TYPE_PROPERTY,
+                JcrConstants.NT_UNSTRUCTURED);
 
         assertTrue(fixture.statsResourceExists());
     }

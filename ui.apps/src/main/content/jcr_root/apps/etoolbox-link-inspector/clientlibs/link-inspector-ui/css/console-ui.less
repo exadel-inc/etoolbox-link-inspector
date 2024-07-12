@@ -47,8 +47,7 @@ tr.elc-card {
 .els-component-col {
   max-width: 350px;
   // Fallback for browsers that not support word-break: break-word
-  word-break: normal;
-  word-break: break-word;
+  word-break: break-all;
 }
 .els-page-col {
   max-width: 250px;
@@ -80,7 +79,7 @@ tr.elc-card {
 .elc-dialog {
   vertical-align: middle;
   .coral3-Dialog-wrapper {
-    width: 30%;
+    width: 35%;
   }
 }
 
@@ -91,5 +90,62 @@ tr.elc-card {
 .elc-processing-link-list {
   > li {
     font-weight: bold;
+  }
+}
+
+.elc-link-status--ok {
+  color: #00FF00;
+}
+
+.elc-link-status--error {
+  color: #FF0000;
+}
+
+.elc-run-button {
+    border: none;
+    background: none !important;
+    padding: 0 !important;
+    font-family: arial, sans-serif;
+    cursor: pointer;
+    color: blue;
+    margin: 0 0.5rem;
+}
+
+.foundation-collection-selectall {
+    display: none;
+}
+
+.foundation-collection-item-link-type{
+    width:30%;
+}
+
+.collection-item_page_title{
+    width:15%;
+}
+
+.collection-item_component_name{
+    width:15%;
+}
+
+.collection-item_property_name{
+    width:30%
+}
+
+#filter-dialog{
+  .coral3-Dialog-wrapper{
+    min-width: 50rem;
+  }
+  .coral3-Multifield{
+    min-width: 100%;
+  }
+  .coral3-Checkbox{
+    display: block;
+  }
+  .coral3-Select{
+    min-width: 100%;
+  }
+  .dialog-description{
+    font-style: italic;
+    font-size: 12px;
   }
 }

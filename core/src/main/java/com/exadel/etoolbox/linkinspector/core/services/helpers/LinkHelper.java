@@ -14,95 +14,48 @@
 
 package com.exadel.etoolbox.linkinspector.core.services.helpers;
 
-import com.exadel.etoolbox.linkinspector.core.models.Link;
-import com.exadel.etoolbox.linkinspector.core.models.LinkStatus;
-import com.exadel.etoolbox.linkinspector.core.services.ExternalLinkChecker;
+import com.exadel.etoolbox.linkinspector.api.Link;
+import com.exadel.etoolbox.linkinspector.api.LinkResolver;
+import com.exadel.etoolbox.linkinspector.api.LinkStatus;
 import org.apache.sling.api.resource.ResourceResolver;
 
 import java.util.stream.Stream;
 
 /**
- * Contains methods that assist in links processing.
+ * Contains methods that assist in processing links
  */
 public interface LinkHelper {
-    /**
-     * Parses JCR property value to fetch links based on regex. Applies to String or String[] property types only.
-     * The extracted links are instantiated as {@link Link} objects.
-     *
-     * @param propertyValue - the JCR property value to be parsed
-     * @return The Stream<Link> of extracted links, or Stream.empty()
-     */
-    Stream<Link> getLinkStreamFromProperty(Object propertyValue);
+
+    Stream<Link> getLinkStream(Object source);
 
     /**
-     * Extracts external links based on regex from the string value
-     *
-     * @param text - the string where links are extracted from
-     * @return The Stream<String> of extracted links
+     * Checks the given {@link Link} for validity using one of the registered {@link LinkResolver} implementations
+     * @param link             - the link object to be checked
+     * @param resourceResolver - {@link ResourceResolver} object
      */
-    Stream<String> getExternalLinksFromString(String text);
+    void validateLink(Link link, ResourceResolver resourceResolver);
 
     /**
-     * Extracts internal links based on regex from the string value
-     *
-     * @param text - the string where links are extracted from
-     * @return The Stream<String> of extracted links
-     */
-    Stream<String> getInternalLinksFromString(String text);
-
-    /**
-     * Checks the given internal link validity using {@link ResourceResolver}. Basically the existence of a resource
-     * in the repository is checked
-     *
-     * @param link             - the link href to be checked
-     * @param resourceResolver - {@link ResourceResolver}
-     * @return the {@link LinkStatus} representing http code and status message of the response
-     */
-    LinkStatus validateInternalLink(String link, ResourceResolver resourceResolver);
-
-    /**
-     * Checks the given external link validity using {@link ExternalLinkChecker}
-     *
-     * @param link - the link href to be checked
-     * @return the {@link LinkStatus} representing http code and status message of the response
-     */
-    LinkStatus validateExternalLink(String link);
-
-    /**
-     * Checks the given link validity using {@link ExternalLinkChecker} for an external link
-     * or {@link ResourceResolver} for an internal link.
-     *
-     * @param link             - the link href to be checked
-     * @param resourceResolver - {@link ResourceResolver}
-     * @return the {@link LinkStatus} representing http code and status message of the response
-     */
-    LinkStatus validateLink(Link link, ResourceResolver resourceResolver);
-
-    /**
-     * Checks the given String link validity using {@link ExternalLinkChecker} for an external link
-     * or {@link ResourceResolver} for an internal link.
-     *
-     * @param link             - the link href to be checked
-     * @param resourceResolver - {@link ResourceResolver}
-     * @return the {@link LinkStatus} representing http code and status message of the response
+     * Checks the given link {@code href} for validity using one of the registered {@link LinkResolver} implementations
+     * @param link             - the string reference to be checked
+     * @param resourceResolver - {@link ResourceResolver} object
+     * @return A {@link LinkStatus} object
      */
     LinkStatus validateLink(String link, ResourceResolver resourceResolver);
 
     /**
-     * Replaces the given link stored at the specified location (resourcePath + propertyName)
-     * with the given replacement.
-     * <p>
-     * All the links contained within the specified property are retrieved
-     * by {@link #getLinkStreamFromProperty}. If none matches the given link, no replacement is applied.
-     * Otherwise, all matching links are replaced with the given replacement.
-     *
+     * Replaces all the occurrences of the given link stored at the specified location ({@code resourcePath} +
+     * {@code propertyName}) with the given replacement
      * @param resourceResolver - {@link ResourceResolver}
      * @param resourcePath     - the path of the resource containing the link
      * @param propertyName     - the name of the property containing the link
      * @param currentLink      - the link to be replaced
      * @param newLink          - the replacement link
-     * @return true, if the replacement completed successfully
+     * @return True if the replacement was successful, false otherwise
      */
-    boolean replaceLink(ResourceResolver resourceResolver, String resourcePath, String propertyName,
-                        String currentLink, String newLink);
+    boolean replaceLink(ResourceResolver resourceResolver,
+                        String resourcePath,
+                        String propertyName,
+                        String currentLink,
+                        String newLink);
 }

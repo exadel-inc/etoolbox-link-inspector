@@ -14,7 +14,8 @@
 
 package com.exadel.etoolbox.linkinspector.core.servlets;
 
-import com.exadel.etoolbox.linkinspector.core.models.LinkStatus;
+import com.exadel.etoolbox.linkinspector.api.LinkStatus;
+import com.exadel.etoolbox.linkinspector.core.services.data.DataFeedService;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.LinkHelper;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.RepositoryHelper;
 import io.wcm.testing.mock.aem.junit5.AemContext;
@@ -35,21 +36,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import javax.json.Json;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(AemContextExtension.class)
 class FixBrokenLinkServletTest {
     private static final String REPOSITORY_HELPER_FIELD = "repositoryHelper";
     private static final String LINK_HELPER_FIELD = "linkHelper";
+    private static final String DATA_FEED_SERVICE_FIELD = "dataFeedService";
 
     private static final String PATH_PARAM = "path";
     private static final String PROPERTY_NAME_PARAM = "propertyName";
@@ -72,6 +66,7 @@ class FixBrokenLinkServletTest {
     private LinkHelper linkHelper;
     private RepositoryHelper repositoryHelper;
     private ResourceResolver resourceResolver;
+    private DataFeedService dataFeedService;
 
     private MockSlingHttpServletRequest request;
     private MockSlingHttpServletResponse response;
@@ -81,7 +76,9 @@ class FixBrokenLinkServletTest {
         linkHelper = mock(LinkHelper.class);
         repositoryHelper = mock(RepositoryHelper.class);
         resourceResolver = mock(ResourceResolver.class);
+        dataFeedService = mock(DataFeedService.class);
         PrivateAccessor.setField(fixture, LINK_HELPER_FIELD, linkHelper);
+        PrivateAccessor.setField(fixture, DATA_FEED_SERVICE_FIELD, dataFeedService);
         PrivateAccessor.setField(fixture, REPOSITORY_HELPER_FIELD, repositoryHelper);
 
         request = context.request();
@@ -130,8 +127,8 @@ class FixBrokenLinkServletTest {
         verify(repositoryHelper, never()).createResourceIfNotExist(anyString(), anyString(), anyString());
 
         String expectedJsonResponse = Json.createObjectBuilder()
-                .add(STATUS_CODE_RESP_PARAM, expectedLinkStatus.getStatusCode())
-                .add(STATUS_MSG_RESP_PARAM, expectedLinkStatus.getStatusMessage())
+                .add(STATUS_CODE_RESP_PARAM, expectedLinkStatus.getCode())
+                .add(STATUS_MSG_RESP_PARAM, expectedLinkStatus.getMessage())
                 .build()
                 .toString();
         String jsonResponse = response.getOutputAsString();

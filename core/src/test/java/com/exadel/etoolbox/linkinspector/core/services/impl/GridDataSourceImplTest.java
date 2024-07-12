@@ -15,8 +15,10 @@
 package com.exadel.etoolbox.linkinspector.core.services.impl;
 
 import com.exadel.etoolbox.linkinspector.core.services.data.DataFeedService;
+import com.exadel.etoolbox.linkinspector.core.services.data.models.DataFilter;
 import io.wcm.testing.mock.aem.junit5.AemContextExtension;
 import junitx.util.PrivateAccessor;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -43,8 +45,8 @@ class GridDataSourceImplTest {
 
     @Test
     void testGetDataSource() {
-        when(dataFeedService.dataFeedToResources()).thenReturn(Collections.emptyList());
+        when(dataFeedService.dataFeedToResources(new DataFilter())).thenReturn(Collections.emptyList());
 
-        assertNotNull(gridDataSource.getDataSource());
+        assertNotNull(gridDataSource.getDataSource("1", "10", "10", "internal", StringUtils.EMPTY));
     }
 }

@@ -1,3 +1,4 @@
 #base=css
 
 console-ui.less
+console-ui.pagination.less

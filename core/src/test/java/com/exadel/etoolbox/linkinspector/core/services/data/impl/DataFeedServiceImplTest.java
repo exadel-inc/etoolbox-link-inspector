@@ -14,16 +14,24 @@
 
 package com.exadel.etoolbox.linkinspector.core.services.data.impl;
 
-import com.exadel.etoolbox.linkinspector.core.services.ExternalLinkChecker;
-import com.exadel.etoolbox.linkinspector.core.services.data.UiConfigService;
-import com.exadel.etoolbox.linkinspector.core.services.helpers.LinkHelper;
-import com.exadel.etoolbox.linkinspector.core.services.util.CsvUtil;
+import com.exadel.etoolbox.linkinspector.api.LinkResolver;
+import com.exadel.etoolbox.linkinspector.core.services.cache.GridResourcesCache;
+import com.exadel.etoolbox.linkinspector.core.services.cache.impl.GridResourcesCacheImpl;
+import com.exadel.etoolbox.linkinspector.core.services.data.ConfigService;
+import com.exadel.etoolbox.linkinspector.core.services.data.GenerationStatsProps;
 import com.exadel.etoolbox.linkinspector.core.services.data.GridResourcesGenerator;
+import com.exadel.etoolbox.linkinspector.core.services.data.models.DataFilter;
 import com.exadel.etoolbox.linkinspector.core.services.data.models.GridResource;
+import com.exadel.etoolbox.linkinspector.core.services.helpers.LinkHelper;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.RepositoryHelper;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.impl.LinkHelperImpl;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.impl.RepositoryHelperImpl;
+import com.exadel.etoolbox.linkinspector.core.services.resolvers.ExternalLinkResolverImpl;
+import com.exadel.etoolbox.linkinspector.core.services.resolvers.InternalLinkResolverImpl;
+import com.exadel.etoolbox.linkinspector.core.services.util.CsvUtil;
 import com.exadel.etoolbox.linkinspector.core.services.util.LinkInspectorResourceUtil;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import io.wcm.testing.mock.aem.junit5.AemContext;
 import io.wcm.testing.mock.aem.junit5.AemContextExtension;
 import junitx.util.PrivateAccessor;
@@ -40,7 +48,11 @@ import org.mockito.stubbing.Answer;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -58,9 +70,11 @@ import static org.mockito.Mockito.when;
 class DataFeedServiceImplTest {
     private static final String GRID_RESOURCES_GENERATOR_FIELD = "gridResourcesGenerator";
     private static final String RESOURCE_RESOLVER_FACTORY_FIELD = "resourceResolverFactory";
+    private static final String GRID_RESOURCES_CACHE_FIELD = "gridResourcesCache";
     private static final String REPOSITORY_HELPER_FIELD = "repositoryHelper";
     private static final String LINK_HELPER_FIELD = "linkHelper";
-    private static final String UI_CONFIG_FIELD = "uiConfigService";
+    private static final String CONFIG_FIELD = "configService";
+    private static final String CUSTOM_LINK_FIELD = "customLinkResolver";
     private static final String EXTERNAL_LINK_CHECKER_FIELD = "externalLinkChecker";
 
     private static final String DATAFEED_PATH = "/content/etoolbox-link-inspector/data/datafeed.json";
@@ -73,11 +87,10 @@ class DataFeedServiceImplTest {
 
     private final DataFeedServiceImpl fixture = new DataFeedServiceImpl();
 
-
     @BeforeEach
     void setup() throws NoSuchFieldException, IOException, URISyntaxException {
         PrivateAccessor.setField(fixture, REPOSITORY_HELPER_FIELD, getRepositoryHelperFromContext());
-
+        PrivateAccessor.setField(fixture, GRID_RESOURCES_CACHE_FIELD, getGridResourcesCacheFromContext());
         GridResourcesGeneratorImpl gridResourcesGenerator = getGridResourcesGenerator();
         PrivateAccessor.setField(fixture, GRID_RESOURCES_GENERATOR_FIELD, gridResourcesGenerator);
     }
@@ -116,7 +129,7 @@ class DataFeedServiceImplTest {
 
         when(repositoryHelperMock.getServiceResourceResolver()).thenReturn(null);
 
-        List<Resource> resources = fixture.dataFeedToResources();
+        List<Resource> resources = fixture.dataFeedToResources(new DataFilter());
         assertTrue(resources.isEmpty());
     }
 
@@ -148,7 +161,7 @@ class DataFeedServiceImplTest {
         context.load().json(TEST_RESOURCES_TREE_PATH, TEST_FOLDER_PATH);
         fixture.generateDataFeed();
 
-        assertNotNull(fixture.dataFeedToResources());
+        assertNotNull(fixture.dataFeedToResources(new DataFilter()));
     }
 
     @Test
@@ -177,17 +190,23 @@ class DataFeedServiceImplTest {
 
     private GridResourcesGeneratorImpl getGridResourcesGenerator() throws NoSuchFieldException, IOException, URISyntaxException {
         GridResourcesGeneratorImpl gridResourcesGenerator = new GridResourcesGeneratorImpl();
+
+        List<LinkResolver> linkResolvers = Arrays.asList(
+                new ExternalLinkResolverImpl(),
+                new InternalLinkResolverImpl()
+        );
         LinkHelper linkHelper = new LinkHelperImpl();
-        ExternalLinkChecker externalLinkChecker = mock(ExternalLinkChecker.class);
-        PrivateAccessor.setField(linkHelper, EXTERNAL_LINK_CHECKER_FIELD, externalLinkChecker);
+        PrivateAccessor.setField(linkHelper, "linkResolvers", linkResolvers);
         PrivateAccessor.setField(gridResourcesGenerator, LINK_HELPER_FIELD, linkHelper);
-        GridResourcesGeneratorImplTest.setUpConfig(gridResourcesGenerator);
 
-        when(externalLinkChecker.checkLink(anyString())).thenReturn(HttpStatus.SC_NOT_FOUND);
-
-        UiConfigService uiConfigService = mock(UiConfigServiceImpl.class);
-        when(uiConfigService.getExcludedLinksPatterns()).thenReturn(new String[0]);
-        PrivateAccessor.setField(gridResourcesGenerator, UI_CONFIG_FIELD, uiConfigService);
+        ConfigService configService = mock(ConfigServiceImpl.class);
+        when(configService.getExcludedLinksPatterns()).thenReturn(new String[0]);
+        when(configService.getSearchPath()).thenReturn(TEST_FOLDER_PATH);
+        when(configService.getExcludedPaths()).thenReturn(new String[0]);
+        when(configService.getExcludedProperties()).thenReturn(new String[0]);
+        when(configService.getStatusCodes()).thenReturn(new int[]{HttpStatus.SC_NOT_FOUND});
+        when(configService.getThreadsPerCore()).thenReturn(60);
+        PrivateAccessor.setField(gridResourcesGenerator, CONFIG_FIELD, configService);
 
         return gridResourcesGenerator;
     }
@@ -197,5 +216,15 @@ class DataFeedServiceImplTest {
         RepositoryHelper repositoryHelper = new RepositoryHelperImpl();
         PrivateAccessor.setField(repositoryHelper, RESOURCE_RESOLVER_FACTORY_FIELD, resourceResolverFactory);
         return repositoryHelper;
+    }
+
+    private GridResourcesCache getGridResourcesCacheFromContext() throws NoSuchFieldException {
+        GridResourcesCache gridResourcesCache = new GridResourcesCacheImpl();
+        Cache<String, CopyOnWriteArrayList<GridResource>> cache = CacheBuilder.newBuilder()
+                .maximumSize(100)
+                .expireAfterWrite(100000, TimeUnit.DAYS)
+                .build();
+        PrivateAccessor.setField(gridResourcesCache, GRID_RESOURCES_CACHE_FIELD, cache);
+        return gridResourcesCache;
     }
 }

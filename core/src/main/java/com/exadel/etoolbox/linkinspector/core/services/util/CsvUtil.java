@@ -21,9 +21,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.function.BiConsumer;
@@ -32,7 +30,6 @@ public class CsvUtil {
     private static final Logger LOG = LoggerFactory.getLogger(CsvUtil.class);
 
     public static final String CSV_MIME_TYPE = "text/csv";
-
     public static final String SEMICOLON = ";";
     public static final String QUOTE = "\"";
     public static final String AT_SIGN = "@";
@@ -58,7 +55,7 @@ public class CsvUtil {
         try (ByteArrayOutputStream out = new ByteArrayOutputStream();
              CSVPrinter csvPrinter = new CSVPrinter(
                      new OutputStreamWriter(out, StandardCharsets.UTF_8),
-                     CSVFormat.DEFAULT.withHeader(columnHeaders)
+                     columnHeaders != null ? CSVFormat.DEFAULT.withHeader(columnHeaders) : CSVFormat.DEFAULT.withSkipHeaderRecord()
              )
         ) {
             items.forEach(item -> printRecord.accept(csvPrinter, item));

@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.exadel.etoolbox</groupId>
         <artifactId>etoolbox-link-inspector</artifactId>
-        <version>1.0.1</version>
+        <version>1.0.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>etoolbox-link-inspector.core</artifactId>
@@ -33,6 +33,7 @@
                         </goals>
                         <configuration>
                             <bnd><![CDATA[
+Export-Package: com.exadel.etoolbox.linkinspector.api.*
 Import-Package: javax.annotation;version=0.0.0,*
 -conditionalpackage: org.apache.commons.csv.*
                                 ]]></bnd>

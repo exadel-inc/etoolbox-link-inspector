@@ -14,38 +14,22 @@
 
 /**
  * EToolbox Link Inspector clientlib.
- * "Filter Options" action definition.
+ * "Filter" action definition.
  */
 (function (window, document, $, ELC, Granite, Coral) {
     'use strict';
-    var DIALOG_TITLE_LABEL = Granite.I18n.get('Filter Options');
-    var SUCCESS_DIALOG_TITLE_LABEL = Granite.I18n.get('Filter Options Applied');
-    var CANCEL_LABEL = Granite.I18n.get('Cancel');
-    var SUBMIT_FILTER_LABEL = Granite.I18n.get('Apply');
-
-    var successDialog = new Coral.Dialog().set({
-        id : "filter-dialog-success",
-        closable: Coral.Dialog.closable.ON,
-        variant: "success",
-        header :{
-            innerHTML : SUCCESS_DIALOG_TITLE_LABEL
-        },
-        content :{
-            innerHTML: "<p>Filter changes has been applied. Next report will be generated according to the applied settings</p>"
-        },
-        footer :{
-            innerHTML: "<button is=\"coral-button\" variant=\"primary\" coral-close>Ok</button>"
-        }
-    });
+    const DIALOG_TITLE_LABEL = Granite.I18n.get('Filter Links');
+    const CANCEL_LABEL = Granite.I18n.get('Cancel');
+    const SUBMIT_FILTER_LABEL = Granite.I18n.get('Apply');
 
     function onFilterAction(name, el, config, collection, selections) {
-        var dialog = document.querySelector('#filter-dialog');
+        const dialog = document.querySelector('#filter--dialog');
         dialog.show();
     }
 
-    function initActionDialog(){
-        var dialog = new Coral.Dialog().set({
-            id : 'filter-dialog',
+    function initFiltersDialog(searchParams){
+        const dialog = new Coral.Dialog().set({
+            id : 'filter--dialog',
             closable: Coral.Dialog.closable.ON,
             backdrop: Coral.Dialog.backdrop.STATIC,
             interaction: 'off',
@@ -54,72 +38,93 @@
             }
         });
 
-        var $cancelBtn = $('<button is="coral-button" variant="default" coral-close>').text(CANCEL_LABEL);
-        var $updateBtn =
+        const linksTypeSelect = new Coral.Select().set({
+            placeholder: 'Choose an item',
+        });
+        linksTypeSelect.items.add({
+            content:{
+                innerHTML: 'All'
+            },
+            value: '',
+            disabled: false,
+            selected: !searchParams.get('type')
+        });
+        linksTypeSelect.items.add({
+            content:{
+                innerHTML: 'Internal'
+            },
+            value: 'internal',
+            disabled: false,
+            selected: searchParams.get('type') === 'internal'
+        });
+        linksTypeSelect.items.add({
+            content:{
+                innerHTML: 'External'
+            },
+            value: 'external',
+            disabled: false,
+            selected: searchParams.get('type') === 'external'
+        });
+        linksTypeSelect.items.add({
+            content:{
+                innerHTML: 'Custom'
+            },
+            value: 'custom',
+            disabled: false,
+            selected: searchParams.get('type') === 'custom'
+        });
+
+        $('<p>').html('By type').appendTo(dialog.content);
+        dialog.content.appendChild(linksTypeSelect);
+
+        const $linkSubstringField = $('<input is="coral-textfield" class="elc-substring-input" name="substring" value="">');
+        $linkSubstringField.val(searchParams.get("substring"));
+        $('<p>').html('By text').appendTo(dialog.content);
+        $linkSubstringField.appendTo(dialog.content);
+
+        const $cancelBtn = $('<button is="coral-button" variant="default" coral-close>').text(CANCEL_LABEL);
+        const $updateBtn =
             $('<button data-dialog-action is="coral-button" variant="primary" coral-close>').text(SUBMIT_FILTER_LABEL);
+
         $cancelBtn.appendTo(dialog.footer);
         $updateBtn.appendTo(dialog.footer);
 
-        var filterMultifield = new Coral.Multifield();
-        filterMultifield.template.content.appendChild(new Coral.Textfield());
-
-        var add = new Coral.Button();
-        add.label.textContent = 'Add regexp for filtering';
-        add.setAttribute('coral-multifield-add', '');
-        filterMultifield.appendChild(add);
-
-        dialog.content.appendChild(filterMultifield);
-        $.ajax({
-            type: "GET",
-            url: "/content/etoolbox-link-inspector/data/config.json"
-        }).done(function (data){
-            if (data.filter){
-                for (var f of data.filter){
-                    var item = new Coral.Multifield.Item();
-                    var textField = new Coral.Textfield();
-                    textField.value = f;
-                    item.content.appendChild(textField);
-                    filterMultifield.items.add(item);
-                }
-            }
-        })
-
         function onSubmit(){
-            var filterMultifieldValues = filterMultifield.items.getAll().map((item) => item.content.children[0].value);
-            filterMultifieldValues = !!filterMultifieldValues.length ? filterMultifieldValues : "";
-            $.ajax({
-                type: "POST",
-                url: "/content/etoolbox-link-inspector/data/config",
-                data: {
-                    'jcr:primaryType': "nt:unstructured",
-                    "filter": filterMultifieldValues,
-                    "filter@TypeHint": "String[]"
-                },
-                dataType: "json",
-                encode: true
-            }).done(function(){
-                document.querySelector('#filter-dialog-success').show();
-            })
+            searchParams.delete('type');
+            searchParams.delete('substring');
+            if (linksTypeSelect.value) {
+                searchParams.append('type', linksTypeSelect.value);
+            }
+            if ($linkSubstringField.val()) {
+                searchParams.append('substring', $linkSubstringField.val());
+            }
+            searchParams.set('page', '1');
+            document.location.search = searchParams;
         }
 
         dialog.on('click', '[data-dialog-action]', onSubmit);
+        dialog.on('change', function(event) {
+            linksTypeSelect.value
+        })
         dialog.on('coral-overlay:close', function (event) {
             dialog.remove();
-            initActionDialog();
+            initFiltersDialog(new URL(document.location).searchParams);
         });
+
         document.body.appendChild(dialog);
     }
 
-    // Button action handler assignment
-    $(window).adaptTo("foundation-registry").register("foundation.collection.action.action", {
-        name: "cq-admin.etoolbox.linkinspector.action.filter-options",
+    $(window).adaptTo('foundation-registry').register('foundation.collection.action.action', {
+        name: 'cq-admin.etoolbox.linkinspector.action.filter-options',
         handler: onFilterAction
     });
 
-    //Dialog initialization
     $(document).ready(function () {
-        initActionDialog();
-        document.body.appendChild(successDialog);
+       let searchParams = new URL(document.location).searchParams;
+       if (searchParams != null && searchParams.get('type') != null || searchParams.get('substring') != null) {
+         $('#elc-filter-options').attr('variant', 'primary');
+       }
+       initFiltersDialog(searchParams);
     });
 
 })(window, document, Granite.$, Granite.ELC, Granite, Coral);

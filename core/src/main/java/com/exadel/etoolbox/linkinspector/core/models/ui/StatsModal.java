@@ -14,17 +14,17 @@
 
 package com.exadel.etoolbox.linkinspector.core.models.ui;
 
-import com.exadel.etoolbox.linkinspector.core.models.Link;
-import com.exadel.etoolbox.linkinspector.core.services.data.GenerationStatsProps;
 import com.exadel.etoolbox.linkinspector.core.services.data.GridResourcesGenerator;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.resource.Resource;
-import org.apache.sling.models.annotations.Default;
 import org.apache.sling.models.annotations.DefaultInjectionStrategy;
 import org.apache.sling.models.annotations.Model;
 import org.apache.sling.models.annotations.injectorspecific.ValueMapValue;
 
 import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -42,51 +42,39 @@ public class StatsModal {
     private static final String ARRAY_VALUES_SEPARATOR = ", ";
     private static final String ALL_STATUS_CODES_MSG = "All error codes outside the range '200-207'";
 
-    @ValueMapValue(name = GenerationStatsProps.PN_LAST_GENERATED)
+    @ValueMapValue
     private String lastGenerated;
 
-    @ValueMapValue(name = GenerationStatsProps.PN_SEARCH_PATH)
+    @ValueMapValue
     private String searchPath;
 
-    @ValueMapValue(name = GenerationStatsProps.PN_EXCLUDED_PATHS)
+    @ValueMapValue
     private String[] excludedPaths;
 
-    @ValueMapValue(name = GenerationStatsProps.PN_CHECK_ACTIVATION)
+    @ValueMapValue
     private boolean checkActivation;
 
-    @ValueMapValue(name = GenerationStatsProps.PN_SKIP_MODIFIED_AFTER_ACTIVATION)
+    @ValueMapValue
     private boolean skipModifiedAfterActivation;
 
-    @ValueMapValue(name = GenerationStatsProps.PN_LAST_MODIFIED_BOUNDARY)
+    @ValueMapValue
     private String lastModifiedBoundary;
 
-    @ValueMapValue(name = GenerationStatsProps.PN_EXCLUDED_PROPERTIES)
+    @ValueMapValue
     private String[] excludedProperties;
 
-    @ValueMapValue(name = GenerationStatsProps.PN_REPORT_LINKS_TYPE)
-    @Default(values = StringUtils.EMPTY)
-    private String reportLinksType;
-
-    @ValueMapValue(name = GenerationStatsProps.PN_EXCLUDED_LINK_PATTERNS)
+    @ValueMapValue
     private String[] excludedLinksPatterns;
 
-    @ValueMapValue(name = GenerationStatsProps.PN_EXCLUDED_TAGS)
+    @ValueMapValue
     private String excludeTags;
 
-    @ValueMapValue(name = GenerationStatsProps.PN_ALLOWED_STATUS_CODES)
+    @ValueMapValue
     private Integer[] allowedStatusCodes;
 
-    @ValueMapValue(name = GenerationStatsProps.PN_ALL_INTERNAL_LINKS)
-    private String allInternalLinksCount;
+    @ValueMapValue
+    private String[] statistics;
 
-    @ValueMapValue(name = GenerationStatsProps.PN_BROKEN_INTERNAL_LINKS)
-    private String brokenInternalLinksCount;
-
-    @ValueMapValue(name = GenerationStatsProps.PN_ALL_EXTERNAL_LINKS)
-    private String allExternalLinksCount;
-
-    @ValueMapValue(name = GenerationStatsProps.PN_BROKEN_EXTERNAL_LINKS)
-    private String brokenExternalLinksCount;
 
     public String getLastGenerated() {
         return lastGenerated;
@@ -114,22 +102,6 @@ public class StatsModal {
 
     public String getExcludedProperties() {
         return arrayToStringValue(excludedProperties);
-    }
-
-    /**
-     * Represents the value of the 'Link type' field from the {@link GridResourcesGenerator} configuration used during
-     * data feed generation
-     *
-     * @return the String representation of the selected link type. Can be either 'Internal', or 'External',
-     * or 'Internal + External'
-     */
-    public String getReportLinksType() {
-        if (StringUtils.isBlank(reportLinksType)) {
-            return StringUtils.EMPTY;
-        }
-        return Optional.of(reportLinksType)
-                .filter(GenerationStatsProps.REPORT_LINKS_TYPE_ALL::equals)
-                .orElseGet(() -> Link.Type.valueOf(reportLinksType).getValue());
     }
 
     public String getExcludedLinksPatterns() {
@@ -164,36 +136,15 @@ public class StatsModal {
         }
     }
 
-    /**
-     * Gets the count of all the inspected internal links
-     *
-     * @return the count of all internal links or empty String, if the report contains 'External' link only
-     */
-    public String getAllInternalLinksCount() {
-        if (Link.Type.EXTERNAL.getValue().equalsIgnoreCase(reportLinksType)) {
-            return StringUtils.EMPTY;
-        }
-        return allInternalLinksCount;
-    }
-
-    public String getBrokenInternalLinksCount() {
-        return brokenInternalLinksCount;
-    }
-
-    /**
-     * Gets the count of all the inspected external links
-     *
-     * @return the count of all external links or empty String, if the report contains 'Internal' link only
-     */
-    public String getAllExternalLinksCount() {
-        if (Link.Type.INTERNAL.getValue().equalsIgnoreCase(reportLinksType)) {
-            return StringUtils.EMPTY;
-        }
-        return allExternalLinksCount;
-    }
-
-    public String getBrokenExternalLinksCount() {
-        return brokenExternalLinksCount;
+    public Map<String, String> getStatistics() {
+        return Arrays.stream(ArrayUtils.nullToEmpty(statistics))
+                .map(stat -> StringUtils.split(stat, ":"))
+                .filter(statParts -> statParts.length == 2)
+                .collect(Collectors.toMap(
+                        statParts -> statParts[0],
+                        statParts -> statParts[1],
+                        (first, second) -> first,
+                        LinkedHashMap::new));
     }
 
     /**

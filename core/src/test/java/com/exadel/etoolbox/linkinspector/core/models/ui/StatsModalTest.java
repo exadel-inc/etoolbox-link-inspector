@@ -16,13 +16,14 @@ package com.exadel.etoolbox.linkinspector.core.models.ui;
 
 import com.day.crx.JcrConstants;
 import com.exadel.etoolbox.linkinspector.core.services.data.GenerationStatsProps;
-import com.exadel.etoolbox.linkinspector.core.models.Link;
 import io.wcm.testing.mock.aem.junit5.AemContext;
 import io.wcm.testing.mock.aem.junit5.AemContextExtension;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.jcr.resource.api.JcrResourceConstants;
 import org.apache.sling.testing.mock.sling.ResourceResolverType;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -31,10 +32,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(AemContextExtension.class)
 class StatsModalTest {
@@ -50,21 +48,22 @@ class StatsModalTest {
     private static final String[] TEST_EXCLUDED_PROPS = {"excluded-1", "excluded-2"};
     private static final String EXPECTED_EXCLUDED_PROPS = "excluded-1, excluded-2";
 
-    private static final String TEST_REPORT_LINKS_TYPE = GenerationStatsProps.REPORT_LINKS_TYPE_ALL;
     private static final String[] TEST_EXCLUDED_LINKS_PATTERNS = {"(.*)/excluded-1", "(.*)/excluded-2"};
     private static final String EXPECTED_EXCLUDED_LINKS_PATTERNS = "(.*)/excluded-1, (.*)/excluded-2";
     private static final String TEST_EXCLUDE_TAGS = "true";
     private static final String[] TEST_STATUS_CODES = {"400", "404"};
     private static final String EXPECTED_STATUS_CODES = "400, 404";
 
-    private static final String TEST_ALL_INTERNAL_LINKS = "1000";
-    private static final String TEST_BROKEN_INTERNAL_LINKS = "10";
-    private static final String TEST_ALL_EXTERNAL_LINKS = "50";
-    private static final String TEST_BROKEN_EXTERNAL_LINKS = "5";
+    private static final String[] TEST_STATISTICS = new String[] {"External: 100/1", "Internal: 20/8"};
 
     private static final String ALL_STATUS_CODES_MSG = "All error codes outside the range '200-207'";
 
     private final AemContext context = new AemContext(ResourceResolverType.RESOURCERESOLVER_MOCK);
+
+    @BeforeEach
+    void setup() {
+        context.addModelsForClasses(StatsModal.class);
+    }
 
     @Test
     void testEmptyResourceProps() {
@@ -81,14 +80,10 @@ class StatsModalTest {
         assertFalse(model.getSkipModifiedAfterActivation());
         assertNull(model.getLastModifiedBoundary());
         assertEquals(StringUtils.EMPTY, model.getExcludedProperties());
-        assertEquals(StringUtils.EMPTY, model.getReportLinksType());
         assertEquals(StringUtils.EMPTY, model.getExcludedLinksPatterns());
         assertNull(model.getExcludeTags());
         assertEquals(StringUtils.EMPTY, model.getAllowedStatusCodes());
-        assertNull(model.getAllInternalLinksCount());
-        assertNull(model.getBrokenInternalLinksCount());
-        assertNull(model.getAllExternalLinksCount());
-        assertNull(model.getBrokenExternalLinksCount());
+        assertTrue(MapUtils.isEmpty(model.getStatistics()));
     }
 
     @Test
@@ -105,15 +100,11 @@ class StatsModalTest {
         stats.put(GenerationStatsProps.PN_LAST_MODIFIED_BOUNDARY, TEST_LAST_MOD_BOUNDARY);
         stats.put(GenerationStatsProps.PN_EXCLUDED_PROPERTIES, TEST_EXCLUDED_PROPS);
 
-        stats.put(GenerationStatsProps.PN_REPORT_LINKS_TYPE, TEST_REPORT_LINKS_TYPE);
         stats.put(GenerationStatsProps.PN_EXCLUDED_LINK_PATTERNS, TEST_EXCLUDED_LINKS_PATTERNS);
         stats.put(GenerationStatsProps.PN_EXCLUDED_TAGS, TEST_EXCLUDE_TAGS);
         stats.put(GenerationStatsProps.PN_ALLOWED_STATUS_CODES, TEST_STATUS_CODES);
 
-        stats.put(GenerationStatsProps.PN_ALL_INTERNAL_LINKS, TEST_ALL_INTERNAL_LINKS);
-        stats.put(GenerationStatsProps.PN_BROKEN_INTERNAL_LINKS, TEST_BROKEN_INTERNAL_LINKS);
-        stats.put(GenerationStatsProps.PN_ALL_EXTERNAL_LINKS, TEST_ALL_EXTERNAL_LINKS);
-        stats.put(GenerationStatsProps.PN_BROKEN_EXTERNAL_LINKS, TEST_BROKEN_EXTERNAL_LINKS);
+        stats.put(GenerationStatsProps.PN_STATISTICS, TEST_STATISTICS);
 
         Resource statsResource = context.create().resource(TEST_RESOURCE_PATH, stats);
 
@@ -127,19 +118,16 @@ class StatsModalTest {
         assertEquals(TEST_SKIP_MODIFIED_AFTER_ACTIVATION, model.getSkipModifiedAfterActivation());
         assertEquals(TEST_LAST_MOD_BOUNDARY, model.getLastModifiedBoundary());
         assertEquals(EXPECTED_EXCLUDED_PROPS, model.getExcludedProperties());
-        assertEquals(TEST_REPORT_LINKS_TYPE, model.getReportLinksType());
         assertEquals(EXPECTED_EXCLUDED_LINKS_PATTERNS, model.getExcludedLinksPatterns());
         assertEquals(TEST_EXCLUDE_TAGS, model.getExcludeTags());
         assertEquals(EXPECTED_STATUS_CODES, model.getAllowedStatusCodes());
-        assertEquals(TEST_ALL_INTERNAL_LINKS, model.getAllInternalLinksCount());
-        assertEquals(TEST_BROKEN_INTERNAL_LINKS, model.getBrokenInternalLinksCount());
-        assertEquals(TEST_ALL_EXTERNAL_LINKS, model.getAllExternalLinksCount());
-        assertEquals(TEST_BROKEN_EXTERNAL_LINKS, model.getBrokenExternalLinksCount());
+        assertEquals(2, model.getStatistics().size());
     }
 
     @Test
     void testAllStatusCodes() {
-        Resource statsResource = context.create().resource(TEST_RESOURCE_PATH,
+        Resource statsResource = context.create().resource(
+                TEST_RESOURCE_PATH,
                 JcrResourceConstants.SLING_RESOURCE_TYPE_PROPERTY, JcrConstants.NT_UNSTRUCTURED,
                 GenerationStatsProps.PN_ALLOWED_STATUS_CODES, -1);
 
@@ -147,29 +135,5 @@ class StatsModalTest {
         assertNotNull(model);
 
         assertEquals(ALL_STATUS_CODES_MSG, model.getAllowedStatusCodes());
-    }
-
-    @Test
-    void testGetAllExternalLinks() {
-        Resource statsResource = context.create().resource(TEST_RESOURCE_PATH,
-                JcrResourceConstants.SLING_RESOURCE_TYPE_PROPERTY, JcrConstants.NT_UNSTRUCTURED,
-                GenerationStatsProps.PN_REPORT_LINKS_TYPE, Link.Type.INTERNAL);
-
-        StatsModal model = statsResource.adaptTo(StatsModal.class);
-        assertNotNull(model);
-
-        assertEquals(StringUtils.EMPTY, model.getAllExternalLinksCount());
-    }
-
-    @Test
-    void testGetAllInternalLinks() {
-        Resource statsResource = context.create().resource(TEST_RESOURCE_PATH,
-                JcrResourceConstants.SLING_RESOURCE_TYPE_PROPERTY, JcrConstants.NT_UNSTRUCTURED,
-                GenerationStatsProps.PN_REPORT_LINKS_TYPE, Link.Type.EXTERNAL);
-
-        StatsModal model = statsResource.adaptTo(StatsModal.class);
-        assertNotNull(model);
-
-        assertEquals(StringUtils.EMPTY, model.getAllInternalLinksCount());
     }
 }
