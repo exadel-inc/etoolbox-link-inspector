@@ -52,7 +52,7 @@ public class ConfigServiceImpl implements ConfigService {
     }
 
     @Override
-    public boolean isActivatedContent() {
+    public boolean activatedContent() {
         return getProperty(PN_ACTIVATED_CONTENT, Boolean.class).orElse(false);
     }
 

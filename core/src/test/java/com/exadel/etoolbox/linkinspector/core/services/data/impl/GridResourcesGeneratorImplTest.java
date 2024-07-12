@@ -258,7 +258,7 @@ class GridResourcesGeneratorImplTest {
     @Test
     void testActivationCheck() throws ParseException {
         when(configService.getExcludedPaths()).thenReturn(new String[]{TEST_EXCLUDED_PATH});
-        when(configService.isActivatedContent()).thenReturn(true);
+        when(configService.activatedContent()).thenReturn(true);
         when(configService.isSkipContentModifiedAfterActivation()).thenReturn(true);
         context.load().json(TEST_REPLICATED_RESOURCES_TREE_PATH, TEST_FOLDER_PATH);
 

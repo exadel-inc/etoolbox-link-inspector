@@ -6,7 +6,7 @@ public interface ConfigService {
     String[] getExcludedLinksPatterns();
     String getSearchPath();
     String[] getExcludedPaths();
-    boolean isActivatedContent();
+    boolean activatedContent();
     boolean isSkipContentModifiedAfterActivation();
     ZonedDateTime getLastModified();
     String[] getExcludedProperties();

@@ -29,6 +29,7 @@ import com.exadel.etoolbox.linkinspector.core.services.util.JsonUtil;
 import com.exadel.etoolbox.linkinspector.core.services.util.LinkInspectorResourceUtil;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.csv.CSVPrinter;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
@@ -163,22 +164,22 @@ public class DataFeedServiceImpl implements DataFeedService {
     public void modifyDataFeed(Map<String, String> valuesMap) {
         List<GridResource> gridResources = gridResourcesCache.getGridResourcesList();
         try (ResourceResolver serviceResourceResolver = repositoryHelper.getServiceResourceResolver()) {
-            List<GridResource> modifiedResources = gridResources.stream()
-                    .peek(gridResource -> {
-                        if (valuesMap.containsKey(String.format("%s@%s", gridResource.getResourcePath(), gridResource.getPropertyName()))) {
-                            Optional<Link> optionalLink = linkHelper
-                                    .getLinkStream(valuesMap.get(String.format("%s@%s", gridResource.getResourcePath(), gridResource.getPropertyName())))
-                                    .peek(link -> linkHelper.validateLink(link, serviceResourceResolver))
-                                    .findFirst();
-                            if (optionalLink.isPresent()) {
-                                Link link = optionalLink.get();
-                                link.setStatus("Modified");
-                                gridResource.setLink(link);
-                            }
-                        }
-                    }).collect(Collectors.toList());
-            gridResourcesCache.setGridResourcesList(modifiedResources);
-            gridResourcesToDataFeed(modifiedResources, serviceResourceResolver);
+            for (GridResource gridResource : gridResources) {
+                String propertyAddress = gridResource.getResourcePath() +"@" + gridResource.getPropertyName();
+                String propertyValue = valuesMap.getOrDefault(propertyAddress, StringUtils.EMPTY);
+                if (propertyValue.isEmpty()) {
+                    continue;
+                }
+                linkHelper
+                        .getLinkStream(propertyValue)
+                        .forEach(link -> {
+                            linkHelper.validateLink(link, serviceResourceResolver);
+                            link.setStatus("Modified");
+                            gridResource.setLink(link);
+                        });
+            }
+            gridResourcesCache.setGridResourcesList(gridResources);
+            gridResourcesToDataFeed(gridResources, serviceResourceResolver);
         }
     }
 

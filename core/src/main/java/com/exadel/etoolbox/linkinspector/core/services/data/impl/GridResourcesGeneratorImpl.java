@@ -275,7 +275,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
     }
 
     private boolean isAllowedReplicationStatus(Resource resource) {
-        if (configService.isActivatedContent()) {
+        if (configService.activatedContent()) {
             if (LinkInspectorResourceUtil.isPageOrAsset(resource)) {
                 return isActivatedPageOrAsset(resource);
             } else {
@@ -346,7 +346,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
                 ZonedDateTime.now().format(DateTimeFormatter.RFC_1123_DATE_TIME));
         stats.put(GenerationStatsProps.PN_SEARCH_PATH, configService.getSearchPath());
         stats.put(GenerationStatsProps.PN_EXCLUDED_PATHS, configService.getExcludedPaths());
-        stats.put(GenerationStatsProps.PN_CHECK_ACTIVATION, configService.isActivatedContent());
+        stats.put(GenerationStatsProps.PN_CHECK_ACTIVATION, configService.activatedContent());
         stats.put(GenerationStatsProps.PN_SKIP_MODIFIED_AFTER_ACTIVATION, configService.isSkipContentModifiedAfterActivation());
         stats.put(GenerationStatsProps.PN_LAST_MODIFIED_BOUNDARY, dateToIsoDateTimeString(configService.getLastModified()));
         stats.put(GenerationStatsProps.PN_EXCLUDED_PROPERTIES, configService.getExcludedProperties());

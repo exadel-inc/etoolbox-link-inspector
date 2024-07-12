@@ -31,7 +31,7 @@
             innerHTML : SUCCESS_DIALOG_TITLE_LABEL
         },
         content :{
-            innerHTML: "<p>Filter changes has been applied. Next report will be generated according to the applied settings</p>"
+            innerHTML: "<p>Filter changes have been applied. The next report will be generated in accordance with the applied settings</p>"
         },
         footer :{
             innerHTML: "<button is=\"coral-button\" variant=\"primary\" coral-close>Ok</button>"
@@ -75,7 +75,7 @@
         $skipContentAfterActivationCheckbox.appendTo(dialog.content);
 
         const filterMultifield = createMultifield();
-        $('<p>').html("Excluded links patterns (<span class='dialog-description'>Links are excluded from processing if match any of the specified regex patterns</span>)").appendTo(dialog.content);
+        $('<p>').html("Excluded links patterns (<span class='dialog-description'>Links are excluded from processing if they match any of the specified regex patterns</span>)").appendTo(dialog.content);
         dialog.content.appendChild(filterMultifield);
 
         const $lastModifiedContentField = $('<input is="coral-textfield" class="elc-replacement-input" name="lastMidified" value="">');
@@ -113,7 +113,7 @@
         $('<p>').html("Links type (<span class='dialog-description'>The type of links in the report</span>)").appendTo(dialog.content);
         dialog.content.appendChild(linksTypeSelect);
 
-        const $customTypeAllowedCheckbox = $('<coral-checkbox value="customTypeAllowed">Allow custom link type(<span class=\'dialog-description\'>If checked custom link types will be included to the reports</span>)</coral-checkbox>');
+        const $customTypeAllowedCheckbox = $('<coral-checkbox value="customTypeAllowed">Allow custom link type(<span class=\'dialog-description\'>If checked custom link types will be included in the reports</span>)</coral-checkbox>');
         $customTypeAllowedCheckbox.appendTo(dialog.content);
 
         const $excludeTagsCheckbox = $('<coral-checkbox value="excludeTags">Exclude tags(<span class=\'dialog-description\'>If checked, the internal links starting with /content/cq:tags will be excluded</span>)</coral-checkbox>');

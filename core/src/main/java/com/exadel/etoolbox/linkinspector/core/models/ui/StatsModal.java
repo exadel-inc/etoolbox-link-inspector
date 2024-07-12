@@ -14,7 +14,6 @@
 
 package com.exadel.etoolbox.linkinspector.core.models.ui;
 
-import com.exadel.etoolbox.linkinspector.core.services.data.GenerationStatsProps;
 import com.exadel.etoolbox.linkinspector.core.services.data.GridResourcesGenerator;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
@@ -43,35 +42,34 @@ public class StatsModal {
     private static final String ARRAY_VALUES_SEPARATOR = ", ";
     private static final String ALL_STATUS_CODES_MSG = "All error codes outside the range '200-207'";
 
-    // TODO: Why these "name" properties are here?
-    @ValueMapValue(name = GenerationStatsProps.PN_LAST_GENERATED)
+    @ValueMapValue
     private String lastGenerated;
 
-    @ValueMapValue(name = GenerationStatsProps.PN_SEARCH_PATH)
+    @ValueMapValue
     private String searchPath;
 
-    @ValueMapValue(name = GenerationStatsProps.PN_EXCLUDED_PATHS)
+    @ValueMapValue
     private String[] excludedPaths;
 
-    @ValueMapValue(name = GenerationStatsProps.PN_CHECK_ACTIVATION)
+    @ValueMapValue
     private boolean checkActivation;
 
-    @ValueMapValue(name = GenerationStatsProps.PN_SKIP_MODIFIED_AFTER_ACTIVATION)
+    @ValueMapValue
     private boolean skipModifiedAfterActivation;
 
-    @ValueMapValue(name = GenerationStatsProps.PN_LAST_MODIFIED_BOUNDARY)
+    @ValueMapValue
     private String lastModifiedBoundary;
 
-    @ValueMapValue(name = GenerationStatsProps.PN_EXCLUDED_PROPERTIES)
+    @ValueMapValue
     private String[] excludedProperties;
 
-    @ValueMapValue(name = GenerationStatsProps.PN_EXCLUDED_LINK_PATTERNS)
+    @ValueMapValue
     private String[] excludedLinksPatterns;
 
-    @ValueMapValue(name = GenerationStatsProps.PN_EXCLUDED_TAGS)
+    @ValueMapValue
     private String excludeTags;
 
-    @ValueMapValue(name = GenerationStatsProps.PN_ALLOWED_STATUS_CODES)
+    @ValueMapValue
     private Integer[] allowedStatusCodes;
 
     @ValueMapValue

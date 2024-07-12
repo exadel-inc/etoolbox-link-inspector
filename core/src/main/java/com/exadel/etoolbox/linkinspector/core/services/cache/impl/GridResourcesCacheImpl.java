@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit;
 @Component(service = GridResourcesCache.class)
 public class GridResourcesCacheImpl implements GridResourcesCache {
 
-    private static final String ELC_BROKEN_LINKS_CACHE = "elc-broken-links";
+    private static final String BROKEN_LINKS_MAP_KEY = "elc-broken-links";
 
     @SuppressWarnings("UnstableApiUsage")
     private Cache<String, CopyOnWriteArrayList<GridResource>> gridResourcesCache;
@@ -26,7 +26,7 @@ public class GridResourcesCacheImpl implements GridResourcesCache {
     @SuppressWarnings("unused")
     private void activate() {
         gridResourcesCache = CacheBuilder.newBuilder()
-                .maximumSize(100)
+                .maximumSize(1)
                 .expireAfterWrite(100000, TimeUnit.DAYS)
                 .build();
     }
@@ -34,12 +34,12 @@ public class GridResourcesCacheImpl implements GridResourcesCache {
     @SuppressWarnings("UnstableApiUsage")
     @Override
     public synchronized void setGridResourcesList(List<GridResource> gridResources) {
-        gridResourcesCache.asMap().put(ELC_BROKEN_LINKS_CACHE, new CopyOnWriteArrayList<>(gridResources));
+        gridResourcesCache.asMap().put(BROKEN_LINKS_MAP_KEY, new CopyOnWriteArrayList<>(gridResources));
     }
 
     @SuppressWarnings("UnstableApiUsage")
     @Override
     public CopyOnWriteArrayList<GridResource> getGridResourcesList() {
-        return gridResourcesCache.asMap().getOrDefault(ELC_BROKEN_LINKS_CACHE, new CopyOnWriteArrayList<>());
+        return gridResourcesCache.asMap().getOrDefault(BROKEN_LINKS_MAP_KEY, new CopyOnWriteArrayList<>());
     }
 }
