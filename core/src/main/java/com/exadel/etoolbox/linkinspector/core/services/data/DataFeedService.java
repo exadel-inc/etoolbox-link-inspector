@@ -59,4 +59,6 @@ public interface DataFeedService {
      * @param valuesMap - {@code Map<String, String>} property location as key and new url as value
      */
     void modifyDataFeed(Map<String, String> valuesMap);
+
+    void deleteDataFeed();
 }

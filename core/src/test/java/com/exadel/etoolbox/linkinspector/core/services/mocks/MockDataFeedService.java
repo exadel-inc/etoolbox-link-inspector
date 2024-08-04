@@ -29,4 +29,9 @@ public class MockDataFeedService implements DataFeedService {
     public void modifyDataFeed(Map<String, String> valuesMap) {
         // No operation
     }
+
+    @Override
+    public void deleteDataFeed() {
+        // No operation
+    }
 }
