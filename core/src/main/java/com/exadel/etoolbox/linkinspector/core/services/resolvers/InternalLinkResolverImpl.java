@@ -68,8 +68,8 @@ public class InternalLinkResolverImpl implements LinkResolver {
 
     private String internalLinksHost;
 
-    @Reference(target = "(service.pid=com.exadel.etoolbox.linkinspector.core.services.resolvers.ExternalLinkResolverImpl)")
-    private LinkResolver externalLinkResolver;
+    @Reference
+    private ExternalLinkResolverImpl externalLinkResolver;
 
     @Activate
     @Modified
