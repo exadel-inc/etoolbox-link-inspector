@@ -76,7 +76,7 @@
                             <select
                                     jcr:primaryType="nt:unstructured"
                                     select="{Boolean}true"/>
-                            <linkStatus
+                            <status
                                     jcr:primaryType="nt:unstructured"
                                     jcr:title="Status"
                                     class="status"/>
