@@ -59,6 +59,7 @@
                 isDryRun: data.isDryRun,
                 isBackup: data.isBackup,
                 isOutputAsCsv: data.isOutputAsCsv,
+                advancedMode: data.advancedMode,
                 selected: data.selected
             }].filter(function (item) {
                 return item.pattern && item.replacement && item.pattern !== item.replacement;
@@ -145,13 +146,22 @@
         $cancelBtn.appendTo(el.footer);
         $updateBtn.appendTo(el.footer);
 
-        buildConfirmationMessage(selection).appendTo(el.content);
+        buildConfirmationMessage(confirmationMessageSelectionItems(selection)).appendTo(el.content);
 
         // Pattern input group
+        var $advancedOptionsSwitch =
+            $('<coral-switch data-dialog-advanced class="coral3-Switch" aria-disabled="false" aria-required="false" aria-invalid="false" aria-readonly="false">' +
+            '<input class="coral3-Switch-input" handle="input" type="checkbox">' +
+            '</coral-switch>');
+            $('<p>').text('Advanced Options').appendTo(el.content);
+            $advancedOptionsSwitch.appendTo(el.content);
+
+        let $patternFieldGroup = $('<div class="elc-pattern-field-group" hidden>');
         var $patternTextField =
             $('<input is="coral-textfield" class="elc-pattern-input" name="pattern" value="" required>');
-        $('<p>').text(PATTERN_LABEL).appendTo(el.content);
-        $patternTextField.appendTo(el.content);
+        $('<p>').text(PATTERN_LABEL).appendTo($patternFieldGroup);
+        $patternTextField.appendTo($patternFieldGroup);
+        $patternFieldGroup.appendTo(el.content);
 
         // Replacement input group
         var $replacementTextField =
@@ -161,11 +171,11 @@
 
         // Dry run checkbox group
         var $isDryRunCheckbox =
-            $('<coral-checkbox name="$isDryRun" title="' + DRY_RUN_TOOLTIP + '" checked>').text(DRY_RUN_CHECKBOX_LABEL);
+            $('<coral-checkbox data-dialog-dry-run name="$isDryRun" title="' + DRY_RUN_TOOLTIP + '" checked>').text(DRY_RUN_CHECKBOX_LABEL);
         $isDryRunCheckbox.appendTo(el.content);
 
         // Backup checkbox group
-        var $isBackupCheckbox = $('<coral-checkbox name="isBackup">').text(BACKUP_CHECKBOX_LABEL);
+        var $isBackupCheckbox = $('<coral-checkbox name="isBackup" disabled>').text(BACKUP_CHECKBOX_LABEL);
         $isBackupCheckbox.appendTo(el.content);
 
         // CSV output checkbox group
@@ -178,15 +188,18 @@
         function onValidate() {
             var replVal = $replacementTextField.val();
             var patternVal = $patternTextField.val();
+            var advanced = $advancedOptionsSwitch.prop("checked");
             $replacementTextField.each(function () {
                 this.setCustomValidity(replVal === patternVal ? VALIDATION_MSG : '');
             });
-            $updateBtn.attr('disabled', !replVal || !patternVal || replVal === patternVal);
+            $updateBtn.attr('disabled', !replVal || (advanced && !patternVal || replVal === patternVal));
         }
+
         /** @param {Event} e */
         function onResolve(e) {
             var data = {
-                pattern: $patternTextField.val(),
+                pattern: $advancedOptionsSwitch.prop("checked") ? $patternTextField.val() : '.+',
+                advancedMode: $advancedOptionsSwitch.prop("checked"),
                 replacement: $replacementTextField.val(),
                 isDryRun: $isDryRunCheckbox.prop("checked"),
                 isBackup: $isBackupCheckbox.prop("checked"),
@@ -198,11 +211,26 @@
             deferred.resolve(data);
         }
 
+        /** @param {Event} e */
+        function onChangeAdvanced(e) {
+            $patternFieldGroup.attr('hidden', !$advancedOptionsSwitch.prop("checked"));
+            onValidate();
+        }
+
+        /** @param {Event} e */
+        function onDryRunChange(e) {
+            $isBackupCheckbox.attr('disabled', $isDryRunCheckbox.prop('checked'));
+        }
+
         el.on('input', 'input', onValidate);
         el.on('click', '[data-dialog-action]', onResolve);
+        el.on('change', '[data-dialog-advanced]', onChangeAdvanced);
+        el.on('change', '[data-dialog-dry-run]', onDryRunChange);
         el.on('coral-overlay:close', function () {
             el.off('input', 'input', onValidate);
             el.off('click', '[data-dialog-action]', onResolve);
+            el.off('change', '[data-dialog-advanced]', onChangeAdvanced);
+            el.off('change', '[data-dialog-dry-run]', onDryRunChange);
             deferred.reject();
         });
 
@@ -214,7 +242,7 @@
 
     function buildConfirmationMessage(selections) {
         let list = selections.slice(0, 12).map(function (row) {
-            return '<li>' + row.currentLink + '</li>';
+            return '<li>' + row.currentLink + ' (' + row.count + ')' + '</li>';
         });
         if (selections.length > 12) {
             list.push('<li>&#8230;</li>'); // &#8230; is ellipsis
@@ -224,6 +252,21 @@
         $('<ul class="elc-processing-link-list">').html(list.join('')).appendTo($msg);
         $('<br/>').appendTo($msg);
         return $msg;
+    }
+
+    function confirmationMessageSelectionItems(selections) {
+         let valuesMap = {};
+         selections.map(function (row) {
+            return row.currentLink;
+         }).forEach(function (item) {
+            valuesMap[item] = (valuesMap[item]||0) + 1;
+         });
+
+         let items = [];
+         for (const [key, value] of Object.entries(valuesMap)) {
+           items.push({currentLink: key, count: value});
+         }
+         return items;
     }
 
     function buildSelectionItems(selections) {

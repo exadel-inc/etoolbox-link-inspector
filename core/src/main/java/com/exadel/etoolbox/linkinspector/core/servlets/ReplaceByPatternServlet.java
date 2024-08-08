@@ -97,12 +97,13 @@ public class ReplaceByPatternServlet extends SlingAllMethodsServlet {
     private static final String DRY_RUN_PARAM = "isDryRun";
     private static final String BACKUP_PARAM = "isBackup";
     private static final String OUTPUT_AS_CSV_PARAM = "isOutputAsCsv";
+    private static final String ADVANCED_MODE_PARAM = "advancedMode";
     private static final String ITEMS_COUNT_RESP_PARAM = "updatedItemsCount";
     private static final String BACKUP_PACKAGE_GROUP = "EToolbox_Link_Inspector";
     private static final String BACKUP_PACKAGE_NAME = "replace_by_pattern_backup_%s";
     private static final String BACKUP_PACKAGE_VERSION = "1.0";
-    private static final String PAGE_PARAM = "page";
     private static final String SELECTED_PARAM = "selected";
+    private static final String FULL_LINK_REPLACEMENT_PATTERN = ".+";
 
     private static final String[] CSV_COLUMNS = {
             "Link",
@@ -136,10 +137,15 @@ public class ReplaceByPatternServlet extends SlingAllMethodsServlet {
     protected void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response) {
         String linkPattern = ServletUtil.getRequestParamString(request, LINK_PATTERN_PARAM);
         String replacement = ServletUtil.getRequestParamString(request, REPLACEMENT_PARAM);
+        boolean isAdvancedMode = ServletUtil.getRequestParamBoolean(request, ADVANCED_MODE_PARAM);
         boolean isDryRun = ServletUtil.getRequestParamBoolean(request, DRY_RUN_PARAM);
         boolean isBackup = ServletUtil.getRequestParamBoolean(request, BACKUP_PARAM);
         boolean isOutputAsCsv = ServletUtil.getRequestParamBoolean(request, OUTPUT_AS_CSV_PARAM);
         List<String> selectedItems = ServletUtil.getRequestParamStringList(request, SELECTED_PARAM);
+
+        if (!isAdvancedMode) {
+            linkPattern = FULL_LINK_REPLACEMENT_PATTERN;
+        }
 
         if (StringUtils.isAnyBlank(linkPattern, replacement)) {
             response.setStatus(HttpStatus.SC_BAD_REQUEST);
