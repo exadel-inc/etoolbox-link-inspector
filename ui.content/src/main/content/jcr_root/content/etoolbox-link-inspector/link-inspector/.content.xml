@@ -76,19 +76,14 @@
                             <select
                                     jcr:primaryType="nt:unstructured"
                                     select="{Boolean}true"/>
+                            <linkStatus
+                                    jcr:primaryType="nt:unstructured"
+                                    jcr:title="Status"
+                                    class="status"/>
                             <title
                                     jcr:primaryType="nt:unstructured"
                                     jcr:title="Link"
                                     class="link"/>
-                            <linkStatusCode
-                                    jcr:primaryType="nt:unstructured"
-                                    jcr:title="Code"
-                                    class="statusCode"
-                                    sortType="numeric"/>
-                            <linkStatusMessage
-                                    jcr:primaryType="nt:unstructured"
-                                    jcr:title="Status Message"
-                                    class="statusMessage"/>
                             <pagePath
                                     jcr:primaryType="nt:unstructured"
                                     jcr:title="Page"
