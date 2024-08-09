@@ -10,4 +10,6 @@ public interface GridResourcesCache {
     CopyOnWriteArrayList<GridResource> getGridResourcesList();
 
     void setGridResourcesList(List<GridResource> gridResources);
+
+    void clearCache();
 }

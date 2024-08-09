@@ -37,6 +37,11 @@ public class GridResourcesCacheImpl implements GridResourcesCache {
         gridResourcesCache.asMap().put(BROKEN_LINKS_MAP_KEY, new CopyOnWriteArrayList<>(gridResources));
     }
 
+    @Override
+    public void clearCache() {
+        gridResourcesCache.invalidateAll();
+    }
+
     @SuppressWarnings("UnstableApiUsage")
     @Override
     public CopyOnWriteArrayList<GridResource> getGridResourcesList() {
