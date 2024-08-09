@@ -45,6 +45,15 @@
         <componentGroupName>EToolbox Link Inspector</componentGroupName>
     </properties>
 
+    <repositories>
+        <repository>
+            <id>etoolbox-contractor@repsy</id>
+            <name>EToolbox Contractor Repository</name>
+            <url>https://repsy.io/onestepcloser/maven/etoolbox-contractor</url>
+            <layout>default</layout>
+        </repository>
+    </repositories>
+
     <build>
         <plugins>
             <!-- Maven Release Plugin -->
@@ -208,7 +217,7 @@ Bundle-DocURL:
                         <dependency>
                             <groupId>biz.netcentric.aem</groupId>
                             <artifactId>aem-nodetypes</artifactId>
-                            <version>6.5.5.0</version>
+                            <version>6.5.7.0</version>
                         </dependency>
                     </dependencies>
                 </plugin>
@@ -507,6 +516,12 @@ Bundle-DocURL:
                 <scope>test</scope>
             </dependency>
             <!-- Other Dependencies -->
+            <dependency>
+                <groupId>com.exadel.etoolbox</groupId>
+                <artifactId>etoolbox-contractor.core</artifactId>
+                <version>1.0.0-SNAPSHOT</version>
+                <scope>provided</scope>
+            </dependency>
             <dependency>
                 <groupId>org.apache.sling</groupId>
                 <artifactId>org.apache.sling.api</artifactId>
