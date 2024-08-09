@@ -10,13 +10,11 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 import javax.servlet.Servlet;
-import javax.servlet.ServletException;
-import java.io.IOException;
 
 @Component(service = {Servlet.class})
 @SlingServletResourceTypes(
         resourceTypes = "/bin/etoolbox/link-inspector/delete-report",
-        methods = HttpConstants.METHOD_POST
+        methods = HttpConstants.METHOD_GET
 )
 public class DeleteReportServlet extends SlingAllMethodsServlet {
 
@@ -24,7 +22,7 @@ public class DeleteReportServlet extends SlingAllMethodsServlet {
     private DataFeedService dataFeedService;
 
     @Override
-    protected void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response) throws ServletException, IOException {
+    protected void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response) {
         dataFeedService.deleteDataFeed();
     }
 }

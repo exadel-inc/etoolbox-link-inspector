@@ -38,7 +38,7 @@
             }
         });
 
-        $('<p>').html('Delete report?').appendTo(dialog.content);
+        $('<p>').html('Are you sure you want to delete the report?').appendTo(dialog.content);
 
         const $cancelBtn = $('<button is="coral-button" variant="default" coral-close>').text(CANCEL_LABEL);
         const $updateBtn =
@@ -50,7 +50,7 @@
         function onSubmit(){
             dialog.trigger('coral-overlay:close');
             $.ajax({
-                url: '/bin/etoolbox/link-inspector/delete-report',
+                url: '/content/etoolbox-link-inspector/servlet/deleteReport',
                 type: 'GET',
                 success: function(){
                     window.location.reload();

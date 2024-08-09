@@ -188,8 +188,8 @@ public class DataFeedServiceImpl implements DataFeedService {
             removePreviousDataFeed(serviceResourceResolver);
             removeCsvReport(serviceResourceResolver);
             removePendingNode(serviceResourceResolver);
+            gridResourcesCache.clearCache();
             serviceResourceResolver.commit();
-            LOG.debug("Data feed has been deleted");
         } catch (PersistenceException e) {
             LOG.error("Failed to delete data feed", e);
         }
