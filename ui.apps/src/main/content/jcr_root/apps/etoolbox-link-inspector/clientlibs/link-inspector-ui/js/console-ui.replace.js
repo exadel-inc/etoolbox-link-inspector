@@ -158,7 +158,7 @@
 
         let $patternFieldGroup = $('<div class="elc-pattern-field-group" hidden>');
         var $patternTextField =
-            $('<input is="coral-textfield" class="elc-pattern-input" name="pattern" value=".+" required>');
+            $('<input is="coral-textfield" class="elc-pattern-input" name="pattern" value="" placeholder=".+" required>');
         $('<p>').text(PATTERN_LABEL).appendTo($patternFieldGroup);
         $patternTextField.appendTo($patternFieldGroup);
         $patternFieldGroup.appendTo(el.content);
