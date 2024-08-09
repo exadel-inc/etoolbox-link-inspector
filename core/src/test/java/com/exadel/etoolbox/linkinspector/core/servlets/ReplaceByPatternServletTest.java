@@ -101,6 +101,7 @@ class ReplaceByPatternServletTest {
     private static final String TEST_RESOURCES_TREE_PATH = "/com/exadel/etoolbox/linkinspector/core/servlets/resources.json";
     private static final String TEST_FOLDER_PATH = "/content/test-folder";
     private static final String TEST_EXCEPTION_MSG = "Test exception message";
+    private static final String ADVANCED_MODE = "advancedMode";
 
     private final AemContext context = new AemContext(ResourceResolverType.JCR_MOCK);
 
@@ -153,6 +154,7 @@ class ReplaceByPatternServletTest {
     void testCurrentLinkEqualToReplacement() {
         request.addRequestParameter(LINK_PATTERN_PARAM, TEST_LINK_PATTERN);
         request.addRequestParameter(REPLACEMENT_PARAM, TEST_LINK_PATTERN);
+        request.addRequestParameter(ADVANCED_MODE, Boolean.TRUE.toString());
         linkHelper = mock(LinkHelper.class);
         repositoryHelper = mock(RepositoryHelper.class);
         packageHelper = mock(PackageHelper.class);
@@ -433,6 +435,7 @@ class ReplaceByPatternServletTest {
     private void setUpRequestParamsLinks() throws IOException {
         request.addRequestParameter(LINK_PATTERN_PARAM, TEST_LINK_PATTERN);
         request.addRequestParameter(REPLACEMENT_PARAM, TEST_REPLACEMENT);
+        request.addRequestParameter(ADVANCED_MODE, Boolean.TRUE.toString());
         Arrays.stream(loadSelectedValues()).forEach(value ->
                 request.addRequestParameter(SELECTED_PARAM, value)
         );
