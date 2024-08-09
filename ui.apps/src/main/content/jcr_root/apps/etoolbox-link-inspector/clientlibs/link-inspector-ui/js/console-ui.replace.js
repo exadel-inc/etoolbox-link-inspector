@@ -158,7 +158,7 @@
 
         let $patternFieldGroup = $('<div class="elc-pattern-field-group" hidden>');
         var $patternTextField =
-            $('<input is="coral-textfield" class="elc-pattern-input" name="pattern" value="" required>');
+            $('<input is="coral-textfield" class="elc-pattern-input" name="pattern" value=".+" required>');
         $('<p>').text(PATTERN_LABEL).appendTo($patternFieldGroup);
         $patternTextField.appendTo($patternFieldGroup);
         $patternFieldGroup.appendTo(el.content);
@@ -198,7 +198,7 @@
         /** @param {Event} e */
         function onResolve(e) {
             var data = {
-                pattern: $advancedOptionsSwitch.prop("checked") ? $patternTextField.val() : '.+',
+                pattern: $patternTextField.val(),
                 advancedMode: $advancedOptionsSwitch.prop("checked"),
                 replacement: $replacementTextField.val(),
                 isDryRun: $isDryRunCheckbox.prop("checked"),
