@@ -103,7 +103,6 @@ public class ReplaceByPatternServlet extends SlingAllMethodsServlet {
     private static final String BACKUP_PACKAGE_NAME = "replace_by_pattern_backup_%s";
     private static final String BACKUP_PACKAGE_VERSION = "1.0";
     private static final String SELECTED_PARAM = "selected";
-    private static final String FULL_LINK_REPLACEMENT_PATTERN = ".+";
 
     private static final String[] CSV_COLUMNS = {
             "Link",
@@ -143,10 +142,6 @@ public class ReplaceByPatternServlet extends SlingAllMethodsServlet {
         boolean isOutputAsCsv = ServletUtil.getRequestParamBoolean(request, OUTPUT_AS_CSV_PARAM);
         List<String> selectedItems = ServletUtil.getRequestParamStringList(request, SELECTED_PARAM);
 
-        if (!isAdvancedMode) {
-            linkPattern = FULL_LINK_REPLACEMENT_PATTERN;
-        }
-
         if (StringUtils.isAnyBlank(linkPattern, replacement)) {
             response.setStatus(HttpStatus.SC_BAD_REQUEST);
             LOG.warn("Any (or all) request params are empty: linkPattern - {}, replacement - {}",
@@ -168,7 +163,7 @@ public class ReplaceByPatternServlet extends SlingAllMethodsServlet {
                             .format("%s@%s", gridResource.getResourcePath(), gridResource.getPropertyName())))
                     .collect(Collectors.toList());
             List<UpdatedItem> updatedItems =
-                    processResources(filteredGridResources, isDryRun, isBackup, linkPattern, replacement, resourceResolver);
+                    processResources(filteredGridResources, isDryRun, isBackup, isAdvancedMode, linkPattern, replacement, resourceResolver);
             if (CollectionUtils.isEmpty(updatedItems)) {
                 LOG.info("No links were updated, linkPattern: {}, replacement: {}", linkPattern, replacement);
                 response.setStatus(HttpStatus.SC_NO_CONTENT);
@@ -190,6 +185,7 @@ public class ReplaceByPatternServlet extends SlingAllMethodsServlet {
     private List<UpdatedItem> processResources(Collection<GridResource> gridResources,
                                            boolean isDryRun,
                                            boolean isBackup,
+                                           boolean isAdvancedMode,
                                            String linkPattern,
                                            String replacement,
                                            ResourceResolver resourceResolver)
@@ -203,7 +199,7 @@ public class ReplaceByPatternServlet extends SlingAllMethodsServlet {
         if (isBackup && !isDeactivated) {
             createBackupPackage(filteredGridResources, session.get());
         }
-        return replaceByPattern(filteredGridResources, isDryRun, linkPattern, replacement, resourceResolver);
+        return replaceByPattern(filteredGridResources, isDryRun, isAdvancedMode, linkPattern, replacement, resourceResolver);
     }
 
     private List<GridResource> filterGridResources(Collection<GridResource> gridResources,
@@ -222,6 +218,7 @@ public class ReplaceByPatternServlet extends SlingAllMethodsServlet {
 
     private List<UpdatedItem> replaceByPattern(Collection<GridResource> gridResources,
                                            boolean isDryRun,
+                                           boolean isAdvancedMode,
                                            String linkPattern,
                                            String replacement,
                                            ResourceResolver resourceResolver) throws PersistenceException {
@@ -233,7 +230,7 @@ public class ReplaceByPatternServlet extends SlingAllMethodsServlet {
             String currentLink = gridResource.getHref();
             String path = gridResource.getResourcePath();
             String propertyName = gridResource.getPropertyName();
-            Optional<String> updated = Optional.of(currentLink.replaceAll(linkPattern, replacement))
+            Optional<String> updated = Optional.of(isAdvancedMode ? currentLink.replaceAll(linkPattern, replacement) : replacement)
                     .filter(updatedLink -> !updatedLink.equals(currentLink))
                     .filter(updatedLink ->
                             linkHelper.replaceLink(resourceResolver, path, propertyName, currentLink, updatedLink)
