@@ -21,6 +21,7 @@
     const DIALOG_TITLE_LABEL = Granite.I18n.get('Filter Links');
     const CANCEL_LABEL = Granite.I18n.get('Cancel');
     const SUBMIT_FILTER_LABEL = Granite.I18n.get('Apply');
+    const RESET_FILTER_LABEL = Granite.I18n.get('Reset');
 
     function onFilterAction(name, el, config, collection, selections) {
         const dialog = document.querySelector('#filter--dialog');
@@ -82,12 +83,21 @@
         $('<p>').html('By text').appendTo(dialog.content);
         $linkSubstringField.appendTo(dialog.content);
 
+
+        const $dialogActionsButtons = $('<div class="filter-dialog-action-buttons">');
+        const $resetBtn = $('<button data-dialog-reset is="coral-button" variant="default">').text(RESET_FILTER_LABEL);
         const $cancelBtn = $('<button is="coral-button" variant="default" coral-close>').text(CANCEL_LABEL);
         const $updateBtn =
             $('<button data-dialog-action is="coral-button" variant="primary" coral-close>').text(SUBMIT_FILTER_LABEL);
 
-        $cancelBtn.appendTo(dialog.footer);
-        $updateBtn.appendTo(dialog.footer);
+        $cancelBtn.appendTo($dialogActionsButtons);
+        $updateBtn.appendTo($dialogActionsButtons);
+
+        const $buttonGroup = $('<div class="filter-dialog-button-group">');
+        $resetBtn.appendTo($buttonGroup);
+        $dialogActionsButtons.appendTo($buttonGroup);
+
+        $buttonGroup.appendTo(dialog.footer);
 
         function onSubmit(){
             searchParams.delete('type');
@@ -102,6 +112,12 @@
             document.location.search = searchParams;
         }
 
+        function onReset(){
+            $linkSubstringField.val('');
+            linksTypeSelect.value = '';
+        }
+
+        dialog.on('click', '[data-dialog-reset]', onReset);
         dialog.on('click', '[data-dialog-action]', onSubmit);
         dialog.on('change', function(event) {
             linksTypeSelect.value
