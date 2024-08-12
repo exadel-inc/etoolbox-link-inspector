@@ -138,7 +138,9 @@
     $(document).ready(function () {
        let searchParams = new URL(document.location).searchParams;
        if (searchParams != null && searchParams.get('type') != null || searchParams.get('substring') != null) {
-         $('#elc-filter-options').attr('variant', 'primary');
+         $('#elc-filter-options').addClass('elc-filter-active');
+       } else {
+         $('#elc-filter-options').removeClass('elc-filter-active');
        }
        initFiltersDialog(searchParams);
     });
