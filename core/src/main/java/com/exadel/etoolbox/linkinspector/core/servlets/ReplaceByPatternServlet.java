@@ -142,13 +142,18 @@ public class ReplaceByPatternServlet extends SlingAllMethodsServlet {
         boolean isOutputAsCsv = ServletUtil.getRequestParamBoolean(request, OUTPUT_AS_CSV_PARAM);
         List<String> selectedItems = ServletUtil.getRequestParamStringList(request, SELECTED_PARAM);
 
-        if (StringUtils.isAnyBlank(linkPattern, replacement)) {
+        if (StringUtils.isBlank(replacement)) {
             response.setStatus(HttpStatus.SC_BAD_REQUEST);
-            LOG.warn("Any (or all) request params are empty: linkPattern - {}, replacement - {}",
-                    linkPattern, replacement);
+            LOG.warn("Request params is empty: replacement - {}", replacement);
             return;
         }
-        if (linkPattern.equals(replacement)) {
+
+        if (isAdvancedMode && StringUtils.isBlank(linkPattern)) {
+            response.setStatus(HttpStatus.SC_BAD_REQUEST);
+            LOG.warn("Request params is empty: linkPattern - {}", linkPattern);
+            return;
+        }
+        if (isAdvancedMode && linkPattern.equals(replacement)) {
             response.setStatus(HttpStatus.SC_ACCEPTED);
             LOG.debug("linkPattern and replacement are equal, no processing is required");
             return;
