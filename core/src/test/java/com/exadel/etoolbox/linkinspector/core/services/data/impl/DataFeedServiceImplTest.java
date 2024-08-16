@@ -14,11 +14,12 @@
 
 package com.exadel.etoolbox.linkinspector.core.services.data.impl;
 
+import com.exadel.etoolbox.contractor.service.tasking.Contractor;
+import com.exadel.etoolbox.contractor.util.ContractorUtil;
 import com.exadel.etoolbox.linkinspector.api.LinkResolver;
 import com.exadel.etoolbox.linkinspector.core.services.cache.GridResourcesCache;
 import com.exadel.etoolbox.linkinspector.core.services.cache.impl.GridResourcesCacheImpl;
 import com.exadel.etoolbox.linkinspector.core.services.data.ConfigService;
-import com.exadel.etoolbox.linkinspector.core.services.data.GenerationStatsProps;
 import com.exadel.etoolbox.linkinspector.core.services.data.GridResourcesGenerator;
 import com.exadel.etoolbox.linkinspector.core.services.data.models.DataFilter;
 import com.exadel.etoolbox.linkinspector.core.services.data.models.GridResource;
@@ -47,8 +48,6 @@ import org.mockito.MockedStatic;
 import org.mockito.stubbing.Answer;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -74,8 +73,6 @@ class DataFeedServiceImplTest {
     private static final String REPOSITORY_HELPER_FIELD = "repositoryHelper";
     private static final String LINK_HELPER_FIELD = "linkHelper";
     private static final String CONFIG_FIELD = "configService";
-    private static final String CUSTOM_LINK_FIELD = "customLinkResolver";
-    private static final String EXTERNAL_LINK_CHECKER_FIELD = "externalLinkChecker";
 
     private static final String DATAFEED_PATH = "/content/etoolbox-link-inspector/data/datafeed.json";
     private static final String CSV_REPORT_PATH = "/content/etoolbox-link-inspector/download/report.csv";
@@ -88,7 +85,7 @@ class DataFeedServiceImplTest {
     private final DataFeedServiceImpl fixture = new DataFeedServiceImpl();
 
     @BeforeEach
-    void setup() throws NoSuchFieldException, IOException, URISyntaxException {
+    void setup() throws NoSuchFieldException {
         PrivateAccessor.setField(fixture, REPOSITORY_HELPER_FIELD, getRepositoryHelperFromContext());
         PrivateAccessor.setField(fixture, GRID_RESOURCES_CACHE_FIELD, getGridResourcesCacheFromContext());
         GridResourcesGeneratorImpl gridResourcesGenerator = getGridResourcesGenerator();
@@ -173,6 +170,7 @@ class DataFeedServiceImplTest {
             Answer<Object> answer = invocationOnMock -> {
                 throw new IOException();
             };
+            //noinspection unchecked
             csvUtil.when(() -> CsvUtil.itemsToCsvByteArray(anyCollection(), any(BiConsumer.class), any(String[].class)))
                     .thenCallRealMethod();
             csvUtil.when(() -> CsvUtil.wrapIfContainsSemicolon(anyString()))
@@ -188,7 +186,7 @@ class DataFeedServiceImplTest {
         }
     }
 
-    private GridResourcesGeneratorImpl getGridResourcesGenerator() throws NoSuchFieldException, IOException, URISyntaxException {
+    private GridResourcesGeneratorImpl getGridResourcesGenerator() throws NoSuchFieldException {
         GridResourcesGeneratorImpl gridResourcesGenerator = new GridResourcesGeneratorImpl();
 
         List<LinkResolver> linkResolvers = Arrays.asList(
@@ -198,6 +196,10 @@ class DataFeedServiceImplTest {
         LinkHelper linkHelper = new LinkHelperImpl();
         PrivateAccessor.setField(linkHelper, "linkResolvers", linkResolvers);
         PrivateAccessor.setField(gridResourcesGenerator, LINK_HELPER_FIELD, linkHelper);
+
+        Contractor contractor = mock(Contractor.class);
+        when(contractor.newJobContext(anyString(), anyString())).thenReturn(ContractorUtil.EMPTY_CONTEXT);
+        PrivateAccessor.setField(gridResourcesGenerator, "contractor", contractor);
 
         ConfigService configService = mock(ConfigServiceImpl.class);
         when(configService.getExcludedLinksPatterns()).thenReturn(new String[0]);
@@ -218,6 +220,7 @@ class DataFeedServiceImplTest {
         return repositoryHelper;
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     private GridResourcesCache getGridResourcesCacheFromContext() throws NoSuchFieldException {
         GridResourcesCache gridResourcesCache = new GridResourcesCacheImpl();
         Cache<String, CopyOnWriteArrayList<GridResource>> cache = CacheBuilder.newBuilder()
