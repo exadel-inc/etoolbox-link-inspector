@@ -65,6 +65,12 @@
                             <type>zip</type>
                             <target>/apps/etoolbox-link-inspector-packages/application/install</target>
                         </embedded>
+                        <embedded>
+                            <groupId>com.exadel.etoolbox</groupId>
+                            <artifactId>etoolbox-contractor.all</artifactId>
+                            <type>zip</type>
+                            <target>/apps/etoolbox-link-inspector-packages/lib/install</target>
+                        </embedded>
                     </embeddeds>
                 </configuration>
             </plugin>
@@ -146,6 +152,11 @@
             <version>${project.version}</version>
             <type>zip</type>
         </dependency>
-
+        <dependency>
+            <groupId>com.exadel.etoolbox</groupId>
+            <artifactId>etoolbox-contractor.all</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+            <type>zip</type>
+        </dependency>
     </dependencies>
 </project>
