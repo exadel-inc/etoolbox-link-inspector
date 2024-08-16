@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component
+        xmlns:scr="http://www.osgi.org/xmlns/scr/v1.3.0"
+        name="com.exadel.etoolbox.linkinspector.core.services.mocks.MockContractor">
+    <service>
+        <provide interface="com.exadel.etoolbox.contractor.service.tasking.Contractor"/>
+    </service>
+    <implementation class="com.exadel.etoolbox.linkinspector.core.services.mocks.MockContractor"/>
+</scr:component>
