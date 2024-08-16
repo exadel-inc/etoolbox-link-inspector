@@ -35,7 +35,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(AemContextExtension.class)
-class StatsModalTest {
+class StatsPanelTest {
     private static final String TEST_RESOURCE_PATH = "/content/link-inspector/data/stats";
     private static final String TEST_LAST_GENERATED = ZonedDateTime.now().format(DateTimeFormatter.RFC_1123_DATE_TIME);
     private static final String TEST_SEARCH_PATH = "/content/search-path";
@@ -62,7 +62,7 @@ class StatsModalTest {
 
     @BeforeEach
     void setup() {
-        context.addModelsForClasses(StatsModal.class);
+        context.addModelsForClasses(StatsModel.class);
     }
 
     @Test
@@ -70,13 +70,13 @@ class StatsModalTest {
         Resource statsResource = context.create().resource(TEST_RESOURCE_PATH,
                 JcrResourceConstants.SLING_RESOURCE_TYPE_PROPERTY, JcrConstants.NT_UNSTRUCTURED);
 
-        StatsModal model = statsResource.adaptTo(StatsModal.class);
+        StatsModel model = statsResource.adaptTo(StatsModel.class);
         assertNotNull(model);
 
         assertNull(model.getLastGenerated());
         assertNull(model.getSearchPath());
         assertEquals(StringUtils.EMPTY, model.getExcludedPaths());
-        assertFalse(model.getCheckActivation());
+        assertFalse(model.isCheckActivation());
         assertFalse(model.getSkipModifiedAfterActivation());
         assertNull(model.getLastModifiedBoundary());
         assertEquals(StringUtils.EMPTY, model.getExcludedProperties());
@@ -108,13 +108,13 @@ class StatsModalTest {
 
         Resource statsResource = context.create().resource(TEST_RESOURCE_PATH, stats);
 
-        StatsModal model = statsResource.adaptTo(StatsModal.class);
+        StatsModel model = statsResource.adaptTo(StatsModel.class);
         assertNotNull(model);
 
         assertEquals(TEST_LAST_GENERATED, model.getLastGenerated());
         assertEquals(TEST_SEARCH_PATH, model.getSearchPath());
         assertEquals(EXPECTED_EXCLUDED_PATHS, model.getExcludedPaths());
-        assertEquals(TEST_CHECK_ACTIVATION, model.getCheckActivation());
+        assertEquals(TEST_CHECK_ACTIVATION, model.isCheckActivation());
         assertEquals(TEST_SKIP_MODIFIED_AFTER_ACTIVATION, model.getSkipModifiedAfterActivation());
         assertEquals(TEST_LAST_MOD_BOUNDARY, model.getLastModifiedBoundary());
         assertEquals(EXPECTED_EXCLUDED_PROPS, model.getExcludedProperties());
@@ -131,7 +131,7 @@ class StatsModalTest {
                 JcrResourceConstants.SLING_RESOURCE_TYPE_PROPERTY, JcrConstants.NT_UNSTRUCTURED,
                 GenerationStatsProps.PN_ALLOWED_STATUS_CODES, -1);
 
-        StatsModal model = statsResource.adaptTo(StatsModal.class);
+        StatsModel model = statsResource.adaptTo(StatsModel.class);
         assertNotNull(model);
 
         assertEquals(ALL_STATUS_CODES_MSG, model.getAllowedStatusCodes());
