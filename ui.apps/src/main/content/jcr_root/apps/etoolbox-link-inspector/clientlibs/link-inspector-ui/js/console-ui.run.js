@@ -27,7 +27,7 @@
 
     function onReady() {
         $('#wait').on('contractor-ticker:end', function () {
-            setTimeout(() => window.location.reload(), 500);
+            setTimeout(() => window.location.reload(), 1000);
         });
     }
 

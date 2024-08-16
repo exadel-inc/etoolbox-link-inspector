@@ -45,7 +45,6 @@
                         <embedded>
                             <groupId>com.exadel.etoolbox</groupId>
                             <artifactId>etoolbox-link-inspector.ui.apps</artifactId>
-                            <type>zip</type>
                             <target>/apps/etoolbox-link-inspector-packages/application/install</target>
                         </embedded>
                         <embedded>
@@ -56,19 +55,16 @@
                         <embedded>
                             <groupId>com.exadel.etoolbox</groupId>
                             <artifactId>etoolbox-link-inspector.ui.content</artifactId>
-                            <type>zip</type>
                             <target>/apps/etoolbox-link-inspector-packages/content/install</target>
                         </embedded>
                         <embedded>
                             <groupId>com.exadel.etoolbox</groupId>
                             <artifactId>etoolbox-link-inspector.ui.config</artifactId>
-                            <type>zip</type>
                             <target>/apps/etoolbox-link-inspector-packages/application/install</target>
                         </embedded>
                         <embedded>
                             <groupId>com.exadel.etoolbox</groupId>
                             <artifactId>etoolbox-contractor.all</artifactId>
-                            <type>zip</type>
                             <target>/apps/etoolbox-link-inspector-packages/lib/install</target>
                         </embedded>
                     </embeddeds>
