@@ -14,10 +14,12 @@
 
 package com.exadel.etoolbox.linkinspector.core.services.data;
 
+import com.exadel.etoolbox.linkinspector.core.models.ui.StatsModel;
+
 /**
  * Lists the JCR property names for generation statistics data written
  * by {@link GridResourcesGenerator#generateGridResources}. Further, these property names are used to map the statistics
- * values to the {@link com.exadel.etoolbox.linkinspector.core.models.ui.StatsModal} fields
+ * values to the {@link StatsModel} fields
  */
 public final class GenerationStatsProps {
     private GenerationStatsProps() {}
