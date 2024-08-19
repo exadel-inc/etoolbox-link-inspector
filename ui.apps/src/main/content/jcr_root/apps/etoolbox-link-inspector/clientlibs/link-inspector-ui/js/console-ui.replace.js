@@ -20,8 +20,9 @@
     'use strict';
 
     var CANCEL_LABEL = Granite.I18n.get('Cancel');
-    var REPLACE_LABEL = Granite.I18n.get('Replace By Pattern');
-    var REPLACE_BUTTON_LABEL = Granite.I18n.get('Replace');
+    var REPLACE_AND_MODIFY_LABEL = Granite.I18n.get('Replace and Modify by Pattern');
+    var REPLACE_LABEL = Granite.I18n.get('Replace');
+    var MODIFY_LABEL = Granite.I18n.get('Modify');
     var PATTERN_LABEL = Granite.I18n.get('Please enter the regex pattern to be replaced');
     var REPLACEMENT_LINK_LABEL = Granite.I18n.get('Please enter the replacement');
     var DRY_RUN_CHECKBOX_LABEL = Granite.I18n.get('Dry run');
@@ -137,24 +138,30 @@
 
         var el = ELC.getSharableDlg();
         el.variant = 'notice';
-        el.header.textContent = REPLACE_LABEL;
+        el.header.textContent = REPLACE_AND_MODIFY_LABEL;
         el.footer.innerHTML = ''; // Clean content
         el.content.innerHTML = ''; // Clean content
 
         var $cancelBtn = $('<button is="coral-button" variant="default" coral-close>').text(CANCEL_LABEL);
-        var $updateBtn = $('<button data-dialog-action is="coral-button" variant="primary" coral-close>').text(REPLACE_BUTTON_LABEL);
+        var $updateBtn = $('<button name="update-button" is="coral-button" variant="primary" coral-close>').text(REPLACE_LABEL);
         $cancelBtn.appendTo(el.footer);
         $updateBtn.appendTo(el.footer);
 
         buildConfirmationMessage(confirmationMessageSelectionItems(selection)).appendTo(el.content);
 
-        // Pattern input group
-        var $advancedOptionsSwitch =
-            $('<coral-switch data-dialog-advanced class="coral3-Switch" aria-disabled="false" aria-required="false" aria-invalid="false" aria-readonly="false">' +
-            '<input class="coral3-Switch-input" handle="input" type="checkbox">' +
-            '</coral-switch>');
-            $('<p>').text('Advanced Options').appendTo(el.content);
-            $advancedOptionsSwitch.appendTo(el.content);
+        let $replaceRadio = new Coral.Radio();
+            $replaceRadio.label.textContent = REPLACE_LABEL;
+            $replaceRadio.name = 'replace-modify';
+            $replaceRadio.checked = true;
+            $replaceRadio.value = 'replace';
+
+        let $modifyRadio = new Coral.Radio();
+            $modifyRadio.label.textContent = MODIFY_LABEL;
+            $modifyRadio.name = 'replace-modify';
+            $modifyRadio.value = 'modify';
+
+            el.content.appendChild($replaceRadio);
+            el.content.appendChild($modifyRadio);
 
         let $patternFieldGroup = $('<div class="elc-pattern-field-group" hidden>');
         var $patternTextField =
@@ -171,7 +178,7 @@
 
         // Dry run checkbox group
         var $isDryRunCheckbox =
-            $('<coral-checkbox data-dialog-dry-run name="$isDryRun" title="' + DRY_RUN_TOOLTIP + '" checked>').text(DRY_RUN_CHECKBOX_LABEL);
+            $('<coral-checkbox name="dry-run-checkbox" title="' + DRY_RUN_TOOLTIP + '" checked>').text(DRY_RUN_CHECKBOX_LABEL);
         $isDryRunCheckbox.appendTo(el.content);
 
         // Backup checkbox group
@@ -188,7 +195,7 @@
         function onValidate() {
             var replVal = $replacementTextField.val();
             var patternVal = $patternTextField.val();
-            var advanced = $advancedOptionsSwitch.prop("checked");
+            var advanced = $modifyRadio.checked;
             $replacementTextField.each(function () {
                 this.setCustomValidity(replVal === patternVal ? VALIDATION_MSG : '');
             });
@@ -199,7 +206,7 @@
         function onResolve(e) {
             var data = {
                 pattern: $patternTextField.val(),
-                advancedMode: $advancedOptionsSwitch.prop("checked"),
+                advancedMode: $modifyRadio.checked,
                 replacement: $replacementTextField.val(),
                 isDryRun: $isDryRunCheckbox.prop("checked"),
                 isBackup: $isBackupCheckbox.prop("checked"),
@@ -212,30 +219,29 @@
         }
 
         /** @param {Event} e */
-        function onChangeAdvanced(e) {
-            $patternFieldGroup.attr('hidden', !$advancedOptionsSwitch.prop("checked"));
-            onValidate();
-        }
-
-        /** @param {Event} e */
         function onDryRunChange(e) {
             $isBackupCheckbox.attr('disabled', $isDryRunCheckbox.prop('checked'));
         }
 
         el.on('input', 'input', onValidate);
-        el.on('click', '[data-dialog-action]', onResolve);
-        el.on('change', '[data-dialog-advanced]', onChangeAdvanced);
-        el.on('change', '[data-dialog-dry-run]', onDryRunChange);
+        el.on('click', '[name="update-button"]', onResolve);
+        el.on('change', '[name="dry-run-checkbox"]', onDryRunChange);
         el.on('coral-overlay:close', function () {
             el.off('input', 'input', onValidate);
-            el.off('click', '[data-dialog-action]', onResolve);
-            el.off('change', '[data-dialog-advanced]', onChangeAdvanced);
-            el.off('change', '[data-dialog-dry-run]', onDryRunChange);
+            el.off('click', '[name="update-button"]', onResolve);
+            el.off('change', '[name="dry-run-checkbox"]', onDryRunChange);
             deferred.reject();
         });
 
         el.show();
         onValidate();
+
+        el.content.addEventListener('change', function(event) {
+          if (event.target.name == 'replace-modify') {
+             $patternFieldGroup.attr('hidden', event.target.value != 'modify');
+             onValidate();
+          }
+        });
 
         return deferred.promise();
     }
