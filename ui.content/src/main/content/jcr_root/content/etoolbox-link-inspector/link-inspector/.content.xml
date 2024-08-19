@@ -109,19 +109,7 @@
                 sling:resourceType="etoolbox-link-inspector/components/footer"/>
         <actions jcr:primaryType="nt:unstructured">
             <primary jcr:primaryType="nt:unstructured">
-                <fixBroken
-                        jcr:primaryType="nt:unstructured"
-                        sling:resourceType="granite/ui/components/coral/foundation/collection/action"
-                        action="cq-admin.etoolbox.linkinspector.action.fix-broken-link"
-                        activeCondition="cq-admin.etoolbox.linkinspector.actioncondition.fix-broken-link"
-                        disabled="{Boolean}true"
-                        icon="linkCheck"
-                        rel="etoolbox-link-inspector-fix-broken-link"
-                        target=".etoolbox-link-inspector"
-                        text="Fix Selected"
-                        title="Fix Selected"
-                        variant="primary"/>
-                <replaceByPattern
+                <fixSelected
                         jcr:primaryType="nt:unstructured"
                         sling:resourceType="granite/ui/components/coral/foundation/collection/action"
                         action="cq-admin.etoolbox.linkinspector.action.replace-by-pattern"
@@ -130,10 +118,10 @@
                         icon="findAndReplace"
                         rel="etoolbox-link-inspector-fix-by-pattern"
                         target=".etoolbox-link-inspector"
-                        text="Replace By Pattern"
-                        title="Replace By Pattern"
+                        text="Fix Selected"
+                        title="Fix Selected"
                         granite:id="elc-replace-by-pattern"
-                        variant="minimal"/>
+                        variant="primary"/>
                 <filterOptions
                         jcr:primaryType="nt:unstructured"
                         sling:resourceType="granite/ui/components/coral/foundation/collection/action"

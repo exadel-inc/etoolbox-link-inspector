@@ -97,11 +97,11 @@ public class ReplaceByPatternServlet extends SlingAllMethodsServlet {
     private static final String DRY_RUN_PARAM = "isDryRun";
     private static final String BACKUP_PARAM = "isBackup";
     private static final String OUTPUT_AS_CSV_PARAM = "isOutputAsCsv";
+    private static final String ADVANCED_MODE_PARAM = "advancedMode";
     private static final String ITEMS_COUNT_RESP_PARAM = "updatedItemsCount";
     private static final String BACKUP_PACKAGE_GROUP = "EToolbox_Link_Inspector";
     private static final String BACKUP_PACKAGE_NAME = "replace_by_pattern_backup_%s";
     private static final String BACKUP_PACKAGE_VERSION = "1.0";
-    private static final String PAGE_PARAM = "page";
     private static final String SELECTED_PARAM = "selected";
 
     private static final String[] CSV_COLUMNS = {
@@ -136,18 +136,24 @@ public class ReplaceByPatternServlet extends SlingAllMethodsServlet {
     protected void doPost(SlingHttpServletRequest request, SlingHttpServletResponse response) {
         String linkPattern = ServletUtil.getRequestParamString(request, LINK_PATTERN_PARAM);
         String replacement = ServletUtil.getRequestParamString(request, REPLACEMENT_PARAM);
+        boolean isAdvancedMode = ServletUtil.getRequestParamBoolean(request, ADVANCED_MODE_PARAM);
         boolean isDryRun = ServletUtil.getRequestParamBoolean(request, DRY_RUN_PARAM);
         boolean isBackup = ServletUtil.getRequestParamBoolean(request, BACKUP_PARAM);
         boolean isOutputAsCsv = ServletUtil.getRequestParamBoolean(request, OUTPUT_AS_CSV_PARAM);
         List<String> selectedItems = ServletUtil.getRequestParamStringList(request, SELECTED_PARAM);
 
-        if (StringUtils.isAnyBlank(linkPattern, replacement)) {
+        if (StringUtils.isBlank(replacement)) {
             response.setStatus(HttpStatus.SC_BAD_REQUEST);
-            LOG.warn("Any (or all) request params are empty: linkPattern - {}, replacement - {}",
-                    linkPattern, replacement);
+            LOG.warn("Request params is empty: replacement - {}", replacement);
             return;
         }
-        if (linkPattern.equals(replacement)) {
+
+        if (isAdvancedMode && StringUtils.isBlank(linkPattern)) {
+            response.setStatus(HttpStatus.SC_BAD_REQUEST);
+            LOG.warn("Request params is empty: linkPattern - {}", linkPattern);
+            return;
+        }
+        if (isAdvancedMode && linkPattern.equals(replacement)) {
             response.setStatus(HttpStatus.SC_ACCEPTED);
             LOG.debug("linkPattern and replacement are equal, no processing is required");
             return;
@@ -162,7 +168,7 @@ public class ReplaceByPatternServlet extends SlingAllMethodsServlet {
                             .format("%s@%s", gridResource.getResourcePath(), gridResource.getPropertyName())))
                     .collect(Collectors.toList());
             List<UpdatedItem> updatedItems =
-                    processResources(filteredGridResources, isDryRun, isBackup, linkPattern, replacement, resourceResolver);
+                    processResources(filteredGridResources, isDryRun, isBackup, isAdvancedMode, linkPattern, replacement, resourceResolver);
             if (CollectionUtils.isEmpty(updatedItems)) {
                 LOG.info("No links were updated, linkPattern: {}, replacement: {}", linkPattern, replacement);
                 response.setStatus(HttpStatus.SC_NO_CONTENT);
@@ -184,6 +190,7 @@ public class ReplaceByPatternServlet extends SlingAllMethodsServlet {
     private List<UpdatedItem> processResources(Collection<GridResource> gridResources,
                                            boolean isDryRun,
                                            boolean isBackup,
+                                           boolean isAdvancedMode,
                                            String linkPattern,
                                            String replacement,
                                            ResourceResolver resourceResolver)
@@ -197,7 +204,7 @@ public class ReplaceByPatternServlet extends SlingAllMethodsServlet {
         if (isBackup && !isDeactivated) {
             createBackupPackage(filteredGridResources, session.get());
         }
-        return replaceByPattern(filteredGridResources, isDryRun, linkPattern, replacement, resourceResolver);
+        return replaceByPattern(filteredGridResources, isDryRun, isAdvancedMode, linkPattern, replacement, resourceResolver);
     }
 
     private List<GridResource> filterGridResources(Collection<GridResource> gridResources,
@@ -216,6 +223,7 @@ public class ReplaceByPatternServlet extends SlingAllMethodsServlet {
 
     private List<UpdatedItem> replaceByPattern(Collection<GridResource> gridResources,
                                            boolean isDryRun,
+                                           boolean isAdvancedMode,
                                            String linkPattern,
                                            String replacement,
                                            ResourceResolver resourceResolver) throws PersistenceException {
@@ -227,7 +235,7 @@ public class ReplaceByPatternServlet extends SlingAllMethodsServlet {
             String currentLink = gridResource.getHref();
             String path = gridResource.getResourcePath();
             String propertyName = gridResource.getPropertyName();
-            Optional<String> updated = Optional.of(currentLink.replaceAll(linkPattern, replacement))
+            Optional<String> updated = Optional.of(isAdvancedMode ? currentLink.replaceAll(linkPattern, replacement) : replacement)
                     .filter(updatedLink -> !updatedLink.equals(currentLink))
                     .filter(updatedLink ->
                             linkHelper.replaceLink(resourceResolver, path, propertyName, currentLink, updatedLink)

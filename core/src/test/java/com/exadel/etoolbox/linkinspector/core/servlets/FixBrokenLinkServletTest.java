@@ -58,6 +58,7 @@ class FixBrokenLinkServletTest {
     private static final String TEST_CURRENT_LINK = "/content/link-for-replacement";
     private static final String TEST_NEW_LINK = "/content/replacement-link";
     private static final String TEST_EXCEPTION_MSG = "Test exception message";
+    private static final String ADVANCED_MODE = "advancedMode";
 
     private final AemContext context = new AemContext(ResourceResolverType.JCR_MOCK);
 
@@ -100,6 +101,7 @@ class FixBrokenLinkServletTest {
         request.addRequestParameter(PROPERTY_NAME_PARAM, TEST_PROPERTY_NAME);
         request.addRequestParameter(CURRENT_LINK_PARAM, TEST_CURRENT_LINK);
         request.addRequestParameter(NEW_LINK_PARAM, TEST_CURRENT_LINK);
+        request.addRequestParameter(ADVANCED_MODE, Boolean.TRUE.toString());
         fixture.doPost(request, response);
 
         assertEquals(HttpStatus.SC_ACCEPTED, response.getStatus());
@@ -119,6 +121,7 @@ class FixBrokenLinkServletTest {
         request.addRequestParameter(CURRENT_LINK_PARAM, TEST_CURRENT_LINK);
         request.addRequestParameter(NEW_LINK_PARAM, TEST_NEW_LINK);
         request.addRequestParameter(IS_SKIP_VALIDATION_PARAM, Boolean.FALSE.toString());
+        request.addRequestParameter(ADVANCED_MODE, Boolean.TRUE.toString());
         fixture.doPost(request, response);
 
         assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatus());
