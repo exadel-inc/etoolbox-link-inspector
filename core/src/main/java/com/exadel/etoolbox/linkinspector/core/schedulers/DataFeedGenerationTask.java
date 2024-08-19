@@ -14,9 +14,9 @@
 
 package com.exadel.etoolbox.linkinspector.core.schedulers;
 
+import com.exadel.etoolbox.contractor.ContractorException;
+import com.exadel.etoolbox.contractor.service.tasking.Contractor;
 import com.exadel.etoolbox.linkinspector.core.services.job.DataFeedJobExecutor;
-import com.exadel.etoolbox.linkinspector.core.services.job.SlingJobUtil;
-import org.apache.sling.event.jobs.JobManager;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -39,22 +39,18 @@ public class DataFeedGenerationTask implements Runnable {
     @ObjectClassDefinition(name = "EToolbox Link Inspector - Data Feed Generation Task")
     public @interface Config {
 
-        @AttributeDefinition(name = "Cron-job expression")
+        @AttributeDefinition(name = "Cron expression")
         String scheduler_expression() default "0 0 5 1/1 * ? *";
 
-        @AttributeDefinition(name = "Concurrent task",
-                description = "Whether or not to schedule this task concurrently")
-        boolean scheduler_concurrent() default false;
-
         @AttributeDefinition(name = "Enabled",
-                description = "Whether or not to enable this task")
+                description = "Whether to enable this task")
         boolean enabled() default false;
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(DataFeedGenerationTask.class);
 
     @Reference
-    private JobManager jobManager;
+    private Contractor contractor;
 
     private boolean enabled;
 
@@ -67,8 +63,12 @@ public class DataFeedGenerationTask implements Runnable {
             LOG.debug("The Data Feed Generation scheduled task is not enabled");
             return;
         }
-        LOG.debug("The Data Feed Generation scheduled task started");
-        SlingJobUtil.addJob(jobManager, DataFeedJobExecutor.GENERATE_DATA_FEED_TOPIC, Collections.emptyMap());
+        LOG.debug("The Data Feed Generation scheduled task is going to start");
+        try {
+            contractor.runExclusive(DataFeedJobExecutor.GENERATE_DATA_FEED_TOPIC);
+        } catch (ContractorException e) {
+            LOG.error("An error occurred while running the scheduled Data Feed Generation task", e);
+        }
     }
 
     /**
@@ -87,6 +87,6 @@ public class DataFeedGenerationTask implements Runnable {
     protected void deactivate() {
         LOG.debug("Deactivating DataFeedGenerationTask, sling jobs with the topic {} will be stopped and removed",
                 DataFeedJobExecutor.GENERATE_DATA_FEED_TOPIC);
-        SlingJobUtil.stopAndRemoveJobs(jobManager, DataFeedJobExecutor.GENERATE_DATA_FEED_TOPIC);
+        contractor.discardAll(DataFeedJobExecutor.GENERATE_DATA_FEED_TOPIC);
     }
 }

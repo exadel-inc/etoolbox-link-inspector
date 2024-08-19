@@ -15,6 +15,7 @@
 package com.exadel.etoolbox.linkinspector.core.models.ui;
 
 import com.exadel.etoolbox.linkinspector.core.services.data.GridResourcesGenerator;
+import lombok.Getter;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.resource.Resource;
@@ -38,26 +39,30 @@ import java.util.stream.Collectors;
         adaptables = Resource.class,
         defaultInjectionStrategy = DefaultInjectionStrategy.OPTIONAL
 )
-public class StatsModal {
+public class StatsModel {
     private static final String ARRAY_VALUES_SEPARATOR = ", ";
     private static final String ALL_STATUS_CODES_MSG = "All error codes outside the range '200-207'";
 
     @ValueMapValue
+    @Getter
     private String lastGenerated;
 
     @ValueMapValue
+    @Getter
     private String searchPath;
 
     @ValueMapValue
     private String[] excludedPaths;
 
     @ValueMapValue
+    @Getter
     private boolean checkActivation;
 
     @ValueMapValue
     private boolean skipModifiedAfterActivation;
 
     @ValueMapValue
+    @Getter
     private String lastModifiedBoundary;
 
     @ValueMapValue
@@ -67,6 +72,7 @@ public class StatsModal {
     private String[] excludedLinksPatterns;
 
     @ValueMapValue
+    @Getter
     private String excludeTags;
 
     @ValueMapValue
@@ -76,28 +82,12 @@ public class StatsModal {
     private String[] statistics;
 
 
-    public String getLastGenerated() {
-        return lastGenerated;
-    }
-
-    public String getSearchPath() {
-        return searchPath;
-    }
-
     public String getExcludedPaths() {
         return arrayToStringValue(excludedPaths);
     }
 
-    public boolean getCheckActivation() {
-        return checkActivation;
-    }
-
     public boolean getSkipModifiedAfterActivation() {
         return checkActivation && skipModifiedAfterActivation;
-    }
-
-    public String getLastModifiedBoundary() {
-        return lastModifiedBoundary;
     }
 
     public String getExcludedProperties() {
@@ -106,10 +96,6 @@ public class StatsModal {
 
     public String getExcludedLinksPatterns() {
         return arrayToStringValue(excludedLinksPatterns);
-    }
-
-    public String getExcludeTags() {
-        return excludeTags;
     }
 
     /**
@@ -145,6 +131,10 @@ public class StatsModal {
                         statParts -> statParts[1],
                         (first, second) -> first,
                         LinkedHashMap::new));
+    }
+
+    public boolean isValid() {
+        return StringUtils.isNotBlank(lastGenerated) && StringUtils.isNotBlank(searchPath);
     }
 
     /**

@@ -12,6 +12,21 @@
  * limitations under the License.
  */
 
+.elc-report-container {
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+}
+
+.elc-report-stats {
+  background-color: #fdfdfd;
+  display: flex;
+  flex-direction: column;
+  padding: 0 1rem;
+  min-width: 150px;
+  width: 12%;
+}
+
 tr.elc-card {
   .card-page {
     padding-left: 2.8125rem;
@@ -101,14 +116,10 @@ tr.elc-card {
   color: #FF0000;
 }
 
-.elc-run-button {
-    border: none;
-    background: none !important;
-    padding: 0 !important;
-    font-family: arial, sans-serif;
-    cursor: pointer;
-    color: blue;
-    margin: 0 0.5rem;
+.elc-download-report-button {
+  align-self: center;
+  display: flex;
+  margin: 1rem 0;
 }
 
 .foundation-collection-selectall {

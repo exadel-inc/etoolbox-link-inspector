@@ -156,6 +156,13 @@ Import-Package: javax.annotation;version=0.0.0,*
             <artifactId>jackson-core</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <!-- Other dependencies -->
+        <dependency>
+            <groupId>com.exadel.etoolbox</groupId>
+            <artifactId>etoolbox-contractor.core</artifactId>
+        </dependency>
+
         <!-- Adobe AEM Dependencies -->
         <dependency>
             <groupId>com.adobe.aem</groupId>
