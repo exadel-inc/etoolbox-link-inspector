@@ -50,8 +50,8 @@
         function onDeleteDialogSubmit(){
             dialog.trigger('coral-overlay:close');
             $.ajax({
-                url: '/content/etoolbox-link-inspector/servlet/deleteReport',
-                type: 'GET',
+                url: '/bin/etoolbox/link-inspector/delete-report',
+                type: 'DELETE',
                 success: function(){
                     window.location.reload();
                 }

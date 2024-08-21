@@ -5,16 +5,16 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.servlets.HttpConstants;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
-import org.apache.sling.servlets.annotations.SlingServletResourceTypes;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 import javax.servlet.Servlet;
 
-@Component(service = {Servlet.class})
-@SlingServletResourceTypes(
-        resourceTypes = "/bin/etoolbox/link-inspector/delete-report",
-        methods = HttpConstants.METHOD_GET
+@Component(service = {Servlet.class},
+        property = {
+                "sling.servlet.methods=" + HttpConstants.METHOD_DELETE,
+                "sling.servlet.paths=" + "/bin/etoolbox/link-inspector/delete-report"
+        }
 )
 public class DeleteReportServlet extends SlingAllMethodsServlet {
 
@@ -22,7 +22,7 @@ public class DeleteReportServlet extends SlingAllMethodsServlet {
     private DataFeedService dataFeedService;
 
     @Override
-    protected void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response) {
+    protected void doDelete(SlingHttpServletRequest request, SlingHttpServletResponse response) {
         dataFeedService.deleteDataFeed();
     }
 }
