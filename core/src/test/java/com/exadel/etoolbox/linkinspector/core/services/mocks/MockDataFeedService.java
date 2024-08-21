@@ -32,6 +32,6 @@ public class MockDataFeedService implements DataFeedService {
 
     @Override
     public void deleteDataFeed() {
-        // No operation=
+        // No operation
     }
 }

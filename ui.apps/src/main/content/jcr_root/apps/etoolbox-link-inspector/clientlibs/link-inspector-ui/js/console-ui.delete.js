@@ -14,7 +14,7 @@
 
 /**
  * EToolbox Link Inspector clientlib.
- * "Filter" action definition.
+ * "Delete Report" action definition.
  */
 (function (window, document, $, ELC, Granite, Coral) {
     'use strict';
@@ -23,13 +23,13 @@
     const SUBMIT_FILTER_LABEL = Granite.I18n.get('Delete');
 
     function onFilterAction(name, el, config, collection, selections) {
-        const dialog = document.querySelector('#delete--dialog');
+        const dialog = document.querySelector('#delete-dialog');
         dialog.show();
     }
 
     function initDeleteDialog(){
         const dialog = new Coral.Dialog().set({
-            id : 'delete--dialog',
+            id : 'delete-dialog',
             closable: Coral.Dialog.closable.ON,
             backdrop: Coral.Dialog.backdrop.STATIC,
             interaction: 'off',
@@ -47,7 +47,7 @@
         $cancelBtn.appendTo(dialog.footer);
         $updateBtn.appendTo(dialog.footer);
 
-        function onSubmit(){
+        function onDeleteDialogSubmit(){
             dialog.trigger('coral-overlay:close');
             $.ajax({
                 url: '/content/etoolbox-link-inspector/servlet/deleteReport',
@@ -58,7 +58,7 @@
             });
         }
 
-        dialog.on('click', '[data-dialog-action]', onSubmit);
+        dialog.on('click', '[data-dialog-action]', onDeleteDialogSubmit);
         dialog.on('coral-overlay:close', function (event) {
             dialog.remove();
             initDeleteDialog();
