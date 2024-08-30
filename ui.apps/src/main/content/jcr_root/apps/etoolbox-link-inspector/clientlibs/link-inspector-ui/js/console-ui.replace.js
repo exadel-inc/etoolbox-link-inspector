@@ -20,8 +20,9 @@
     'use strict';
 
     var CANCEL_LABEL = Granite.I18n.get('Cancel');
-    var REPLACE_LABEL = Granite.I18n.get('Replace By Pattern');
-    var REPLACE_BUTTON_LABEL = Granite.I18n.get('Replace');
+    var REPLACE_AND_MODIFY_LABEL = Granite.I18n.get('Replace and Modify by Pattern');
+    var REPLACE_LABEL = Granite.I18n.get('Replace');
+    var MODIFY_LABEL = Granite.I18n.get('Modify');
     var PATTERN_LABEL = Granite.I18n.get('Please enter the regex pattern to be replaced');
     var REPLACEMENT_LINK_LABEL = Granite.I18n.get('Please enter the replacement');
     var DRY_RUN_CHECKBOX_LABEL = Granite.I18n.get('Dry run');
@@ -59,6 +60,7 @@
                 isDryRun: data.isDryRun,
                 isBackup: data.isBackup,
                 isOutputAsCsv: data.isOutputAsCsv,
+                advancedMode: data.advancedMode,
                 selected: data.selected
             }].filter(function (item) {
                 return item.pattern && item.replacement && item.pattern !== item.replacement;
@@ -136,22 +138,37 @@
 
         var el = ELC.getSharableDlg();
         el.variant = 'notice';
-        el.header.textContent = REPLACE_LABEL;
+        el.header.textContent = REPLACE_AND_MODIFY_LABEL;
         el.footer.innerHTML = ''; // Clean content
         el.content.innerHTML = ''; // Clean content
 
         var $cancelBtn = $('<button is="coral-button" variant="default" coral-close>').text(CANCEL_LABEL);
-        var $updateBtn = $('<button data-dialog-action is="coral-button" variant="primary" coral-close>').text(REPLACE_BUTTON_LABEL);
+        var $updateBtn = $('<button name="update-button" is="coral-button" variant="primary" coral-close>').text(REPLACE_LABEL);
         $cancelBtn.appendTo(el.footer);
         $updateBtn.appendTo(el.footer);
 
-        buildConfirmationMessage(selection).appendTo(el.content);
+        buildConfirmationMessage(confirmationMessageSelectionItems(selection)).appendTo(el.content);
 
-        // Pattern input group
+        let $replaceRadio = new Coral.Radio();
+            $replaceRadio.label.textContent = REPLACE_LABEL;
+            $replaceRadio.name = 'replace-modify';
+            $replaceRadio.checked = true;
+            $replaceRadio.value = 'replace';
+
+        let $modifyRadio = new Coral.Radio();
+            $modifyRadio.label.textContent = MODIFY_LABEL;
+            $modifyRadio.name = 'replace-modify';
+            $modifyRadio.value = 'modify';
+
+            el.content.appendChild($replaceRadio);
+            el.content.appendChild($modifyRadio);
+
+        let $patternFieldGroup = $('<div class="elc-pattern-field-group" hidden>');
         var $patternTextField =
-            $('<input is="coral-textfield" class="elc-pattern-input" name="pattern" value="" required>');
-        $('<p>').text(PATTERN_LABEL).appendTo(el.content);
-        $patternTextField.appendTo(el.content);
+            $('<input is="coral-textfield" class="elc-pattern-input" name="pattern" value="" placeholder=".+" required>');
+        $('<p>').text(PATTERN_LABEL).appendTo($patternFieldGroup);
+        $patternTextField.appendTo($patternFieldGroup);
+        $patternFieldGroup.appendTo(el.content);
 
         // Replacement input group
         var $replacementTextField =
@@ -161,11 +178,11 @@
 
         // Dry run checkbox group
         var $isDryRunCheckbox =
-            $('<coral-checkbox name="$isDryRun" title="' + DRY_RUN_TOOLTIP + '" checked>').text(DRY_RUN_CHECKBOX_LABEL);
+            $('<coral-checkbox name="dry-run-checkbox" title="' + DRY_RUN_TOOLTIP + '" checked>').text(DRY_RUN_CHECKBOX_LABEL);
         $isDryRunCheckbox.appendTo(el.content);
 
         // Backup checkbox group
-        var $isBackupCheckbox = $('<coral-checkbox name="isBackup">').text(BACKUP_CHECKBOX_LABEL);
+        var $isBackupCheckbox = $('<coral-checkbox name="isBackup" disabled>').text(BACKUP_CHECKBOX_LABEL);
         $isBackupCheckbox.appendTo(el.content);
 
         // CSV output checkbox group
@@ -178,15 +195,18 @@
         function onValidate() {
             var replVal = $replacementTextField.val();
             var patternVal = $patternTextField.val();
+            var advanced = $modifyRadio.checked;
             $replacementTextField.each(function () {
                 this.setCustomValidity(replVal === patternVal ? VALIDATION_MSG : '');
             });
-            $updateBtn.attr('disabled', !replVal || !patternVal || replVal === patternVal);
+            $updateBtn.attr('disabled', !replVal || (advanced && !patternVal || replVal === patternVal));
         }
+
         /** @param {Event} e */
         function onResolve(e) {
             var data = {
                 pattern: $patternTextField.val(),
+                advancedMode: $modifyRadio.checked,
                 replacement: $replacementTextField.val(),
                 isDryRun: $isDryRunCheckbox.prop("checked"),
                 isBackup: $isBackupCheckbox.prop("checked"),
@@ -198,23 +218,37 @@
             deferred.resolve(data);
         }
 
+        /** @param {Event} e */
+        function onDryRunChange(e) {
+            $isBackupCheckbox.attr('disabled', $isDryRunCheckbox.prop('checked'));
+        }
+
         el.on('input', 'input', onValidate);
-        el.on('click', '[data-dialog-action]', onResolve);
+        el.on('click', '[name="update-button"]', onResolve);
+        el.on('change', '[name="dry-run-checkbox"]', onDryRunChange);
         el.on('coral-overlay:close', function () {
             el.off('input', 'input', onValidate);
-            el.off('click', '[data-dialog-action]', onResolve);
+            el.off('click', '[name="update-button"]', onResolve);
+            el.off('change', '[name="dry-run-checkbox"]', onDryRunChange);
             deferred.reject();
         });
 
         el.show();
         onValidate();
 
+        el.content.addEventListener('change', function(event) {
+          if (event.target.name == 'replace-modify') {
+             $patternFieldGroup.attr('hidden', event.target.value != 'modify');
+             onValidate();
+          }
+        });
+
         return deferred.promise();
     }
 
     function buildConfirmationMessage(selections) {
         let list = selections.slice(0, 12).map(function (row) {
-            return '<li>' + row.currentLink + '</li>';
+            return '<li>' + row.currentLink + ' (' + row.count + ')' + '</li>';
         });
         if (selections.length > 12) {
             list.push('<li>&#8230;</li>'); // &#8230; is ellipsis
@@ -224,6 +258,21 @@
         $('<ul class="elc-processing-link-list">').html(list.join('')).appendTo($msg);
         $('<br/>').appendTo($msg);
         return $msg;
+    }
+
+    function confirmationMessageSelectionItems(selections) {
+         let valuesMap = {};
+         selections.map(function (row) {
+            return row.currentLink;
+         }).forEach(function (item) {
+            valuesMap[item] = (valuesMap[item]||0) + 1;
+         });
+
+         let items = [];
+         for (const [key, value] of Object.entries(valuesMap)) {
+           items.push({currentLink: key, count: value});
+         }
+         return items;
     }
 
     function buildSelectionItems(selections) {
