@@ -140,8 +140,8 @@
                         action="cq-admin.etoolbox.linkinspector.action.delete-report"
                         icon="delete"
                         target=".etoolbox-link-inspector"
-                        text="Clear"
-                        title="Clear"
+                        text="Delete"
+                        title="Delete"
                         variant="minimal"/>
             </primary>
             <secondary jcr:primaryType="nt:unstructured">
