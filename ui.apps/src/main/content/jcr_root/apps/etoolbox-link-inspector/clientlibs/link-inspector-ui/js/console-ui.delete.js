@@ -21,6 +21,7 @@
     const DIALOG_TITLE_LABEL = Granite.I18n.get('Delete Report');
     const CANCEL_LABEL = Granite.I18n.get('Cancel');
     const SUBMIT_FILTER_LABEL = Granite.I18n.get('Delete');
+    const ERROR_MSG = Granite.I18n.get('Something went wrong');
 
     function onFilterAction(name, el, config, collection, selections) {
         const dialog = document.querySelector('#delete-dialog');
@@ -54,6 +55,19 @@
                 type: 'DELETE',
                 success: function(){
                     window.location.reload();
+                },
+                error: function(){
+                    var alertPopup = new Coral.Alert().set({
+                        variant: "error",
+                        header: {
+                            innerHTML: 'ERROR'
+                        },
+                        content: {
+                            textContent: ERROR_MSG
+                        }
+                    });
+                    alertPopup.classList.add('elc-coral-alert');
+                    document.body.append(alertPopup);
                 }
             });
         }

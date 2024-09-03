@@ -20,6 +20,7 @@ import com.exadel.etoolbox.linkinspector.core.services.cache.GridResourcesCache;
 import com.exadel.etoolbox.linkinspector.core.services.data.DataFeedService;
 import com.exadel.etoolbox.linkinspector.core.services.data.GridResourcesGenerator;
 import com.exadel.etoolbox.linkinspector.core.services.data.models.DataFilter;
+import com.exadel.etoolbox.linkinspector.core.services.exceptions.DataFeedException;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.LinkHelper;
 import com.exadel.etoolbox.linkinspector.core.services.util.CsvUtil;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.RepositoryHelper;
@@ -183,7 +184,7 @@ public class DataFeedServiceImpl implements DataFeedService {
     }
 
     @Override
-    public void deleteDataFeed() {
+    public void deleteDataFeed() throws DataFeedException {
         try (ResourceResolver serviceResourceResolver = repositoryHelper.getServiceResourceResolver()) {
             removePreviousDataFeed(serviceResourceResolver);
             removeCsvReport(serviceResourceResolver);
@@ -192,6 +193,7 @@ public class DataFeedServiceImpl implements DataFeedService {
             serviceResourceResolver.commit();
         } catch (PersistenceException e) {
             LOG.error("Failed to delete data feed", e);
+            throw new DataFeedException("Exception Deleting Data Feed");
         }
     }
 

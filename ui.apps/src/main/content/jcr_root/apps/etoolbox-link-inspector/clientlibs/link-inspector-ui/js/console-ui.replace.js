@@ -63,7 +63,7 @@
                 advancedMode: data.advancedMode,
                 selected: data.selected
             }].filter(function (item) {
-                return item.pattern && item.replacement && item.pattern !== item.replacement;
+                return !item.advancedMode || item.pattern && item.replacement && item.pattern !== item.replacement;
             });
             ELC.bulkLinksUpdate(replacementList, buildReplaceRequest);
         });
