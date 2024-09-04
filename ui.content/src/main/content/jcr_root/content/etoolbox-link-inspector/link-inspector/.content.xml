@@ -133,6 +133,16 @@
                         text="Filter"
                         title="Filter"
                         variant="minimal"/>
+                <deleteReport
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="granite/ui/components/coral/foundation/collection/action"
+                        granite:id="elc-delete-report"
+                        action="cq-admin.etoolbox.linkinspector.action.delete-report"
+                        icon="delete"
+                        target=".etoolbox-link-inspector"
+                        text="Delete"
+                        title="Delete"
+                        variant="minimal"/>
             </primary>
             <secondary jcr:primaryType="nt:unstructured">
                 <options

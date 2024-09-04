@@ -29,7 +29,7 @@
     var BACKUP_CHECKBOX_LABEL = Granite.I18n.get('Backup before replacement');
     var CSV_OUT_CHECKBOX_LABEL = Granite.I18n.get('Download CSV with updated items');
     var DRY_RUN_TOOLTIP = Granite.I18n.get("If checked, no changes will be applied in the repository");
-    var REPLACEMENT_DESCRIPTION = Granite.I18n.get('* Replacement will be applied within the detected broken links scope');
+    var REPLACEMENT_DESCRIPTION = Granite.I18n.get('* Replacement will be applied within the selected broken links scope');
     var REPLACEMENT_ACL_DESCRIPTION = Granite.I18n.get('** User should have sufficient read/write permissions in order to complete replacement successfully and create the backup package');
     var VALIDATION_MSG = Granite.I18n.get('Replacement can\'t be the same as pattern');
     var LINK_TO_UPDATE_LABEL = Granite.I18n.get('The following links will be updated:');
@@ -63,7 +63,7 @@
                 advancedMode: data.advancedMode,
                 selected: data.selected
             }].filter(function (item) {
-                return item.pattern && item.replacement && item.pattern !== item.replacement;
+                return !item.advancedMode || item.pattern && item.replacement && item.pattern !== item.replacement;
             });
             ELC.bulkLinksUpdate(replacementList, buildReplaceRequest);
         });

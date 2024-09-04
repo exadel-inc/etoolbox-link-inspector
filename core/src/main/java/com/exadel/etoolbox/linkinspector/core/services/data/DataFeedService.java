@@ -16,6 +16,7 @@ package com.exadel.etoolbox.linkinspector.core.services.data;
 
 import com.exadel.etoolbox.linkinspector.core.services.data.models.DataFilter;
 import com.exadel.etoolbox.linkinspector.core.services.data.models.GridResource;
+import com.exadel.etoolbox.linkinspector.core.services.exceptions.DataFeedException;
 import org.apache.sling.api.resource.Resource;
 
 import java.util.List;
@@ -59,4 +60,9 @@ public interface DataFeedService {
      * @param valuesMap - {@code Map<String, String>} property location as key and new url as value
      */
     void modifyDataFeed(Map<String, String> valuesMap);
+
+    /**
+     * Method for deleting data in data feed
+     */
+    void deleteDataFeed() throws DataFeedException;
 }

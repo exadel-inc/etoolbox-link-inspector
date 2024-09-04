@@ -9,7 +9,7 @@
         <img itemprop="thumbnail" width="192" src="${model.thumbnail}" alt="">
     </td>
 
-    <td class="foundation-collection-item-keys" is="coral-table-cell">
+    <td class="foundation-collection-item-keys collection-item_status_code" is="coral-table-cell">
         <div data-sly-set.statuscode="${model.linkStatusCode == '200' ? 'ok' : 'error'}"
              class="status" title="HTTP Status ${model.linkStatusCode}">
             <coral-icon icon="circle" class="elc-link-status--${statuscode}"></coral-icon>
@@ -19,7 +19,7 @@
         </div>
     </td>
 
-    <td class="foundation-collection-item-title foundation-collection-item-link-type" is="coral-table-cell">
+    <td class="foundation-collection-item-title collection-item_link-type" is="coral-table-cell">
         <div class="elc-complex-col">
             <h4 class="elc-primary-info" title="${model.link}">${model.link}</h4>
             <span class="elc-secondary-info">${model.linkType}</span>

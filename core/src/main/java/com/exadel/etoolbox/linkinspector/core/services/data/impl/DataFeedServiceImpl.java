@@ -15,12 +15,12 @@
 package com.exadel.etoolbox.linkinspector.core.services.data.impl;
 
 import com.adobe.granite.ui.components.ds.ValueMapResource;
-import com.exadel.etoolbox.linkinspector.api.Link;
 import com.exadel.etoolbox.linkinspector.core.models.ui.GridViewItem;
 import com.exadel.etoolbox.linkinspector.core.services.cache.GridResourcesCache;
 import com.exadel.etoolbox.linkinspector.core.services.data.DataFeedService;
 import com.exadel.etoolbox.linkinspector.core.services.data.GridResourcesGenerator;
 import com.exadel.etoolbox.linkinspector.core.services.data.models.DataFilter;
+import com.exadel.etoolbox.linkinspector.core.services.exceptions.DataFeedException;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.LinkHelper;
 import com.exadel.etoolbox.linkinspector.core.services.util.CsvUtil;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.RepositoryHelper;
@@ -183,6 +183,20 @@ public class DataFeedServiceImpl implements DataFeedService {
         }
     }
 
+    @Override
+    public void deleteDataFeed() throws DataFeedException {
+        try (ResourceResolver serviceResourceResolver = repositoryHelper.getServiceResourceResolver()) {
+            removePreviousDataFeed(serviceResourceResolver);
+            removeCsvReport(serviceResourceResolver);
+            removePendingNode(serviceResourceResolver);
+            gridResourcesCache.clearCache();
+            serviceResourceResolver.commit();
+        } catch (PersistenceException e) {
+            LOG.error("Failed to delete data feed", e);
+            throw new DataFeedException("Exception Deleting Data Feed");
+        }
+    }
+
     private List<GridResource> dataFeedToGridResources(ResourceResolver resourceResolver) {
         List<GridResource> gridResources = new ArrayList<>();
         JSONArray jsonArray = JsonUtil.getJsonArrayFromFile(JSON_FEED_PATH, resourceResolver);
@@ -216,6 +230,10 @@ public class DataFeedServiceImpl implements DataFeedService {
 
     private void removePreviousDataFeed(ResourceResolver resourceResolver) {
         LinkInspectorResourceUtil.removeResource(JSON_FEED_PATH, resourceResolver);
+    }
+
+    private void removeCsvReport(ResourceResolver resourceResolver) {
+        LinkInspectorResourceUtil.removeResource(CSV_REPORT_PATH, resourceResolver);
     }
 
     private void saveGridResourcesToJcr(ResourceResolver resourceResolver, JSONArray jsonArray) {
