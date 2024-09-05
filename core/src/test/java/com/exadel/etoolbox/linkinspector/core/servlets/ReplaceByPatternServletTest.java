@@ -16,7 +16,6 @@ package com.exadel.etoolbox.linkinspector.core.servlets;
 
 import com.exadel.etoolbox.linkinspector.core.services.data.DataFeedService;
 import com.exadel.etoolbox.linkinspector.core.services.data.impl.DataFeedServiceImpl;
-import com.exadel.etoolbox.linkinspector.core.services.data.models.GridResource;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.LinkHelper;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.PackageHelper;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.RepositoryHelper;
@@ -29,8 +28,6 @@ import com.exadel.etoolbox.linkinspector.core.services.resolvers.ExternalLinkRes
 import com.exadel.etoolbox.linkinspector.core.services.resolvers.InternalLinkResolverImpl;
 import com.exadel.etoolbox.linkinspector.core.services.util.CsvUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ImmutableMap;
 import io.wcm.testing.mock.aem.junit5.AemContext;
 import io.wcm.testing.mock.aem.junit5.AemContextExtension;
@@ -62,8 +59,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 
 import static org.junit.jupiter.api.Assertions.*;

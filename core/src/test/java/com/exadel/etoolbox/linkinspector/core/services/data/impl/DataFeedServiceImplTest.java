@@ -62,7 +62,6 @@ import static org.mockito.Mockito.when;
 class DataFeedServiceImplTest {
     private static final String GRID_RESOURCES_GENERATOR_FIELD = "gridResourcesGenerator";
     private static final String RESOURCE_RESOLVER_FACTORY_FIELD = "resourceResolverFactory";
-    private static final String GRID_RESOURCES_CACHE_FIELD = "gridResourcesCache";
     private static final String REPOSITORY_HELPER_FIELD = "repositoryHelper";
     private static final String LINK_HELPER_FIELD = "linkHelper";
     private static final String CONFIG_FIELD = "configService";

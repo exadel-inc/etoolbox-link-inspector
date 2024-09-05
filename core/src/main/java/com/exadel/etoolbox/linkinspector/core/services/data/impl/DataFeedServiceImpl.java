@@ -188,7 +188,7 @@ public class DataFeedServiceImpl implements DataFeedService {
             removePreviousDataFeed(serviceResourceResolver);
             removeCsvReport(serviceResourceResolver);
             removePendingNode(serviceResourceResolver);
-            clearCacheList();
+            clearStaticDataFeed();
             serviceResourceResolver.commit();
         } catch (PersistenceException e) {
             LOG.error("Failed to delete data feed", e);
@@ -205,7 +205,7 @@ public class DataFeedServiceImpl implements DataFeedService {
         GRID_RESOURCE_COPY_ON_WRITE_ARRAY_LIST.addAll(gridResources);
     }
 
-    private synchronized void clearCacheList() {
+    private synchronized void clearStaticDataFeed() {
         GRID_RESOURCE_COPY_ON_WRITE_ARRAY_LIST.clear();
     }
 
