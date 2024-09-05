@@ -393,11 +393,6 @@ class ReplaceByPatternServletTest {
 
     private void setUpDataFeedService(RepositoryHelper repositoryHelper) throws NoSuchFieldException {
         DataFeedService dataFeedService = new DataFeedServiceImpl();
-        Cache<String, CopyOnWriteArrayList<GridResource>> cache = CacheBuilder.newBuilder()
-                .maximumSize(100)
-                .expireAfterWrite(100000, TimeUnit.DAYS)
-                .build();
-        PrivateAccessor.setField(dataFeedService, "gridResourcesCache", cache);
         PrivateAccessor.setField(dataFeedService, REPOSITORY_HELPER_FIELD, repositoryHelper);
         PrivateAccessor.setField(fixture, DATAFEED_SERVICE_FIELD, dataFeedService);
     }

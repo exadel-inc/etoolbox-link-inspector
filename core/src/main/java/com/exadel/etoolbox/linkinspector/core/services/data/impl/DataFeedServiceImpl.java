@@ -26,8 +26,6 @@ import com.exadel.etoolbox.linkinspector.core.services.helpers.RepositoryHelper;
 import com.exadel.etoolbox.linkinspector.core.services.data.models.GridResource;
 import com.exadel.etoolbox.linkinspector.core.services.util.JsonUtil;
 import com.exadel.etoolbox.linkinspector.core.services.util.LinkInspectorResourceUtil;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.lang3.StringUtils;
@@ -41,7 +39,6 @@ import org.apache.sling.jcr.contentloader.ContentTypeUtil;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
@@ -62,10 +59,8 @@ import java.util.stream.Stream;
 @Component(service = DataFeedService.class)
 public class DataFeedServiceImpl implements DataFeedService {
     private static final Logger LOG = LoggerFactory.getLogger(DataFeedServiceImpl.class);
-    private static final String BROKEN_LINKS_MAP_KEY = "elc-broken-links";
 
-    @SuppressWarnings("UnstableApiUsage")
-    private static Cache<String, CopyOnWriteArrayList<GridResource>> GRID_RESOURCE_CACHE;
+    private static final CopyOnWriteArrayList<GridResource> GRID_RESOURCE_COPY_ON_WRITE_ARRAY_LIST = new CopyOnWriteArrayList<>();
 
     @Reference
     private RepositoryHelper repositoryHelper;
@@ -105,15 +100,6 @@ public class DataFeedServiceImpl implements DataFeedService {
             "Component Type",
             "Property Location"
     };
-
-    @Activate
-    @SuppressWarnings("unused")
-    private void activate() {
-        GRID_RESOURCE_CACHE = CacheBuilder.newBuilder()
-                .maximumSize(1)
-                .expireAfterWrite(100000, TimeUnit.DAYS)
-                .build();
-    }
 
     /**
      * {@inheritDoc}
@@ -202,7 +188,7 @@ public class DataFeedServiceImpl implements DataFeedService {
             removePreviousDataFeed(serviceResourceResolver);
             removeCsvReport(serviceResourceResolver);
             removePendingNode(serviceResourceResolver);
-            clearCache();
+            clearCacheList();
             serviceResourceResolver.commit();
         } catch (PersistenceException e) {
             LOG.error("Failed to delete data feed", e);
@@ -210,16 +196,17 @@ public class DataFeedServiceImpl implements DataFeedService {
         }
     }
 
-    private CopyOnWriteArrayList<GridResource> getGridResourcesList() {
-        return GRID_RESOURCE_CACHE.asMap().getOrDefault(BROKEN_LINKS_MAP_KEY, new CopyOnWriteArrayList<>());
+    private List<GridResource> getGridResourcesList() {
+        return new ArrayList<>(GRID_RESOURCE_COPY_ON_WRITE_ARRAY_LIST);
     }
 
     private synchronized void setGridResourcesList(List<GridResource> gridResources) {
-        GRID_RESOURCE_CACHE.asMap().put(BROKEN_LINKS_MAP_KEY, new CopyOnWriteArrayList<>(gridResources));
+        GRID_RESOURCE_COPY_ON_WRITE_ARRAY_LIST.clear();
+        GRID_RESOURCE_COPY_ON_WRITE_ARRAY_LIST.addAll(gridResources);
     }
 
-    private synchronized void clearCache() {
-        GRID_RESOURCE_CACHE.invalidateAll();
+    private synchronized void clearCacheList() {
+        GRID_RESOURCE_COPY_ON_WRITE_ARRAY_LIST.clear();
     }
 
     private List<GridResource> dataFeedToGridResources(ResourceResolver resourceResolver) {

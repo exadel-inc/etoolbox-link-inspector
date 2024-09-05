@@ -27,8 +27,6 @@ import com.exadel.etoolbox.linkinspector.core.services.resolvers.ExternalLinkRes
 import com.exadel.etoolbox.linkinspector.core.services.resolvers.InternalLinkResolverImpl;
 import com.exadel.etoolbox.linkinspector.core.services.util.CsvUtil;
 import com.exadel.etoolbox.linkinspector.core.services.util.LinkInspectorResourceUtil;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import io.wcm.testing.mock.aem.junit5.AemContext;
 import io.wcm.testing.mock.aem.junit5.AemContextExtension;
 import junitx.util.PrivateAccessor;
@@ -47,8 +45,6 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -84,7 +80,6 @@ class DataFeedServiceImplTest {
     @BeforeEach
     void setup() throws NoSuchFieldException, IOException, URISyntaxException {
         PrivateAccessor.setField(fixture, REPOSITORY_HELPER_FIELD, getRepositoryHelperFromContext());
-        PrivateAccessor.setField(fixture, GRID_RESOURCES_CACHE_FIELD, getGridResourcesCacheFromContext());
         GridResourcesGeneratorImpl gridResourcesGenerator = getGridResourcesGenerator();
         PrivateAccessor.setField(fixture, GRID_RESOURCES_GENERATOR_FIELD, gridResourcesGenerator);
     }
@@ -210,12 +205,5 @@ class DataFeedServiceImplTest {
         RepositoryHelper repositoryHelper = new RepositoryHelperImpl();
         PrivateAccessor.setField(repositoryHelper, RESOURCE_RESOLVER_FACTORY_FIELD, resourceResolverFactory);
         return repositoryHelper;
-    }
-
-    private Cache<String, CopyOnWriteArrayList<GridResource>> getGridResourcesCacheFromContext() throws NoSuchFieldException {
-        return CacheBuilder.newBuilder()
-                .maximumSize(100)
-                .expireAfterWrite(100000, TimeUnit.DAYS)
-                .build();
     }
 }
