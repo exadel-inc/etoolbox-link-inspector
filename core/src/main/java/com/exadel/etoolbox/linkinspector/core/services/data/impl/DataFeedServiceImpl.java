@@ -65,7 +65,7 @@ public class DataFeedServiceImpl implements DataFeedService {
     private static final String BROKEN_LINKS_MAP_KEY = "elc-broken-links";
 
     @SuppressWarnings("UnstableApiUsage")
-    private Cache<String, CopyOnWriteArrayList<GridResource>> gridResourcesCache;
+    private static Cache<String, CopyOnWriteArrayList<GridResource>> GRID_RESOURCE_CACHE;
 
     @Reference
     private RepositoryHelper repositoryHelper;
@@ -109,7 +109,7 @@ public class DataFeedServiceImpl implements DataFeedService {
     @Activate
     @SuppressWarnings("unused")
     private void activate() {
-        gridResourcesCache = CacheBuilder.newBuilder()
+        GRID_RESOURCE_CACHE = CacheBuilder.newBuilder()
                 .maximumSize(1)
                 .expireAfterWrite(100000, TimeUnit.DAYS)
                 .build();
@@ -211,15 +211,15 @@ public class DataFeedServiceImpl implements DataFeedService {
     }
 
     private CopyOnWriteArrayList<GridResource> getGridResourcesList() {
-        return gridResourcesCache.asMap().getOrDefault(BROKEN_LINKS_MAP_KEY, new CopyOnWriteArrayList<>());
+        return GRID_RESOURCE_CACHE.asMap().getOrDefault(BROKEN_LINKS_MAP_KEY, new CopyOnWriteArrayList<>());
     }
 
     private synchronized void setGridResourcesList(List<GridResource> gridResources) {
-        gridResourcesCache.asMap().put(BROKEN_LINKS_MAP_KEY, new CopyOnWriteArrayList<>(gridResources));
+        GRID_RESOURCE_CACHE.asMap().put(BROKEN_LINKS_MAP_KEY, new CopyOnWriteArrayList<>(gridResources));
     }
 
-    private void clearCache() {
-        gridResourcesCache.invalidateAll();
+    private synchronized void clearCache() {
+        GRID_RESOURCE_CACHE.invalidateAll();
     }
 
     private List<GridResource> dataFeedToGridResources(ResourceResolver resourceResolver) {
