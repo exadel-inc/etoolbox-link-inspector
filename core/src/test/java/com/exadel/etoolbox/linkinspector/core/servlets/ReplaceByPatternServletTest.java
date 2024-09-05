@@ -14,8 +14,6 @@
 
 package com.exadel.etoolbox.linkinspector.core.servlets;
 
-import com.exadel.etoolbox.linkinspector.core.services.cache.GridResourcesCache;
-import com.exadel.etoolbox.linkinspector.core.services.cache.impl.GridResourcesCacheImpl;
 import com.exadel.etoolbox.linkinspector.core.services.data.DataFeedService;
 import com.exadel.etoolbox.linkinspector.core.services.data.impl.DataFeedServiceImpl;
 import com.exadel.etoolbox.linkinspector.core.services.data.models.GridResource;
@@ -395,13 +393,11 @@ class ReplaceByPatternServletTest {
 
     private void setUpDataFeedService(RepositoryHelper repositoryHelper) throws NoSuchFieldException {
         DataFeedService dataFeedService = new DataFeedServiceImpl();
-        GridResourcesCache gridResourcesCache = new GridResourcesCacheImpl();
         Cache<String, CopyOnWriteArrayList<GridResource>> cache = CacheBuilder.newBuilder()
                 .maximumSize(100)
                 .expireAfterWrite(100000, TimeUnit.DAYS)
                 .build();
-        PrivateAccessor.setField(gridResourcesCache, "gridResourcesCache", cache);
-        PrivateAccessor.setField(dataFeedService, "gridResourcesCache", gridResourcesCache);
+        PrivateAccessor.setField(dataFeedService, "gridResourcesCache", cache);
         PrivateAccessor.setField(dataFeedService, REPOSITORY_HELPER_FIELD, repositoryHelper);
         PrivateAccessor.setField(fixture, DATAFEED_SERVICE_FIELD, dataFeedService);
     }

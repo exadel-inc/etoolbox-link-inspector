@@ -15,10 +15,7 @@
 package com.exadel.etoolbox.linkinspector.core.services.data.impl;
 
 import com.exadel.etoolbox.linkinspector.api.LinkResolver;
-import com.exadel.etoolbox.linkinspector.core.services.cache.GridResourcesCache;
-import com.exadel.etoolbox.linkinspector.core.services.cache.impl.GridResourcesCacheImpl;
 import com.exadel.etoolbox.linkinspector.core.services.data.ConfigService;
-import com.exadel.etoolbox.linkinspector.core.services.data.GenerationStatsProps;
 import com.exadel.etoolbox.linkinspector.core.services.data.GridResourcesGenerator;
 import com.exadel.etoolbox.linkinspector.core.services.data.models.DataFilter;
 import com.exadel.etoolbox.linkinspector.core.services.data.models.GridResource;
@@ -48,7 +45,6 @@ import org.mockito.stubbing.Answer;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -74,8 +70,6 @@ class DataFeedServiceImplTest {
     private static final String REPOSITORY_HELPER_FIELD = "repositoryHelper";
     private static final String LINK_HELPER_FIELD = "linkHelper";
     private static final String CONFIG_FIELD = "configService";
-    private static final String CUSTOM_LINK_FIELD = "customLinkResolver";
-    private static final String EXTERNAL_LINK_CHECKER_FIELD = "externalLinkChecker";
 
     private static final String DATAFEED_PATH = "/content/etoolbox-link-inspector/data/datafeed.json";
     private static final String CSV_REPORT_PATH = "/content/etoolbox-link-inspector/download/report.csv";
@@ -218,13 +212,10 @@ class DataFeedServiceImplTest {
         return repositoryHelper;
     }
 
-    private GridResourcesCache getGridResourcesCacheFromContext() throws NoSuchFieldException {
-        GridResourcesCache gridResourcesCache = new GridResourcesCacheImpl();
-        Cache<String, CopyOnWriteArrayList<GridResource>> cache = CacheBuilder.newBuilder()
+    private Cache<String, CopyOnWriteArrayList<GridResource>> getGridResourcesCacheFromContext() throws NoSuchFieldException {
+        return CacheBuilder.newBuilder()
                 .maximumSize(100)
                 .expireAfterWrite(100000, TimeUnit.DAYS)
                 .build();
-        PrivateAccessor.setField(gridResourcesCache, GRID_RESOURCES_CACHE_FIELD, cache);
-        return gridResourcesCache;
     }
 }
