@@ -1,13 +1,11 @@
 package com.exadel.etoolbox.linkinspector.core.servlets;
 
-/**
- * @author Sergey Soldatenko
- */
 
 import com.adobe.granite.ui.components.ds.DataSource;
 import com.adobe.granite.ui.components.ds.SimpleDataSource;
 import com.exadel.etoolbox.linkinspector.api.LinkResolver;
-import com.exadel.etoolbox.linkinspector.core.services.util.ServletUtil;
+import com.exadel.etoolbox.linkinspector.core.services.util.GraniteUtil;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
@@ -62,10 +60,10 @@ public class SettingsDataSourceServlet extends SlingSafeMethodsServlet {
                 fieldProperties.put("name", "./" + serviceName + "." + attributeDefinition.getID());
                 fieldProperties.put("fieldLabel", attributeDefinition.getName());
                 fieldProperties.put("fieldDescription", attributeDefinition.getDescription());
-                Resource textField = ServletUtil.createResource(request.getResourceResolver(), serviceName + "." + attributeDefinition.getID(), fieldProperties, Collections.emptyList());
+                Resource textField = GraniteUtil.createResource(request.getResourceResolver(), serviceName + "." + attributeDefinition.getID(), fieldProperties, Collections.emptyList());
                 innerFields.add(textField);
             }
-            Resource tab = ServletUtil.createTab(request.getResourceResolver(), serviceName, splitCamelCase(StringUtils.substringAfterLast(serviceName, ".")), innerFields);
+            Resource tab = GraniteUtil.createTab(request.getResourceResolver(), serviceName, splitCamelCase(StringUtils.substringAfterLast(serviceName, ".")), innerFields);
             tabs.add(tab);
         }
 
@@ -99,7 +97,7 @@ public class SettingsDataSourceServlet extends SlingSafeMethodsServlet {
 
     private Map<String, List<AttributeDefinition>> getServiceSettings() {
         Map<String, List<AttributeDefinition>> result = new HashMap<>();
-        for (LinkResolver linkResolver : linkResolvers) {
+        for (LinkResolver linkResolver : CollectionUtils.emptyIfNull(linkResolvers)) {
             Bundle bundle = FrameworkUtil.getBundle(linkResolver.getClass());
             MetaTypeInformation metaTypeInformation = metaTypeService.getMetaTypeInformation(bundle);
             ObjectClassDefinition objectClassDefinition = metaTypeInformation.getObjectClassDefinition(linkResolver.getClass().getName(), null);

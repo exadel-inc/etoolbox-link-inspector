@@ -3,7 +3,7 @@ package com.exadel.etoolbox.linkinspector.core.servlets;
 import com.adobe.granite.ui.components.ds.DataSource;
 import com.adobe.granite.ui.components.ds.SimpleDataSource;
 import com.exadel.etoolbox.linkinspector.api.LinkResolver;
-import com.exadel.etoolbox.linkinspector.core.services.util.ServletUtil;
+import com.exadel.etoolbox.linkinspector.core.services.util.GraniteUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
@@ -18,9 +18,6 @@ import org.osgi.service.component.annotations.Reference;
 import javax.servlet.Servlet;
 import java.util.*;
 
-/**
- * @author Sergey Soldatenko
- */
 @Component(service = {Servlet.class})
 @SlingServletResourceTypes(
         resourceTypes = "/bin/etoolbox/link-inspector/settings/linktypes",
@@ -45,7 +42,7 @@ public class LinkTypesDataSourceServlet extends SlingSafeMethodsServlet {
             fieldProperties.put("uncheckedValue", Boolean.FALSE);
             fieldProperties.put("checked", Boolean.FALSE);
             fieldProperties.put("value", Boolean.TRUE);
-            Resource checkBox = ServletUtil.createResource(request.getResourceResolver(), serviceName, fieldProperties, Collections.emptyList());
+            Resource checkBox = GraniteUtil.createResource(request.getResourceResolver(), serviceName, fieldProperties, Collections.emptyList());
             links.add(checkBox);
         }
 
