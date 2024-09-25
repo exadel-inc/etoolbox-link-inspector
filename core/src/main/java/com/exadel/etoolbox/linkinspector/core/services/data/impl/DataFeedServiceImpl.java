@@ -60,7 +60,7 @@ import java.util.stream.Stream;
 public class DataFeedServiceImpl implements DataFeedService {
     private static final Logger LOG = LoggerFactory.getLogger(DataFeedServiceImpl.class);
 
-    private static final CopyOnWriteArrayList<GridResource> GRID_RESOURCE_COPY_ON_WRITE_ARRAY_LIST = new CopyOnWriteArrayList<>();
+    private final CopyOnWriteArrayList<GridResource> GRID_RESOURCE = new CopyOnWriteArrayList<>();
 
     @Reference
     private RepositoryHelper repositoryHelper;
@@ -197,16 +197,18 @@ public class DataFeedServiceImpl implements DataFeedService {
     }
 
     private List<GridResource> getGridResourcesList() {
-        return new ArrayList<>(GRID_RESOURCE_COPY_ON_WRITE_ARRAY_LIST);
+        return GRID_RESOURCE;
     }
 
-    private synchronized void setGridResourcesList(List<GridResource> gridResources) {
-        GRID_RESOURCE_COPY_ON_WRITE_ARRAY_LIST.clear();
-        GRID_RESOURCE_COPY_ON_WRITE_ARRAY_LIST.addAll(gridResources);
+    private void setGridResourcesList(List<GridResource> gridResources) {
+        synchronized (this) {
+            GRID_RESOURCE.clear();
+            GRID_RESOURCE.addAll(gridResources);
+        }
     }
 
-    private synchronized void clearStaticDataFeed() {
-        GRID_RESOURCE_COPY_ON_WRITE_ARRAY_LIST.clear();
+    private void clearStaticDataFeed() {
+        GRID_RESOURCE.clear();
     }
 
     private List<GridResource> dataFeedToGridResources(ResourceResolver resourceResolver) {
