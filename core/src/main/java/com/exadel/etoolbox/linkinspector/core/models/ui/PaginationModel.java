@@ -1,11 +1,12 @@
 package com.exadel.etoolbox.linkinspector.core.models.ui;
 
-import com.exadel.etoolbox.linkinspector.core.services.cache.GridResourcesCache;
-import com.exadel.etoolbox.linkinspector.core.services.data.models.GridResource;
+import com.exadel.etoolbox.linkinspector.core.services.data.DataFeedService;
+import com.exadel.etoolbox.linkinspector.core.services.data.models.DataFilter;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.request.RequestParameter;
+import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.models.annotations.DefaultInjectionStrategy;
 import org.apache.sling.models.annotations.Model;
@@ -15,7 +16,6 @@ import org.apache.sling.models.annotations.injectorspecific.SlingObject;
 
 import javax.annotation.PostConstruct;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Represents the model with pagination logic.
@@ -33,7 +33,7 @@ public class PaginationModel {
     private static final int DEFAULT_PAGE_SIZE = 500;
 
     @OSGiService
-    private GridResourcesCache cache;
+    private DataFeedService dataFeedService;
 
     @SlingObject
     private ResourceResolver resourceResolver;
@@ -57,12 +57,8 @@ public class PaginationModel {
         String type = requestParameterToString(request.getRequestParameter(REQUEST_PARAMETER_TYPE));
         String substring = requestParameterToString(request.getRequestParameter(REQUEST_PARAMETER_SUBSTRING));
 
-        List<GridResource> resources = cache
-                .getGridResourcesList()
-                .stream()
-                .filter(gridResource -> StringUtils.isBlank(type) || StringUtils.equals(gridResource.getLink().getType(), type))
-                .filter(gridResource -> StringUtils.isBlank(substring) || gridResource.getLink().getHref().contains(substring))
-                .collect(Collectors.toList());
+        List<Resource> resources = dataFeedService
+                .dataFeedToResources(new DataFilter(type, substring));
 
         size = resources.size() / DEFAULT_PAGE_SIZE + (resources.size() % DEFAULT_PAGE_SIZE == 0 ? 0 : 1);
     }

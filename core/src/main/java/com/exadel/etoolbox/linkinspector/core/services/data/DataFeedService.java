@@ -21,6 +21,7 @@ import org.apache.sling.api.resource.Resource;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Provides the service responsible for managing the data feed based on the set of resources generated

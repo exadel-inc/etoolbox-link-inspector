@@ -16,7 +16,6 @@ package com.exadel.etoolbox.linkinspector.core.services.data.impl;
 
 import com.adobe.granite.ui.components.ds.ValueMapResource;
 import com.exadel.etoolbox.linkinspector.core.models.ui.GridViewItem;
-import com.exadel.etoolbox.linkinspector.core.services.cache.GridResourcesCache;
 import com.exadel.etoolbox.linkinspector.core.services.data.DataFeedService;
 import com.exadel.etoolbox.linkinspector.core.services.data.GridResourcesGenerator;
 import com.exadel.etoolbox.linkinspector.core.services.data.models.DataFilter;
@@ -48,6 +47,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -60,6 +60,8 @@ import java.util.stream.Stream;
 public class DataFeedServiceImpl implements DataFeedService {
     private static final Logger LOG = LoggerFactory.getLogger(DataFeedServiceImpl.class);
 
+    private final CopyOnWriteArrayList<GridResource> GRID_RESOURCE = new CopyOnWriteArrayList<>();
+
     @Reference
     private RepositoryHelper repositoryHelper;
 
@@ -68,9 +70,6 @@ public class DataFeedServiceImpl implements DataFeedService {
 
     @Reference
     private LinkHelper linkHelper;
-
-    @Reference
-    private GridResourcesCache gridResourcesCache;
 
     /**
      * The sling resource type of grid row items
@@ -115,7 +114,7 @@ public class DataFeedServiceImpl implements DataFeedService {
             }
             Optional.ofNullable(gridResourcesGenerator.generateGridResources(GRID_RESOURCE_TYPE, resourceResolver))
                     .ifPresent(gridResources -> {
-                        gridResourcesCache.setGridResourcesList(gridResources);
+                        setGridResourcesList(gridResources);
                         gridResourcesToDataFeed(gridResources, resourceResolver);
                         generateCsvReport(gridResources, resourceResolver);
                     });
@@ -134,11 +133,11 @@ public class DataFeedServiceImpl implements DataFeedService {
                 LOG.warn("ResourceResolver is null, data feed to resources conversion is stopped");
                 return Collections.emptyList();
             }
-            if (CollectionUtils.isEmpty(gridResourcesCache.getGridResourcesList())) {
-                gridResourcesCache.setGridResourcesList(dataFeedToGridResources(serviceResourceResolver));
+            if (CollectionUtils.isEmpty(getGridResourcesList())) {
+                setGridResourcesList(dataFeedToGridResources(serviceResourceResolver));
             }
             List<Resource> resources = toSlingResourcesStream(
-                    doFiltering(gridResourcesCache.getGridResourcesList(), filter),
+                    doFiltering(getGridResourcesList(), filter),
                     repositoryHelper.getThreadResourceResolver())
                     .collect(Collectors.toList());
             LOG.info("EToolbox Link Inspector - the number of items shown is {}", resources.size());
@@ -162,7 +161,7 @@ public class DataFeedServiceImpl implements DataFeedService {
 
     @Override
     public void modifyDataFeed(Map<String, String> valuesMap) {
-        List<GridResource> gridResources = gridResourcesCache.getGridResourcesList();
+        List<GridResource> gridResources = getGridResourcesList();
         try (ResourceResolver serviceResourceResolver = repositoryHelper.getServiceResourceResolver()) {
             for (GridResource gridResource : gridResources) {
                 String propertyAddress = gridResource.getResourcePath() +"@" + gridResource.getPropertyName();
@@ -178,7 +177,7 @@ public class DataFeedServiceImpl implements DataFeedService {
                             gridResource.setLink(link);
                         });
             }
-            gridResourcesCache.setGridResourcesList(gridResources);
+            setGridResourcesList(gridResources);
             gridResourcesToDataFeed(gridResources, serviceResourceResolver);
         }
     }
@@ -189,12 +188,27 @@ public class DataFeedServiceImpl implements DataFeedService {
             removePreviousDataFeed(serviceResourceResolver);
             removeCsvReport(serviceResourceResolver);
             removePendingNode(serviceResourceResolver);
-            gridResourcesCache.clearCache();
+            clearStaticDataFeed();
             serviceResourceResolver.commit();
         } catch (PersistenceException e) {
             LOG.error("Failed to delete data feed", e);
             throw new DataFeedException("Exception Deleting Data Feed");
         }
+    }
+
+    private List<GridResource> getGridResourcesList() {
+        return GRID_RESOURCE;
+    }
+
+    private void setGridResourcesList(List<GridResource> gridResources) {
+        synchronized (this) {
+            GRID_RESOURCE.clear();
+            GRID_RESOURCE.addAll(gridResources);
+        }
+    }
+
+    private void clearStaticDataFeed() {
+        GRID_RESOURCE.clear();
     }
 
     private List<GridResource> dataFeedToGridResources(ResourceResolver resourceResolver) {
