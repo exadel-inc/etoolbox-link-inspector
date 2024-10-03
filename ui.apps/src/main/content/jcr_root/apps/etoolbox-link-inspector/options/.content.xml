@@ -171,15 +171,6 @@
                                                         uncheckedValue="{Boolean}false"
                                                         checked="{Boolean}false"
                                                         value="{Boolean}true"/>
-                                                <excludeTags
-                                                        jcr:primaryType="nt:unstructured"
-                                                        sling:resourceType="granite/ui/components/coral/foundation/form/checkbox"
-                                                        name="./excludeTags"
-                                                        text="Exclude tags"
-                                                        fieldDescription="If checked, the internal links starting with /content/cq:tags will be excluded"
-                                                        uncheckedValue="{Boolean}false"
-                                                        checked="{Boolean}false"
-                                                        value="{Boolean}true"/>
                                                 <statusCodes
                                                         granite:class="foundation-layout-util-maximized-alt"
                                                         jcr:primaryType="nt:unstructured"
