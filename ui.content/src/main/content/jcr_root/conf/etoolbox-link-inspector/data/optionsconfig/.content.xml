@@ -13,11 +13,5 @@
   ~ limitations under the License.
   -->
 <jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
-          jcr:primaryType="nt:unstructured"
-          path="/content"
-          excludedProperties="[dam:Comments,cq:allowedTemplates,cq:childrenOrder,cq:designPath,cq:lastModifiedBy,cq:lastPublishedBy,cq:lastReplicatedBy,cq:lastReplicationAction,cq:lastReplicationStatus,cq:lastRolledoutBy,cq:template,jcr:createdBy,sling:resourceType,sling:resourceSuperType]"
-          linksType="Internal + External"
-          excludeTags="{Boolean}true"
-          statusCodes="[404]"
-          threadsPerCore="60">
+          jcr:primaryType="nt:unstructured">
 </jcr:root>

@@ -1,6 +1,5 @@
 package com.exadel.etoolbox.linkinspector.core.services.data.impl;
 
-import com.exadel.etoolbox.linkinspector.core.services.data.GenerationStatsProps;
 import com.exadel.etoolbox.linkinspector.core.services.data.ConfigService;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.RepositoryHelper;
 import org.apache.commons.lang3.StringUtils;
@@ -17,13 +16,14 @@ import java.util.Optional;
 
 @Component(service = ConfigService.class)
 public class ConfigServiceImpl implements ConfigService {
-    private static final String CONFIG_PATH = "/conf/etoolbox-link-inspector/data/config";
-    private static final String PN_FILTER = "filter";
+    private static final String CONFIG_PATH = "/conf/etoolbox-link-inspector/data/optionsconfig";
+    private static final String PN_IS_CUSTOM_TYPE_ALLOWED = "customTypeAllowed";
+    private static final String PN_EXCLUDED_LINK_PATTERNS = "excludedLinkPatterns";
     private static final String PN_EXCLUDED_PATHS = "excludedPaths";
     private static final String PN_ACTIVATED_CONTENT = "activatedContent";
     private static final String PN_SKIP_CONTENT_AFTER_ACTIVATION = "skipContentAfterActivation";
-    private static final String PN_LAST_MODIFIED = "lastModifiedBoundary";
-    private static final String PN_PATH = "path";
+    private static final String PN_LAST_MODIFIED = "lastMidified";
+    private static final String PN_REPLACEMENT = "replacement";
     private static final String PN_EXCLUDED_PROPERTIES = "excludedProperties";
     private static final String PN_LINKS_TYPE = "linksType";
     private static final String PN_EXCLUDE_TAGS = "excludeTags";
@@ -38,12 +38,12 @@ public class ConfigServiceImpl implements ConfigService {
 
     @Override
     public String[] getExcludedLinksPatterns() {
-        return getProperty(PN_FILTER, String[].class).orElse(new String[0]);
+        return getProperty(PN_EXCLUDED_LINK_PATTERNS, String[].class).orElse(new String[0]);
     }
 
     @Override
     public String getSearchPath() {
-        return getProperty(PN_PATH, String.class).orElse(DEFAULT_PATH);
+        return getProperty(PN_REPLACEMENT, String.class).orElse(DEFAULT_PATH);
     }
 
     @Override
@@ -75,7 +75,14 @@ public class ConfigServiceImpl implements ConfigService {
     }
 
     @Override
+    public boolean isCustomTypeAllowed() {
+        //TODO: check where it used
+        return getProperty(PN_IS_CUSTOM_TYPE_ALLOWED, Boolean.class).orElse(false);
+    }
+
+    @Override
     public String getLinksType() {
+        //TODO: check where it used and if needed replace with new config values
         return getProperty(PN_LINKS_TYPE, String.class).orElse(null);
     }
 
@@ -93,6 +100,26 @@ public class ConfigServiceImpl implements ConfigService {
     @Override
     public int getThreadsPerCore() {
         return getProperty(PN_THREADS_PER_CORE, Integer.class).orElse(DEFAULT_THREADS_PER_CORE);
+    }
+
+    @Override
+    public String getInternalLinksHost() {
+        return getProperty("com.exadel.etoolbox.linkinspector.core.services.resolvers.InternalLinkResolverImpl.internalLinksHost", String.class).orElse(StringUtils.EMPTY);
+    }
+
+    @Override
+    public int getConnectionTimeout() {
+        return getProperty("com.exadel.etoolbox.linkinspector.core.services.resolvers.ExternalLinkResolverImpl.connectionTimeout", Integer.class).orElse(0);
+    }
+
+    @Override
+    public int getSocketTimeout() {
+        return getProperty("com.exadel.etoolbox.linkinspector.core.services.resolvers.ExternalLinkResolverImpl.socketTimeout", Integer.class).orElse(0);
+    }
+
+    @Override
+    public String getUserAgent() {
+        return getProperty("com.exadel.etoolbox.linkinspector.core.services.resolvers.ExternalLinkResolverImpl.userAgent", String.class).orElse(StringUtils.EMPTY);
     }
 
     private <T> Optional<T> getProperty(String name, Class<T> clazz){

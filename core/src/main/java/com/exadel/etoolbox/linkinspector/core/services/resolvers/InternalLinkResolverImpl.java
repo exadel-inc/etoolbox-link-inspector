@@ -18,6 +18,7 @@ import com.exadel.etoolbox.linkinspector.api.Link;
 import com.exadel.etoolbox.linkinspector.api.LinkResolver;
 import com.exadel.etoolbox.linkinspector.api.LinkStatus;
 import com.exadel.etoolbox.linkinspector.core.models.LinkImpl;
+import com.exadel.etoolbox.linkinspector.core.services.data.ConfigService;
 import org.apache.http.HttpStatus;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
@@ -71,10 +72,13 @@ public class InternalLinkResolverImpl implements LinkResolver {
     @Reference
     private LinkResolver externalLinkResolver;
 
+    @Reference
+    private ConfigService configService;
+
     @Activate
     @Modified
-    private void activate(Config config){
-        this.internalLinksHost = config.internalLinksHost();
+    private void activate(){
+        this.internalLinksHost = configService.getInternalLinksHost();
     }
 
 

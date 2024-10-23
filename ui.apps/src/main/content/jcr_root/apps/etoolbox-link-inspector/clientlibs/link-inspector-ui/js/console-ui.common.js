@@ -181,4 +181,23 @@
     }
     Utils.resourceExistCheck = resourceExistCheck;
 
+    $(document).on('submit', '#elc-options-savesettings', function (e) {
+        e.preventDefault();
+        const form = $(this);
+        $.ajax({
+            type: "POST",
+            url: $(this).attr('action'),
+            data: $(this).serialize(),
+            success: function () {
+                $.ajax({
+                    type: "POST",
+                    url: '/bin/etoolbox/link-inspector/config',
+                    success: function (data) {
+                        location.replace("/tools/etoolbox/link-inspector.html")
+                    }
+                });
+            }
+        });
+    })
+
 })(window, document, Granite.$, Granite);

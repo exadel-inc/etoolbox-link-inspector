@@ -147,11 +147,9 @@
             <secondary jcr:primaryType="nt:unstructured">
                 <options
                         jcr:primaryType="nt:unstructured"
-                        sling:resourceType="granite/ui/components/coral/foundation/collection/action"
-                        action="cq-admin.etoolbox.linkinspector.action.conf-options"
+                        sling:resourceType="granite/ui/components/coral/foundation/anchorbutton"
+                        href="/apps/etoolbox-link-inspector/options/options.html"
                         icon="gears"
-                        rel="etoolbox-link-inspector-conf-options"
-                        target=".etoolbox-link-inspector"
                         text="Options"
                         title="Options"
                         variant="minimal"/>
