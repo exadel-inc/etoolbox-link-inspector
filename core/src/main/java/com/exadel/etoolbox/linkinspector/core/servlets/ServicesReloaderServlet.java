@@ -5,10 +5,10 @@ import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.servlets.HttpConstants;
 import org.apache.sling.api.servlets.SlingAllMethodsServlet;
+import org.apache.sling.servlets.annotations.SlingServletResourceTypes;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -20,11 +20,10 @@ import javax.servlet.ServletException;
 import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
 
-@Component(service = {Servlet.class},
-        property = {
-                "sling.servlet.methods=" + HttpConstants.METHOD_GET,
-                "sling.servlet.paths=" + "/bin/etoolbox/link-inspector/config"
-        }
+@Component(service = {Servlet.class})
+@SlingServletResourceTypes(
+        resourceTypes = "/bin/etoolbox/link-inspector/config",
+        methods = HttpConstants.METHOD_POST
 )
 public class ServicesReloaderServlet extends SlingAllMethodsServlet {
 
@@ -34,8 +33,8 @@ public class ServicesReloaderServlet extends SlingAllMethodsServlet {
     private BundleContext bundleContext;
 
     @Activate
-    public void activate(ComponentContext componentContext) {
-        bundleContext = componentContext.getBundleContext();
+    private void activate(BundleContext bundleContext) {
+        this.bundleContext = bundleContext;
     }
 
     @Override

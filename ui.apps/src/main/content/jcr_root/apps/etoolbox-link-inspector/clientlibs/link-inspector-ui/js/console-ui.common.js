@@ -16,8 +16,9 @@
  * EToolbox Link Inspector clientlib.
  * Common utilities
  */
-(function (window, document, $, Granite) {
+(function (window, document, $, Granite, Coral) {
     'use strict';
+    const ERROR_MSG = Granite.I18n.get('Something went wrong');
 
     var Utils = Granite.ELC = (Granite.ELC || {});
 
@@ -191,13 +192,26 @@
             success: function () {
                 $.ajax({
                     type: "POST",
-                    url: '/bin/etoolbox/link-inspector/config',
+                    url: '/content/etoolbox-link-inspector/servlet/servicesReloader',
                     success: function (data) {
                         location.replace("/tools/etoolbox/link-inspector.html")
+                    },
+                    error: function() {
+                        var alertPopup = new Coral.Alert().set({
+                            variant: "error",
+                            header: {
+                                innerHTML: 'ERROR'
+                            },
+                            content: {
+                                textContent: ERROR_MSG
+                            }
+                        });
+                        alertPopup.classList.add('elc-coral-alert');
+                        document.body.append(alertPopup);
                     }
                 });
             }
         });
     })
 
-})(window, document, Granite.$, Granite);
+})(window, document, Granite.$, Granite, Coral);

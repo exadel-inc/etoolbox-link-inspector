@@ -22,7 +22,7 @@ public class ConfigServiceImpl implements ConfigService {
     private static final String PN_EXCLUDED_PATHS = "excludedPaths";
     private static final String PN_ACTIVATED_CONTENT = "activatedContent";
     private static final String PN_SKIP_CONTENT_AFTER_ACTIVATION = "skipContentAfterActivation";
-    private static final String PN_LAST_MODIFIED = "lastMidified";
+    private static final String PN_LAST_MODIFIED = "lastModified";
     private static final String PN_REPLACEMENT = "replacement";
     private static final String PN_EXCLUDED_PROPERTIES = "excludedProperties";
     private static final String PN_LINKS_TYPE = "linksType";
