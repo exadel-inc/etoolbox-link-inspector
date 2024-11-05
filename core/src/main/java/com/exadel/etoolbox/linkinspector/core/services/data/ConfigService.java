@@ -10,14 +10,7 @@ public interface ConfigService {
     boolean isSkipContentModifiedAfterActivation();
     ZonedDateTime getLastModified();
     String[] getExcludedProperties();
-    boolean isCustomTypeAllowed();
-
-    String getLinksType();
     boolean excludeTagLinks();
     int[] getStatusCodes();
     int getThreadsPerCore();
-    String getInternalLinksHost();
-    int getConnectionTimeout();
-    int getSocketTimeout();
-    String getUserAgent();
 }

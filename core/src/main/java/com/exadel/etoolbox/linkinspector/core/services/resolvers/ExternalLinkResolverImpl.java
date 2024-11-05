@@ -17,9 +17,9 @@ package com.exadel.etoolbox.linkinspector.core.services.resolvers;
 import com.exadel.etoolbox.linkinspector.api.Link;
 import com.exadel.etoolbox.linkinspector.api.LinkResolver;
 import com.exadel.etoolbox.linkinspector.core.models.LinkImpl;
-import com.exadel.etoolbox.linkinspector.core.services.data.ConfigService;
-import org.apache.http.HttpStatus;
+import com.exadel.etoolbox.linkinspector.core.services.data.UserConfig;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpStatus;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -31,11 +31,7 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.osgi.services.HttpClientBuilderFactory;
 import org.apache.http.util.EntityUtils;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Deactivate;
-import org.osgi.service.component.annotations.Modified;
-import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.*;
 import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
@@ -46,10 +42,7 @@ import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -80,6 +73,11 @@ public class ExternalLinkResolverImpl implements LinkResolver {
                 description = "Example - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like " +
                         "Gecko) Chrome/86.0.4240.111 Safari/537.36"
         ) String userAgent() default StringUtils.EMPTY;
+
+        @AttributeDefinition(
+                name = "Activate service",
+                description = "Is service active or not"
+        ) boolean linkType() default false;
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(ExternalLinkResolverImpl.class);
@@ -96,7 +94,7 @@ public class ExternalLinkResolverImpl implements LinkResolver {
     private HttpClientBuilderFactory httpClientBuilderFactory;
 
     @Reference
-    private ConfigService configService;
+    private UserConfig userConfig;
 
     private CloseableHttpClient httpClient;
     private PoolingHttpClientConnectionManager connectionManager;
@@ -104,6 +102,7 @@ public class ExternalLinkResolverImpl implements LinkResolver {
     private int connectionTimeout;
     private int socketTimeout;
     private String userAgent;
+    private boolean isActive;
 
     @Override
     public String getId() {
@@ -112,6 +111,9 @@ public class ExternalLinkResolverImpl implements LinkResolver {
 
     @Override
     public Collection<Link> getLinks(String source) {
+        if (!isActive) {
+            return Collections.emptyList();
+        }
         Set<Link> links = new HashSet<>();
         Matcher matcher = PATTERN_EXTERNAL_LINK.matcher(source);
         while (matcher.find()) {
@@ -140,10 +142,12 @@ public class ExternalLinkResolverImpl implements LinkResolver {
 
     @Activate
     @Modified
-    void activate() {
-        connectionTimeout = configService.getConnectionTimeout();
-        socketTimeout = configService.getSocketTimeout();
-        userAgent = configService.getUserAgent();
+    void activate(Configuration config) {
+        config = userConfig.apply(config);
+        connectionTimeout = config.connectionTimeout();
+        socketTimeout = config.socketTimeout();
+        userAgent = config.userAgent();
+        isActive = config.linkType();
         buildCloseableHttpClient();
     }
 

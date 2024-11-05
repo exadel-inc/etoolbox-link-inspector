@@ -18,9 +18,9 @@ import com.exadel.etoolbox.linkinspector.api.Link;
 import com.exadel.etoolbox.linkinspector.api.LinkResolver;
 import com.exadel.etoolbox.linkinspector.api.LinkStatus;
 import com.exadel.etoolbox.linkinspector.core.models.LinkImpl;
-import com.exadel.etoolbox.linkinspector.core.services.data.ConfigService;
-import org.apache.http.HttpStatus;
+import com.exadel.etoolbox.linkinspector.core.services.data.UserConfig;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpStatus;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceUtil;
@@ -37,10 +37,7 @@ import org.slf4j.LoggerFactory;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -65,20 +62,28 @@ public class InternalLinkResolverImpl implements LinkResolver {
                 description = "Host to be used for verifying internal links. " +
                         "If no value is set, links will be verified against local JCR.")
         String internalLinksHost() default StringUtils.EMPTY;
+
+        @AttributeDefinition(
+                name = "Activate service",
+                description = "Is service active or not"
+        ) boolean linkType() default false;
     }
 
     private String internalLinksHost;
+    private boolean isActive;
 
     @Reference
     private LinkResolver externalLinkResolver;
 
     @Reference
-    private ConfigService configService;
+    private UserConfig userConfig;
 
     @Activate
     @Modified
-    private void activate(){
-        this.internalLinksHost = configService.getInternalLinksHost();
+    private void activate(Config config){
+        config = userConfig.apply(config);
+        this.internalLinksHost = config.internalLinksHost();
+        this.isActive = config.linkType();
     }
 
 
@@ -89,6 +94,9 @@ public class InternalLinkResolverImpl implements LinkResolver {
 
     @Override
     public Collection<Link> getLinks(String source) {
+        if (!isActive) {
+            return Collections.emptyList();
+        }
         Set<Link> links = new HashSet<>();
         Matcher matcher = PATTERN_INTERNAL_LINK.matcher(source);
         while (matcher.find()) {

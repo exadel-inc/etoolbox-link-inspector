@@ -54,10 +54,13 @@ public class SettingsDataSourceServlet extends SlingSafeMethodsServlet {
             String serviceName = stringListEntry.getKey();
             List<Resource> innerFields = new ArrayList<>();
             for (AttributeDefinition attributeDefinition : stringListEntry.getValue()) {
+                if (attributeDefinition.getID().equals("linkType")) {
+                    continue;
+                }
                 Map<String, Object> fieldProperties = new HashMap<>();
                 fieldProperties.put(JcrResourceConstants.SLING_RESOURCE_TYPE_PROPERTY, getResourceTypeByType(attributeDefinition.getType()));
 
-                fieldProperties.put("name", "./" + serviceName + "." + attributeDefinition.getID());
+                fieldProperties.put("name", "./" + serviceName + "/" + attributeDefinition.getID());
                 fieldProperties.put("fieldLabel", attributeDefinition.getName());
                 fieldProperties.put("fieldDescription", attributeDefinition.getDescription());
                 Resource textField = GraniteUtil.createResource(request.getResourceResolver(), serviceName + "." + attributeDefinition.getID(), fieldProperties, Collections.emptyList());

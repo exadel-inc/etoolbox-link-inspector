@@ -12,8 +12,7 @@ import org.apache.sling.api.servlets.HttpConstants;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
 import org.apache.sling.jcr.resource.api.JcrResourceConstants;
 import org.apache.sling.servlets.annotations.SlingServletResourceTypes;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.*;
 
 import javax.servlet.Servlet;
 import java.util.*;
@@ -24,8 +23,8 @@ import java.util.*;
         methods = HttpConstants.METHOD_GET)
 public class LinkTypesDataSourceServlet extends SlingSafeMethodsServlet {
 
-    @Reference
-    private transient List<LinkResolver> linkResolvers;
+    @Reference(policy = ReferencePolicy.DYNAMIC, policyOption = ReferencePolicyOption.GREEDY)
+    private transient volatile List<LinkResolver> linkResolvers;
 
     @Override
     protected void doGet(final SlingHttpServletRequest request, final SlingHttpServletResponse response) {
@@ -36,7 +35,7 @@ public class LinkTypesDataSourceServlet extends SlingSafeMethodsServlet {
             fieldProperties.put(JcrResourceConstants.SLING_RESOURCE_TYPE_PROPERTY, "granite/ui/components/coral/foundation/form/checkbox");
 
             String serviceName = linkResolver.getClass().getName();
-            fieldProperties.put("name", "./" + serviceName + ".linkType");
+            fieldProperties.put("name", "./" + serviceName + "/linkType");
             fieldProperties.put("text", StringUtils.substringAfterLast(serviceName, "."));
             fieldProperties.put("fieldDescription", StringUtils.substringAfterLast(serviceName, "."));
             fieldProperties.put("uncheckedValue", Boolean.FALSE);
