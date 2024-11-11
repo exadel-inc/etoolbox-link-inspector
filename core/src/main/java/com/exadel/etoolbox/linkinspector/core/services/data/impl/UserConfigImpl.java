@@ -42,7 +42,7 @@ public class UserConfigImpl implements UserConfig {
 
     private Map<String, Object> getProperties(String configId) {
         try(ResourceResolver resourceResolver = repositoryHelper.getServiceResourceResolver()){
-            Resource resource = resourceResolver.getResource("/conf/etoolbox-link-inspector/data/optionsconfig/" + StringUtils.substringBeforeLast(configId, "$"));
+            Resource resource = resourceResolver.getResource(ConfigServiceImpl.CONFIG_PATH + "/" + StringUtils.substringBeforeLast(configId, "$"));
             if (resource == null) {
                 return Collections.emptyMap();
             }
@@ -72,7 +72,7 @@ public class UserConfigImpl implements UserConfig {
             if (isNotBlank(override)) {
                 if (NumberUtils.isCreatable(override.toString())) {
                     return Integer.parseInt(override.toString());
-                } else if ("false".equals(override) || "true".equals(override)) {
+                } else if (StringUtils.equalsAnyIgnoreCase(override.toString(), "true", "false")) {
                     return Boolean.parseBoolean(override.toString());
                 }
                 return override;

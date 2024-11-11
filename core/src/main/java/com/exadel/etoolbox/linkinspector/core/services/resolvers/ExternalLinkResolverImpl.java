@@ -75,7 +75,7 @@ public class ExternalLinkResolverImpl implements LinkResolver {
         ) String userAgent() default StringUtils.EMPTY;
 
         @AttributeDefinition(
-                name = "Activate service",
+                name = "Enable service",
                 description = "Is service active or not"
         ) boolean linkType() default false;
     }
@@ -102,7 +102,7 @@ public class ExternalLinkResolverImpl implements LinkResolver {
     private int connectionTimeout;
     private int socketTimeout;
     private String userAgent;
-    private boolean isActive;
+    private boolean enabled;
 
     @Override
     public String getId() {
@@ -111,7 +111,7 @@ public class ExternalLinkResolverImpl implements LinkResolver {
 
     @Override
     public Collection<Link> getLinks(String source) {
-        if (!isActive) {
+        if (!enabled) {
             return Collections.emptyList();
         }
         Set<Link> links = new HashSet<>();
@@ -147,7 +147,7 @@ public class ExternalLinkResolverImpl implements LinkResolver {
         connectionTimeout = config.connectionTimeout();
         socketTimeout = config.socketTimeout();
         userAgent = config.userAgent();
-        isActive = config.linkType();
+        enabled = config.linkType();
         buildCloseableHttpClient();
     }
 

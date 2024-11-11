@@ -64,13 +64,13 @@ public class InternalLinkResolverImpl implements LinkResolver {
         String internalLinksHost() default StringUtils.EMPTY;
 
         @AttributeDefinition(
-                name = "Activate service",
+                name = "Enable service",
                 description = "Is service active or not"
         ) boolean linkType() default false;
     }
 
     private String internalLinksHost;
-    private boolean isActive;
+    private boolean enabled;
 
     @Reference
     private LinkResolver externalLinkResolver;
@@ -83,7 +83,7 @@ public class InternalLinkResolverImpl implements LinkResolver {
     private void activate(Config config){
         config = userConfig.apply(config);
         this.internalLinksHost = config.internalLinksHost();
-        this.isActive = config.linkType();
+        this.enabled = config.linkType();
     }
 
 
@@ -94,7 +94,7 @@ public class InternalLinkResolverImpl implements LinkResolver {
 
     @Override
     public Collection<Link> getLinks(String source) {
-        if (!isActive) {
+        if (!enabled) {
             return Collections.emptyList();
         }
         Set<Link> links = new HashSet<>();

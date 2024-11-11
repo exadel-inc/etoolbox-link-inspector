@@ -57,8 +57,8 @@
                                   granite:id="elc-options-savesettings"
                                   method="post"
                                   foundationForm="true"
-                                  dataPath="/conf/etoolbox-link-inspector/data/optionsconfig"
-                                  action="/conf/etoolbox-link-inspector/data/optionsconfig"
+                                  dataPath="/conf/etoolbox/link-inspector"
+                                  action="/conf/etoolbox/link-inspector"
                                   style="vertical">
                                 <items jcr:primaryType="nt:unstructured">
                                     <tabs jcr:primaryType="nt:unstructured"
