@@ -18,6 +18,7 @@ import com.exadel.etoolbox.linkinspector.api.Link;
 import com.exadel.etoolbox.linkinspector.api.LinkResolver;
 import com.exadel.etoolbox.linkinspector.core.models.LinkImpl;
 import com.exadel.etoolbox.linkinspector.core.services.data.UserConfig;
+import com.exadel.etoolbox.linkinspector.core.services.resolvers.configs.ExternalLinkResolverConfig;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.config.RequestConfig;
@@ -32,9 +33,7 @@ import org.apache.http.osgi.services.HttpClientBuilderFactory;
 import org.apache.http.util.EntityUtils;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.osgi.service.component.annotations.*;
-import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
-import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,40 +49,12 @@ import java.util.regex.Pattern;
  * Validates external links via sending HEAD requests concurrently using {@link PoolingHttpClientConnectionManager}
  */
 @Component(service = {LinkResolver.class, ExternalLinkResolverImpl.class}, immediate = true)
-@Designate(ocd = ExternalLinkResolverImpl.Configuration.class)
+@Designate(ocd = ExternalLinkResolverConfig.class)
 public class ExternalLinkResolverImpl implements LinkResolver {
-
-    @ObjectClassDefinition(
-            name = "EToolbox Link Inspector - External Link Resolver",
-            description = "Validates external links"
-    )
-    @interface Configuration {
-        @AttributeDefinition(
-                name = "Connection timeout",
-                description = "The time (in milliseconds) for connection to disconnect"
-        ) int connectionTimeout() default DEFAULT_CONNECTION_TIMEOUT;
-
-        @AttributeDefinition(
-                name = "Socket timeout",
-                description = "The timeout (in milliseconds) for socket"
-        ) int socketTimeout() default DEFAULT_SOCKET_TIMEOUT;
-
-        @AttributeDefinition(
-                name = "User agent",
-                description = "Example - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like " +
-                        "Gecko) Chrome/86.0.4240.111 Safari/537.36"
-        ) String userAgent() default StringUtils.EMPTY;
-
-        @AttributeDefinition(
-                name = "Enable service",
-                description = "Is service active or not"
-        ) boolean linkType() default false;
-    }
 
     private static final Logger LOG = LoggerFactory.getLogger(ExternalLinkResolverImpl.class);
 
     private static final int DEFAULT_CONNECTION_TIMEOUT = 5000;
-    private static final int DEFAULT_SOCKET_TIMEOUT = 15000;
     private static final int DEFAULT_MAX_TOTAL = 1000;
     private static final int DEFAULT_MAX_PER_ROUTE = 1000;
 
@@ -140,10 +111,15 @@ public class ExternalLinkResolverImpl implements LinkResolver {
         }
     }
 
+    @Override
+    public boolean isEnabled() {
+        return enabled;
+    }
+
     @Activate
     @Modified
-    void activate(Configuration config) {
-        config = userConfig.apply(config);
+    void activate(ExternalLinkResolverConfig config) {
+        config = userConfig.apply(config, this.getClass());
         connectionTimeout = config.connectionTimeout();
         socketTimeout = config.socketTimeout();
         userAgent = config.userAgent();

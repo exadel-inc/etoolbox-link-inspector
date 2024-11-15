@@ -4,5 +4,5 @@ import java.lang.annotation.Annotation;
 
 public interface UserConfig {
 
-    <T extends Annotation> T apply(T baseConfig);
+    <T extends Annotation> T apply(T baseConfig, Class<?> clazz);
 }

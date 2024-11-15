@@ -57,19 +57,19 @@
                     sling:resourceType="granite/ui/components/foundation/container">
                 <items jcr:primaryType="nt:unstructured">
                     <table
-                        granite:rel="etoolbox-link-inspector"
-                        jcr:primaryType="nt:unstructured"
-                        sling:resourceType="granite/ui/components/coral/foundation/table"
-                        src="/content/etoolbox-link-inspector/link-inspector/jcr:content/views/container/items/table{.offset,limit}.html{+id}?page=${param.page}&amp;type=${param.type}&amp;substring=${param.substring}"
-                        itemprop="item"
-                        limit="{Long}50"
-                        layoutId="list"
-                        maximized="{Boolean}true"
-                        modeGroup="etoolbox-link-inspector"
-                        path="${requestPathInfo.suffix}"
-                        selectionMode="row"
-                        sortMode="local"
-                        stateId="link-inspector-ui">
+                            granite:rel="etoolbox-link-inspector"
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/table"
+                            src="/content/etoolbox-link-inspector/link-inspector/jcr:content/views/container/items/table{.offset,limit}.html{+id}?page=${param.page}&amp;type=${param.type}&amp;substring=${param.substring}"
+                            itemprop="item"
+                            limit="{Long}50"
+                            layoutId="list"
+                            maximized="{Boolean}true"
+                            modeGroup="etoolbox-link-inspector"
+                            path="${requestPathInfo.suffix}"
+                            selectionMode="row"
+                            sortMode="local"
+                            stateId="link-inspector-ui">
                         <columns
                                 jcr:primaryType="nt:unstructured"
                                 class="elc-card">
@@ -126,13 +126,28 @@
                         jcr:primaryType="nt:unstructured"
                         sling:resourceType="granite/ui/components/coral/foundation/collection/action"
                         granite:id="elc-filter-options"
-                        action="cq-admin.etoolbox.linkinspector.action.filter-options"
+                        action="foundation.dialog"
                         icon="filter"
                         rel="etoolbox-link-inspector-filter-options"
                         target=".etoolbox-link-inspector"
                         text="Filter"
                         title="Filter"
-                        variant="minimal"/>
+                        variant="minimal">
+                    <data jcr:primaryType="nt:unstructured"
+                          nesting="hide"
+                          src.uritemplate="/content/etoolbox-link-inspector/link-inspector/filterOptions.html"/>
+                </filterOptions>
+                <!--                <filterOptions-->
+                <!--                        jcr:primaryType="nt:unstructured"-->
+                <!--                        sling:resourceType="granite/ui/components/coral/foundation/collection/action"-->
+                <!--                        granite:id="elc-filter-options"-->
+                <!--                        action="cq-admin.etoolbox.linkinspector.action.filter-options"-->
+                <!--                        icon="filter"-->
+                <!--                        rel="etoolbox-link-inspector-filter-options"-->
+                <!--                        target=".etoolbox-link-inspector"-->
+                <!--                        text="Filter"-->
+                <!--                        title="Filter"-->
+                <!--                        variant="minimal"/>-->
                 <deleteReport
                         jcr:primaryType="nt:unstructured"
                         sling:resourceType="granite/ui/components/coral/foundation/collection/action"
@@ -167,4 +182,74 @@
             </secondary>
         </actions>
     </jcr:content>
+    <filterOptions
+            jcr:primaryType="nt:unstructured"
+            jcr:title="Filter Links"
+            sling:resourceType="granite/ui/components/coral/foundation/dialog"
+            granite:class="modal-form"
+            granite:id="filter--dialog">
+        <items jcr:primaryType="nt:unstructured">
+            <form jcr:primaryType="nt:unstructured"
+                  sling:resourceType="granite/ui/components/coral/foundation/form"
+                  foundationForm="{Boolean}true"
+                  style="vertical">
+                <items jcr:primaryType="nt:unstructured">
+                    <content jcr:primaryType="nt:unstructured"
+                             jcr:title="Add by Path"
+                             sling:resourceType="granite/ui/components/coral/foundation/fixedcolumns">
+                        <items jcr:primaryType="nt:unstructured">
+                            <column jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/container">
+                                <items jcr:primaryType="nt:unstructured">
+                                    <type
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/form/select"
+                                            granite:id="linkTypesSelect"
+                                            fieldLabel="By type"
+                                            name="./linkTypes">
+                                        <datasource jcr:primaryType="nt:unstructured"
+                                                    sling:resourceType="/bin/etoolbox/link-inspector/settings/linktypes"/>
+                                    </type>
+                                    <text
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                                            granite:id="byTextFilter"
+                                            fieldLabel="By text"
+                                            name="./byText"/>
+                                    <buttons jcr:primaryType="nt:unstructured"
+                                             sling:resourceType="granite/ui/components/coral/foundation/container"
+                                             granite:id="filterButtons">
+                                        <items jcr:primaryType="nt:unstructured">
+                                            <resetButton
+                                                    jcr:primaryType="nt:unstructured"
+                                                    sling:resourceType="granite/ui/components/coral/foundation/button"
+                                                    type="reset"
+                                                    text="Reset"
+                                                    variant="secondary"
+                                                    granite:class="foundation-ui-notification coral-Form-fieldwrapper"/>
+                                            <cancelButton
+                                                    jcr:primaryType="nt:unstructured"
+                                                    sling:resourceType="granite/ui/components/coral/foundation/button"
+                                                    granite:id="dialog-cancel"
+                                                    text="Cancel"
+                                                    variant="secondary"
+                                                    granite:class="foundation-ui-notification coral-Form-fieldwrapper"/>
+                                            <okButton
+                                                    jcr:primaryType="nt:unstructured"
+                                                    sling:resourceType="granite/ui/components/coral/foundation/button"
+                                                    granite:id="dialog-action"
+                                                    text="Apply"
+                                                    variant="primary"
+                                                    granite:class="foundation-ui-notification coral-Form-fieldwrapper"/>
+                                        </items>
+                                    </buttons>
+
+                                </items>
+                            </column>
+                        </items>
+                    </content>
+                </items>
+            </form>
+        </items>
+    </filterOptions>
 </jcr:root>

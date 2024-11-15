@@ -18,6 +18,8 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.component.annotations.ReferencePolicyOption;
 import org.osgi.service.metatype.AttributeDefinition;
 import org.osgi.service.metatype.MetaTypeInformation;
 import org.osgi.service.metatype.MetaTypeService;
@@ -35,8 +37,8 @@ public class SettingsDataSourceServlet extends SlingSafeMethodsServlet {
     @Reference
     private transient MetaTypeService metaTypeService;
 
-    @Reference
-    private transient List<LinkResolver> linkResolvers;
+    @Reference(policy = ReferencePolicy.DYNAMIC, policyOption = ReferencePolicyOption.GREEDY)
+    private transient volatile List<LinkResolver> linkResolvers;
 
     @Override
     protected void doGet(final SlingHttpServletRequest request, final SlingHttpServletResponse response) {

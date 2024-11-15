@@ -22,4 +22,9 @@ public class MockCustomLinkResolver implements LinkResolver {
     public void validate(Link link, ResourceResolver resourceResolver) {
         // No operation
     }
+
+    @Override
+    public boolean isEnabled() {
+        return false;
+    }
 }

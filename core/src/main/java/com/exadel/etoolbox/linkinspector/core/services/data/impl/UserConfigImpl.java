@@ -31,8 +31,8 @@ public class UserConfigImpl implements UserConfig {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T extends Annotation> T apply(T baseConfig) {
-        Handler<T> handler = new Handler<>(baseConfig, getProperties(baseConfig.annotationType().getName()));
+    public <T extends Annotation> T apply(T baseConfig, Class<?> clazz) {
+        Handler<T> handler = new Handler<>(baseConfig, getProperties(clazz.getName()));
         Object proxy = Proxy.newProxyInstance(
                 baseConfig.annotationType().getClassLoader(),
                 new Class[]{baseConfig.annotationType()},
@@ -42,7 +42,7 @@ public class UserConfigImpl implements UserConfig {
 
     private Map<String, Object> getProperties(String configId) {
         try(ResourceResolver resourceResolver = repositoryHelper.getServiceResourceResolver()){
-            Resource resource = resourceResolver.getResource(ConfigServiceImpl.CONFIG_PATH + "/" + StringUtils.substringBeforeLast(configId, "$"));
+            Resource resource = resourceResolver.getResource(ConfigServiceImpl.CONFIG_PATH + "/" + configId);
             if (resource == null) {
                 return Collections.emptyMap();
             }

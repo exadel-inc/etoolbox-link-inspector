@@ -38,4 +38,6 @@ public interface LinkResolver {
      * @param resourceResolver {@link ResourceResolver} object; a non-null reference is expected
      */
     void validate(Link link, ResourceResolver resourceResolver);
+
+    boolean isEnabled();
 }

@@ -19,7 +19,7 @@ import java.util.*;
 
 @Component(service = {Servlet.class})
 @SlingServletResourceTypes(
-        resourceTypes = "/bin/etoolbox/link-inspector/settings/linktypes",
+        resourceTypes = "/bin/etoolbox/link-inspector/settings/linktypes-checkbox",
         methods = HttpConstants.METHOD_GET)
 public class LinkTypesDataSourceServlet extends SlingSafeMethodsServlet {
 
