@@ -39,11 +39,9 @@
     })
 
     $(document).on('click', '#dialog-cancel', function (e) {
-        var searchParams = new URL(document.location).searchParams
-        searchParams.delete('type');
-        searchParams.delete('substring');
-        searchParams.delete('page')
-        document.location.search = searchParams;
+        var url = new URL(document.location)
+        url.search = '';
+        document.location = url;
     })
 
 })(Granite, Granite.$, Coral);

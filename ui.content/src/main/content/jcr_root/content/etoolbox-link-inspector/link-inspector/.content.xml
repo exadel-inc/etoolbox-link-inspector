@@ -216,34 +216,6 @@
                                             granite:id="byTextFilter"
                                             fieldLabel="By text"
                                             name="./byText"/>
-                                    <buttons jcr:primaryType="nt:unstructured"
-                                             sling:resourceType="granite/ui/components/coral/foundation/container"
-                                             granite:id="filterButtons">
-                                        <items jcr:primaryType="nt:unstructured">
-                                            <resetButton
-                                                    jcr:primaryType="nt:unstructured"
-                                                    sling:resourceType="granite/ui/components/coral/foundation/button"
-                                                    type="reset"
-                                                    text="Reset"
-                                                    variant="secondary"
-                                                    granite:class="foundation-ui-notification coral-Form-fieldwrapper"/>
-                                            <cancelButton
-                                                    jcr:primaryType="nt:unstructured"
-                                                    sling:resourceType="granite/ui/components/coral/foundation/button"
-                                                    granite:id="dialog-cancel"
-                                                    text="Cancel"
-                                                    variant="secondary"
-                                                    granite:class="foundation-ui-notification coral-Form-fieldwrapper"/>
-                                            <okButton
-                                                    jcr:primaryType="nt:unstructured"
-                                                    sling:resourceType="granite/ui/components/coral/foundation/button"
-                                                    granite:id="dialog-action"
-                                                    text="Apply"
-                                                    variant="primary"
-                                                    granite:class="foundation-ui-notification coral-Form-fieldwrapper"/>
-                                        </items>
-                                    </buttons>
-
                                 </items>
                             </column>
                         </items>
@@ -251,5 +223,25 @@
                 </items>
             </form>
         </items>
+        <footer jcr:primaryType="nt:unstructured">
+            <resetButton
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/button"
+                    type="reset"
+                    text="Reset"
+                    variant="secondary"/>
+            <cancelButton
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/button"
+                    granite:id="dialog-cancel"
+                    text="Cancel"
+                    variant="secondary"/>
+            <okButton
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/button"
+                    granite:id="dialog-action"
+                    text="Apply"
+                    variant="primary"/>
+        </footer>
     </filterOptions>
 </jcr:root>
