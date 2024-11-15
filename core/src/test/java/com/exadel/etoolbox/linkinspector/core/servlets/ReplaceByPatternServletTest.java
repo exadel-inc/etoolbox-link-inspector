@@ -18,6 +18,7 @@ import com.exadel.etoolbox.linkinspector.core.services.cache.GridResourcesCache;
 import com.exadel.etoolbox.linkinspector.core.services.cache.impl.GridResourcesCacheImpl;
 import com.exadel.etoolbox.linkinspector.core.services.data.DataFeedService;
 import com.exadel.etoolbox.linkinspector.core.services.data.impl.DataFeedServiceImpl;
+import com.exadel.etoolbox.linkinspector.core.services.data.impl.UserConfigImpl;
 import com.exadel.etoolbox.linkinspector.core.services.data.models.GridResource;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.LinkHelper;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.PackageHelper;
@@ -47,7 +48,6 @@ import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
-import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletRequest;
 import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletResponse;
 import org.junit.jupiter.api.Assertions;
@@ -63,7 +63,10 @@ import javax.servlet.ServletOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
@@ -103,7 +106,7 @@ class ReplaceByPatternServletTest {
     private static final String TEST_EXCEPTION_MSG = "Test exception message";
     private static final String ADVANCED_MODE = "advancedMode";
 
-    private final AemContext context = new AemContext(ResourceResolverType.JCR_MOCK);
+    private final AemContext context = new AemContext();
 
     private ReplaceByPatternServlet fixture;
 
@@ -129,6 +132,7 @@ class ReplaceByPatternServletTest {
                         "statusCode", org.apache.http.HttpStatus.SC_NOT_FOUND,
                         "statusMessage", "Not Found")
         );
+        context.registerInjectActivateService(new UserConfigImpl());
         context.registerInjectActivateService(new ExternalLinkResolverImpl());
         context.registerInjectActivateService(new InternalLinkResolverImpl());
         linkHelper = context.registerInjectActivateService(new LinkHelperImpl());
