@@ -161,14 +161,6 @@
                         variant="minimal"/>
             </primary>
             <secondary jcr:primaryType="nt:unstructured">
-                <scan
-                        jcr:primaryType="nt:unstructured"
-                        sling:resourceType="granite/ui/components/coral/foundation/collection/action"
-                        granite:id="scan"
-                        granite:title="Scan for links"
-                        text="Scan now"
-                        icon="play"
-                        variant="primary"/>
                 <settings
                         jcr:primaryType="nt:unstructured"
                         sling:resourceType="granite/ui/components/coral/foundation/anchorbutton"
@@ -177,18 +169,14 @@
                         text="Settings"
                         granite:title="Settings"
                         variant="secondary"/>
-                <download
+                <scan
                         jcr:primaryType="nt:unstructured"
-                        sling:resourceType="granite/ui/components/coral/foundation/anchorbutton"
-                        text="Download"
-                        variant="primary"
-                        granite:class="elc-download-report-button"
-                        x-cq-linkchecker="skip"/>
-                        rel="etoolbox-link-inspector-conf-options"
-                        target=".etoolbox-link-inspector"
-                        text="Options"
-                        title="Options"
-                        variant="secondary"/>
+                        sling:resourceType="granite/ui/components/coral/foundation/collection/action"
+                        granite:id="scan"
+                        granite:title="Scan for links"
+                        text="Scan now"
+                        icon="play"
+                        variant="primary"/>
             </secondary>
         </actions>
     </jcr:content>
