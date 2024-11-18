@@ -48,6 +48,7 @@ import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
+import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletRequest;
 import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletResponse;
 import org.junit.jupiter.api.Assertions;
@@ -106,7 +107,7 @@ class ReplaceByPatternServletTest {
     private static final String TEST_EXCEPTION_MSG = "Test exception message";
     private static final String ADVANCED_MODE = "advancedMode";
 
-    private final AemContext context = new AemContext();
+    private final AemContext context = new AemContext(ResourceResolverType.JCR_MOCK);
 
     private ReplaceByPatternServlet fixture;
 
@@ -118,7 +119,7 @@ class ReplaceByPatternServletTest {
     private MockSlingHttpServletResponse response;
 
     @BeforeEach
-    void setup() throws NoSuchFieldException {
+    void setup() {
         request = context.request();
         response = context.response();
 

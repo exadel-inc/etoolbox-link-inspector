@@ -140,6 +140,9 @@ class GridResourcesGeneratorImplTest {
                         MockHttpClientBuilderFactory.PN_STATUS_CODE, HttpStatus.SC_NOT_FOUND,
                         MockHttpClientBuilderFactory.PN_STATUS_MESSAGE, "Not Found")
         );
+
+        context.registerInjectActivateService(new UserConfigImpl());
+
         context.registerInjectActivateService(new ExternalLinkResolverImpl());
 
         context.registerInjectActivateService(new InternalLinkResolverImpl());
