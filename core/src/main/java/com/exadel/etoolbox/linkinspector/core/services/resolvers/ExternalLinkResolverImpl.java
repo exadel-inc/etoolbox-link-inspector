@@ -120,10 +120,10 @@ public class ExternalLinkResolverImpl implements LinkResolver {
     @Modified
     void activate(ExternalLinkResolverConfig config) {
         config = userConfig.apply(config, this.getClass());
+        enabled = config.enabled();
         connectionTimeout = config.connectionTimeout();
         socketTimeout = config.socketTimeout();
         userAgent = config.userAgent();
-        enabled = config.linkType();
         buildCloseableHttpClient();
     }
 

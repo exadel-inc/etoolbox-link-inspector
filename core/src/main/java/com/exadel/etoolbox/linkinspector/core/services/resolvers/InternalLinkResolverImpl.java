@@ -64,8 +64,8 @@ public class InternalLinkResolverImpl implements LinkResolver {
     @Modified
     private void activate(InternalLinkResolverConfig config){
         config = userConfig.apply(config, this.getClass());
+        this.enabled = config.enabled();
         this.internalLinksHost = config.internalLinksHost();
-        this.enabled = config.linkType();
     }
 
 
