@@ -38,10 +38,15 @@
         initFiltersDialog(new URL(document.location).searchParams);
     })
 
-    $(document).on('click', '#dialog-cancel', function () {
+    $(document).on('click', '#dialog-reset', function () {
         var url = new URL(document.location)
         url.search = '';
         document.location = url;
     })
+
+    $(document).ready(function () {
+        let searchParams = new URL(document.location).searchParams;
+        $('#elc-filter-options').toggleClass('elc-filter-active', searchParams && searchParams.get('type') != null || searchParams.get('substring') != null)
+    });
 
 })(Granite, Granite.$);

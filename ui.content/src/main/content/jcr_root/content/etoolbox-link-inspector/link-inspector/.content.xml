@@ -216,7 +216,7 @@
             <resetButton
                     jcr:primaryType="nt:unstructured"
                     sling:resourceType="granite/ui/components/coral/foundation/button"
-                    type="reset"
+                    granite:id="dialog-reset"
                     text="Reset"
                     variant="secondary"/>
             <cancelButton
@@ -224,7 +224,11 @@
                     sling:resourceType="granite/ui/components/coral/foundation/button"
                     granite:id="dialog-cancel"
                     text="Cancel"
-                    variant="secondary"/>
+                    variant="secondary">
+                <parentConfig
+                        jcr:primaryType="nt:unstructured"
+                        close="{Boolean}true"/>
+            </cancelButton>
             <okButton
                     jcr:primaryType="nt:unstructured"
                     sling:resourceType="granite/ui/components/coral/foundation/button"
