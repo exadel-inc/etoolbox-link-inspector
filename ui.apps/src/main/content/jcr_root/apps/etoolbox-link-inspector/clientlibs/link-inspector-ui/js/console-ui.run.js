@@ -14,72 +14,35 @@
 
 /**
  * EToolbox Link Inspector clientlib.
- * Job status check and run functionality.
+ * Logic for running a manual scan
  */
-(function (document, $) {
+(function (window, document, $) {
     'use strict';
 
-    const TRIGGER_DATA_FEED_GENERATION = '/content/etoolbox-link-inspector/servlet/triggerDataFeedGeneration';
-    const CHECK_JOB_STATUS = '/content/etoolbox-link-inspector/servlet/jobStatus';
+    const TRIGGER_DATA_FEED_GENERATION = '/content/etoolbox/contractor/servlet/task';
+    const ui = $(window).adaptTo('foundation-ui');
 
-    function jobIsActive() {
-        let isActive = false;
-        $.ajax({
-            url: CHECK_JOB_STATUS,
-            type: 'GET',
-            async: false,
-            success: function (data) {
-                isActive = data && data.status && data.status == 'ACTIVE' | 'QUEUED' | 'GIVEN_UP';
-            }
+    Coral.commons.ready($('body'), onReady);
+    $(document).on('click', '#scan', onScanClicked);
+
+    function onReady() {
+        $('#wait').on('contractor-ticker:end', function () {
+            setTimeout(() => window.location.reload(), 1000);
         });
-        return isActive;
     }
 
-    function onRunAction(callback) {
+    function onScanClicked() {
+        const formData = new FormData();
+        formData.append('topic', 'etoolbox/link-inspector/job/datafeed/generate');
+        formData.append('exclusive', 'true');
         $.ajax({
             url: TRIGGER_DATA_FEED_GENERATION,
-            type: 'GET',
-            success: callback
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false
+        }).error(function (e) {
+            ui.notify('Error', e.responseText || e.statusText, 'error');
         });
     }
-
-    function createInProgressMessage($popover) {
-        const $container = $('<p class="u-coral-margin"></p>').text('Job status: ');
-        $('<b>...in progress</b>').appendTo($container);
-        $('<br/>').appendTo($container);
-        $('<span>scan may take some time to complete</span>').appendTo($container);;
-        $popover.find('coral-popover-content').append($container);
-    }
-
-    function createRunJobMessage($popover) {
-        const $container = $('<p class="u-coral-margin"></p>');
-        $('<button class="elc-run-button">Scan</button>').appendTo($container);
-        $popover.find('coral-popover-content').append($container);
-    }
-
-    function beforeOpenPopover(e) {
-        jobIsActive() ? createInProgressMessage($(e.currentTarget)) : createRunJobMessage($(e.currentTarget));
-    }
-
-    function beforeClosePopover(e) {
-        removeLastChild($(e.currentTarget));
-    }
-
-    function removeLastChild($popover){
-       const $popoverContent = $popover.find('coral-popover-content');
-       $popoverContent.children().last().remove();
-    }
-
-    $(document).on('coral-overlay:beforeopen', '.elc-coral-popover', beforeOpenPopover);
-
-    $(document).on('coral-overlay:beforeclose', '.elc-coral-popover', beforeClosePopover);
-
-    $(document).on('click', '.elc-run-button', function() {
-        onRunAction(function() {
-            const $popover = $('.elc-coral-popover');
-            removeLastChild($popover);
-            createInProgressMessage($popover);
-        });
-    });
-
-})(document, Granite.$);
+})(window, document, Granite.$);

@@ -22,6 +22,7 @@ import com.exadel.etoolbox.linkinspector.core.services.data.models.GridResource;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.RepositoryHelper;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.impl.LinkHelperImpl;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.impl.RepositoryHelperImpl;
+import com.exadel.etoolbox.linkinspector.core.services.mocks.MockContractor;
 import com.exadel.etoolbox.linkinspector.core.services.mocks.MockHttpClientBuilderFactory;
 import com.exadel.etoolbox.linkinspector.core.services.mocks.MockCustomLinkResolver;
 import com.exadel.etoolbox.linkinspector.core.services.mocks.MockRepositoryHelper;
@@ -161,6 +162,7 @@ class GridResourcesGeneratorImplTest {
         context.registerInjectActivateService(configService);
 
         context.registerInjectActivateService(new LinkHelperImpl());
+        context.registerInjectActivateService(new MockContractor());
 
         fixture = context.registerInjectActivateService(new GridResourcesGeneratorImpl());
     }

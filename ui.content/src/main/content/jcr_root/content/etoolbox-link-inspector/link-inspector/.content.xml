@@ -57,19 +57,19 @@
                     sling:resourceType="granite/ui/components/foundation/container">
                 <items jcr:primaryType="nt:unstructured">
                     <table
-                            granite:rel="etoolbox-link-inspector"
-                            jcr:primaryType="nt:unstructured"
-                            sling:resourceType="granite/ui/components/coral/foundation/table"
-                            src="/content/etoolbox-link-inspector/link-inspector/jcr:content/views/container/items/table{.offset,limit}.html{+id}?page=${param.page}&amp;type=${param.type}&amp;substring=${param.substring}"
-                            itemprop="item"
-                            limit="{Long}50"
-                            layoutId="list"
-                            maximized="{Boolean}true"
-                            modeGroup="etoolbox-link-inspector"
-                            path="${requestPathInfo.suffix}"
-                            selectionMode="row"
-                            sortMode="local"
-                            stateId="link-inspector-ui">
+                        granite:rel="etoolbox-link-inspector"
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="granite/ui/components/coral/foundation/table"
+                        src="/content/etoolbox-link-inspector/link-inspector/jcr:content/views/container/items/table{.offset,limit}.html{+id}?page=${param.page}&amp;type=${param.type}&amp;substring=${param.substring}"
+                        itemprop="item"
+                        limit="{Long}50"
+                        layoutId="list"
+                        maximized="{Boolean}true"
+                        modeGroup="etoolbox-link-inspector"
+                        path="${requestPathInfo.suffix}"
+                        selectionMode="row"
+                        sortMode="local"
+                        stateId="link-inspector-ui">
                         <columns
                                 jcr:primaryType="nt:unstructured"
                                 class="elc-card">
@@ -102,6 +102,18 @@
                                 sling:resourceType="etoolbox-link-inspector/components/gridDatasource"
                                 itemResourceType="etoolbox-link-inspector/components/gridConfig"/>
                     </table>
+                    <statistics
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/include"
+                            path="/content/etoolbox-link-inspector/data/stats"
+                            resourceType="etoolbox-link-inspector/components/stats/statsPanel"/>
+                    <ticker jcr:primaryType="nt:unstructured"
+                            sling:resourceType="etoolbox-contractor/components/ticker"
+                            granite:id="wait"
+                            topic="etoolbox/link-inspector/job/datafeed/generate"
+                            controls="#scan"
+                            tick="200"
+                            tracks="/content/etoolbox/contractor/servlet/task"/>
                 </items>
             </container>
         </views>
@@ -149,18 +161,22 @@
                         variant="minimal"/>
             </primary>
             <secondary jcr:primaryType="nt:unstructured">
-                <options
+                <scan
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="granite/ui/components/coral/foundation/collection/action"
+                        granite:id="scan"
+                        granite:title="Scan for links"
+                        text="Scan now"
+                        icon="play"
+                        variant="primary"/>
+                <settings
                         jcr:primaryType="nt:unstructured"
                         sling:resourceType="granite/ui/components/coral/foundation/anchorbutton"
                         href="/etoolbox/link-inspector/settings.html"
                         icon="gears"
                         text="Settings"
                         granite:title="Settings"
-                        variant="minimal"/>
-                <stats
-                        jcr:primaryType="nt:unstructured"
-                        path="/content/etoolbox-link-inspector/data/stats"
-                        sling:resourceType="etoolbox-link-inspector/components/stats/statsButton"/>
+                        variant="secondary"/>
                 <download
                         jcr:primaryType="nt:unstructured"
                         sling:resourceType="granite/ui/components/coral/foundation/anchorbutton"
@@ -168,6 +184,11 @@
                         variant="primary"
                         granite:class="elc-download-report-button"
                         x-cq-linkchecker="skip"/>
+                        rel="etoolbox-link-inspector-conf-options"
+                        target=".etoolbox-link-inspector"
+                        text="Options"
+                        title="Options"
+                        variant="secondary"/>
             </secondary>
         </actions>
     </jcr:content>
