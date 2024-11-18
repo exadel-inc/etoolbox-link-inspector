@@ -70,9 +70,7 @@
                         selectionMode="row"
                         sortMode="local"
                         stateId="link-inspector-ui">
-                        <columns
-                                jcr:primaryType="nt:unstructured"
-                                class="elc-card">
+                        <columns jcr:primaryType="nt:unstructured">
                             <select
                                     jcr:primaryType="nt:unstructured"
                                     select="{Boolean}true"/>
