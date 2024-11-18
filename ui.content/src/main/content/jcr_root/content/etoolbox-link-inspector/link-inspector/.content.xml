@@ -197,7 +197,7 @@
                                             fieldLabel="By type"
                                             name="./linkTypes">
                                         <datasource jcr:primaryType="nt:unstructured"
-                                                    sling:resourceType="/bin/etoolbox/link-inspector/settings/linktypes"/>
+                                                    sling:resourceType="/bin/etoolbox/link-inspector/settings/resolvers"/>
                                     </type>
                                     <text
                                             jcr:primaryType="nt:unstructured"

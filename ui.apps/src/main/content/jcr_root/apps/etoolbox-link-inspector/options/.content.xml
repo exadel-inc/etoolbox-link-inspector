@@ -170,7 +170,7 @@
                                                         jcr:primaryType="nt:unstructured"
                                                         sling:resourceType="granite/ui/components/coral/foundation/form/fieldset">
                                                     <datasource jcr:primaryType="nt:unstructured"
-                                                                sling:resourceType="/bin/etoolbox/link-inspector/settings/resolvers"/>
+                                                                sling:resourceType="/bin/etoolbox/link-inspector/settings/resolvers/cb"/>
                                                 </resolvers>
                                             </items>
                                         </main>
