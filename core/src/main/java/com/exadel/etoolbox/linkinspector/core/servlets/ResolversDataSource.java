@@ -37,6 +37,8 @@ import java.util.Map;
 })
 public class ResolversDataSource extends SlingSafeMethodsServlet {
 
+    private static final String PROP_TEXT = "text";
+
     @Reference
     private transient MetaTypeService metaTypeService;
 
@@ -49,8 +51,8 @@ public class ResolversDataSource extends SlingSafeMethodsServlet {
             @NonNull SlingHttpServletResponse response) {
 
         List<Resource> resolverFields = new ArrayList<>();
+        boolean isItemDataSource = StringUtils.endsWith(request.getResource().getResourceType(), "/resolvers");
         for (LinkResolver linkResolver : linkResolvers) {
-            boolean isItemDataSource = StringUtils.endsWith(request.getResource().getResourceType(), "/resolvers");
             Resource item = isItemDataSource
                     ? createListItem(request, linkResolver)
                     : createCheckBox(request, linkResolver);
@@ -58,6 +60,9 @@ public class ResolversDataSource extends SlingSafeMethodsServlet {
                 resolverFields.add(item);
             }
         }
+        resolverFields.sort((o1, o2) -> StringUtils.compare(
+                o1.getValueMap().get(PROP_TEXT, String.class),
+                o2.getValueMap().get(PROP_TEXT, String.class)));
         DataSource dataSource = new SimpleDataSource(resolverFields.iterator());
         request.setAttribute(DataSource.class.getName(), dataSource);
     }
@@ -67,7 +72,7 @@ public class ResolversDataSource extends SlingSafeMethodsServlet {
         fieldProperties.put(JcrResourceConstants.SLING_RESOURCE_TYPE_PROPERTY, "granite/ui/components/coral/foundation/form/checkbox");
         String serviceName = linkResolver.getClass().getName();
         fieldProperties.put("name", "./" + serviceName + "/enabled");
-        fieldProperties.put("text", OcdUtil.getLabel(linkResolver, metaTypeService));
+        fieldProperties.put(PROP_TEXT, OcdUtil.getLabel(linkResolver, metaTypeService));
         fieldProperties.put("fieldDescription", StringUtils.substringAfterLast(serviceName, "."));
         fieldProperties.put("value", Boolean.TRUE);
         fieldProperties.put("uncheckedValue", Boolean.FALSE);
@@ -85,7 +90,7 @@ public class ResolversDataSource extends SlingSafeMethodsServlet {
         }
         ValueMap valueMap = new ValueMapDecorator(new HashMap<>());
         valueMap.put("value", linkResolver.getId());
-        valueMap.put("text", linkResolver.getId());
+        valueMap.put(PROP_TEXT, linkResolver.getId());
         return new ValueMapResource(
                 request.getResourceResolver(),
                 StringUtils.EMPTY,
