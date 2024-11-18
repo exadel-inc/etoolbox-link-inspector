@@ -1,12 +1,15 @@
 package com.exadel.etoolbox.linkinspector.core.servlets;
 
-
 import com.adobe.granite.ui.components.ds.DataSource;
 import com.adobe.granite.ui.components.ds.SimpleDataSource;
 import com.exadel.etoolbox.linkinspector.api.LinkResolver;
 import com.exadel.etoolbox.linkinspector.core.services.util.GraniteUtil;
+import com.exadel.etoolbox.linkinspector.core.services.util.OcdUtil;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
@@ -32,7 +35,10 @@ import java.util.*;
 @SlingServletResourceTypes(
         resourceTypes = "/bin/etoolbox/link-inspector/settings",
         methods = HttpConstants.METHOD_GET)
-public class SettingsDataSourceServlet extends SlingSafeMethodsServlet {
+public class SettingsDataSource extends SlingSafeMethodsServlet {
+
+    private static final String RESTYPE_TEXT_FIELD = "granite/ui/components/coral/foundation/form/textfield";
+    private static final String RESTYPE_NUMBER_FIELD = "granite/ui/components/coral/foundation/form/numberfield";
 
     @Reference
     private transient MetaTypeService metaTypeService;
@@ -41,8 +47,7 @@ public class SettingsDataSourceServlet extends SlingSafeMethodsServlet {
     private transient volatile List<LinkResolver> linkResolvers;
 
     @Override
-    protected void doGet(final SlingHttpServletRequest request, final SlingHttpServletResponse response) {
-
+    protected void doGet(@NonNull SlingHttpServletRequest request, @NonNull SlingHttpServletResponse response) {
         String rootPath = request.getRequestPathInfo().getResourcePath();
         Resource mainTab = request.getResourceResolver().getResource(rootPath + "/main");
         Resource advancedTab = request.getResourceResolver().getResource(rootPath + "/advanced");
@@ -51,24 +56,37 @@ public class SettingsDataSourceServlet extends SlingSafeMethodsServlet {
         tabs.add(mainTab);
         tabs.add(advancedTab);
 
-        Map<String, List<AttributeDefinition>> serviceSettings = getServiceSettings();
-        for (Map.Entry<String, List<AttributeDefinition>> stringListEntry : serviceSettings.entrySet()) {
-            String serviceName = stringListEntry.getKey();
+        for (ServiceConfig serviceConfig : getServiceConfigs()) {
             List<Resource> innerFields = new ArrayList<>();
-            for (AttributeDefinition attributeDefinition : stringListEntry.getValue()) {
-                if (attributeDefinition.getID().equals("linkType")) {
+            for (AttributeDefinition attributeDefinition : serviceConfig.getDefinitions()) {
+                if (attributeDefinition.getID().equals("enabled")) {
                     continue;
                 }
                 Map<String, Object> fieldProperties = new HashMap<>();
-                fieldProperties.put(JcrResourceConstants.SLING_RESOURCE_TYPE_PROPERTY, getResourceTypeByType(attributeDefinition.getType()));
-
-                fieldProperties.put("name", "./" + serviceName + "/" + attributeDefinition.getID());
+                String resourceType = getResourceType(attributeDefinition.getType());
+                fieldProperties.put(JcrResourceConstants.SLING_RESOURCE_TYPE_PROPERTY, resourceType);
+                fieldProperties.put("name", "./" + serviceConfig.getId() + "/" + attributeDefinition.getID());
                 fieldProperties.put("fieldLabel", attributeDefinition.getName());
                 fieldProperties.put("fieldDescription", attributeDefinition.getDescription());
-                Resource textField = GraniteUtil.createResource(request.getResourceResolver(), serviceName + "." + attributeDefinition.getID(), fieldProperties, Collections.emptyList());
-                innerFields.add(textField);
+
+                if (ArrayUtils.getLength(attributeDefinition.getDefaultValue()) == 1) {
+                    if (RESTYPE_TEXT_FIELD.equals(resourceType)) {
+                        fieldProperties.put("emptyText", attributeDefinition.getDefaultValue()[0]);
+                    } else if (RESTYPE_NUMBER_FIELD.equals(resourceType)) {
+                        fieldProperties.put("value", attributeDefinition.getDefaultValue()[0]);
+                    }
+                }
+                Resource field = GraniteUtil.createResource(
+                        request.getResourceResolver(),
+                        serviceConfig.getId() + "." + attributeDefinition.getID(),
+                        fieldProperties, Collections.emptyList());
+
+                innerFields.add(field);
             }
-            Resource tab = GraniteUtil.createTab(request.getResourceResolver(), serviceName, splitCamelCase(StringUtils.substringAfterLast(serviceName, ".")), innerFields);
+            if (innerFields.isEmpty()) {
+                continue;
+            }
+            Resource tab = GraniteUtil.createTab(request.getResourceResolver(), serviceConfig.getId(), serviceConfig.getLabel(), innerFields);
             tabs.add(tab);
         }
 
@@ -76,42 +94,34 @@ public class SettingsDataSourceServlet extends SlingSafeMethodsServlet {
         request.setAttribute(DataSource.class.getName(), dataSource);
     }
 
-    private String splitCamelCase(String s) {
-        return s.replaceAll(
-                String.format("%s|%s|%s",
-                        "(?<=[A-Z])(?=[A-Z][a-z])",
-                        "(?<=[^A-Z])(?=[A-Z])",
-                        "(?<=[A-Za-z])(?=[^A-Za-z])"
-                ),
-                " "
-        );
-    }
-
-    private String getResourceTypeByType(int type) {
-        String result;
-        switch (type) {
-            case 3:
-                result = "granite/ui/components/coral/foundation/form/numberfield";
-                break;
-            default:
-                result = "granite/ui/components/coral/foundation/form/textfield";
-                break;
-        }
-        return result;
-    }
-
-    private Map<String, List<AttributeDefinition>> getServiceSettings() {
-        Map<String, List<AttributeDefinition>> result = new HashMap<>();
+    private List<ServiceConfig> getServiceConfigs() {
+        List<ServiceConfig> result = new ArrayList<>();
         for (LinkResolver linkResolver : CollectionUtils.emptyIfNull(linkResolvers)) {
             Bundle bundle = FrameworkUtil.getBundle(linkResolver.getClass());
             MetaTypeInformation metaTypeInformation = metaTypeService.getMetaTypeInformation(bundle);
             ObjectClassDefinition objectClassDefinition = metaTypeInformation.getObjectClassDefinition(linkResolver.getClass().getName(), null);
             AttributeDefinition[] definitions = objectClassDefinition.getAttributeDefinitions(ObjectClassDefinition.ALL);
 
-            result.put(linkResolver.getClass().getName(), Arrays.asList(definitions));
+            String id = linkResolver.getClass().getName();
+            String label = OcdUtil.getLabel(linkResolver, metaTypeService);
+            result.add(new ServiceConfig(id, label, definitions));
         }
+        result.sort(Comparator.comparing(ServiceConfig::getLabel));
         return result;
     }
 
+    private static String getResourceType(int type) {
+        if (type == 3) {
+            return RESTYPE_NUMBER_FIELD;
+        }
+        return RESTYPE_TEXT_FIELD;
+    }
 
+    @RequiredArgsConstructor
+    @Getter
+    private static class ServiceConfig {
+        private final String id;
+        private final String label;
+        private final AttributeDefinition[] definitions;
+    }
 }
