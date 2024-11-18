@@ -23,7 +23,7 @@
             sling:resourceType="granite/ui/components/shell/collectionpage"
             currentView="list"
             modeGroup="etoolbox-link-inspector"
-            sling:vanityPath="/tools/etoolbox/link-inspector"
+            sling:vanityPath="/etoolbox/link-inspector"
             pageURITemplate="#"
             targetCollection=".etoolbox-link-inspector">
         <head jcr:primaryType="nt:unstructured">
@@ -137,17 +137,6 @@
                           nesting="hide"
                           src.uritemplate="/content/etoolbox-link-inspector/link-inspector/filterOptions.html"/>
                 </filterOptions>
-                <!--                <filterOptions-->
-                <!--                        jcr:primaryType="nt:unstructured"-->
-                <!--                        sling:resourceType="granite/ui/components/coral/foundation/collection/action"-->
-                <!--                        granite:id="elc-filter-options"-->
-                <!--                        action="cq-admin.etoolbox.linkinspector.action.filter-options"-->
-                <!--                        icon="filter"-->
-                <!--                        rel="etoolbox-link-inspector-filter-options"-->
-                <!--                        target=".etoolbox-link-inspector"-->
-                <!--                        text="Filter"-->
-                <!--                        title="Filter"-->
-                <!--                        variant="minimal"/>-->
                 <deleteReport
                         jcr:primaryType="nt:unstructured"
                         sling:resourceType="granite/ui/components/coral/foundation/collection/action"
@@ -163,10 +152,10 @@
                 <options
                         jcr:primaryType="nt:unstructured"
                         sling:resourceType="granite/ui/components/coral/foundation/anchorbutton"
-                        href="/apps/etoolbox-link-inspector/options/options.html"
+                        href="/etoolbox/link-inspector/settings.html"
                         icon="gears"
-                        text="Options"
-                        title="Options"
+                        text="Settings"
+                        granite:title="Settings"
                         variant="minimal"/>
                 <stats
                         jcr:primaryType="nt:unstructured"

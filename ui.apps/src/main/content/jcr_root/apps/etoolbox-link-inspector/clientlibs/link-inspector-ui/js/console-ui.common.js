@@ -194,7 +194,7 @@
                     type: "POST",
                     url: '/content/etoolbox-link-inspector/servlet/servicesReloader',
                     success: function (data) {
-                        location.replace("/tools/etoolbox/link-inspector.html")
+                        location.replace("/etoolbox/link-inspector.html")
                     },
                     error: function() {
                         var alertPopup = new Coral.Alert().set({
