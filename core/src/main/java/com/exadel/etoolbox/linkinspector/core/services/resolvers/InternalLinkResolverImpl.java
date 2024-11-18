@@ -43,7 +43,7 @@ import java.util.regex.Pattern;
 /**
  * Validates external links via sending HEAD requests concurrently using {@link PoolingHttpClientConnectionManager}
  */
-@Component(service = LinkResolver.class )
+@Component(service = LinkResolver.class, immediate = true)
 @Designate(ocd = InternalLinkResolverConfig.class)
 public class InternalLinkResolverImpl implements LinkResolver {
 
