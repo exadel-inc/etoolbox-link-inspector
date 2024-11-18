@@ -1,0 +1,155 @@
+/*
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.exadel.etoolbox.linkinspector.core.services.resolvers;
+
+import com.exadel.etoolbox.linkinspector.api.Link;
+import com.exadel.etoolbox.linkinspector.api.LinkResolver;
+import com.exadel.etoolbox.linkinspector.api.LinkStatus;
+import com.exadel.etoolbox.linkinspector.core.services.data.UserConfig;
+import lombok.EqualsAndHashCode;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.http.HttpStatus;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.Designate;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+/**
+ * Validates external links via sending HEAD requests concurrently using {@link PoolingHttpClientConnectionManager}
+ */
+@Component(service = LinkResolver.class, immediate = true)
+@Designate(ocd = TextResolverImpl.TextResolverConfig.class)
+@Slf4j
+public class TextResolverImpl implements LinkResolver {
+
+    private static final String TYPE_TEXT = "Text";
+    private static final LinkStatus STATUS_FOUND = new LinkStatus(HttpStatus.SC_OK, "Found");
+
+    private boolean enabled;
+    private Pattern search;
+
+    @Reference
+    private UserConfig userConfig;
+
+    @Activate
+    @Modified
+    private void activate(TextResolverConfig config){
+        config = userConfig.apply(config, this.getClass());
+        this.enabled = config.enabled();
+        try {
+            this.search = Pattern.compile(config.search(), config.caseSensitive() ? 0 : Pattern.CASE_INSENSITIVE);
+        } catch (IllegalArgumentException | NullPointerException e) {
+            log.error("Invalid search pattern: {}", config.search(), e);
+            this.enabled = false;
+        }
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    @Override
+    public String getId() {
+        return TYPE_TEXT;
+    }
+
+    @Override
+    public Collection<Link> getLinks(String source) {
+        if (!enabled ) {
+            return Collections.emptyList();
+        }
+
+        Matcher matcher = search.matcher(source);
+        Set<Link> result = new LinkedHashSet<>();
+        while (matcher.find()) {
+            result.add(new Match(matcher.group()));
+        }
+        return result;
+    }
+
+    @Override
+    public void validate(Link link, ResourceResolver resourceResolver) {
+        // No operation
+    }
+
+    @ObjectClassDefinition(
+            name = "EToolbox Link Inspector - Text Resolver",
+            description = "Searches for particular text in content"
+    )
+    public @interface TextResolverConfig {
+        @AttributeDefinition(
+                name = "Enabled",
+                description = "Is service enabled?"
+        )
+        boolean enabled() default true;
+
+        @AttributeDefinition(
+                name = "Text to look for",
+                description = "Enter a string to look for (can be a RegExp)"
+        )
+        String search();
+
+        @AttributeDefinition(
+                name = "Case sensitive",
+                description = "Whether the search is case-sensitive"
+        )
+        boolean caseSensitive() default false;
+    }
+
+    @RequiredArgsConstructor
+    @EqualsAndHashCode
+    private static class Match implements Link {
+        private final String content;
+
+        @Override
+        public String getType() {
+            return TYPE_TEXT;
+        }
+
+        @Override
+        public String getHref() {
+            return content;
+        }
+
+        @Override
+        public LinkStatus getStatus() {
+            return STATUS_FOUND;
+        }
+
+        @Override
+        public boolean isReported() {
+            return true;
+        }
+
+        @Override
+        public void setStatus(LinkStatus status) {
+            // No operation
+        }
+    }
+}
