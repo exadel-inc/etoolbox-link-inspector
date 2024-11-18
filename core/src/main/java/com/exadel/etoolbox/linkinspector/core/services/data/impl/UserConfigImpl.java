@@ -4,7 +4,7 @@ import com.exadel.etoolbox.linkinspector.core.services.data.UserConfig;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.RepositoryHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.MapUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.sling.api.resource.Resource;
@@ -41,14 +41,10 @@ public class UserConfigImpl implements UserConfig {
     }
 
     private Map<String, Object> getProperties(String configId) {
-        try(ResourceResolver resourceResolver = repositoryHelper.getServiceResourceResolver()){
+        try (ResourceResolver resourceResolver = repositoryHelper.getServiceResourceResolver()) {
             Resource resource = resourceResolver.getResource(ConfigServiceImpl.CONFIG_PATH + "/" + configId);
-            if (resource == null) {
-                return Collections.emptyMap();
-            }
-            Map<String, Object> properties = new HashMap<>();
-            properties.putAll(resource.adaptTo(ValueMap.class));
-            return properties;
+            ValueMap valueMap = resource != null ? resource.getValueMap() : null;
+            return valueMap != null ? new HashMap<>(valueMap) : Collections.emptyMap();
         }
     }
 
