@@ -17,14 +17,18 @@ package com.exadel.etoolbox.linkinspector.core.services.data.impl;
 import com.day.cq.replication.ReplicationActionType;
 import com.day.cq.replication.ReplicationStatus;
 import com.day.crx.JcrConstants;
+import com.exadel.etoolbox.contractor.entity.Context;
+import com.exadel.etoolbox.contractor.service.tasking.Contractor;
 import com.exadel.etoolbox.linkinspector.api.Link;
 import com.exadel.etoolbox.linkinspector.core.services.data.GenerationStatsProps;
 import com.exadel.etoolbox.linkinspector.core.services.data.GridResourcesGenerator;
 import com.exadel.etoolbox.linkinspector.core.services.data.ConfigService;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.LinkHelper;
 import com.exadel.etoolbox.linkinspector.core.services.data.models.GridResource;
+import com.exadel.etoolbox.linkinspector.core.services.job.DataFeedJobExecutor;
 import com.exadel.etoolbox.linkinspector.core.services.util.LinkInspectorResourceUtil;
 import com.exadel.etoolbox.linkinspector.core.services.util.LinksCounter;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.StopWatch;
@@ -32,6 +36,7 @@ import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceUtil;
+import org.apache.sling.event.jobs.Job;
 import org.apache.sling.jcr.resource.api.JcrResourceConstants;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -68,6 +73,8 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
     private LinkHelper linkHelper;
     @Reference
     private ConfigService configService;
+    @Reference
+    private Contractor contractor;
 
     private ExecutorService executorService;
 
@@ -77,21 +84,35 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
     @Override
     public List<GridResource> generateGridResources(String gridResourceType, ResourceResolver resourceResolver) {
         StopWatch stopWatch = StopWatch.createStarted();
-        String searchPath = configService.getSearchPath();
-        LOG.debug("Start broken links collecting, path: {}", searchPath);
 
-        Resource rootResource = resourceResolver.getResource(searchPath);
-        if (rootResource == null) {
-            LOG.warn("Search path resource is null, link inspector report generation is stopped");
-            return Collections.emptyList();
+        String searchPath = configService.getSearchPath();
+        Map<Link, List<GridResource>> linkToGridResourcesMap;
+
+        try (Context context = contractor.newJobContext(
+                DataFeedJobExecutor.GENERATE_DATA_FEED_TOPIC,
+                "Scanning " + searchPath)) {
+
+            LOG.debug("Start broken links collecting, path: {}", searchPath);
+            Resource rootResource = resourceResolver.getResource(searchPath);
+            if (rootResource == null) {
+                LOG.warn("Search path resource is null, link inspector report generation is stopped");
+                context.feedback().state(Job.JobState.DROPPED).message("Search path resource not found").send();
+                return Collections.emptyList();
+            }
+
+            linkToGridResourcesMap = new HashMap<>();
+            int traversedNodesCounter = getGridResourcesViaTraversing(
+                    rootResource,
+                    gridResourceType,
+                    linkToGridResourcesMap,
+                    context);
+
+            LOG.info("Traversal is completed in {} ms, path: {}, traversed nodes count: {}",
+                    stopWatch.getTime(TimeUnit.MILLISECONDS), searchPath, traversedNodesCounter);
+            context.feedback("Completed");
         }
 
-        Map<Link, List<GridResource>> linkToGridResourcesMap = new HashMap<>();
-        int traversedNodesCounter = getGridResourcesViaTraversing(rootResource, gridResourceType, linkToGridResourcesMap);
-        LOG.debug("Traversal is completed in {} ms, path: {}, traversed nodes count: {}",
-                stopWatch.getTime(TimeUnit.MILLISECONDS), searchPath, traversedNodesCounter);
-
-        if (linkToGridResourcesMap.isEmpty()) {
+        if (MapUtils.isEmpty(linkToGridResourcesMap)) {
             LOG.warn("Collecting reported links is completed in {} ms, path: {}. No links reported after traversing",
                     stopWatch.getTime(TimeUnit.MILLISECONDS), searchPath);
             LinksCounter emptyCounter = new LinksCounter();
@@ -113,7 +134,9 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
 
     private int getGridResourcesViaTraversing(Resource resource,
                                               String gridResourceType,
-                                              Map<Link, List<GridResource>> allLinkToGridResourcesMap) {
+                                              Map<Link, List<GridResource>> allLinkToGridResourcesMap,
+                                              Context context) {
+        context.feedback("Scanning {}", resource.getPath());
         int traversedNodesCount = 0;
         if (!isAllowedResource(resource)) {
             return traversedNodesCount;
@@ -129,7 +152,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
         Iterator<Resource> children = resource.listChildren();
         while (children.hasNext()) {
             Resource child = children.next();
-            traversedNodesCount += getGridResourcesViaTraversing(child, gridResourceType, allLinkToGridResourcesMap);
+            traversedNodesCount += getGridResourcesViaTraversing(child, gridResourceType, allLinkToGridResourcesMap, context);
         }
         return traversedNodesCount;
     }

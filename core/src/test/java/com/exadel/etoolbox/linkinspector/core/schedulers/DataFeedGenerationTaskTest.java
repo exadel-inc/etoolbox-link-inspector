@@ -14,55 +14,71 @@
 
 package com.exadel.etoolbox.linkinspector.core.schedulers;
 
+import com.exadel.etoolbox.contractor.ContractorException;
+import com.exadel.etoolbox.contractor.service.tasking.Contractor;
 import com.exadel.etoolbox.linkinspector.core.services.job.DataFeedJobExecutor;
-import com.exadel.etoolbox.linkinspector.core.services.job.SlingJobUtil;
 import junitx.util.PrivateAccessor;
-import org.apache.sling.event.jobs.JobManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.MockedStatic;
 
+import java.util.concurrent.atomic.AtomicReference;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 class DataFeedGenerationTaskTest {
-    private static final String JOB_MANAGER_FIELD = "jobManager";
 
     private final DataFeedGenerationTask fixture = new DataFeedGenerationTask();
+    private final Contractor contractor = mock(Contractor.class);
 
     @BeforeEach
     void setup() throws NoSuchFieldException {
-        JobManager jobManager = mock(JobManager.class);
-        PrivateAccessor.setField(fixture, JOB_MANAGER_FIELD, jobManager);
+        PrivateAccessor.setField(fixture, "contractor", contractor);
     }
 
     @Test
-    void testRun() {
+    void testRun() throws ContractorException {
         DataFeedGenerationTask.Config config = mock(DataFeedGenerationTask.Config.class);
         when(config.enabled()).thenReturn(true);
-        try (MockedStatic<SlingJobUtil> slingJobUtil = mockStatic(SlingJobUtil.class)) {
-            fixture.activate(config);
-            fixture.run();
-            slingJobUtil.verify(() -> SlingJobUtil.addJob(any(JobManager.class), eq(DataFeedJobExecutor.GENERATE_DATA_FEED_TOPIC), anyMap()));
-        }
+
+        AtomicReference<String> runTopic = new AtomicReference<>();
+        when(contractor.runExclusive(anyString())).then(invocation -> {
+            runTopic.set(invocation.getArgument(0));
+            return null;
+        });
+
+        fixture.activate(config);
+        fixture.run();
+        assertEquals(DataFeedJobExecutor.GENERATE_DATA_FEED_TOPIC, runTopic.get());
     }
 
     @Test
-    void testRunNotEnabled() {
+    void testRunNotEnabled() throws ContractorException {
         DataFeedGenerationTask.Config config = mock(DataFeedGenerationTask.Config.class);
         when(config.enabled()).thenReturn(false);
-        try (MockedStatic<SlingJobUtil> slingJobUtil = mockStatic(SlingJobUtil.class)) {
-            fixture.activate(config);
-            fixture.run();
-            slingJobUtil.verifyNoInteractions();
-        }
+
+        AtomicReference<String> runTopic = new AtomicReference<>();
+        when(contractor.runExclusive(anyString())).then(invocation -> {
+            runTopic.set(invocation.getArgument(0));
+            return null;
+        });
+
+        fixture.activate(config);
+        fixture.run();
+        assertNull(runTopic.get());
     }
 
     @Test
     void testDeactivate() {
-        try (MockedStatic<SlingJobUtil> slingJobUtil = mockStatic(SlingJobUtil.class)) {
-            fixture.deactivate();
-            slingJobUtil.verify(() -> SlingJobUtil.stopAndRemoveJobs(any(JobManager.class), eq(DataFeedJobExecutor.GENERATE_DATA_FEED_TOPIC)));
-        }
+        AtomicReference<String> discardTopic = new AtomicReference<>();
+        when(contractor.discardAll(anyString())).then(invocation -> {
+            discardTopic.set(invocation.getArgument(0));
+            return null;
+        });
+
+        fixture.deactivate();
+        assertEquals(DataFeedJobExecutor.GENERATE_DATA_FEED_TOPIC, discardTopic.get());
     }
 }
