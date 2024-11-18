@@ -22,7 +22,7 @@ public class ConfigServiceImpl implements ConfigService {
     private static final String PN_ACTIVATED_CONTENT = "activatedContent";
     private static final String PN_SKIP_CONTENT_AFTER_ACTIVATION = "skipContentAfterActivation";
     private static final String PN_LAST_MODIFIED = "lastModified";
-    private static final String PN_REPLACEMENT = "replacement";
+    private static final String PN_PATH = "path";
     private static final String PN_EXCLUDED_PROPERTIES = "excludedProperties";
     private static final String PN_EXCLUDE_TAGS = "excludeTags";
     private static final String PN_STATUS_CODES = "statusCodes";
@@ -41,7 +41,7 @@ public class ConfigServiceImpl implements ConfigService {
 
     @Override
     public String getSearchPath() {
-        return getProperty(PN_REPLACEMENT, String.class).orElse(DEFAULT_PATH);
+        return getProperty(PN_PATH, String.class).orElse(DEFAULT_PATH);
     }
 
     @Override
