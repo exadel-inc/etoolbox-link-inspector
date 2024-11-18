@@ -1,5 +1,5 @@
 <tr data-sly-use.model="com.exadel.etoolbox.linkinspector.core.models.ui.GridViewItem"
-    class="foundation-collection-item elc-card"
+    class="foundation-collection-item elc-item"
     is="coral-table-row"
     data-path="${model.path}"
     data-current-link="${model.link}"
@@ -9,52 +9,45 @@
         <img itemprop="thumbnail" width="192" src="${model.thumbnail}" alt="">
     </td>
 
-    <td class="foundation-collection-item-keys collection-item_status_code" is="coral-table-cell">
+    <td class="status centered" is="coral-table-cell">
         <div data-sly-set.statuscode="${model.linkStatusCode == '200' ? 'ok' : 'error'}"
-             class="status" title="HTTP Status ${model.linkStatusCode}">
+             class="indicator" title="HTTP Status ${model.linkStatusCode}">
             <coral-icon icon="circle" class="elc-link-status--${statuscode}"></coral-icon>
         </div>
-        <div class="els-status-msg-col">
+        <div class="secondary">
             ${model.linkStatusMessage}
         </div>
     </td>
 
-    <td class="foundation-collection-item-title collection-item_link-type" is="coral-table-cell">
-        <div class="elc-complex-col">
-            <h4 class="elc-primary-info" title="${model.link}">${model.link}</h4>
-            <span class="elc-secondary-info">${model.linkType}</span>
-        </div>
+    <td class="link" is="coral-table-cell">
+        <div class="primary break-word"><b>${model.link}</b></div>
+        <div class="secondary">${model.linkType}</div>
     </td>
 
-    <td class="foundation-collection-item-keys collection-item_page_title" is="coral-table-cell">
-        <div class="els-page-col">
-            <sly data-sly-test.isValidPage="${model.isValidPage}">
-                <a href="${model.pagePath}" target="_blank"
-                   x-cq-linkchecker="skip">
-                    ${model.pageTitle}
-                </a>
-            </sly>
-            <sly data-sly-test="${!isValidPage}">
-                <span>${model.pagePath}</span>
-            </sly>
-        </div>
-    </td>
-
-    <td class="foundation-collection-item-keys collection-item_component_name" is="coral-table-cell">
-        <div class="elc-complex-col els-component-col">
-            <a class="elc-primary-info"
-               href="${'{0}{1}' @ format=[model.crxDePath, model.componentPath]}"
-               target="_blank"
+    <td class="page" is="coral-table-cell">
+        <sly data-sly-test.isValidPage="${model.isValidPage}">
+            <a href="${model.pagePath}" target="_blank"
+               class="primary"
                x-cq-linkchecker="skip">
-                ${model.componentName}
+                ${model.pageTitle}
             </a>
-            <span class="elc-secondary-info" title="${model.componentType}"><em>${model.componentType}</em></span>
-        </div>
+        </sly>
+        <sly data-sly-test="${!isValidPage}">
+            <span class="break-all">${model.pagePath}</span>
+        </sly>
     </td>
 
-    <td class="foundation-collection-item-keys collection-item_property_name" is="coral-table-cell">
-        <div class="els-property-col" title="${model.path}@${model.propertyName}">
-            ${model.path}@<strong>${model.propertyName}</strong>
-        </div>
+    <td class="component" is="coral-table-cell">
+        <a class="primary"
+           href="${'{0}{1}' @ format=[model.crxDePath, model.componentPath]}"
+           target="_blank"
+           x-cq-linkchecker="skip">
+            ${model.componentName}
+        </a>
+        <div class="secondary break-all" title="${model.componentType}"><em>${model.componentType}</em></div>
+    </td>
+
+    <td class="property break-all" is="coral-table-cell">
+        ${model.path}@<strong>${model.propertyName}</strong>
     </td>
 </tr>

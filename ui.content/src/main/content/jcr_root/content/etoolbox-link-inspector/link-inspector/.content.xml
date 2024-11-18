@@ -57,9 +57,10 @@
                     sling:resourceType="granite/ui/components/foundation/container">
                 <items jcr:primaryType="nt:unstructured">
                     <table
-                        granite:rel="etoolbox-link-inspector"
                         jcr:primaryType="nt:unstructured"
                         sling:resourceType="granite/ui/components/coral/foundation/table"
+                        granite:rel="etoolbox-link-inspector"
+                        granite:class="elc-grid"
                         src="/content/etoolbox-link-inspector/link-inspector/jcr:content/views/container/items/table{.offset,limit}.html{+id}?page=${param.page}&amp;type=${param.type}&amp;substring=${param.substring}"
                         itemprop="item"
                         limit="{Long}50"
