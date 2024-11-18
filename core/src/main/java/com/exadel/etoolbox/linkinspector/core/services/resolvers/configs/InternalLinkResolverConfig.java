@@ -19,19 +19,21 @@ import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
 @ObjectClassDefinition(
-        name = "EToolbox Link Inspector - Link Helper",
+        name = "EToolbox Link Inspector - Internal Link Resolver",
         description = "Assists in link processing"
 )
 public @interface InternalLinkResolverConfig {
 
     @AttributeDefinition(
-            name = "Internal Links Host",
-            description = "Host to be used for verifying internal links. " +
-                    "If no value is set, links will be verified against local JCR.")
-    String internalLinksHost() default StringUtils.EMPTY;
+            name = "Enabled",
+            description = "Is service enabled?"
+    )
+    boolean enabled() default true;
 
     @AttributeDefinition(
-            name = "Enable service",
-            description = "Is service active or not"
-    ) boolean linkType() default false;
+            name = "Internal Links Host",
+            description = "Host to be used for verifying internal links. " +
+                    "If no value is set, links will be verified against local JCR"
+    )
+    String internalLinksHost() default StringUtils.EMPTY;
 }
