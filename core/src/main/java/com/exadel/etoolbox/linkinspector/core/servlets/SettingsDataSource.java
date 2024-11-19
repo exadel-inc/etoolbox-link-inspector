@@ -38,6 +38,7 @@ import java.util.*;
         methods = HttpConstants.METHOD_GET)
 public class SettingsDataSource extends SlingSafeMethodsServlet {
 
+    private static final String RESTYPE_CHECKBOX = "granite/ui/components/coral/foundation/form/checkbox";
     private static final String RESTYPE_TEXT_FIELD = "granite/ui/components/coral/foundation/form/textfield";
     private static final String RESTYPE_NUMBER_FIELD = "granite/ui/components/coral/foundation/form/numberfield";
 
@@ -69,11 +70,22 @@ public class SettingsDataSource extends SlingSafeMethodsServlet {
                 }
                 Map<String, Object> fieldProperties = new HashMap<>();
                 String resourceType = getResourceType(attributeDefinition.getType());
+                // Generic properties
                 fieldProperties.put(JcrResourceConstants.SLING_RESOURCE_TYPE_PROPERTY, resourceType);
                 fieldProperties.put("name", "./" + serviceConfig.getId() + "/" + attributeDefinition.getID());
-                fieldProperties.put("fieldLabel", attributeDefinition.getName());
                 fieldProperties.put("fieldDescription", attributeDefinition.getDescription());
-
+                // Labels
+                if (RESTYPE_CHECKBOX.equals(resourceType)) {
+                    fieldProperties.put("text", attributeDefinition.getName());
+                } else {
+                    fieldProperties.put("fieldLabel", attributeDefinition.getName());
+                }
+                // Value members
+                if (RESTYPE_CHECKBOX.equals(resourceType)) {
+                    fieldProperties.put("value", Boolean.TRUE.toString());
+                    fieldProperties.put("uncheckedValue", Boolean.FALSE.toString());
+                }
+                // Default value
                 if (ArrayUtils.getLength(attributeDefinition.getDefaultValue()) == 1) {
                     if (RESTYPE_TEXT_FIELD.equals(resourceType)) {
                         fieldProperties.put("emptyText", attributeDefinition.getDefaultValue()[0]);
@@ -116,8 +128,11 @@ public class SettingsDataSource extends SlingSafeMethodsServlet {
     }
 
     private static String getResourceType(int type) {
-        if (type == 3) {
+        if (type == AttributeDefinition.INTEGER || type == AttributeDefinition.LONG || type == AttributeDefinition.SHORT) {
             return RESTYPE_NUMBER_FIELD;
+        }
+        if (type == AttributeDefinition.BOOLEAN) {
+            return RESTYPE_CHECKBOX;
         }
         return RESTYPE_TEXT_FIELD;
     }
