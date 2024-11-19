@@ -27,7 +27,8 @@
 
     function onReady() {
         $('#wait').on('contractor-ticker:end', function () {
-            setTimeout(() => window.location.reload(), 1000);
+            ui.alert('Success', 'Data feed generation completed successfully.', 'success');
+            setTimeout(() => window.location.reload(), 2000);
         });
     }
 
