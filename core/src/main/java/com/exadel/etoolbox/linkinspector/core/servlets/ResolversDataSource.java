@@ -19,6 +19,7 @@ import org.apache.sling.jcr.resource.api.JcrResourceConstants;
 import org.apache.sling.servlets.annotations.SlingServletPaths;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.component.annotations.ReferencePolicyOption;
 import org.osgi.service.metatype.MetaTypeService;
@@ -42,7 +43,11 @@ public class ResolversDataSource extends SlingSafeMethodsServlet {
     @Reference
     private transient MetaTypeService metaTypeService;
 
-    @Reference(policy = ReferencePolicy.DYNAMIC, policyOption = ReferencePolicyOption.GREEDY)
+    @Reference(
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            policyOption = ReferencePolicyOption.GREEDY
+    )
     private transient volatile List<LinkResolver> linkResolvers;
 
     @Override
