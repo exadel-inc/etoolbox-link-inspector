@@ -32,7 +32,11 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.osgi.services.HttpClientBuilderFactory;
 import org.apache.http.util.EntityUtils;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.osgi.service.component.annotations.*;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.metatype.annotations.Designate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +45,12 @@ import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.net.UnknownHostException;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -105,7 +114,13 @@ public class ExternalLinkResolverImpl implements LinkResolver {
         } catch (SocketTimeoutException e) {
             LOG.error("Timeout occurred while validating link {}", link.getHref(), e);
             link.setStatus(HttpStatus.SC_REQUEST_TIMEOUT, "Request Timeout");
-        } catch (URISyntaxException | IOException e) {
+        } catch (UnknownHostException e) {
+            LOG.error("Unknown host detected when validating {}", link.getHref(), e);
+            link.setStatus(HttpStatus.SC_NOT_FOUND, "Unknown host");
+        } catch (URISyntaxException e) {
+            LOG.error("Invalid URI syntax when validating link {}", link.getHref(), e);
+            link.setStatus(HttpStatus.SC_BAD_REQUEST, "Invalid URI syntax");
+        } catch (Exception e) {
             LOG.error("Failed to validate link {}", link.getHref(), e);
             link.setStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR, StringUtils.defaultIfEmpty(e.getMessage(), e.toString()));
         }
