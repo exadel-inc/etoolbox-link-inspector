@@ -25,6 +25,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 public class LinksCounter {
+    public static final LinksCounter EMPTY = new LinksCounter();
+
     private final Map<String, AtomicInteger> statistics;
 
     public LinksCounter() {
