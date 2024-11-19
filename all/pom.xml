@@ -65,7 +65,7 @@
                         <embedded>
                             <groupId>com.exadel.etoolbox</groupId>
                             <artifactId>etoolbox-contractor.all</artifactId>
-                            <target>/apps/etoolbox-link-inspector-packages/lib/install</target>
+                            <target>/apps/etoolbox-link-inspector-vendor-packages/container/install</target>
                         </embedded>
                     </embeddeds>
                 </configuration>
