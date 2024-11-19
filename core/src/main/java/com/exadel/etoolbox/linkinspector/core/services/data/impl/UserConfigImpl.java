@@ -5,6 +5,7 @@ import com.exadel.etoolbox.linkinspector.core.services.helpers.RepositoryHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.sling.api.resource.Resource;
@@ -65,13 +66,17 @@ public class UserConfigImpl implements UserConfig {
                 return source.annotationType();
             }
             Object override = MapUtils.getObject(overriddenProperties, method.getName());
-            if (isNotBlank(override)) {
-                if (NumberUtils.isCreatable(override.toString())) {
-                    return Integer.parseInt(override.toString());
-                } else if (StringUtils.equalsAnyIgnoreCase(override.toString(), "true", "false")) {
-                    return Boolean.parseBoolean(override.toString());
+            if (override != null) {
+                Class<?> targetType = ClassUtils.primitiveToWrapper(method.getReturnType());
+                if (targetType.equals(Integer.class)) {
+                    return getInt(override);
+                } else if (targetType.equals(Long.class)) {
+                    return (long) getInt(override);
+                } else if (targetType.equals(Boolean.class)) {
+                    return getBoolean(override);
+                } else {
+                    return override.toString();
                 }
-                return override;
             }
             try {
                 return source.annotationType().getDeclaredMethod(method.getName()).invoke(source, args);
@@ -81,11 +86,28 @@ public class UserConfigImpl implements UserConfig {
             }
         }
 
-        private static boolean isNotBlank(Object value) {
-            if (value == null) {
+        private static int getInt(Object value) {
+            if (isBlank(value)) {
+                return 0;
+            }
+            if (NumberUtils.isCreatable(value.toString())) {
+                return Integer.parseInt(value.toString());
+            }
+            return 0;
+        }
+
+        private static boolean getBoolean(Object value) {
+            if (isBlank(value)) {
                 return false;
             }
-            return StringUtils.isNotBlank(value.toString());
+            return !StringUtils.equalsAnyIgnoreCase(value.toString(), "false", "off");
+        }
+
+        private static boolean isBlank(Object value) {
+            if (value == null) {
+                return true;
+            }
+            return StringUtils.isBlank(value.toString());
         }
     }
 }
