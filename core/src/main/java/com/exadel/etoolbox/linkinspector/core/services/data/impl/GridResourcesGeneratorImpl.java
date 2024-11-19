@@ -109,27 +109,10 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
 
             LOG.info("Traversal is completed in {} ms, path: {}, traversed nodes count: {}",
                     stopWatch.getTime(TimeUnit.MILLISECONDS), searchPath, traversedNodesCounter);
-            context.feedback("Completed");
+
+            context.feedback("Validating links...");
+            return validateLinks(linkToGridResourcesMap, resourceResolver, context, stopWatch);
         }
-
-        if (MapUtils.isEmpty(linkToGridResourcesMap)) {
-            LOG.warn("Collecting reported links is completed in {} ms, path: {}. No links reported after traversing",
-                    stopWatch.getTime(TimeUnit.MILLISECONDS), searchPath);
-            LinksCounter emptyCounter = new LinksCounter();
-            saveStatsToJcr(emptyCounter, emptyCounter, resourceResolver);
-            return Collections.emptyList();
-        }
-
-        List<GridResource> sortedGridResources = validateLinksInParallel(linkToGridResourcesMap, resourceResolver)
-                .stream()
-                .sorted(Comparator.comparing(GridResource::getHref))
-                .collect(Collectors.toList());
-
-        stopWatch.stop();
-        LOG.info("Collecting broken links is completed in {} ms, path: {}, the number of grid items is {}",
-                stopWatch.getTime(TimeUnit.MILLISECONDS), searchPath, sortedGridResources.size());
-
-        return sortedGridResources;
     }
 
     private int getGridResourcesViaTraversing(Resource resource,
@@ -169,10 +152,11 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
                 );
     }
 
-    private Stream<Map.Entry<Link, GridResource>> getLinkToGridResourceMap(String property,
-                                                                           Object propertyValue,
-                                                                           Resource resource,
-                                                                           String gridResourceType) {
+    private Stream<Map.Entry<Link, GridResource>> getLinkToGridResourceMap(
+            String property,
+            Object propertyValue,
+            Resource resource,
+            String gridResourceType) {
         return linkHelper.getLinkStream(propertyValue)
                 .filter(this::isAllowedLink)
                 .collect(Collectors.toMap(
@@ -184,8 +168,36 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
                 .stream();
     }
 
-    private Set<GridResource> validateLinksInParallel(Map<Link, List<GridResource>> linkToGridResourcesMap,
-                                                      ResourceResolver resourceResolver) {
+    private List<GridResource> validateLinks(
+            Map<Link, List<GridResource>> linkToGridResourcesMap,
+            ResourceResolver resourceResolver,
+            Context context,
+            StopWatch stopWatch) {
+
+        if (MapUtils.isEmpty(linkToGridResourcesMap)) {
+            stopWatch.stop();
+            LOG.warn("Collecting reported links is completed in {} ms. No links reported after traversing",
+                    stopWatch.getTime(TimeUnit.MILLISECONDS));
+            saveStatsToJcr(LinksCounter.EMPTY, LinksCounter.EMPTY, resourceResolver);
+            context.feedback("Completed");
+            return Collections.emptyList();
+        }
+
+        List<GridResource> sortedGridResources = validateLinksInParallel(linkToGridResourcesMap, resourceResolver)
+                .stream()
+                .sorted(Comparator.comparing(GridResource::getHref))
+                .collect(Collectors.toList());
+
+        stopWatch.stop();
+        LOG.info("Collecting broken links is completed in {} ms, the number of grid items is {}",
+                stopWatch.getTime(TimeUnit.MILLISECONDS), sortedGridResources.size());
+        context.feedback("Completed");
+        return sortedGridResources;
+    }
+
+    private Set<GridResource> validateLinksInParallel(
+            Map<Link, List<GridResource>> linkToGridResourcesMap,
+            ResourceResolver resourceResolver) {
         LinksCounter allLinksCounter = new LinksCounter();
         LinksCounter reportedLinksCounter = new LinksCounter();
         // TODO: VERY slow
