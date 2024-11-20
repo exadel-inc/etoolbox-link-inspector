@@ -16,7 +16,7 @@ import java.util.Optional;
 
 @Component(service = ConfigService.class)
 public class ConfigServiceImpl implements ConfigService {
-    public static final String CONFIG_PATH = "/conf/etoolbox/link-inspector";
+    static final String CONFIG_PATH = "/conf/etoolbox/link-inspector";
     private static final String PN_EXCLUDED_LINK_PATTERNS = "excludedLinkPatterns";
     private static final String PN_EXCLUDED_PATHS = "excludedPaths";
     private static final String PN_ACTIVATED_CONTENT = "activatedContent";

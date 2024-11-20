@@ -18,7 +18,6 @@ import com.exadel.etoolbox.linkinspector.core.services.cache.GridResourcesCache;
 import com.exadel.etoolbox.linkinspector.core.services.cache.impl.GridResourcesCacheImpl;
 import com.exadel.etoolbox.linkinspector.core.services.data.DataFeedService;
 import com.exadel.etoolbox.linkinspector.core.services.data.impl.DataFeedServiceImpl;
-import com.exadel.etoolbox.linkinspector.core.services.data.impl.UserConfigImpl;
 import com.exadel.etoolbox.linkinspector.core.services.data.models.GridResource;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.LinkHelper;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.PackageHelper;
@@ -133,7 +132,6 @@ class ReplaceByPatternServletTest {
                         "statusCode", org.apache.http.HttpStatus.SC_NOT_FOUND,
                         "statusMessage", "Not Found")
         );
-        context.registerInjectActivateService(new UserConfigImpl());
         context.registerInjectActivateService(new ExternalLinkResolverImpl());
         context.registerInjectActivateService(new InternalLinkResolverImpl());
         linkHelper = context.registerInjectActivateService(new LinkHelperImpl());

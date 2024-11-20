@@ -17,7 +17,6 @@ package com.exadel.etoolbox.linkinspector.core.services.resolvers;
 import com.exadel.etoolbox.linkinspector.api.Link;
 import com.exadel.etoolbox.linkinspector.api.LinkResolver;
 import com.exadel.etoolbox.linkinspector.core.models.LinkImpl;
-import com.exadel.etoolbox.linkinspector.core.services.data.UserConfig;
 import com.exadel.etoolbox.linkinspector.core.services.resolvers.configs.ExternalLinkResolverConfig;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
@@ -72,9 +71,6 @@ public class ExternalLinkResolverImpl implements LinkResolver {
 
     @Reference
     private HttpClientBuilderFactory httpClientBuilderFactory;
-
-    @Reference
-    private UserConfig userConfig;
 
     private CloseableHttpClient httpClient;
     private PoolingHttpClientConnectionManager connectionManager;
@@ -134,7 +130,6 @@ public class ExternalLinkResolverImpl implements LinkResolver {
     @Activate
     @Modified
     void activate(ExternalLinkResolverConfig config) {
-        config = userConfig.apply(config, this.getClass());
         enabled = config.enabled();
         connectionTimeout = config.connectionTimeout();
         socketTimeout = config.socketTimeout();
