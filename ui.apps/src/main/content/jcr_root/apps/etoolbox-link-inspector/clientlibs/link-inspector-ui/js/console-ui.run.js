@@ -16,7 +16,7 @@
  * EToolbox Link Inspector clientlib.
  * Logic for running a manual scan
  */
-(function (window, document, $) {
+(function (window, document, $, Granite) {
     'use strict';
 
     const TRIGGER_DATA_FEED_GENERATION = '/content/etoolbox/contractor/servlet/task';
@@ -27,8 +27,8 @@
 
     function onReady() {
         $('#wait').on('contractor-ticker:end', function () {
-            ui.alert('Success', 'Data feed generation completed successfully.', 'success');
-            setTimeout(() => window.location.reload(), 2000);
+            ui.alert(Granite.I18n.get('Success'), Granite.I18n.get('Data feed generation completed successfully'), 'success');
+            setTimeout(() => window.location.reload(), 1000);
         });
     }
 
@@ -43,7 +43,7 @@
             processData: false,
             contentType: false
         }).error(function (e) {
-            ui.notify('Error', e.responseText || e.statusText, 'error');
+            ui.notify(Granite.I18n.get('Error'), e.responseText || e.statusText, 'error');
         });
     }
-})(window, document, Granite.$);
+})(window, document, Granite.$, Granite);
