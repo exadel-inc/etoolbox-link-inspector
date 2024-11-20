@@ -36,7 +36,7 @@ public class LinkTypesDataSourceServlet extends SlingSafeMethodsServlet {
 
             String serviceName = linkResolver.getClass().getName();
             fieldProperties.put("name", "./" + serviceName + "/linkType");
-            fieldProperties.put("text", StringUtils.substringAfterLast(serviceName, "."));
+            fieldProperties.put("text", linkResolver.getId());
             fieldProperties.put("fieldDescription", StringUtils.substringAfterLast(serviceName, "."));
             fieldProperties.put("uncheckedValue", Boolean.FALSE);
             fieldProperties.put("checked", Boolean.FALSE);
