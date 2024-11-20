@@ -17,7 +17,7 @@ package com.exadel.etoolbox.linkinspector.core.services.resolvers;
 import com.exadel.etoolbox.linkinspector.api.Link;
 import com.exadel.etoolbox.linkinspector.api.LinkResolver;
 import com.exadel.etoolbox.linkinspector.api.LinkStatus;
-import com.exadel.etoolbox.linkinspector.core.services.data.UserConfig;
+import com.exadel.etoolbox.linkinspector.core.services.resolvers.configs.TextResolverConfig;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,10 +27,7 @@ import org.apache.sling.api.resource.ResourceResolver;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Modified;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
-import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -43,7 +40,7 @@ import java.util.regex.Pattern;
  * Validates external links via sending HEAD requests concurrently using {@link PoolingHttpClientConnectionManager}
  */
 @Component(service = LinkResolver.class, immediate = true)
-@Designate(ocd = TextResolverImpl.TextResolverConfig.class)
+@Designate(ocd = TextResolverConfig.class)
 @Slf4j
 public class TextResolverImpl implements LinkResolver {
 
@@ -53,13 +50,9 @@ public class TextResolverImpl implements LinkResolver {
     private boolean enabled;
     private Pattern search;
 
-    @Reference
-    private UserConfig userConfig;
-
     @Activate
     @Modified
-    private void activate(TextResolverConfig config){
-        config = userConfig.apply(config, this.getClass());
+    private void activate(TextResolverConfig config) {
         this.enabled = config.enabled();
         try {
             this.search = Pattern.compile(config.search(), config.caseSensitive() ? 0 : Pattern.CASE_INSENSITIVE);
@@ -96,30 +89,6 @@ public class TextResolverImpl implements LinkResolver {
     @Override
     public void validate(Link link, ResourceResolver resourceResolver) {
         // No operation
-    }
-
-    @ObjectClassDefinition(
-            name = "EToolbox Link Inspector - Text Resolver",
-            description = "Searches for particular text in content"
-    )
-    public @interface TextResolverConfig {
-        @AttributeDefinition(
-                name = "Enabled",
-                description = "Is service enabled?"
-        )
-        boolean enabled() default true;
-
-        @AttributeDefinition(
-                name = "Text to look for",
-                description = "Enter a string to look for (can be a RegExp)"
-        )
-        String search();
-
-        @AttributeDefinition(
-                name = "Case sensitive",
-                description = "Whether the search is case-sensitive"
-        )
-        boolean caseSensitive() default false;
     }
 
     @RequiredArgsConstructor
