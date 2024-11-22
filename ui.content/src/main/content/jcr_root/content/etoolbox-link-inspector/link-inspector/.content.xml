@@ -23,7 +23,7 @@
             sling:resourceType="granite/ui/components/shell/collectionpage"
             currentView="list"
             modeGroup="etoolbox-link-inspector"
-            sling:vanityPath="/tools/etoolbox/link-inspector"
+            sling:vanityPath="/etoolbox/link-inspector"
             pageURITemplate="#"
             targetCollection=".etoolbox-link-inspector">
         <head jcr:primaryType="nt:unstructured">
@@ -57,22 +57,21 @@
                     sling:resourceType="granite/ui/components/foundation/container">
                 <items jcr:primaryType="nt:unstructured">
                     <table
-                            granite:rel="etoolbox-link-inspector"
-                            jcr:primaryType="nt:unstructured"
-                            sling:resourceType="granite/ui/components/coral/foundation/table"
-                            src="/content/etoolbox-link-inspector/link-inspector/jcr:content/views/container/items/table{.offset,limit}.html{+id}?page=${param.page}&amp;type=${param.type}&amp;substring=${param.substring}"
-                            itemprop="item"
-                            limit="{Long}50"
-                            layoutId="list"
-                            maximized="{Boolean}true"
-                            modeGroup="etoolbox-link-inspector"
-                            path="${requestPathInfo.suffix}"
-                            selectionMode="row"
-                            sortMode="local"
-                            stateId="link-inspector-ui">
-                        <columns
-                                jcr:primaryType="nt:unstructured"
-                                class="elc-card">
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="granite/ui/components/coral/foundation/table"
+                        granite:rel="etoolbox-link-inspector"
+                        granite:class="elc-grid"
+                        src="/content/etoolbox-link-inspector/link-inspector/jcr:content/views/container/items/table{.offset,limit}.html{+id}?page=${param.page}&amp;type=${param.type}&amp;substring=${param.substring}"
+                        itemprop="item"
+                        limit="{Long}50"
+                        layoutId="list"
+                        maximized="{Boolean}true"
+                        modeGroup="etoolbox-link-inspector"
+                        path="${requestPathInfo.suffix}"
+                        selectionMode="row"
+                        sortMode="local"
+                        stateId="link-inspector-ui">
+                        <columns jcr:primaryType="nt:unstructured">
                             <select
                                     jcr:primaryType="nt:unstructured"
                                     select="{Boolean}true"/>
@@ -102,6 +101,18 @@
                                 sling:resourceType="etoolbox-link-inspector/components/gridDatasource"
                                 itemResourceType="etoolbox-link-inspector/components/gridConfig"/>
                     </table>
+                    <statistics
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/include"
+                            path="/content/etoolbox-link-inspector/data/stats"
+                            resourceType="etoolbox-link-inspector/components/stats/statsPanel"/>
+                    <ticker jcr:primaryType="nt:unstructured"
+                            sling:resourceType="etoolbox-contractor/components/ticker"
+                            granite:id="wait"
+                            topic="etoolbox/link-inspector/job/datafeed/generate"
+                            controls="#scan"
+                            tick="200"
+                            tracks="/content/etoolbox/contractor/servlet/task"/>
                 </items>
             </container>
         </views>
@@ -137,17 +148,6 @@
                           nesting="hide"
                           src.uritemplate="/content/etoolbox-link-inspector/link-inspector/filterOptions.html"/>
                 </filterOptions>
-                <!--                <filterOptions-->
-                <!--                        jcr:primaryType="nt:unstructured"-->
-                <!--                        sling:resourceType="granite/ui/components/coral/foundation/collection/action"-->
-                <!--                        granite:id="elc-filter-options"-->
-                <!--                        action="cq-admin.etoolbox.linkinspector.action.filter-options"-->
-                <!--                        icon="filter"-->
-                <!--                        rel="etoolbox-link-inspector-filter-options"-->
-                <!--                        target=".etoolbox-link-inspector"-->
-                <!--                        text="Filter"-->
-                <!--                        title="Filter"-->
-                <!--                        variant="minimal"/>-->
                 <deleteReport
                         jcr:primaryType="nt:unstructured"
                         sling:resourceType="granite/ui/components/coral/foundation/collection/action"
@@ -160,25 +160,22 @@
                         variant="minimal"/>
             </primary>
             <secondary jcr:primaryType="nt:unstructured">
-                <options
+                <settings
                         jcr:primaryType="nt:unstructured"
                         sling:resourceType="granite/ui/components/coral/foundation/anchorbutton"
-                        href="/apps/etoolbox-link-inspector/options/options.html"
+                        href="/etoolbox/link-inspector/settings.html"
                         icon="gears"
-                        text="Options"
-                        title="Options"
-                        variant="minimal"/>
-                <stats
+                        text="Settings"
+                        granite:title="Settings"
+                        variant="secondary"/>
+                <scan
                         jcr:primaryType="nt:unstructured"
-                        path="/content/etoolbox-link-inspector/data/stats"
-                        sling:resourceType="etoolbox-link-inspector/components/stats/statsButton"/>
-                <download
-                        jcr:primaryType="nt:unstructured"
-                        sling:resourceType="granite/ui/components/coral/foundation/anchorbutton"
-                        text="Download"
-                        variant="primary"
-                        granite:class="elc-download-report-button"
-                        x-cq-linkchecker="skip"/>
+                        sling:resourceType="granite/ui/components/coral/foundation/collection/action"
+                        granite:id="scan"
+                        granite:title="Scan for links"
+                        text="Scan now"
+                        icon="play"
+                        variant="primary"/>
             </secondary>
         </actions>
     </jcr:content>
@@ -208,7 +205,7 @@
                                             fieldLabel="By type"
                                             name="./linkTypes">
                                         <datasource jcr:primaryType="nt:unstructured"
-                                                    sling:resourceType="/bin/etoolbox/link-inspector/settings/linktypes"/>
+                                                    sling:resourceType="/bin/etoolbox/link-inspector/settings/resolvers"/>
                                     </type>
                                     <text
                                             jcr:primaryType="nt:unstructured"
@@ -227,7 +224,7 @@
             <resetButton
                     jcr:primaryType="nt:unstructured"
                     sling:resourceType="granite/ui/components/coral/foundation/button"
-                    type="reset"
+                    granite:id="dialog-reset"
                     text="Reset"
                     variant="secondary"/>
             <cancelButton
@@ -235,7 +232,11 @@
                     sling:resourceType="granite/ui/components/coral/foundation/button"
                     granite:id="dialog-cancel"
                     text="Cancel"
-                    variant="secondary"/>
+                    variant="secondary">
+                <parentConfig
+                        jcr:primaryType="nt:unstructured"
+                        close="{Boolean}true"/>
+            </cancelButton>
             <okButton
                     jcr:primaryType="nt:unstructured"
                     sling:resourceType="granite/ui/components/coral/foundation/button"

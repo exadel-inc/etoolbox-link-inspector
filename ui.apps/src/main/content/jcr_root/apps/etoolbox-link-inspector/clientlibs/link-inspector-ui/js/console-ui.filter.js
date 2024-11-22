@@ -16,7 +16,7 @@
  * EToolbox Link Inspector clientlib.
  * "Filter" action definition.
  */
-(function (Granite, $, Coral) {
+(function (Granite, $) {
     'use strict';
 
     function initFiltersDialog(searchParams){
@@ -34,14 +34,19 @@
         document.location.search = searchParams;
     }
 
-    $(document).on('click', '#dialog-action', function (e) {
+    $(document).on('click', '#dialog-action', function () {
         initFiltersDialog(new URL(document.location).searchParams);
     })
 
-    $(document).on('click', '#dialog-cancel', function (e) {
+    $(document).on('click', '#dialog-reset', function () {
         var url = new URL(document.location)
         url.search = '';
         document.location = url;
     })
 
-})(Granite, Granite.$, Coral);
+    $(document).ready(function () {
+        let searchParams = new URL(document.location).searchParams;
+        $('#elc-filter-options').toggleClass('elc-filter-active', searchParams && searchParams.get('type') != null || searchParams.get('substring') != null)
+    });
+
+})(Granite, Granite.$);

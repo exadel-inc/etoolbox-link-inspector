@@ -17,7 +17,6 @@ package com.exadel.etoolbox.linkinspector.core.services.resolvers;
 import com.exadel.etoolbox.linkinspector.api.Link;
 import com.exadel.etoolbox.linkinspector.api.LinkResolver;
 import com.exadel.etoolbox.linkinspector.core.models.LinkImpl;
-import com.exadel.etoolbox.linkinspector.core.services.data.UserConfig;
 import com.exadel.etoolbox.linkinspector.core.services.resolvers.configs.ExternalLinkResolverConfig;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
@@ -32,7 +31,11 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.osgi.services.HttpClientBuilderFactory;
 import org.apache.http.util.EntityUtils;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.osgi.service.component.annotations.*;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.metatype.annotations.Designate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +44,12 @@ import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.net.UnknownHostException;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -63,9 +71,6 @@ public class ExternalLinkResolverImpl implements LinkResolver {
 
     @Reference
     private HttpClientBuilderFactory httpClientBuilderFactory;
-
-    @Reference
-    private UserConfig userConfig;
 
     private CloseableHttpClient httpClient;
     private PoolingHttpClientConnectionManager connectionManager;
@@ -105,7 +110,13 @@ public class ExternalLinkResolverImpl implements LinkResolver {
         } catch (SocketTimeoutException e) {
             LOG.error("Timeout occurred while validating link {}", link.getHref(), e);
             link.setStatus(HttpStatus.SC_REQUEST_TIMEOUT, "Request Timeout");
-        } catch (URISyntaxException | IOException e) {
+        } catch (UnknownHostException e) {
+            LOG.error("Unknown host detected when validating {}", link.getHref(), e);
+            link.setStatus(HttpStatus.SC_NOT_FOUND, "Unknown host");
+        } catch (URISyntaxException e) {
+            LOG.error("Invalid URI syntax when validating link {}", link.getHref(), e);
+            link.setStatus(HttpStatus.SC_BAD_REQUEST, "Invalid URI syntax");
+        } catch (Exception e) {
             LOG.error("Failed to validate link {}", link.getHref(), e);
             link.setStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR, StringUtils.defaultIfEmpty(e.getMessage(), e.toString()));
         }
@@ -119,11 +130,10 @@ public class ExternalLinkResolverImpl implements LinkResolver {
     @Activate
     @Modified
     void activate(ExternalLinkResolverConfig config) {
-        config = userConfig.apply(config, this.getClass());
+        enabled = config.enabled();
         connectionTimeout = config.connectionTimeout();
         socketTimeout = config.socketTimeout();
         userAgent = config.userAgent();
-        enabled = config.linkType();
         buildCloseableHttpClient();
     }
 

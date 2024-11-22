@@ -140,10 +140,9 @@ class GridResourcesGeneratorImplTest {
                         MockHttpClientBuilderFactory.PN_STATUS_CODE, HttpStatus.SC_NOT_FOUND,
                         MockHttpClientBuilderFactory.PN_STATUS_MESSAGE, "Not Found")
         );
+
         context.registerInjectActivateService(new ExternalLinkResolverImpl());
-
         context.registerInjectActivateService(new InternalLinkResolverImpl());
-
         context.registerInjectActivateService(new MockCustomLinkResolver());
 
         configService = mock(ConfigServiceImpl.class);

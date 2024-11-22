@@ -16,8 +16,6 @@ package com.exadel.etoolbox.linkinspector.core.services.resolvers;
 
 import com.exadel.etoolbox.linkinspector.api.Link;
 import com.exadel.etoolbox.linkinspector.core.models.LinkImpl;
-import com.exadel.etoolbox.linkinspector.core.services.data.impl.UserConfigImpl;
-import com.exadel.etoolbox.linkinspector.core.services.helpers.RepositoryHelper;
 import com.exadel.etoolbox.linkinspector.core.services.mocks.MockHttpClientBuilderFactory;
 import com.exadel.etoolbox.linkinspector.core.services.mocks.MockRepositoryHelper;
 import com.google.common.collect.ImmutableMap;
@@ -63,7 +61,6 @@ class ExternalLinkResolverImplTest {
 
         Link testLink = getTestLink();
         context.registerInjectActivateService(new MockRepositoryHelper(context.resourceResolver()));
-        context.registerInjectActivateService(new UserConfigImpl());
         context.registerInjectActivateService(new ExternalLinkResolverImpl(), HTTP_PARAMS).validate(testLink, context.resourceResolver());
         assertEquals(HttpStatus.SC_BAD_REQUEST, testLink.getStatus().getCode());
     }
@@ -82,7 +79,6 @@ class ExternalLinkResolverImplTest {
 
         Link testLink = getTestLink();
         context.registerInjectActivateService(new MockRepositoryHelper(context.resourceResolver()));
-        context.registerInjectActivateService(new UserConfigImpl());
         context.registerInjectActivateService(new ExternalLinkResolverImpl(), HTTP_PARAMS).validate(testLink, context.resourceResolver());
         assertEquals(HttpStatus.SC_NOT_FOUND, testLink.getStatus().getCode());
     }
@@ -104,7 +100,6 @@ class ExternalLinkResolverImplTest {
 
         Link testLink = getTestLink();
         context.registerInjectActivateService(new MockRepositoryHelper(context.resourceResolver()));
-        context.registerInjectActivateService(new UserConfigImpl());
         context.registerInjectActivateService(new ExternalLinkResolverImpl(), HTTP_PARAMS).validate(testLink, context.resourceResolver());
         assertEquals(HttpStatus.SC_OK, testLink.getStatus().getCode());
     }
@@ -119,7 +114,6 @@ class ExternalLinkResolverImplTest {
 
         Link testLink = getTestLink();
         context.registerInjectActivateService(new MockRepositoryHelper(context.resourceResolver()));
-        context.registerInjectActivateService(new UserConfigImpl());
         context.registerInjectActivateService(new ExternalLinkResolverImpl(), HTTP_PARAMS).validate(testLink, context.resourceResolver());
         assertEquals(HttpStatus.SC_OK, testLink.getStatus().getCode());
     }
@@ -131,7 +125,6 @@ class ExternalLinkResolverImplTest {
                 new MockHttpClientBuilderFactory(),
                 Collections.singletonMap(MockHttpClientBuilderFactory.PN_CLIENT, client));
         context.registerInjectActivateService(new MockRepositoryHelper(context.resourceResolver()));
-        context.registerInjectActivateService(new UserConfigImpl());
         ExternalLinkResolverImpl fixture = context.registerInjectActivateService(new ExternalLinkResolverImpl(), HTTP_PARAMS);
         fixture.deactivate();
         verify(client).close();

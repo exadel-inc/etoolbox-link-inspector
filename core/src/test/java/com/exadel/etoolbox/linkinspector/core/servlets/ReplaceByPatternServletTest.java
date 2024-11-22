@@ -18,7 +18,6 @@ import com.exadel.etoolbox.linkinspector.core.services.cache.GridResourcesCache;
 import com.exadel.etoolbox.linkinspector.core.services.cache.impl.GridResourcesCacheImpl;
 import com.exadel.etoolbox.linkinspector.core.services.data.DataFeedService;
 import com.exadel.etoolbox.linkinspector.core.services.data.impl.DataFeedServiceImpl;
-import com.exadel.etoolbox.linkinspector.core.services.data.impl.UserConfigImpl;
 import com.exadel.etoolbox.linkinspector.core.services.data.models.GridResource;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.LinkHelper;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.PackageHelper;
@@ -48,6 +47,7 @@ import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceResolverFactory;
+import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletRequest;
 import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletResponse;
 import org.junit.jupiter.api.Assertions;
@@ -106,7 +106,7 @@ class ReplaceByPatternServletTest {
     private static final String TEST_EXCEPTION_MSG = "Test exception message";
     private static final String ADVANCED_MODE = "advancedMode";
 
-    private final AemContext context = new AemContext();
+    private final AemContext context = new AemContext(ResourceResolverType.JCR_MOCK);
 
     private ReplaceByPatternServlet fixture;
 
@@ -118,7 +118,7 @@ class ReplaceByPatternServletTest {
     private MockSlingHttpServletResponse response;
 
     @BeforeEach
-    void setup() throws NoSuchFieldException {
+    void setup() {
         request = context.request();
         response = context.response();
 
@@ -132,7 +132,6 @@ class ReplaceByPatternServletTest {
                         "statusCode", org.apache.http.HttpStatus.SC_NOT_FOUND,
                         "statusMessage", "Not Found")
         );
-        context.registerInjectActivateService(new UserConfigImpl());
         context.registerInjectActivateService(new ExternalLinkResolverImpl());
         context.registerInjectActivateService(new InternalLinkResolverImpl());
         linkHelper = context.registerInjectActivateService(new LinkHelperImpl());

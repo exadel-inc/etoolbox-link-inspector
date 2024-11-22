@@ -54,7 +54,7 @@ public final class LinkStatus {
      * Indicates if a link is valid
      */
     public boolean isValid() {
-        return code % 100 == 1;
+        return code / 100 == 2;
     }
 
     @Override

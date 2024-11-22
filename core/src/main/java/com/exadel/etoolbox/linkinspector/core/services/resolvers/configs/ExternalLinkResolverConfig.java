@@ -27,23 +27,27 @@ public @interface ExternalLinkResolverConfig {
     int DEFAULT_SOCKET_TIMEOUT = 15000;
 
     @AttributeDefinition(
+            name = "Enabled",
+            description = "Is service enabled?"
+    )
+    boolean enabled() default true;
+
+    @AttributeDefinition(
             name = "Connection timeout",
-            description = "The time (in milliseconds) for connection to disconnect"
-    ) int connectionTimeout() default DEFAULT_CONNECTION_TIMEOUT;
+            description = "The timeout (in milliseconds) after which the connection fails"
+    )
+    int connectionTimeout() default DEFAULT_CONNECTION_TIMEOUT;
 
     @AttributeDefinition(
             name = "Socket timeout",
-            description = "The timeout (in milliseconds) for socket"
-    ) int socketTimeout() default DEFAULT_SOCKET_TIMEOUT;
+            description = "The timeout (in milliseconds) for socket."
+    )
+    int socketTimeout() default DEFAULT_SOCKET_TIMEOUT;
 
     @AttributeDefinition(
             name = "User agent",
             description = "Example - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like " +
                     "Gecko) Chrome/86.0.4240.111 Safari/537.36"
-    ) String userAgent() default StringUtils.EMPTY;
-
-    @AttributeDefinition(
-            name = "Enable service",
-            description = "Is service active or not"
-    ) boolean linkType() default false;
+    )
+    String userAgent() default StringUtils.EMPTY;
 }

@@ -25,6 +25,8 @@ import org.apache.sling.api.resource.ResourceResolver;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.component.annotations.ReferencePolicyOption;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,8 +45,12 @@ public class LinkHelperImpl implements LinkHelper {
 
     private static final Logger LOG = LoggerFactory.getLogger(LinkHelperImpl.class);
 
-    @Reference(cardinality = ReferenceCardinality.MULTIPLE)
-    private List<LinkResolver> linkResolvers;
+    @Reference(
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            policyOption = ReferencePolicyOption.GREEDY
+    )
+    private volatile List<LinkResolver> linkResolvers;
 
     /**
      * {@inheritDoc}

@@ -18,7 +18,6 @@ import com.exadel.etoolbox.linkinspector.api.Link;
 import com.exadel.etoolbox.linkinspector.api.LinkResolver;
 import com.exadel.etoolbox.linkinspector.api.LinkStatus;
 import com.exadel.etoolbox.linkinspector.core.models.LinkImpl;
-import com.exadel.etoolbox.linkinspector.core.services.data.UserConfig;
 import com.exadel.etoolbox.linkinspector.core.services.resolvers.configs.InternalLinkResolverConfig;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
@@ -36,14 +35,18 @@ import org.slf4j.LoggerFactory;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
  * Validates external links via sending HEAD requests concurrently using {@link PoolingHttpClientConnectionManager}
  */
-@Component(service = LinkResolver.class )
+@Component(service = LinkResolver.class, immediate = true)
 @Designate(ocd = InternalLinkResolverConfig.class)
 public class InternalLinkResolverImpl implements LinkResolver {
 
@@ -57,17 +60,12 @@ public class InternalLinkResolverImpl implements LinkResolver {
     @Reference
     private LinkResolver externalLinkResolver;
 
-    @Reference
-    private UserConfig userConfig;
-
     @Activate
     @Modified
-    private void activate(InternalLinkResolverConfig config){
-        config = userConfig.apply(config, this.getClass());
+    private void activate(InternalLinkResolverConfig config) {
+        this.enabled = config.enabled();
         this.internalLinksHost = config.internalLinksHost();
-        this.enabled = config.linkType();
     }
-
 
     @Override
     public String getId() {

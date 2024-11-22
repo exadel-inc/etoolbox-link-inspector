@@ -16,13 +16,13 @@ import java.util.Optional;
 
 @Component(service = ConfigService.class)
 public class ConfigServiceImpl implements ConfigService {
-    public static final String CONFIG_PATH = "/conf/etoolbox/link-inspector";
+    static final String CONFIG_PATH = "/conf/etoolbox/link-inspector";
     private static final String PN_EXCLUDED_LINK_PATTERNS = "excludedLinkPatterns";
     private static final String PN_EXCLUDED_PATHS = "excludedPaths";
     private static final String PN_ACTIVATED_CONTENT = "activatedContent";
     private static final String PN_SKIP_CONTENT_AFTER_ACTIVATION = "skipContentAfterActivation";
     private static final String PN_LAST_MODIFIED = "lastModified";
-    private static final String PN_REPLACEMENT = "replacement";
+    private static final String PN_PATH = "path";
     private static final String PN_EXCLUDED_PROPERTIES = "excludedProperties";
     private static final String PN_EXCLUDE_TAGS = "excludeTags";
     private static final String PN_STATUS_CODES = "statusCodes";
@@ -41,7 +41,7 @@ public class ConfigServiceImpl implements ConfigService {
 
     @Override
     public String getSearchPath() {
-        return getProperty(PN_REPLACEMENT, String.class).orElse(DEFAULT_PATH);
+        return getProperty(PN_PATH, String.class).orElse(DEFAULT_PATH);
     }
 
     @Override

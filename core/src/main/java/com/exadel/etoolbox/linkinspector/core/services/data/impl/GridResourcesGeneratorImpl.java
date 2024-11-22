@@ -247,7 +247,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
     }
 
     private boolean isExcludedTagLink(String href) {
-        return configService.excludeTagLinks() && href.startsWith(TAGS_LOCATION);
+        return configService.excludeTagLinks() && StringUtils.startsWith(href, TAGS_LOCATION);
     }
 
     private boolean isExcludedProperty(String propertyName) {
@@ -311,7 +311,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
     }
 
     private boolean isStringMatchAnyPattern(String value, String[] patterns) {
-        if (ArrayUtils.isEmpty(patterns)) {
+        if (value == null || ArrayUtils.isEmpty(patterns)) {
             return false;
         }
         for (String pattern : patterns) {

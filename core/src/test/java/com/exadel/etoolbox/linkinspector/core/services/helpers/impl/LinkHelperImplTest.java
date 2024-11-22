@@ -18,7 +18,6 @@ import com.exadel.etoolbox.linkinspector.api.Link;
 import com.exadel.etoolbox.linkinspector.api.LinkResolver;
 import com.exadel.etoolbox.linkinspector.api.LinkStatus;
 import com.exadel.etoolbox.linkinspector.core.models.LinkImpl;
-import com.exadel.etoolbox.linkinspector.core.services.data.impl.UserConfigImpl;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.LinkHelper;
 import com.exadel.etoolbox.linkinspector.core.services.mocks.MockHttpClientBuilderFactory;
 import com.exadel.etoolbox.linkinspector.core.services.mocks.MockRepositoryHelper;
@@ -96,7 +95,6 @@ class LinkHelperImplTest {
         context.registerInjectActivateService(
                 new MockHttpClientBuilderFactory(),
                 Collections.singletonMap(MockHttpClientBuilderFactory.PN_CLIENT, httpClient));
-        context.registerInjectActivateService(new UserConfigImpl());
         context.registerInjectActivateService(new ExternalLinkResolverImpl());
         internalLinkResolver = context.registerInjectActivateService(new InternalLinkResolverImpl());
 
