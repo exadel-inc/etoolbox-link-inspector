@@ -16,29 +16,22 @@ import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.apache.sling.jcr.resource.api.JcrResourceConstants;
-import org.apache.sling.servlets.annotations.SlingServletPaths;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
-import org.osgi.service.component.annotations.ReferencePolicyOption;
+import org.apache.sling.servlets.annotations.SlingServletResourceTypes;
+import org.osgi.service.component.annotations.*;
 import org.osgi.service.metatype.MetaTypeService;
 
 import javax.servlet.Servlet;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Component(service = Servlet.class)
-@SlingServletPaths({
+@SlingServletResourceTypes(resourceTypes = {
         "/bin/etoolbox/link-inspector/settings/resolvers",
         "/bin/etoolbox/link-inspector/settings/resolvers/cb"
 })
 public class ResolversDataSource extends SlingSafeMethodsServlet {
 
     private static final String PROP_TEXT = "text";
+    private static final String SELECTED_PARAM = "selected";
 
     @Reference
     private transient MetaTypeService metaTypeService;
@@ -55,11 +48,13 @@ public class ResolversDataSource extends SlingSafeMethodsServlet {
             @NonNull SlingHttpServletRequest request,
             @NonNull SlingHttpServletResponse response) {
 
+        String type = StringUtils.substringBefore(StringUtils.substringAfter(request.getHeader("Referer"), "type="), "&");
+
         List<Resource> resolverFields = new ArrayList<>();
         boolean isItemDataSource = StringUtils.endsWith(request.getResource().getResourceType(), "/resolvers");
         for (LinkResolver linkResolver : linkResolvers) {
             Resource item = isItemDataSource
-                    ? createListItem(request, linkResolver)
+                    ? createListItem(request, linkResolver, type)
                     : createCheckBox(request, linkResolver);
             if (item != null) {
                 resolverFields.add(item);
@@ -89,13 +84,17 @@ public class ResolversDataSource extends SlingSafeMethodsServlet {
                 Collections.emptyList());
     }
 
-    private Resource createListItem(SlingHttpServletRequest request, LinkResolver linkResolver) {
+    private Resource createListItem(SlingHttpServletRequest request, LinkResolver linkResolver, String type) {
         if (!linkResolver.isEnabled()) {
             return null;
         }
         ValueMap valueMap = new ValueMapDecorator(new HashMap<>());
-        valueMap.put("value", linkResolver.getId());
-        valueMap.put(PROP_TEXT, linkResolver.getId());
+        String id = linkResolver.getId();
+        valueMap.put("value", id);
+        if (id.equalsIgnoreCase(type)) {
+            valueMap.put(SELECTED_PARAM, true);
+        }
+        valueMap.put(PROP_TEXT, id);
         return new ValueMapResource(
                 request.getResourceResolver(),
                 StringUtils.EMPTY,
