@@ -146,7 +146,7 @@
                         variant="minimal">
                     <data jcr:primaryType="nt:unstructured"
                           nesting="hide"
-                          src.uritemplate="/content/etoolbox-link-inspector/link-inspector/filterOptions.html"/>
+                          src.uritemplate="/content/etoolbox-link-inspector/link-inspector/filterOptions.html?substring=${param.substring}"/>
                 </filterOptions>
                 <deleteReport
                         jcr:primaryType="nt:unstructured"
@@ -212,6 +212,7 @@
                                             sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
                                             granite:id="byTextFilter"
                                             fieldLabel="By text"
+                                            value="${param.substring}"
                                             name="./byText"/>
                                 </items>
                             </column>
