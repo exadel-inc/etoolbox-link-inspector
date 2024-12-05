@@ -176,6 +176,10 @@
                         text="Scan now"
                         icon="play"
                         variant="primary"/>
+                <stats
+                        jcr:primaryType="nt:unstructured"
+                        path="/content/etoolbox-link-inspector/data/stats"
+                        sling:resourceType="etoolbox-link-inspector/components/stats/statsButton"/>
             </secondary>
         </actions>
     </jcr:content>
