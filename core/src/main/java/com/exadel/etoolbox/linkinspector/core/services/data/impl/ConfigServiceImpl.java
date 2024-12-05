@@ -19,7 +19,6 @@ public class ConfigServiceImpl implements ConfigService {
     static final String CONFIG_PATH = "/conf/etoolbox/link-inspector";
     private static final String PN_EXCLUDED_LINK_PATTERNS = "excludedLinkPatterns";
     private static final String PN_EXCLUDED_PATHS = "excludedPaths";
-    private static final String PN_ACTIVATED_CONTENT = "activatedContent";
     private static final String PN_SKIP_CONTENT_AFTER_ACTIVATION = "skipContentAfterActivation";
     private static final String PN_LAST_MODIFIED = "lastModified";
     private static final String PN_PATH = "path";
@@ -47,11 +46,6 @@ public class ConfigServiceImpl implements ConfigService {
     @Override
     public String[] getExcludedPaths() {
         return getProperty(PN_EXCLUDED_PATHS, String[].class).orElse(new String[0]);
-    }
-
-    @Override
-    public boolean activatedContent() {
-        return getProperty(PN_ACTIVATED_CONTENT, Boolean.class).orElse(false);
     }
 
     @Override

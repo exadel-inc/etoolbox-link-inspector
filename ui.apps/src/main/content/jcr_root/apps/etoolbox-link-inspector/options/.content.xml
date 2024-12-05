@@ -100,21 +100,12 @@
                                                         granite:class="foundation-layout-util-vmargin"
                                                         level="2"
                                                         text="Filters"/>
-                                                <activatedContent
-                                                        jcr:primaryType="nt:unstructured"
-                                                        sling:resourceType="granite/ui/components/coral/foundation/form/checkbox"
-                                                        name="./activatedContent"
-                                                        text="Activated Content"
-                                                        fieldDescription="If checked, links will be retrieved from activated content only"
-                                                        uncheckedValue="{Boolean}false"
-                                                        checked="{Boolean}false"
-                                                        value="{Boolean}true"/>
                                                 <skipContentAfterActivation
                                                         jcr:primaryType="nt:unstructured"
                                                         sling:resourceType="granite/ui/components/coral/foundation/form/checkbox"
                                                         name="./skipContentAfterActivation"
-                                                   text="Skip non-published content and content changed after publishing"
-                                                        fieldDescription="Works in conjunction with the 'Activated Content' checkbox only. If checked, links will be retrieved from activated content that is not modified after activation (lastModified is before lastReplicated)"
+                                                        text="Skip non-published content and content changed after publishing"
+                                                        fieldDescription="If checked, links will be retrieved from activated content that is not modified after activation (lastModified is before lastReplicated)"
                                                         uncheckedValue="{Boolean}false"
                                                         checked="{Boolean}false"
                                                         value="{Boolean}true"/>
