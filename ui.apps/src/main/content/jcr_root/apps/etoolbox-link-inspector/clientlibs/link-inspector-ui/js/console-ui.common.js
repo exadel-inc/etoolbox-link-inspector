@@ -16,7 +16,7 @@
  * EToolbox Link Inspector clientlib.
  * Common utilities
  */
-(function (window, document, $, Granite) {
+(function (window, document, $, Granite, Coral) {
     'use strict';
 
     var Utils = Granite.ELC = (Granite.ELC || {});
@@ -181,4 +181,23 @@
     }
     Utils.resourceExistCheck = resourceExistCheck;
 
-})(window, document, Granite.$, Granite);
+    $(document).on('submit', '#elc-options-savesettings', function (e) {
+        e.preventDefault();
+        const form = $(this);
+        $.ajax({
+            type: "POST",
+            url: $(this).attr('action'),
+            data: $(this).serialize(),
+            success: function () {
+                location.replace("/etoolbox/link-inspector.html")
+            },
+            error: function() {
+                $(window).adaptTo('foundation-ui').alert(
+                    Granite.I18n.get('Error'),
+                    Granite.I18n.get('Error while saving settings'),
+                    'error');
+            }
+        });
+    })
+
+})(window, document, Granite.$, Granite, Coral);

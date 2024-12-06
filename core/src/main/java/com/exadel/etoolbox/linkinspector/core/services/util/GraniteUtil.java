@@ -22,6 +22,7 @@ public class GraniteUtil {
         Map<String, Object> properties = new HashMap<>();
         properties.put(JcrConstants.JCR_TITLE, title);
         properties.put(JcrResourceConstants.SLING_RESOURCE_TYPE_PROPERTY, "granite/ui/components/coral/foundation/container");
+        properties.put("granite:class", "foundation-layout-util-vmargin");
         return createResource(resolver, path, properties, Collections.singletonList(items));
     }
 

@@ -95,7 +95,6 @@ class StatsModalTest {
         stats.put(GenerationStatsProps.PN_LAST_GENERATED, TEST_LAST_GENERATED);
         stats.put(GenerationStatsProps.PN_SEARCH_PATH, TEST_SEARCH_PATH);
         stats.put(GenerationStatsProps.PN_EXCLUDED_PATHS, TEST_EXCLUDED_PATHS);
-        stats.put(GenerationStatsProps.PN_CHECK_ACTIVATION, TEST_CHECK_ACTIVATION);
         stats.put(GenerationStatsProps.PN_SKIP_MODIFIED_AFTER_ACTIVATION, TEST_SKIP_MODIFIED_AFTER_ACTIVATION);
         stats.put(GenerationStatsProps.PN_LAST_MODIFIED_BOUNDARY, TEST_LAST_MOD_BOUNDARY);
         stats.put(GenerationStatsProps.PN_EXCLUDED_PROPERTIES, TEST_EXCLUDED_PROPS);

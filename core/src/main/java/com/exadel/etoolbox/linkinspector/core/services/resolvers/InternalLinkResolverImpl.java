@@ -18,8 +18,9 @@ import com.exadel.etoolbox.linkinspector.api.Link;
 import com.exadel.etoolbox.linkinspector.api.LinkResolver;
 import com.exadel.etoolbox.linkinspector.api.LinkStatus;
 import com.exadel.etoolbox.linkinspector.core.models.LinkImpl;
-import org.apache.http.HttpStatus;
+import com.exadel.etoolbox.linkinspector.core.services.resolvers.configs.InternalLinkResolverConfig;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpStatus;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceUtil;
@@ -27,9 +28,7 @@ import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
-import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,6 +36,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -46,37 +46,26 @@ import java.util.regex.Pattern;
 /**
  * Validates external links via sending HEAD requests concurrently using {@link PoolingHttpClientConnectionManager}
  */
-@Component(service = LinkResolver.class )
-@Designate(ocd = InternalLinkResolverImpl.Config.class)
+@Component(service = LinkResolver.class, immediate = true)
+@Designate(ocd = InternalLinkResolverConfig.class)
 public class InternalLinkResolverImpl implements LinkResolver {
 
     private static final Logger LOG = LoggerFactory.getLogger(InternalLinkResolverImpl.class);
 
     private static final Pattern PATTERN_INTERNAL_LINK = Pattern.compile("(^|(?<=\"))/content/([-\\w\\d():%_+.~#?&/=\\s]*)", Pattern.UNICODE_CHARACTER_CLASS);
 
-    @ObjectClassDefinition(
-            name = "EToolbox Link Inspector - Link Helper",
-            description = "Assists in link processing"
-    )
-    @interface Config{
-        @AttributeDefinition(
-                name = "Internal Links Host",
-                description = "Host to be used for verifying internal links. " +
-                        "If no value is set, links will be verified against local JCR.")
-        String internalLinksHost() default StringUtils.EMPTY;
-    }
-
     private String internalLinksHost;
+    private boolean enabled;
 
     @Reference
     private LinkResolver externalLinkResolver;
 
     @Activate
     @Modified
-    private void activate(Config config){
+    private void activate(InternalLinkResolverConfig config) {
+        this.enabled = config.enabled();
         this.internalLinksHost = config.internalLinksHost();
     }
-
 
     @Override
     public String getId() {
@@ -85,6 +74,9 @@ public class InternalLinkResolverImpl implements LinkResolver {
 
     @Override
     public Collection<Link> getLinks(String source) {
+        if (!enabled) {
+            return Collections.emptyList();
+        }
         Set<Link> links = new HashSet<>();
         Matcher matcher = PATTERN_INTERNAL_LINK.matcher(source);
         while (matcher.find()) {
@@ -105,6 +97,11 @@ public class InternalLinkResolverImpl implements LinkResolver {
         } else {
             link.setStatus(status.getCode(), status.getMessage());
         }
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return enabled;
     }
 
     private LinkStatus checkLink(String href, ResourceResolver resourceResolver) {

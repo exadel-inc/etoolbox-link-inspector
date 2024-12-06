@@ -2,26 +2,27 @@ package com.exadel.etoolbox.linkinspector.core.services.mocks;
 
 import com.exadel.etoolbox.linkinspector.core.services.helpers.RepositoryHelper;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.wrappers.ResourceResolverWrapper;
 
 import javax.jcr.Session;
 
 public class MockRepositoryHelper implements RepositoryHelper {
 
-    private final ResourceResolver resourceResolver;
+    private final ResourceResolver basicResolver;
     private int resourceCounter = 0;
 
-    public MockRepositoryHelper(ResourceResolver resourceResolver) {
-        this.resourceResolver = resourceResolver;
+    public MockRepositoryHelper(ResourceResolver basicResolver) {
+        this.basicResolver = basicResolver;
     }
 
     @Override
     public ResourceResolver getServiceResourceResolver() {
-        return resourceResolver;
+        return new OneTimeResourceResolver(basicResolver);
     }
 
     @Override
     public ResourceResolver getThreadResourceResolver() {
-        return resourceResolver;
+        return new OneTimeResourceResolver(basicResolver);
     }
 
     @Override
@@ -41,5 +42,16 @@ public class MockRepositoryHelper implements RepositoryHelper {
 
     public int getCreationsCount() {
         return resourceCounter;
+    }
+
+    private static class OneTimeResourceResolver extends ResourceResolverWrapper {
+        OneTimeResourceResolver(ResourceResolver resourceResolver) {
+            super(resourceResolver);
+        }
+
+        @Override
+        public void close() {
+            // No operation
+        }
     }
 }

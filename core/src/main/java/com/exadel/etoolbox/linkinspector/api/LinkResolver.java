@@ -19,6 +19,13 @@ import org.apache.sling.api.resource.ResourceResolver;
 import java.util.Collection;
 
 public interface LinkResolver {
+
+    /**
+     * Gets whether the current resolver is enabled
+     * @return True or false
+     */
+    boolean isEnabled();
+
     /**
      * Retrieves the token used to identify the current link type
      * @return A non-blank string value

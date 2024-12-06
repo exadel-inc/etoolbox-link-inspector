@@ -12,56 +12,40 @@
  * limitations under the License.
  */
 
-tr.elc-card {
-  .card-page {
-    padding-left: 2.8125rem;
-    border-bottom: 0.0625rem solid #f2f2f2;
-    padding-right: 0.625rem;
-  }
+.elc-grid {
+  font-size: 0.9rem;
+}
 
-  .etoolbox-link-inspector,
-  .coral-Tooltip {
+.elc-item {
+  td {
+    padding: 0.5rem 0.75rem;
+    vertical-align: top;
+
+    &.centered {
+        text-align: center;
+    }
+    &.status {
+      max-width: 80px;
+    }
+  }
+  .break-all {
+    word-break: break-all;
+  }
+  .break-word {
     word-break: break-word;
   }
-}
-
-.elc-complex-col {
-  margin: 0.2rem 0;
-  max-width: 600px;
-  overflow: hidden;
-
-  .elc-primary-info {
-    display: block;
-    max-width: 100%;
-    margin-top: 0;
-    margin-bottom: 0;
-    // Fallback for browsers that not support word-break: break-word
-    word-break: normal;
-    word-break: break-word;
+  .indicator {
+    margin-top: 0.2rem;
   }
-
-  .elc-secondary-info {
+  .primary {
     display: block;
+    margin-bottom: 0.2rem;
   }
-}
-.els-component-col {
-  max-width: 350px;
-  // Fallback for browsers that not support word-break: break-word
-  word-break: break-all;
-}
-.els-page-col {
-  max-width: 250px;
-  overflow: hidden;
-}
-.els-status-msg-col {
-  max-width: 200px;
-}
-.els-property-col {
-  margin: 0.2rem 0;
-  max-width: 550px;
-  // Fallback for browsers that not support word-break: break-word
-  word-break: normal;
-  word-break: break-word;
+  .secondary {
+    display: block;
+    font-size: 0.8rem;
+    line-height: 0.8rem;
+  }
 }
 
 .elc-coral-alert {
@@ -113,26 +97,6 @@ tr.elc-card {
 
 .foundation-collection-selectall {
     display: none;
-}
-
-.collection-item_link-type{
-    width:30%;
-}
-
-.collection-item_page_title{
-    width:15%;
-}
-
-.collection-item_component_name{
-    width:15%;
-}
-
-.collection-item_property_name{
-    width:30%
-}
-
-.collection-item_status_code {
-    text-align: center;
 }
 
 #elc-filter-options.elc-filter-active, #elc-filter-options.elc-filter-active:hover {

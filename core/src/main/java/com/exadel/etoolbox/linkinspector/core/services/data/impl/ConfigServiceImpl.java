@@ -1,6 +1,5 @@
 package com.exadel.etoolbox.linkinspector.core.services.data.impl;
 
-import com.exadel.etoolbox.linkinspector.core.services.data.GenerationStatsProps;
 import com.exadel.etoolbox.linkinspector.core.services.data.ConfigService;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.RepositoryHelper;
 import org.apache.commons.lang3.StringUtils;
@@ -17,15 +16,13 @@ import java.util.Optional;
 
 @Component(service = ConfigService.class)
 public class ConfigServiceImpl implements ConfigService {
-    private static final String CONFIG_PATH = "/conf/etoolbox-link-inspector/data/config";
-    private static final String PN_FILTER = "filter";
+    static final String CONFIG_PATH = "/conf/etoolbox/link-inspector";
+    private static final String PN_EXCLUDED_LINK_PATTERNS = "excludedLinkPatterns";
     private static final String PN_EXCLUDED_PATHS = "excludedPaths";
-    private static final String PN_ACTIVATED_CONTENT = "activatedContent";
     private static final String PN_SKIP_CONTENT_AFTER_ACTIVATION = "skipContentAfterActivation";
-    private static final String PN_LAST_MODIFIED = "lastModifiedBoundary";
+    private static final String PN_LAST_MODIFIED = "lastModified";
     private static final String PN_PATH = "path";
     private static final String PN_EXCLUDED_PROPERTIES = "excludedProperties";
-    private static final String PN_LINKS_TYPE = "linksType";
     private static final String PN_EXCLUDE_TAGS = "excludeTags";
     private static final String PN_STATUS_CODES = "statusCodes";
     private static final String PN_THREADS_PER_CORE = "threadsPerCore";
@@ -38,7 +35,7 @@ public class ConfigServiceImpl implements ConfigService {
 
     @Override
     public String[] getExcludedLinksPatterns() {
-        return getProperty(PN_FILTER, String[].class).orElse(new String[0]);
+        return getProperty(PN_EXCLUDED_LINK_PATTERNS, String[].class).orElse(new String[0]);
     }
 
     @Override
@@ -49,11 +46,6 @@ public class ConfigServiceImpl implements ConfigService {
     @Override
     public String[] getExcludedPaths() {
         return getProperty(PN_EXCLUDED_PATHS, String[].class).orElse(new String[0]);
-    }
-
-    @Override
-    public boolean activatedContent() {
-        return getProperty(PN_ACTIVATED_CONTENT, Boolean.class).orElse(false);
     }
 
     @Override
@@ -72,11 +64,6 @@ public class ConfigServiceImpl implements ConfigService {
     @Override
     public String[] getExcludedProperties() {
         return getProperty(PN_EXCLUDED_PROPERTIES, String[].class).orElse(new String[0]);
-    }
-
-    @Override
-    public String getLinksType() {
-        return getProperty(PN_LINKS_TYPE, String.class).orElse(null);
     }
 
     @Override

@@ -20,7 +20,7 @@
             jcr:primaryType="nt:unstructured"
             jcr:title="EToolbox Link Inspector"
             jcr:description="Analyze webpage links and generate comprehensive reports"
-            href="/tools/etoolbox/link-inspector.html"
+            href="/etoolbox/link-inspector.html"
             consoleId="etoolbox-link-inspector"
             icon="etoolbox-link-inspector"
             order="{Long}100"/>

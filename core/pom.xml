@@ -216,5 +216,9 @@ Import-Package: javax.annotation;version=0.0.0,*
             <artifactId>commons-csv</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
     </dependencies>
 </project>

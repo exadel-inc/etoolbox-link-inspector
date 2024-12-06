@@ -17,8 +17,9 @@ package com.exadel.etoolbox.linkinspector.core.services.resolvers;
 import com.exadel.etoolbox.linkinspector.api.Link;
 import com.exadel.etoolbox.linkinspector.api.LinkResolver;
 import com.exadel.etoolbox.linkinspector.core.models.LinkImpl;
-import org.apache.http.HttpStatus;
+import com.exadel.etoolbox.linkinspector.core.services.resolvers.configs.ExternalLinkResolverConfig;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpStatus;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -35,9 +36,7 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
-import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,7 +44,9 @@ import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.UnknownHostException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -56,35 +57,12 @@ import java.util.regex.Pattern;
  * Validates external links via sending HEAD requests concurrently using {@link PoolingHttpClientConnectionManager}
  */
 @Component(service = {LinkResolver.class, ExternalLinkResolverImpl.class}, immediate = true)
-@Designate(ocd = ExternalLinkResolverImpl.Configuration.class)
+@Designate(ocd = ExternalLinkResolverConfig.class)
 public class ExternalLinkResolverImpl implements LinkResolver {
-
-    @ObjectClassDefinition(
-            name = "EToolbox Link Inspector - External Link Resolver",
-            description = "Validates external links"
-    )
-    @interface Configuration {
-        @AttributeDefinition(
-                name = "Connection timeout",
-                description = "The time (in milliseconds) for connection to disconnect"
-        ) int connectionTimeout() default DEFAULT_CONNECTION_TIMEOUT;
-
-        @AttributeDefinition(
-                name = "Socket timeout",
-                description = "The timeout (in milliseconds) for socket"
-        ) int socketTimeout() default DEFAULT_SOCKET_TIMEOUT;
-
-        @AttributeDefinition(
-                name = "User agent",
-                description = "Example - Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like " +
-                        "Gecko) Chrome/86.0.4240.111 Safari/537.36"
-        ) String userAgent() default StringUtils.EMPTY;
-    }
 
     private static final Logger LOG = LoggerFactory.getLogger(ExternalLinkResolverImpl.class);
 
     private static final int DEFAULT_CONNECTION_TIMEOUT = 5000;
-    private static final int DEFAULT_SOCKET_TIMEOUT = 15000;
     private static final int DEFAULT_MAX_TOTAL = 1000;
     private static final int DEFAULT_MAX_PER_ROUTE = 1000;
 
@@ -100,6 +78,7 @@ public class ExternalLinkResolverImpl implements LinkResolver {
     private int connectionTimeout;
     private int socketTimeout;
     private String userAgent;
+    private boolean enabled;
 
     @Override
     public String getId() {
@@ -108,6 +87,9 @@ public class ExternalLinkResolverImpl implements LinkResolver {
 
     @Override
     public Collection<Link> getLinks(String source) {
+        if (!enabled) {
+            return Collections.emptyList();
+        }
         Set<Link> links = new HashSet<>();
         Matcher matcher = PATTERN_EXTERNAL_LINK.matcher(source);
         while (matcher.find()) {
@@ -128,18 +110,30 @@ public class ExternalLinkResolverImpl implements LinkResolver {
         } catch (SocketTimeoutException e) {
             LOG.error("Timeout occurred while validating link {}", link.getHref(), e);
             link.setStatus(HttpStatus.SC_REQUEST_TIMEOUT, "Request Timeout");
-        } catch (URISyntaxException | IOException e) {
+        } catch (UnknownHostException e) {
+            LOG.error("Unknown host detected when validating {}", link.getHref(), e);
+            link.setStatus(HttpStatus.SC_NOT_FOUND, "Unknown host");
+        } catch (URISyntaxException e) {
+            LOG.error("Invalid URI syntax when validating link {}", link.getHref(), e);
+            link.setStatus(HttpStatus.SC_BAD_REQUEST, "Invalid URI syntax");
+        } catch (Exception e) {
             LOG.error("Failed to validate link {}", link.getHref(), e);
             link.setStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR, StringUtils.defaultIfEmpty(e.getMessage(), e.toString()));
         }
     }
 
+    @Override
+    public boolean isEnabled() {
+        return enabled;
+    }
+
     @Activate
     @Modified
-    void activate(Configuration configuration) {
-        connectionTimeout = configuration.connectionTimeout();
-        socketTimeout = configuration.socketTimeout();
-        userAgent = configuration.userAgent();
+    void activate(ExternalLinkResolverConfig config) {
+        enabled = config.enabled();
+        connectionTimeout = config.connectionTimeout();
+        socketTimeout = config.socketTimeout();
+        userAgent = config.userAgent();
         buildCloseableHttpClient();
     }
 

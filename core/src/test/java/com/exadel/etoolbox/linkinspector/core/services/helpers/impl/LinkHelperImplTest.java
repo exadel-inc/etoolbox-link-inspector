@@ -23,7 +23,6 @@ import com.exadel.etoolbox.linkinspector.core.services.mocks.MockHttpClientBuild
 import com.exadel.etoolbox.linkinspector.core.services.mocks.MockRepositoryHelper;
 import com.exadel.etoolbox.linkinspector.core.services.resolvers.ExternalLinkResolverImpl;
 import com.exadel.etoolbox.linkinspector.core.services.resolvers.InternalLinkResolverImpl;
-import com.google.common.collect.ImmutableMap;
 import io.wcm.testing.mock.aem.junit5.AemContext;
 import io.wcm.testing.mock.aem.junit5.AemContextExtension;
 import org.apache.http.HttpStatus;
@@ -33,7 +32,6 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.message.BasicStatusLine;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.testing.mock.osgi.MockOsgi;
-import org.apache.sling.testing.mock.sling.ResourceResolverType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -79,7 +77,7 @@ class LinkHelperImplTest {
     private static final String INTERNAL_LINKS_HOST_FIELD = "internalLinksHost";
     private static final String INTERNAL_LINKS_HOST_FIELD_VALUE = "https://example.com";
 
-    private final AemContext context = new AemContext(ResourceResolverType.JCR_MOCK);
+    private final AemContext context = new AemContext();
 
     private LinkHelper fixture;
     private LinkResolver internalLinkResolver;
@@ -97,7 +95,6 @@ class LinkHelperImplTest {
         context.registerInjectActivateService(
                 new MockHttpClientBuilderFactory(),
                 Collections.singletonMap(MockHttpClientBuilderFactory.PN_CLIENT, httpClient));
-
         context.registerInjectActivateService(new ExternalLinkResolverImpl());
         internalLinkResolver = context.registerInjectActivateService(new InternalLinkResolverImpl());
 

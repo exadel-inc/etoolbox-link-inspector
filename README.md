@@ -59,7 +59,7 @@ After the [Installation](#Installation) steps are completed it is necessary to:
 2. Set up the root path for searching broken links at _/system/console/configMgr/com.exadel.etoolbox.linkinspector.core.services.data.impl.GridResourcesGeneratorImpl_, see the [Data Filtering](#) section in Wiki for more details.
 
 The report generation will start in accordance with the configured cron. As soon as the data feed is generated, the results will be available at **_Tools > EToolbox > Link Inspector_**
-(_<YOUR_AEM_INSTANCE>/tools/etoolbox/link-inspector.html_)
+(_<YOUR_AEM_INSTANCE>/etoolbox/link-inspector.html_)
 
 Check out the [Data Filtering](#) section in Wiki for more filtering options.
 

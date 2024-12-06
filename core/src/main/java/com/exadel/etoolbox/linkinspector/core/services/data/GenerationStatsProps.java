@@ -25,7 +25,6 @@ public final class GenerationStatsProps {
     public static final String PN_LAST_GENERATED = "lastGenerated";
     public static final String PN_SEARCH_PATH = "searchPath";
     public static final String PN_EXCLUDED_PATHS = "excludedPaths";
-    public static final String PN_CHECK_ACTIVATION = "checkActivation";
     public static final String PN_SKIP_MODIFIED_AFTER_ACTIVATION = "skipModifiedAfterActivation";
     public static final String PN_LAST_MODIFIED_BOUNDARY = "lastModifiedBoundary";
     public static final String PN_EXCLUDED_PROPERTIES = "excludedProperties";

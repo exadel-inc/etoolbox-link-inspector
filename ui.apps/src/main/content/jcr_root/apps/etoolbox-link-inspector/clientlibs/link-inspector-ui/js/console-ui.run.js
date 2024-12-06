@@ -74,12 +74,22 @@
 
     $(document).on('coral-overlay:beforeclose', '.elc-coral-popover', beforeClosePopover);
 
-    $(document).on('click', '.elc-run-button', function() {
-        onRunAction(function() {
-            const $popover = $('.elc-coral-popover');
-            removeLastChild($popover);
-            createInProgressMessage($popover);
+    $(document).on('click', '#scan', onScanClicked);
+    function onScanClicked() {
+        const formData = new FormData();
+        formData.append('topic', 'etoolbox/link-inspector/job/datafeed/generate');
+        formData.append('exclusive', 'true');
+        $.ajax({
+            url: TRIGGER_DATA_FEED_GENERATION,
+            type: 'GET',
+            success: function () {
+                const $popover = $('.elc-coral-popover');
+                removeLastChild($popover);
+                createInProgressMessage($popover);
+            }
+        }).error(function (e) {
+            ui.notify('Error', e.responseText || e.statusText, 'error');
         });
-    });
+    }
 
 })(document, Granite.$);

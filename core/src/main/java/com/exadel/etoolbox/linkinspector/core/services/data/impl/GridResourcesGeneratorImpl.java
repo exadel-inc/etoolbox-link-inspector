@@ -18,11 +18,11 @@ import com.day.cq.replication.ReplicationActionType;
 import com.day.cq.replication.ReplicationStatus;
 import com.day.crx.JcrConstants;
 import com.exadel.etoolbox.linkinspector.api.Link;
+import com.exadel.etoolbox.linkinspector.core.services.data.ConfigService;
 import com.exadel.etoolbox.linkinspector.core.services.data.GenerationStatsProps;
 import com.exadel.etoolbox.linkinspector.core.services.data.GridResourcesGenerator;
-import com.exadel.etoolbox.linkinspector.core.services.data.ConfigService;
-import com.exadel.etoolbox.linkinspector.core.services.helpers.LinkHelper;
 import com.exadel.etoolbox.linkinspector.core.services.data.models.GridResource;
+import com.exadel.etoolbox.linkinspector.core.services.helpers.LinkHelper;
 import com.exadel.etoolbox.linkinspector.core.services.util.LinkInspectorResourceUtil;
 import com.exadel.etoolbox.linkinspector.core.services.util.LinksCounter;
 import org.apache.commons.lang.ArrayUtils;
@@ -247,7 +247,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
     }
 
     private boolean isExcludedTagLink(String href) {
-        return configService.excludeTagLinks() && href.startsWith(TAGS_LOCATION);
+        return configService.excludeTagLinks() && StringUtils.startsWith(href, TAGS_LOCATION);
     }
 
     private boolean isExcludedProperty(String propertyName) {
@@ -275,16 +275,14 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
     }
 
     private boolean isAllowedReplicationStatus(Resource resource) {
-        if (configService.activatedContent()) {
+        if (configService.isSkipContentModifiedAfterActivation()) {
             if (LinkInspectorResourceUtil.isPageOrAsset(resource)) {
                 return isActivatedPageOrAsset(resource);
             } else {
                 Optional<String> replicationAction = Optional.of(resource.getValueMap())
                         .map(valueMap -> valueMap.get(ReplicationStatus.NODE_PROPERTY_LAST_REPLICATION_ACTION, String.class));
-                if (replicationAction.isPresent()) {
-                    return ReplicationActionType.ACTIVATE.getName().equals(replicationAction.get()) &&
-                            (!configService.isSkipContentModifiedAfterActivation() || LinkInspectorResourceUtil.isModifiedBeforeActivation(resource));
-                }
+                return replicationAction.filter(s -> ReplicationActionType.ACTIVATE.getName().equals(s) &&
+                        LinkInspectorResourceUtil.isModifiedBeforeActivation(resource)).isPresent();
             }
         }
         return true;
@@ -294,13 +292,10 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
         Optional<ReplicationStatus> replicationStatus =
                 Optional.ofNullable(pageOrAssetResource.adaptTo(ReplicationStatus.class))
                         .filter(ReplicationStatus::isActivated);
-        if (!replicationStatus.isPresent()) {
-            return false;
-        }
-        return !configService.isSkipContentModifiedAfterActivation() || replicationStatus.map(ReplicationStatus::getLastPublished)
+        return replicationStatus.map(ReplicationStatus::getLastPublished)
                 .map(Calendar::toInstant)
                 .map(instant -> isModifiedBeforeActivation(pageOrAssetResource, instant))
-                .orElse(true);
+                .isPresent();
     }
 
     private boolean isModifiedBeforeActivation(Resource pageOrAssetResource, Instant lastReplicated) {
@@ -311,7 +306,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
     }
 
     private boolean isStringMatchAnyPattern(String value, String[] patterns) {
-        if (ArrayUtils.isEmpty(patterns)) {
+        if (value == null || ArrayUtils.isEmpty(patterns)) {
             return false;
         }
         for (String pattern : patterns) {
@@ -346,7 +341,6 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
                 ZonedDateTime.now().format(DateTimeFormatter.RFC_1123_DATE_TIME));
         stats.put(GenerationStatsProps.PN_SEARCH_PATH, configService.getSearchPath());
         stats.put(GenerationStatsProps.PN_EXCLUDED_PATHS, configService.getExcludedPaths());
-        stats.put(GenerationStatsProps.PN_CHECK_ACTIVATION, configService.activatedContent());
         stats.put(GenerationStatsProps.PN_SKIP_MODIFIED_AFTER_ACTIVATION, configService.isSkipContentModifiedAfterActivation());
         stats.put(GenerationStatsProps.PN_LAST_MODIFIED_BOUNDARY, dateToIsoDateTimeString(configService.getLastModified()));
         stats.put(GenerationStatsProps.PN_EXCLUDED_PROPERTIES, configService.getExcludedProperties());
@@ -354,8 +348,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
         stats.put(GenerationStatsProps.PN_EXCLUDED_LINK_PATTERNS, getExcludedLinksPatterns());
 
         stats.put(GenerationStatsProps.PN_EXCLUDED_TAGS, configService.excludeTagLinks());
-        // TODO: Why is the next line commented out?
-//        stats.put(GenerationStatsProps.PN_ALLOWED_STATUS_CODES, uiConfigService.getStatusCodes());
+        stats.put(GenerationStatsProps.PN_ALLOWED_STATUS_CODES, configService.getStatusCodes());
 
         List<String> perTypeStatistics = new ArrayList<>();
         for (String type : allLinksCounter.getStatistics().keySet()) {

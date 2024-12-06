@@ -63,7 +63,10 @@ import javax.servlet.ServletOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
@@ -115,7 +118,7 @@ class ReplaceByPatternServletTest {
     private MockSlingHttpServletResponse response;
 
     @BeforeEach
-    void setup() throws NoSuchFieldException {
+    void setup() {
         request = context.request();
         response = context.response();
 

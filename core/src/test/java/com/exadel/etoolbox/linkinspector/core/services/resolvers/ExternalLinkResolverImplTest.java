@@ -17,6 +17,7 @@ package com.exadel.etoolbox.linkinspector.core.services.resolvers;
 import com.exadel.etoolbox.linkinspector.api.Link;
 import com.exadel.etoolbox.linkinspector.core.models.LinkImpl;
 import com.exadel.etoolbox.linkinspector.core.services.mocks.MockHttpClientBuilderFactory;
+import com.exadel.etoolbox.linkinspector.core.services.mocks.MockRepositoryHelper;
 import com.google.common.collect.ImmutableMap;
 import io.wcm.testing.mock.aem.junit5.AemContext;
 import io.wcm.testing.mock.aem.junit5.AemContextExtension;
@@ -29,6 +30,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.message.BasicStatusLine;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -58,6 +60,7 @@ class ExternalLinkResolverImplTest {
                 Collections.singletonMap(MockHttpClientBuilderFactory.PN_CLIENT, client));
 
         Link testLink = getTestLink();
+        context.registerInjectActivateService(new MockRepositoryHelper(context.resourceResolver()));
         context.registerInjectActivateService(new ExternalLinkResolverImpl(), HTTP_PARAMS).validate(testLink, context.resourceResolver());
         assertEquals(HttpStatus.SC_BAD_REQUEST, testLink.getStatus().getCode());
     }
@@ -75,6 +78,7 @@ class ExternalLinkResolverImplTest {
                 Collections.singletonMap(MockHttpClientBuilderFactory.PN_CLIENT, client));
 
         Link testLink = getTestLink();
+        context.registerInjectActivateService(new MockRepositoryHelper(context.resourceResolver()));
         context.registerInjectActivateService(new ExternalLinkResolverImpl(), HTTP_PARAMS).validate(testLink, context.resourceResolver());
         assertEquals(HttpStatus.SC_NOT_FOUND, testLink.getStatus().getCode());
     }
@@ -95,6 +99,7 @@ class ExternalLinkResolverImplTest {
                 Collections.singletonMap(MockHttpClientBuilderFactory.PN_CLIENT, client));
 
         Link testLink = getTestLink();
+        context.registerInjectActivateService(new MockRepositoryHelper(context.resourceResolver()));
         context.registerInjectActivateService(new ExternalLinkResolverImpl(), HTTP_PARAMS).validate(testLink, context.resourceResolver());
         assertEquals(HttpStatus.SC_OK, testLink.getStatus().getCode());
     }
@@ -108,6 +113,7 @@ class ExternalLinkResolverImplTest {
                         MockHttpClientBuilderFactory.PN_STATUS_MESSAGE, "OK"));
 
         Link testLink = getTestLink();
+        context.registerInjectActivateService(new MockRepositoryHelper(context.resourceResolver()));
         context.registerInjectActivateService(new ExternalLinkResolverImpl(), HTTP_PARAMS).validate(testLink, context.resourceResolver());
         assertEquals(HttpStatus.SC_OK, testLink.getStatus().getCode());
     }
@@ -118,6 +124,7 @@ class ExternalLinkResolverImplTest {
         context.registerInjectActivateService(
                 new MockHttpClientBuilderFactory(),
                 Collections.singletonMap(MockHttpClientBuilderFactory.PN_CLIENT, client));
+        context.registerInjectActivateService(new MockRepositoryHelper(context.resourceResolver()));
         ExternalLinkResolverImpl fixture = context.registerInjectActivateService(new ExternalLinkResolverImpl(), HTTP_PARAMS);
         fixture.deactivate();
         verify(client).close();
