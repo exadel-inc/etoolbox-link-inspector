@@ -133,12 +133,25 @@
                                                             name="./excludedProperties">
                                                     </field>
                                                 </excludedProperties>
+                                                <enableLastModified
+                                                        jcr:primaryType="nt:unstructured"
+                                                        sling:resourceType="granite/ui/components/coral/foundation/form/switch"
+                                                        fieldLabel="Enable Last Modified?"
+                                                        fieldDescription="Check to make visible the Last Modified Date Picker."
+                                                        granite:class="etoolbox-dialog-checkbox-showhide"
+                                                        name="./enableLastModified">
+                                                    <granite:data
+                                                            jcr:primaryType="nt:unstructured"
+                                                            show-hide-target="last-modified-date-picker"/>
+                                                </enableLastModified>
                                                 <lastModified
                                                         jcr:primaryType="nt:unstructured"
                                                         sling:resourceType="granite/ui/components/coral/foundation/form/datepicker"
+                                                        wrapperClass="last-modified-date-picker"
                                                         fieldLabel="Last Modified"
                                                         fieldDescription="The content modified before the specified date will be excluded. Tha date should has the ISO-like date-time format, such as '2011-12-03T10:15:30+01:00')"
-                                                        name="./lastModified"/>
+                                                        name="./lastModified">
+                                                </lastModified>
                                                 <statusCodes
                                                         granite:class="foundation-layout-util-maximized-alt"
                                                         jcr:primaryType="nt:unstructured"
