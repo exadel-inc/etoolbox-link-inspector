@@ -22,7 +22,6 @@
     const TRIGGER_DATA_FEED_GENERATION = '/content/etoolbox-link-inspector/servlet/triggerDataFeedGeneration';
     const CHECK_JOB_STATUS = '/content/etoolbox-link-inspector/servlet/jobStatus';
     let $jobStatusContainer = null;
-    let $alertPopup = null;
 
     function jobIsActive(callback) {
         $.ajax({
