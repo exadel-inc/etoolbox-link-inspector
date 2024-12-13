@@ -21,18 +21,19 @@
 
     const TRIGGER_DATA_FEED_GENERATION = '/content/etoolbox-link-inspector/servlet/triggerDataFeedGeneration';
     const CHECK_JOB_STATUS = '/content/etoolbox-link-inspector/servlet/jobStatus';
+    let $jobStatusContainer = null;
 
-    function jobIsActive() {
-        let isActive = false;
+    function jobIsActive(callback) {
         $.ajax({
             url: CHECK_JOB_STATUS,
             type: 'GET',
             async: false,
             success: function (data) {
-                isActive = data && data.status && data.status == 'ACTIVE' | 'QUEUED' | 'GIVEN_UP';
+                if (data && $.inArray(data.status ,['ACTIVE','QUEUED','GIVEN_UP']) !== -1) {
+                    callback();
+                }
             }
         });
-        return isActive;
     }
 
     function onRunAction(callback) {
@@ -43,12 +44,12 @@
         });
     }
 
-    function createInProgressMessage($popover) {
-        const $container = $('<p class="u-coral-margin"></p>').text('Job status: ');
-        $('<b>...in progress</b>').appendTo($container);
-        $('<br/>').appendTo($container);
-        $('<span>scan may take some time to complete</span>').appendTo($container);;
-        $popover.find('coral-popover-content').append($container);
+    function addJobStatusMessage($popover) {
+        $jobStatusContainer = $('<p class="u-coral-margin"></p>').text('Job status: ');
+        $('<b>...in progress</b>').appendTo($jobStatusContainer);
+        $('<br/>').appendTo($jobStatusContainer);
+        $('<span>scan may take some time to complete</span>').appendTo($jobStatusContainer);;
+        $popover.find('coral-popover-content').append($jobStatusContainer);
     }
 
     function createRunJobMessage($popover) {
@@ -58,16 +59,15 @@
     }
 
     function beforeOpenPopover(e) {
-        jobIsActive() ? createInProgressMessage($(e.currentTarget)) : createRunJobMessage($(e.currentTarget));
+        !$jobStatusContainer && jobIsActive(function () {addJobStatusMessage($(e.currentTarget));});
     }
 
     function beforeClosePopover(e) {
-        removeLastChild($(e.currentTarget));
+        removeJobStatusMessage();
     }
 
-    function removeLastChild($popover){
-       const $popoverContent = $popover.find('coral-popover-content');
-       $popoverContent.children().last().remove();
+    function removeJobStatusMessage() {
+        $jobStatusContainer && $jobStatusContainer.remove() && ($jobStatusContainer = null);
     }
 
     $(document).on('coral-overlay:beforeopen', '.elc-coral-popover', beforeOpenPopover);
@@ -81,12 +81,7 @@
         formData.append('exclusive', 'true');
         $.ajax({
             url: TRIGGER_DATA_FEED_GENERATION,
-            type: 'GET',
-            success: function () {
-                const $popover = $('.elc-coral-popover');
-                removeLastChild($popover);
-                createInProgressMessage($popover);
-            }
+            type: 'GET'
         }).error(function (e) {
             ui.notify('Error', e.responseText || e.statusText, 'error');
         });
