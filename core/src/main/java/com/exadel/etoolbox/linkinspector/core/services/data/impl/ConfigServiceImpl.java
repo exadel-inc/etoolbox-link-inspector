@@ -20,6 +20,7 @@ public class ConfigServiceImpl implements ConfigService {
     private static final String PN_EXCLUDED_LINK_PATTERNS = "excludedLinkPatterns";
     private static final String PN_EXCLUDED_PATHS = "excludedPaths";
     private static final String PN_SKIP_CONTENT_AFTER_ACTIVATION = "skipContentAfterActivation";
+    private static final String PN_ENABLED_LAST_MODIFIED = "enableLastModified";
     private static final String PN_LAST_MODIFIED = "lastModified";
     private static final String PN_PATH = "path";
     private static final String PN_EXCLUDED_PROPERTIES = "excludedProperties";
@@ -55,6 +56,9 @@ public class ConfigServiceImpl implements ConfigService {
 
     @Override
     public ZonedDateTime getLastModified() {
+        if (!getProperty(PN_ENABLED_LAST_MODIFIED, Boolean.class).orElse(false)) {
+            return null;
+        }
         return getProperty(PN_LAST_MODIFIED, String.class)
                 .filter(StringUtils::isNotBlank)
                 .map(dateString -> ZonedDateTime.parse(dateString, DateTimeFormatter.ISO_DATE_TIME))
