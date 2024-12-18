@@ -75,7 +75,6 @@ class StatsModalTest {
         assertNull(model.getLastGenerated());
         assertNull(model.getSearchPath());
         assertEquals(StringUtils.EMPTY, model.getExcludedPaths());
-        assertFalse(model.getCheckActivation());
         assertFalse(model.getSkipModifiedAfterActivation());
         assertNull(model.getLastModifiedBoundary());
         assertEquals(StringUtils.EMPTY, model.getExcludedProperties());
