@@ -15,7 +15,7 @@
 package com.exadel.etoolbox.linkinspector.core.services.data.impl;
 
 import com.adobe.granite.ui.components.ds.ValueMapResource;
-import com.exadel.etoolbox.linkinspector.core.models.UpdatedItem;
+import com.exadel.etoolbox.linkinspector.core.services.data.models.UpdatedItem;
 import com.exadel.etoolbox.linkinspector.core.models.ui.GridViewItem;
 import com.exadel.etoolbox.linkinspector.core.services.cache.GridResourcesCache;
 import com.exadel.etoolbox.linkinspector.core.services.data.DataFeedService;
@@ -312,12 +312,10 @@ public class DataFeedServiceImpl implements DataFeedService {
     }
 
     private boolean isUpdated(List<UpdatedItem> updatedItems, String propertyAddress, String currentLink) {
-        boolean propertyAddressUpdated = updatedItems.stream()
-                .map(UpdatedItem::getPropertyLocation)
-                .anyMatch(propertyLocation -> propertyLocation.equals(propertyAddress));
-        boolean currentLinkUpdated = updatedItems.stream()
-                .map(UpdatedItem::getCurrentLink)
-                .anyMatch(link -> link.equals(currentLink));
-        return propertyAddressUpdated && currentLinkUpdated;
+        if (updatedItems.isEmpty() || StringUtils.isAnyBlank(propertyAddress, currentLink)) {
+            return false;
+        }
+        return updatedItems.stream()
+                .anyMatch(item -> item.getPropertyLocation().equals(propertyAddress) && item.getCurrentLink().equals(currentLink));
     }
 }

@@ -14,7 +14,7 @@
 
 package com.exadel.etoolbox.linkinspector.core.services.data;
 
-import com.exadel.etoolbox.linkinspector.core.models.UpdatedItem;
+import com.exadel.etoolbox.linkinspector.core.services.data.models.UpdatedItem;
 import com.exadel.etoolbox.linkinspector.core.services.data.models.DataFilter;
 import com.exadel.etoolbox.linkinspector.core.services.data.models.GridResource;
 import com.exadel.etoolbox.linkinspector.core.services.exceptions.DataFeedException;
