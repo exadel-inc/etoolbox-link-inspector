@@ -16,10 +16,10 @@ package com.exadel.etoolbox.linkinspector.core.servlets;
 
 import com.day.crx.JcrConstants;
 import com.exadel.etoolbox.linkinspector.api.LinkStatus;
+import com.exadel.etoolbox.linkinspector.core.models.UpdatedItem;
 import com.exadel.etoolbox.linkinspector.core.services.data.DataFeedService;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.LinkHelper;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.RepositoryHelper;
-import com.exadel.etoolbox.linkinspector.core.services.util.CsvUtil;
 import com.exadel.etoolbox.linkinspector.core.services.util.ServletUtil;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.lang3.StringUtils;
@@ -38,7 +38,8 @@ import org.slf4j.LoggerFactory;
 import javax.json.Json;
 import javax.servlet.Servlet;
 import java.io.IOException;
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The servlet for replacement a broken link with the new one within the specified resource property. The resource path,
@@ -57,7 +58,6 @@ public class FixBrokenLinkServlet extends SlingAllMethodsServlet {
     private static final String CURRENT_LINK_PARAM = "currentLink";
     private static final String NEW_LINK_PARAM = "newLink";
     private static final String IS_SKIP_VALIDATION_PARAM = "isSkipValidation";
-    private static final String PAGE_PARAM = "page";
     private static final String STATUS_CODE_RESP_PARAM = "statusCode";
     private static final String STATUS_MSG_RESP_PARAM = "statusMessage";
 
@@ -134,6 +134,8 @@ public class FixBrokenLinkServlet extends SlingAllMethodsServlet {
     }
 
     private void modifyDataFeed(String path, String propertyName, String newLink) {
-        dataFeedService.modifyDataFeed(Collections.singletonMap(CsvUtil.buildLocation(path, propertyName), newLink));
+        List<UpdatedItem> updatedItems = new ArrayList<>();
+        updatedItems.add(new UpdatedItem(StringUtils.EMPTY, newLink, path, propertyName));
+        dataFeedService.modifyDataFeed(updatedItems);
     }
 }

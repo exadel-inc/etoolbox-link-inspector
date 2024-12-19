@@ -115,7 +115,7 @@ public class LinkInspectorResourceUtil {
     public static Object replaceStringInPropValue(Object value, String current, String replacement) {
         if (value instanceof String) {
             String currentValue = (String) value;
-            String newValue = currentValue.replaceAll(current, replacement);
+            String newValue = currentValue.replace(current, replacement);
             if (!currentValue.equals(newValue)) {
                 return newValue;
             }
