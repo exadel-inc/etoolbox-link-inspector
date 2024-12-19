@@ -312,7 +312,7 @@ public class DataFeedServiceImpl implements DataFeedService {
     }
 
     private boolean isUpdated(List<UpdatedItem> updatedItems, String propertyAddress, String currentLink) {
-        if (updatedItems.isEmpty() || StringUtils.isAnyBlank(propertyAddress, currentLink)) {
+        if (updatedItems == null || updatedItems.isEmpty() || StringUtils.isAnyBlank(propertyAddress, currentLink)) {
             return false;
         }
         return updatedItems.stream()
