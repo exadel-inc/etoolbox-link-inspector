@@ -39,6 +39,7 @@ import javax.json.Json;
 import javax.servlet.Servlet;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -134,8 +135,7 @@ public class FixBrokenLinkServlet extends SlingAllMethodsServlet {
     }
 
     private void modifyDataFeed(String path, String propertyName, String newLink) {
-        List<UpdatedItem> updatedItems = new ArrayList<>();
-        updatedItems.add(new UpdatedItem(StringUtils.EMPTY, newLink, path, propertyName));
-        dataFeedService.modifyDataFeed(updatedItems);
+        UpdatedItem updatedItem = new UpdatedItem(StringUtils.EMPTY, newLink, path, propertyName);
+        dataFeedService.modifyDataFeed(Collections.singletonList(updatedItem));
     }
 }
