@@ -52,9 +52,6 @@ public class StatsModal {
     private String[] excludedPaths;
 
     @ValueMapValue
-    private boolean checkActivation;
-
-    @ValueMapValue
     private boolean skipModifiedAfterActivation;
 
     @ValueMapValue
@@ -88,12 +85,8 @@ public class StatsModal {
         return arrayToStringValue(excludedPaths);
     }
 
-    public boolean getCheckActivation() {
-        return checkActivation;
-    }
-
     public boolean getSkipModifiedAfterActivation() {
-        return checkActivation && skipModifiedAfterActivation;
+        return skipModifiedAfterActivation;
     }
 
     public String getLastModifiedBoundary() {

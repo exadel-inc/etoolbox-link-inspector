@@ -281,8 +281,10 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
             } else {
                 Optional<String> replicationAction = Optional.of(resource.getValueMap())
                         .map(valueMap -> valueMap.get(ReplicationStatus.NODE_PROPERTY_LAST_REPLICATION_ACTION, String.class));
-                return replicationAction.filter(s -> ReplicationActionType.ACTIVATE.getName().equals(s) &&
-                        LinkInspectorResourceUtil.isModifiedBeforeActivation(resource)).isPresent();
+                if (replicationAction.isPresent()) {
+                    return ReplicationActionType.ACTIVATE.getName().equals(replicationAction.get()) &&
+                            LinkInspectorResourceUtil.isModifiedBeforeActivation(resource);
+                }
             }
         }
         return true;

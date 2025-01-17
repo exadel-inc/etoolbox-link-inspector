@@ -106,13 +106,6 @@
                             sling:resourceType="granite/ui/components/coral/foundation/include"
                             path="/content/etoolbox-link-inspector/data/stats"
                             resourceType="etoolbox-link-inspector/components/stats/statsPanel"/>
-                    <ticker jcr:primaryType="nt:unstructured"
-                            sling:resourceType="etoolbox-contractor/components/ticker"
-                            granite:id="wait"
-                            topic="etoolbox/link-inspector/job/datafeed/generate"
-                            controls="#scan"
-                            tick="200"
-                            tracks="/content/etoolbox/contractor/servlet/task"/>
                 </items>
             </container>
         </views>
