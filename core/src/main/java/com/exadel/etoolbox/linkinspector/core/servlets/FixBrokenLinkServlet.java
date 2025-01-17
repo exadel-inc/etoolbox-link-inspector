@@ -57,7 +57,6 @@ public class FixBrokenLinkServlet extends SlingAllMethodsServlet {
     private static final String CURRENT_LINK_PARAM = "currentLink";
     private static final String NEW_LINK_PARAM = "newLink";
     private static final String IS_SKIP_VALIDATION_PARAM = "isSkipValidation";
-    private static final String PAGE_PARAM = "page";
     private static final String STATUS_CODE_RESP_PARAM = "statusCode";
     private static final String STATUS_MSG_RESP_PARAM = "statusMessage";
 

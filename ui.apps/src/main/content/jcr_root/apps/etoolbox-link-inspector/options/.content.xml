@@ -33,9 +33,15 @@
                    sling:resourceType="granite/ui/components/coral/foundation/text"
                    text="EToolbox Link Inspector - Settings"/>
             <actions jcr:primaryType="nt:unstructured">
+                <primary jcr:primaryType="nt:unstructured">
+                    <back  jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/anchorbutton"
+                            href="/etoolbox/link-inspector.html"
+                            granite:title="Go back"
+                            icon="back"/>
+                </primary>
                 <secondary jcr:primaryType="nt:unstructured">
-                    <save
-                            jcr:primaryType="nt:unstructured"
+                    <save   jcr:primaryType="nt:unstructured"
                             sling:resourceType="granite/ui/components/coral/foundation/button"
                             type="submit"
                             formId="elc-options-savesettings"
@@ -49,7 +55,6 @@
                 <items jcr:primaryType="nt:unstructured">
                     <columns jcr:primaryType="nt:unstructured"
                              sling:resourceType="granite/ui/components/coral/foundation/fixedcolumns"
-
                              maximized="{Boolean}true">
                         <items jcr:primaryType="nt:unstructured">
                             <form jcr:primaryType="nt:unstructured"
@@ -173,6 +178,7 @@
                                             <items jcr:primaryType="nt:unstructured">
                                                 <text jcr:primaryType="nt:unstructured"
                                                       sling:resourceType="granite/ui/components/coral/foundation/form/numberfield"
+                                                      min="1"
                                                       fieldLabel="Threads per core"
                                                       fieldDescription="The number of threads created per each CPU core for validating links in parallel"
                                                       value="60"
