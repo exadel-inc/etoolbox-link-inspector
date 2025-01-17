@@ -19,7 +19,7 @@
     <jcr:content
             jcr:mixinTypes="[sling:VanityPath]"
             jcr:primaryType="nt:unstructured"
-            jcr:title="Link Inspector"
+            jcr:title="Scan Results"
             sling:resourceType="granite/ui/components/shell/collectionpage"
             currentView="list"
             modeGroup="etoolbox-link-inspector"
@@ -40,7 +40,7 @@
                     sling:resourceType="cq/gui/components/siteadmin/admin/page/winmode"/>
             <title
                     jcr:primaryType="nt:unstructured"
-                    jcr:title="Link Inspector"
+                    jcr:title="Scan Results"
                     sling:resourceType="cq/gui/components/siteadmin/admin/page/title"/>
             <favicon
                     jcr:primaryType="nt:unstructured"
@@ -141,16 +141,6 @@
                           nesting="hide"
                           src.uritemplate="/content/etoolbox-link-inspector/link-inspector/filterOptions.html?substring=${param.substring}"/>
                 </filterOptions>
-                <deleteReport
-                        jcr:primaryType="nt:unstructured"
-                        sling:resourceType="granite/ui/components/coral/foundation/collection/action"
-                        granite:id="elc-delete-report"
-                        action="cq-admin.etoolbox.linkinspector.action.delete-report"
-                        icon="delete"
-                        target=".etoolbox-link-inspector"
-                        text="Delete"
-                        title="Delete"
-                        variant="minimal"/>
             </primary>
             <secondary jcr:primaryType="nt:unstructured">
                 <settings
@@ -164,15 +154,27 @@
                 <scan
                         jcr:primaryType="nt:unstructured"
                         sling:resourceType="granite/ui/components/coral/foundation/collection/action"
-                        granite:id="scan"
                         granite:title="Scan for links"
-                        text="Scan now"
+                        action="foundation.dialog"
+                        text="Scan"
                         icon="play"
-                        variant="primary"/>
+                        variant="primary">
+                    <data jcr:primaryType="nt:unstructured"
+                          nesting="hide"
+                          src.uritemplate="/content/etoolbox-link-inspector/link-inspector/scanDialog.html"/>
+                </scan>
                 <stats
                         jcr:primaryType="nt:unstructured"
                         path="/content/etoolbox-link-inspector/data/stats"
                         sling:resourceType="etoolbox-link-inspector/components/stats/statsButton"/>
+                <deleteReport
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="granite/ui/components/coral/foundation/collection/action"
+                        granite:id="elc-delete-report"
+                        action="cq-admin.etoolbox.linkinspector.action.delete-report"
+                        target=".etoolbox-link-inspector"
+                        text="Delete"
+                        title="Delete"/>
             </secondary>
         </actions>
     </jcr:content>
@@ -204,8 +206,7 @@
                                         <datasource jcr:primaryType="nt:unstructured"
                                                     sling:resourceType="/bin/etoolbox/link-inspector/settings/resolvers"/>
                                     </type>
-                                    <text
-                                            jcr:primaryType="nt:unstructured"
+                                    <text jcr:primaryType="nt:unstructured"
                                             sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
                                             granite:id="byTextFilter"
                                             fieldLabel="By text"
@@ -243,4 +244,39 @@
                     variant="primary"/>
         </footer>
     </filterOptions>
+    <scanDialog jcr:primaryType="nt:unstructured"
+            jcr:title="Scan"
+            granite:id="elc-scan-now-dialog"
+            sling:resourceType="granite/ui/components/coral/foundation/dialog"
+            granite:class="modal-form">
+        <items jcr:primaryType="nt:unstructured">
+            <scan jcr:primaryType="nt:unstructured"
+                  path="/content/etoolbox-link-inspector/data/stats"
+                  sling:resourceType="etoolbox-link-inspector/components/settings/model"/>
+        </items>
+        <footer jcr:primaryType="nt:unstructured">
+            <settings jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/anchorbutton"
+                    href="/etoolbox/link-inspector/settings.html"
+                    icon="gears"
+                    text="Settings"
+                    granite:title="Settings"
+                    variant="secondary"/>
+            <cancel jcr:primaryType="nt:unstructured"
+                          sling:resourceType="granite/ui/components/coral/foundation/button"
+                          granite:id="dialog-cancel"
+                          text="Cancel"
+                          variant="secondary">
+                <parentConfig jcr:primaryType="nt:unstructured"
+                              close="{Boolean}true"/>
+            </cancel>
+            <scan jcr:primaryType="nt:unstructured"
+                      sling:resourceType="granite/ui/components/coral/foundation/button"
+                      granite:id="scan"
+                      granite:title="Scan for links"
+                      text="Scan now"
+                      variant="primary">
+            </scan>
+        </footer>
+    </scanDialog>
 </jcr:root>
