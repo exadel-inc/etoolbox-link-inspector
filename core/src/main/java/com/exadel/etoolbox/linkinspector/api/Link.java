@@ -22,6 +22,8 @@ public interface Link {
 
     String getHref();
 
+    String getMatchedText();
+
     LinkStatus getStatus();
 
     default boolean isReported() {

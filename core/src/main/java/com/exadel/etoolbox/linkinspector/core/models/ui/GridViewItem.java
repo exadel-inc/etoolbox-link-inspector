@@ -72,6 +72,9 @@ public class GridViewItem {
     @ValueMapValue(name = GridResource.PN_LINK)
     private String link;
 
+    @ValueMapValue(name = "matchedText")
+    private String matchedText;
+
     @ValueMapValue(name = GridResource.PN_LINK_TYPE)
     private String linkType;
 
@@ -131,6 +134,10 @@ public class GridViewItem {
 
     public String getLink() {
         return link;
+    }
+
+    public String getMatchedText() {
+        return matchedText;
     }
 
     public String getPropertyName() {

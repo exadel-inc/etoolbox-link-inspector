@@ -81,7 +81,7 @@ public class TextResolverImpl implements LinkResolver {
         Matcher matcher = search.matcher(source);
         Set<Link> result = new LinkedHashSet<>();
         while (matcher.find()) {
-            result.add(new Match(matcher.group()));
+            result.add(new Match(source, matcher.group()));
         }
         return result;
     }
@@ -95,6 +95,7 @@ public class TextResolverImpl implements LinkResolver {
     @EqualsAndHashCode
     private static class Match implements Link {
         private final String content;
+        private final String matchedText;
 
         @Override
         public String getType() {
@@ -104,6 +105,11 @@ public class TextResolverImpl implements LinkResolver {
         @Override
         public String getHref() {
             return content;
+        }
+
+        @Override
+        public String getMatchedText() {
+            return matchedText;
         }
 
         @Override

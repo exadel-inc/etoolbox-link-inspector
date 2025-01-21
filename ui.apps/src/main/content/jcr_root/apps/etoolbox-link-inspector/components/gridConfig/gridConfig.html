@@ -20,8 +20,18 @@
     </td>
 
     <td class="link" is="coral-table-cell">
-        <div class="primary break-word"><b>${model.link}</b></div>
+        <div class="primary break-word open-modal">${model.link}</div>
         <div class="secondary">${model.linkType}</div>
+        <form method="post" action="${model.path}" class="modal link-modal">
+            <div class="modal-content">
+                <span class="close close-modal">&times;</span>
+                <div class="editor" contenteditable="true">
+                    <p>${model.link}</p>
+                </div>
+                <input data-matched-text="${model.matchedText}" class="modal-textarea" name="./${model.propertyName}" hidden>
+                <div class="submit-modal"><input type="submit" class="modal-submit" value="Submit"></div>
+            </div>
+        </form>
     </td>
 
     <td class="page" is="coral-table-cell">

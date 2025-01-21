@@ -105,6 +105,12 @@ public class GridResource {
                 .orElse(StringUtils.EMPTY);
     }
 
+    public String getMatchedText() {
+        return Optional.ofNullable(getLink())
+                .map(Link::getMatchedText)
+                .orElse(StringUtils.EMPTY);
+    }
+
     public String getType() {
         return Optional.ofNullable(getLink())
                 .map(Link::getType)

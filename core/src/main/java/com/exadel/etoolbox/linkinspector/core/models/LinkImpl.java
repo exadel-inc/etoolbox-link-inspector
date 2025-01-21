@@ -34,6 +34,11 @@ public class LinkImpl implements Link {
     }
 
     @Override
+    public String getMatchedText() {
+        return href;
+    }
+
+    @Override
     public LinkStatus getStatus() {
         return status;
     }

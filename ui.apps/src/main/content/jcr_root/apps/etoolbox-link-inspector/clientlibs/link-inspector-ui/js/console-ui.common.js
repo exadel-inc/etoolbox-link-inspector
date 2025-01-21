@@ -200,4 +200,121 @@
         });
     })
 
+    $(document).ready(function () {
+
+        const HIGHLIGHTS = $('.modal-textarea').data('matched-text');
+
+        $(document).on('click', '.open-modal', function(event) {
+            let editor = $(this).siblings('.link-modal').find('.editor')[0];
+            setHighlights(editor, HIGHLIGHTS);
+            editor.addEventListener('input', onInput);
+            $(this).siblings('.link-modal').show();
+
+        });
+
+        $(document).on('click', '.close-modal', function(event) {
+            $(this).siblings('.editor')[0].innerText = $(this).closest('.link-modal').siblings('.open-modal')[0].innerText;
+            $(this).closest('.link-modal').hide();
+        });
+
+        $(document).on('click', '.modal-submit', function (e) {
+            e.preventDefault();
+            const form = $(this).closest('.link-modal');
+            form.find('.modal-textarea').val(form.find('.editor')[0].innerText);
+            const item = form.siblings('.open-modal')[0];
+            $.ajax({
+                type: "POST",
+                url: form.attr('action'),
+                data: form.serialize(),
+                success: function () {
+                    console.log('Value saved successfully');
+                    item.innerText = form.find('.modal-textarea').val();
+                    form.hide();
+                },
+                error: function() {
+                    console.log('Error while saving value');
+                    form.hide();
+                }
+            });
+        })
+
+        function onInput(event) {
+            const editor = event.target;
+            setHighlights(editor, HIGHLIGHTS);
+        }
+
+        function setHighlights(editor, highlights) {
+            if (!editor) return;
+
+            const cursorPosition = getCursorPosition(editor);
+            let content = editor.innerText || '';
+
+            content = escapeHtml(content);
+
+            content = content.replaceAll(highlights, `<mark>${highlights}</mark>`);
+
+            editor.innerHTML = content;
+
+            try {
+                setCursorPosition(editor, cursorPosition);
+            } catch (e) {
+                console.warn('Could not restore caret position:', e);
+            }
+        }
+
+        function getCursorPosition(element) {
+            const selection = window.getSelection();
+            if (selection && selection.rangeCount > 0) {
+                const range = selection.getRangeAt(0);
+                const preCaretRange = range.cloneRange();
+                preCaretRange.selectNodeContents(element);
+                preCaretRange.setEnd(range.endContainer, range.endOffset);
+                return preCaretRange.toString().length;
+            }
+            return 0;
+        }
+
+        function setCursorPosition(element, position) {
+            const selection = window.getSelection();
+            const range = document.createRange();
+
+            let currentOffset = 0;
+            let targetNode = null;
+            let targetOffset = 0;
+            const findPosition = (node) => {
+                if (node.nodeType === Node.TEXT_NODE) {
+                    if (currentOffset + node.length >= position) {
+                        targetNode = node;
+                        targetOffset = position - currentOffset;
+                        return true;
+                    }
+                    currentOffset += node.length;
+                } else {
+                    for (const child of node.childNodes) {
+                        if (findPosition(child)) {
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            }
+            findPosition(element);
+            if (targetNode) {
+                range.setStart(targetNode, targetOffset);
+                range.setEnd(targetNode, targetOffset);
+                selection.removeAllRanges();
+                selection.addRange(range);
+            }
+        }
+
+        function escapeHtml(text) {
+            return text
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+    });
+
 })(window, document, Granite.$, Granite, Coral);

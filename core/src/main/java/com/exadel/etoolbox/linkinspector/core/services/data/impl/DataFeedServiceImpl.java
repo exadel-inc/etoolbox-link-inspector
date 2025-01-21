@@ -262,6 +262,7 @@ public class DataFeedServiceImpl implements DataFeedService {
         valueMap.put(GridResource.PN_LINK_STATUS_MESSAGE, gridResource.getStatusMessage());
         valueMap.put(GridResource.PN_RESOURCE_PATH, gridResource.getResourcePath());
         valueMap.put(GridResource.PN_PROPERTY_NAME, gridResource.getPropertyName());
+        valueMap.put("matchedText", gridResource.getMatchedText());
         return new ValueMapResource(resourceResolver, gridResource.getResourcePath(), gridResource.getResourceType(), valueMap);
     }
 
