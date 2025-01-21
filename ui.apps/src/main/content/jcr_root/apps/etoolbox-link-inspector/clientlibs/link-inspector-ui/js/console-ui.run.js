@@ -77,13 +77,18 @@
     $(document).on('click', '#scan', onScanClicked);
     function onScanClicked() {
         const formData = new FormData();
+        const dialog = $('#elc-scan-now-dialog');
         formData.append('topic', 'etoolbox/link-inspector/job/datafeed/generate');
         formData.append('exclusive', 'true');
         $.ajax({
             url: TRIGGER_DATA_FEED_GENERATION,
-            type: 'GET'
-        }).error(function (e) {
-            ui.notify('Error', e.responseText || e.statusText, 'error');
+            type: 'GET',
+            success: function(){
+                dialog.trigger('hide')
+            },
+            error: function(e) {
+                ui.notify('Error', e.responseText || e.statusText, 'error');
+            }
         });
     }
 
