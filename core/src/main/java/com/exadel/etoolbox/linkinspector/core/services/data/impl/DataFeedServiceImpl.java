@@ -262,7 +262,7 @@ public class DataFeedServiceImpl implements DataFeedService {
         valueMap.put(GridResource.PN_LINK_STATUS_MESSAGE, gridResource.getStatusMessage());
         valueMap.put(GridResource.PN_RESOURCE_PATH, gridResource.getResourcePath());
         valueMap.put(GridResource.PN_PROPERTY_NAME, gridResource.getPropertyName());
-        valueMap.put("matchedText", gridResource.getMatchedText());
+        valueMap.put("match", gridResource.getMatchedText());
         return new ValueMapResource(resourceResolver, gridResource.getResourcePath(), gridResource.getResourceType(), valueMap);
     }
 
@@ -284,7 +284,7 @@ public class DataFeedServiceImpl implements DataFeedService {
     private void printViewItemToCsv(CSVPrinter csvPrinter, GridViewItem viewItem) {
         try {
             csvPrinter.printRecord(
-                    CsvUtil.wrapIfContainsSemicolon(viewItem.getLink()),
+                    CsvUtil.wrapIfContainsSemicolon(viewItem.getResult()),
                     viewItem.getLinkType(),
                     viewItem.getLinkStatusCode(),
                     CsvUtil.wrapIfContainsSemicolon(viewItem.getLinkStatusMessage()),
@@ -295,7 +295,7 @@ public class DataFeedServiceImpl implements DataFeedService {
                     CsvUtil.buildLocation(viewItem.getPath(), viewItem.getPropertyName())
             );
         } catch (IOException e) {
-            LOG.error(String.format("Failed to build CSV for the grid resource %s", viewItem.getLink()), e);
+            LOG.error(String.format("Failed to build CSV for the grid resource %s", viewItem.getResult()), e);
         }
     }
 

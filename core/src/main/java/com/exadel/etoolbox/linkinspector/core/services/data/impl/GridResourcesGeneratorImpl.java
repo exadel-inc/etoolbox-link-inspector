@@ -17,7 +17,7 @@ package com.exadel.etoolbox.linkinspector.core.services.data.impl;
 import com.day.cq.replication.ReplicationActionType;
 import com.day.cq.replication.ReplicationStatus;
 import com.day.crx.JcrConstants;
-import com.exadel.etoolbox.linkinspector.api.Link;
+import com.exadel.etoolbox.linkinspector.api.Result;
 import com.exadel.etoolbox.linkinspector.core.services.data.ConfigService;
 import com.exadel.etoolbox.linkinspector.core.services.data.GenerationStatsProps;
 import com.exadel.etoolbox.linkinspector.core.services.data.GridResourcesGenerator;
@@ -86,7 +86,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
             return Collections.emptyList();
         }
 
-        Map<Link, List<GridResource>> linkToGridResourcesMap = new HashMap<>();
+        Map<Result, List<GridResource>> linkToGridResourcesMap = new HashMap<>();
         int traversedNodesCounter = getGridResourcesViaTraversing(rootResource, gridResourceType, linkToGridResourcesMap);
         LOG.debug("Traversal is completed in {} ms, path: {}, traversed nodes count: {}",
                 stopWatch.getTime(TimeUnit.MILLISECONDS), searchPath, traversedNodesCounter);
@@ -113,7 +113,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
 
     private int getGridResourcesViaTraversing(Resource resource,
                                               String gridResourceType,
-                                              Map<Link, List<GridResource>> allLinkToGridResourcesMap) {
+                                              Map<Result, List<GridResource>> allLinkToGridResourcesMap) {
         int traversedNodesCount = 0;
         if (!isAllowedResource(resource)) {
             return traversedNodesCount;
@@ -134,7 +134,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
         return traversedNodesCount;
     }
 
-    private Map<Link, List<GridResource>> getLinkToGridResourcesMap(Resource resource, String gridResourceType) {
+    private Map<Result, List<GridResource>> getLinkToGridResourcesMap(Resource resource, String gridResourceType) {
         return ResourceUtil.getValueMap(resource)
                 .entrySet()
                 .stream()
@@ -146,10 +146,10 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
                 );
     }
 
-    private Stream<Map.Entry<Link, GridResource>> getLinkToGridResourceMap(String property,
-                                                                           Object propertyValue,
-                                                                           Resource resource,
-                                                                           String gridResourceType) {
+    private Stream<Map.Entry<Result, GridResource>> getLinkToGridResourceMap(String property,
+                                                                             Object propertyValue,
+                                                                             Resource resource,
+                                                                             String gridResourceType) {
         return linkHelper.getLinkStream(propertyValue)
                 .filter(this::isAllowedLink)
                 .collect(Collectors.toMap(
@@ -161,7 +161,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
                 .stream();
     }
 
-    private Set<GridResource> validateLinksInParallel(Map<Link, List<GridResource>> linkToGridResourcesMap,
+    private Set<GridResource> validateLinksInParallel(Map<Result, List<GridResource>> linkToGridResourcesMap,
                                                       ResourceResolver resourceResolver) {
         LinksCounter allLinksCounter = new LinksCounter();
         LinksCounter reportedLinksCounter = new LinksCounter();
@@ -193,19 +193,19 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
         return allReportedLinkResources;
     }
 
-    private void submitLinkForValidation(Link link,
+    private void submitLinkForValidation(Result result,
                                          List<GridResource> currentLinkResources,
                                          Set<GridResource> allReportedLinkResources,
                                          LinksCounter allLinksCounter,
                                          LinksCounter reportedLinksCounter,
                                          ResourceResolver resourceResolver) {
-        allLinksCounter.checkIn(link);
+        allLinksCounter.checkIn(result);
         executorService.submit(() -> {
-                    linkHelper.validateLink(link, resourceResolver);
-                    if (link.isReported() && isAllowedErrorCode(link.getStatus().getCode())) {
-                        currentLinkResources.forEach(gridResource -> gridResource.getLink().setStatus(link.getStatus()));
+                    linkHelper.validateLink(result, resourceResolver);
+                    if (result.isReported() && isAllowedErrorCode(result.getStatus().getCode())) {
+                        currentLinkResources.forEach(gridResource -> gridResource.getLink().setStatus(result.getStatus()));
                         allReportedLinkResources.addAll(currentLinkResources);
-                        reportedLinksCounter.checkIn(link);
+                        reportedLinksCounter.checkIn(result);
                     }
                 }
         );
@@ -238,8 +238,8 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
                 .orElse(true);
     }
 
-    private boolean isAllowedLink(Link link) {
-        return !isExcludedTagLink(link.getHref()) && !isExcludedByPattern(link.getHref());
+    private boolean isAllowedLink(Result result) {
+        return !isExcludedTagLink(result.getValue()) && !isExcludedByPattern(result.getValue());
     }
 
     private boolean isExcludedByPattern(String href) {

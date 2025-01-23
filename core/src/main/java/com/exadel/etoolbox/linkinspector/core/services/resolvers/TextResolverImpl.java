@@ -14,7 +14,7 @@
 
 package com.exadel.etoolbox.linkinspector.core.services.resolvers;
 
-import com.exadel.etoolbox.linkinspector.api.Link;
+import com.exadel.etoolbox.linkinspector.api.Result;
 import com.exadel.etoolbox.linkinspector.api.LinkResolver;
 import com.exadel.etoolbox.linkinspector.api.LinkStatus;
 import com.exadel.etoolbox.linkinspector.core.services.resolvers.configs.TextResolverConfig;
@@ -73,27 +73,27 @@ public class TextResolverImpl implements LinkResolver {
     }
 
     @Override
-    public Collection<Link> getLinks(String source) {
+    public Collection<Result> getLinks(String source) {
         if (!enabled ) {
             return Collections.emptyList();
         }
 
         Matcher matcher = search.matcher(source);
-        Set<Link> result = new LinkedHashSet<>();
+        Set<Result> result = new LinkedHashSet<>();
         while (matcher.find()) {
-            result.add(new Match(source, matcher.group()));
+            result.add(new TextResult(source, matcher.group()));
         }
         return result;
     }
 
     @Override
-    public void validate(Link link, ResourceResolver resourceResolver) {
+    public void validate(Result result, ResourceResolver resourceResolver) {
         // No operation
     }
 
     @RequiredArgsConstructor
     @EqualsAndHashCode
-    private static class Match implements Link {
+    private static class TextResult implements Result {
         private final String content;
         private final String matchedText;
 
@@ -103,12 +103,12 @@ public class TextResolverImpl implements LinkResolver {
         }
 
         @Override
-        public String getHref() {
+        public String getValue() {
             return content;
         }
 
         @Override
-        public String getMatchedText() {
+        public String getMatch() {
             return matchedText;
         }
 

@@ -40,7 +40,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(AemContextExtension.class)
-class FixBrokenLinkServletTest {
+class FixBrokenResultServletTest {
     private static final String REPOSITORY_HELPER_FIELD = "repositoryHelper";
     private static final String LINK_HELPER_FIELD = "linkHelper";
     private static final String DATA_FEED_SERVICE_FIELD = "dataFeedService";

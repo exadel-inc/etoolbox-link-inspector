@@ -14,9 +14,9 @@
 
 package com.exadel.etoolbox.linkinspector.core.services.data.models;
 
-import com.exadel.etoolbox.linkinspector.api.Link;
+import com.exadel.etoolbox.linkinspector.api.Result;
 import com.exadel.etoolbox.linkinspector.api.LinkStatus;
-import com.exadel.etoolbox.linkinspector.core.models.LinkImpl;
+import com.exadel.etoolbox.linkinspector.core.models.LinkResult;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -53,14 +53,14 @@ public class GridResource {
     private static final String JSON_STATUS_CODE = "statusCode";
 
     @JsonIgnore
-    private Link link;
+    private Result result;
 
     private final String resourcePath;
     private final String propertyName;
     private final String resourceType;
 
-    public GridResource(Link link, String resourcePath, String propertyName, String resourceType) {
-        this.link = link;
+    public GridResource(Result result, String resourcePath, String propertyName, String resourceType) {
+        this.result = result;
         this.resourcePath = resourcePath;
         this.propertyName = propertyName;
         this.resourceType = resourceType;
@@ -88,45 +88,45 @@ public class GridResource {
         this.resourcePath = resourcePath;
         this.propertyName = propertyName;
         this.resourceType = resourceType;
-        this.link = new LinkImpl(type, href, new LinkStatus(Integer.parseInt(statusCode), statusMessage));
+        this.result = new LinkResult(type, href, new LinkStatus(Integer.parseInt(statusCode), statusMessage));
     }
 
-    public Link getLink() {
-        return link;
+    public Result getLink() {
+        return result;
     }
 
-    public void setLink(Link link) {
-        this.link = link;
+    public void setLink(Result result) {
+        this.result = result;
     }
 
     public String getHref() {
         return Optional.ofNullable(getLink())
-                .map(Link::getHref)
+                .map(Result::getValue)
                 .orElse(StringUtils.EMPTY);
     }
 
     public String getMatchedText() {
         return Optional.ofNullable(getLink())
-                .map(Link::getMatchedText)
+                .map(Result::getMatch)
                 .orElse(StringUtils.EMPTY);
     }
 
     public String getType() {
         return Optional.ofNullable(getLink())
-                .map(Link::getType)
+                .map(Result::getType)
                 .orElse("internal");
     }
 
     public int getStatusCode() {
         return Optional.ofNullable(getLink())
-                .map(Link::getStatus)
+                .map(Result::getStatus)
                 .map(LinkStatus::getCode)
                 .orElse(HttpStatus.SC_NOT_FOUND);
     }
 
     public String getStatusMessage() {
         return Optional.ofNullable(getLink())
-                .map(Link::getStatus)
+                .map(Result::getStatus)
                 .map(LinkStatus::getMessage)
                 .orElse(HttpStatus.getStatusText(HttpStatus.SC_NOT_FOUND));
     }
@@ -148,13 +148,13 @@ public class GridResource {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         GridResource that = (GridResource) o;
-        return Objects.equals(link, that.link) &&
+        return Objects.equals(result, that.result) &&
                 resourcePath.equals(that.resourcePath) &&
                 propertyName.equals(that.propertyName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(link, resourcePath, propertyName);
+        return Objects.hash(result, resourcePath, propertyName);
     }
 }

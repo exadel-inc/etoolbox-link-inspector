@@ -16,13 +16,13 @@ package com.exadel.etoolbox.linkinspector.api;
 
 import org.eclipse.jetty.http.HttpStatus;
 
-public interface Link {
+public interface Result {
 
     String getType();
 
-    String getHref();
+    String getValue();
 
-    String getMatchedText();
+    String getMatch();
 
     LinkStatus getStatus();
 

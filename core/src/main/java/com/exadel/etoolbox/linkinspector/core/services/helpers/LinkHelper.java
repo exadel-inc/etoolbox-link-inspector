@@ -14,7 +14,7 @@
 
 package com.exadel.etoolbox.linkinspector.core.services.helpers;
 
-import com.exadel.etoolbox.linkinspector.api.Link;
+import com.exadel.etoolbox.linkinspector.api.Result;
 import com.exadel.etoolbox.linkinspector.api.LinkResolver;
 import com.exadel.etoolbox.linkinspector.api.LinkStatus;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -26,14 +26,14 @@ import java.util.stream.Stream;
  */
 public interface LinkHelper {
 
-    Stream<Link> getLinkStream(Object source);
+    Stream<Result> getLinkStream(Object source);
 
     /**
-     * Checks the given {@link Link} for validity using one of the registered {@link LinkResolver} implementations
-     * @param link             - the link object to be checked
+     * Checks the given {@link Result} for validity using one of the registered {@link LinkResolver} implementations
+     * @param result             - the link object to be checked
      * @param resourceResolver - {@link ResourceResolver} object
      */
-    void validateLink(Link link, ResourceResolver resourceResolver);
+    void validateLink(Result result, ResourceResolver resourceResolver);
 
     /**
      * Checks the given link {@code href} for validity using one of the registered {@link LinkResolver} implementations

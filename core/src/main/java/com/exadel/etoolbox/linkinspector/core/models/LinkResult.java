@@ -1,25 +1,26 @@
 package com.exadel.etoolbox.linkinspector.core.models;
 
-import com.exadel.etoolbox.linkinspector.api.Link;
+import com.exadel.etoolbox.linkinspector.api.Result;
 import com.exadel.etoolbox.linkinspector.api.LinkStatus;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-public class LinkImpl implements Link {
+public class LinkResult implements Result {
 
     public static final String DEFAULT_TYPE = "other";
 
     private final String type;
-    private final String href;
+    private final String value;
     private LinkStatus status;
 
-    public LinkImpl(String type, String href) {
-        this(type, href, LinkStatus.OK);
+    public LinkResult(String type, String value) {
+        this(type, value, LinkStatus.OK);
     }
 
-    public LinkImpl(String type, String href, LinkStatus status) {
+    public LinkResult(String type, String value, LinkStatus status) {
         this.type = type;
-        this.href = href;
+        this.value = value;
         this.status = status;
     }
 
@@ -29,13 +30,13 @@ public class LinkImpl implements Link {
     }
 
     @Override
-    public String getHref() {
-        return href;
+    public String getValue() {
+        return value;
     }
 
     @Override
-    public String getMatchedText() {
-        return href;
+    public String getMatch() {
+        return StringUtils.EMPTY;
     }
 
     @Override
@@ -56,12 +57,12 @@ public class LinkImpl implements Link {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        LinkImpl link = (LinkImpl) o;
-        return new EqualsBuilder().append(type, link.type).append(href, link.href).append(status, link.status).isEquals();
+        LinkResult link = (LinkResult) o;
+        return new EqualsBuilder().append(type, link.type).append(value, link.value).append(status, link.status).isEquals();
     }
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(17, 37).append(type).append(href).append(status).toHashCode();
+        return new HashCodeBuilder(17, 37).append(type).append(value).append(status).toHashCode();
     }
 }

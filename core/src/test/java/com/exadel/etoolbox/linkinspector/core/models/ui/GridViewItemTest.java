@@ -87,7 +87,7 @@ public class GridViewItemTest {
     @Test
     void testLink() {
         setupFullParamSet();
-        assertEquals(TEST_BROKEN_LINK_HREF, viewItem.getLink());
+        assertEquals(TEST_BROKEN_LINK_HREF, viewItem.getResult());
     }
 
     @Test

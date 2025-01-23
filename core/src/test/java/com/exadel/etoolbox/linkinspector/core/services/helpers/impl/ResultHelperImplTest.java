@@ -14,10 +14,10 @@
 
 package com.exadel.etoolbox.linkinspector.core.services.helpers.impl;
 
-import com.exadel.etoolbox.linkinspector.api.Link;
+import com.exadel.etoolbox.linkinspector.api.Result;
 import com.exadel.etoolbox.linkinspector.api.LinkResolver;
 import com.exadel.etoolbox.linkinspector.api.LinkStatus;
-import com.exadel.etoolbox.linkinspector.core.models.LinkImpl;
+import com.exadel.etoolbox.linkinspector.core.models.LinkResult;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.LinkHelper;
 import com.exadel.etoolbox.linkinspector.core.services.mocks.MockHttpClientBuilderFactory;
 import com.exadel.etoolbox.linkinspector.core.services.mocks.MockRepositoryHelper;
@@ -54,7 +54,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(AemContextExtension.class)
-class LinkHelperImplTest {
+class ResultHelperImplTest {
 
     private static final String VALID_INTERNAL = "/content/test";
     private static final String VALID_INTERNAL_EXTENSION = "/content/test.png";
@@ -115,7 +115,7 @@ class LinkHelperImplTest {
                 .toArray(String[]::new);
 
         List<String> detectedLinks = fixture.getLinkStream(allLinks)
-                .map(Link::getHref)
+                .map(Result::getValue)
                 .collect(Collectors.toList());
 
         assertTrue(detectedLinks.stream().noneMatch(invalidLinks::contains));
@@ -154,14 +154,14 @@ class LinkHelperImplTest {
 
     @Test
     void shouldReturnEmptyForInvalidInternal() {
-        Optional<Link> linkOptional = fixture.getLinkStream(INVALID_INTERNAL).findFirst();
+        Optional<Result> linkOptional = fixture.getLinkStream(INVALID_INTERNAL).findFirst();
 
         assertFalse(linkOptional.isPresent());
     }
 
     @Test
     void shouldReturnEmptyForInvalidExternal() {
-        Optional<Link> linkOptional = fixture.getLinkStream(INVALID_EXTERNAL).findFirst();
+        Optional<Result> linkOptional = fixture.getLinkStream(INVALID_EXTERNAL).findFirst();
 
         assertFalse(linkOptional.isPresent());
     }
@@ -227,18 +227,18 @@ class LinkHelperImplTest {
     void testValidateLink_validInternal() {
         context.create().resource(VALID_INTERNAL);
 
-        Link linkForValidation = new LinkImpl("Internal", VALID_INTERNAL);
-        fixture.validateLink(linkForValidation, context.resourceResolver());
+        Result resultForValidation = new LinkResult("Internal", VALID_INTERNAL);
+        fixture.validateLink(resultForValidation, context.resourceResolver());
 
-        testLinkStatus(HttpStatus.SC_OK, linkForValidation.getStatus());
+        testLinkStatus(HttpStatus.SC_OK, resultForValidation.getStatus());
     }
 
     @Test
     void testValidateLink_invalidInternal() {
-        Link linkForValidation = new LinkImpl("Internal", VALID_INTERNAL);
-        fixture.validateLink(linkForValidation, context.resourceResolver());
+        Result resultForValidation = new LinkResult("Internal", VALID_INTERNAL);
+        fixture.validateLink(resultForValidation, context.resourceResolver());
 
-        testLinkStatus(HttpStatus.SC_NOT_FOUND, linkForValidation.getStatus());
+        testLinkStatus(HttpStatus.SC_NOT_FOUND, resultForValidation.getStatus());
     }
 
     @Test
@@ -253,10 +253,10 @@ class LinkHelperImplTest {
                 context.bundleContext(),
                 Collections.singletonMap(INTERNAL_LINKS_HOST_FIELD, INTERNAL_LINKS_HOST_FIELD_VALUE));
 
-        Link linkForValidation = new LinkImpl("Internal", VALID_INTERNAL);
-        fixture.validateLink(linkForValidation, context.resourceResolver());
+        Result resultForValidation = new LinkResult("Internal", VALID_INTERNAL);
+        fixture.validateLink(resultForValidation, context.resourceResolver());
 
-        testLinkStatus(HttpStatus.SC_OK, linkForValidation.getStatus());
+        testLinkStatus(HttpStatus.SC_OK, resultForValidation.getStatus());
     }
 
     @Test
@@ -331,9 +331,9 @@ class LinkHelperImplTest {
     }
 
     private void testGetSingleLinkFromText(String text, String expected) {
-        Optional<Link> linkOptional = fixture.getLinkStream(text).findFirst();
+        Optional<Result> linkOptional = fixture.getLinkStream(text).findFirst();
 
         assertTrue(linkOptional.isPresent());
-        assertEquals(expected, linkOptional.get().getHref());
+        assertEquals(expected, linkOptional.get().getValue());
     }
 }

@@ -20,7 +20,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 /**
- * Represents the of the {@link Link} based on a result of checking link's validity
+ * Represents the of the {@link Result} based on a result of checking link's validity
  */
 public final class LinkStatus {
 

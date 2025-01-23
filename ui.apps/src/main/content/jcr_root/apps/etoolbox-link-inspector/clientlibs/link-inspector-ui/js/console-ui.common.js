@@ -202,24 +202,24 @@
 
     $(document).ready(function () {
 
-        const HIGHLIGHTS = $('.modal-textarea').data('matched-text');
+        const highlight = $('.modal-textarea').data('matched-text');
 
         $(document).on('click', '.open-modal', function(event) {
-            let editor = $(this).siblings('.link-modal').find('.editor')[0];
-            setHighlights(editor, HIGHLIGHTS);
+            let editor = $(this).siblings('.result-modal').find('.editor')[0];
+            setHighlights(editor, highlight);
             editor.addEventListener('input', onInput);
-            $(this).siblings('.link-modal').show();
+            $(this).siblings('.result-modal').show();
 
         });
 
         $(document).on('click', '.close-modal', function(event) {
-            $(this).siblings('.editor')[0].innerText = $(this).closest('.link-modal').siblings('.open-modal')[0].innerText;
-            $(this).closest('.link-modal').hide();
+            $(this).siblings('.editor')[0].innerText = $(this).closest('.result-modal').siblings('.open-modal')[0].innerText;
+            $(this).closest('.result-modal').hide();
         });
 
         $(document).on('click', '.modal-submit', function (e) {
             e.preventDefault();
-            const form = $(this).closest('.link-modal');
+            const form = $(this).closest('.result-modal');
             form.find('.modal-textarea').val(form.find('.editor')[0].innerText);
             const item = form.siblings('.open-modal')[0];
             $.ajax({
@@ -240,10 +240,10 @@
 
         function onInput(event) {
             const editor = event.target;
-            setHighlights(editor, HIGHLIGHTS);
+            setHighlights(editor, highlight);
         }
 
-        function setHighlights(editor, highlights) {
+        function setHighlights(editor, highlight) {
             if (!editor) return;
 
             const cursorPosition = getCursorPosition(editor);
@@ -251,7 +251,7 @@
 
             content = escapeHtml(content);
 
-            content = content.replaceAll(highlights, `<mark>${highlights}</mark>`);
+            content = content.replaceAll(highlight, `<mark>${highlight}</mark>`);
 
             editor.innerHTML = content;
 

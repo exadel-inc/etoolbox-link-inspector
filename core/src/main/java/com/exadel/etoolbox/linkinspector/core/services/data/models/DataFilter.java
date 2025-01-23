@@ -19,6 +19,6 @@ public class DataFilter {
 
     public boolean validate(GridResource gridResource) {
         return (StringUtils.isBlank(type) || StringUtils.equalsIgnoreCase(gridResource.getLink().getType(), this.type))
-                && (StringUtils.isBlank(substring) || gridResource.getLink().getHref().contains(substring));
+                && (StringUtils.isBlank(substring) || gridResource.getLink().getValue().contains(substring));
     }
 }
