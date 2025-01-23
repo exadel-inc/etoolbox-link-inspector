@@ -20,8 +20,13 @@
     </td>
 
     <td class="result" is="coral-table-cell">
-        <div class="primary break-word open-modal">${model.result}</div>
-        <div class="secondary">${model.linkType}</div>
+        <div class="primary break-word">${model.result}</div>
+        <coral-quickactions placement="top" target="_prev">
+            <coral-quickactions-item class="open-modal" icon="copy" type="anchor" href="#">
+                Edit
+            </coral-quickactions-item>
+        </coral-quickactions>
+        <div class="secondary result-type">${model.linkType}</div>
         <form method="post" action="${model.path}" class="modal result-modal">
             <div class="modal-content">
                 <span class="close close-modal">&times;</span>

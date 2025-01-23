@@ -205,15 +205,15 @@
         const highlight = $('.modal-textarea').data('matched-text');
 
         $(document).on('click', '.open-modal', function(event) {
-            let editor = $(this).siblings('.result-modal').find('.editor')[0];
+            let editor = $(this).parent().siblings('.result-modal').find('.editor')[0];
             setHighlights(editor, highlight);
             editor.addEventListener('input', onInput);
-            $(this).siblings('.result-modal').show();
+            $(this).parent().siblings('.result-modal').show();
 
         });
 
         $(document).on('click', '.close-modal', function(event) {
-            $(this).siblings('.editor')[0].innerText = $(this).closest('.result-modal').siblings('.open-modal')[0].innerText;
+            $(this).siblings('.editor')[0].innerText = $(this).closest('.result-modal').siblings('.break-word')[0].innerText;
             $(this).closest('.result-modal').hide();
         });
 
@@ -221,13 +221,12 @@
             e.preventDefault();
             const form = $(this).closest('.result-modal');
             form.find('.modal-textarea').val(form.find('.editor')[0].innerText);
-            const item = form.siblings('.open-modal')[0];
+            const item = form.siblings('.break-word')[0];
             $.ajax({
                 type: "POST",
                 url: form.attr('action'),
                 data: form.serialize(),
                 success: function () {
-                    console.log('Value saved successfully');
                     item.innerText = form.find('.modal-textarea').val();
                     form.hide();
                 },
