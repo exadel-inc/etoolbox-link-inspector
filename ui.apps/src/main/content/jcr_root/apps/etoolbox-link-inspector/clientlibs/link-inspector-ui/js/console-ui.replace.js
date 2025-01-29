@@ -61,7 +61,8 @@
                 isBackup: data.isBackup,
                 isOutputAsCsv: data.isOutputAsCsv,
                 advancedMode: data.advancedMode,
-                selected: data.selected
+                selected: data.selected,
+                links: data.links
             }].filter(function (item) {
                 return !item.advancedMode || item.pattern && item.replacement && item.pattern !== item.replacement;
             });
@@ -213,6 +214,9 @@
                 isOutputAsCsv: $isCsvOutputCheckbox.prop("checked"),
                 selected: selection.map(item => {
                     return item.path + '@' + item.propertyName
+                }),
+                links: selection.map(item => {
+                    return item.currentLink
                 })
             }
             deferred.resolve(data);

@@ -15,16 +15,17 @@
 package com.exadel.etoolbox.linkinspector.core.services.data.impl;
 
 import com.adobe.granite.ui.components.ds.ValueMapResource;
+import com.exadel.etoolbox.linkinspector.core.services.data.models.UpdatedItem;
 import com.exadel.etoolbox.linkinspector.core.models.ui.GridViewItem;
 import com.exadel.etoolbox.linkinspector.core.services.cache.GridResourcesCache;
 import com.exadel.etoolbox.linkinspector.core.services.data.DataFeedService;
 import com.exadel.etoolbox.linkinspector.core.services.data.GridResourcesGenerator;
 import com.exadel.etoolbox.linkinspector.core.services.data.models.DataFilter;
+import com.exadel.etoolbox.linkinspector.core.services.data.models.GridResource;
 import com.exadel.etoolbox.linkinspector.core.services.exceptions.DataFeedException;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.LinkHelper;
-import com.exadel.etoolbox.linkinspector.core.services.util.CsvUtil;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.RepositoryHelper;
-import com.exadel.etoolbox.linkinspector.core.services.data.models.GridResource;
+import com.exadel.etoolbox.linkinspector.core.services.util.CsvUtil;
 import com.exadel.etoolbox.linkinspector.core.services.util.JsonUtil;
 import com.exadel.etoolbox.linkinspector.core.services.util.LinkInspectorResourceUtil;
 import org.apache.commons.collections4.CollectionUtils;
@@ -161,17 +162,17 @@ public class DataFeedServiceImpl implements DataFeedService {
     }
 
     @Override
-    public void modifyDataFeed(Map<String, String> valuesMap) {
+    public void modifyDataFeed(List<UpdatedItem> updatedItems) {
         List<GridResource> gridResources = gridResourcesCache.getGridResourcesList();
         try (ResourceResolver serviceResourceResolver = repositoryHelper.getServiceResourceResolver()) {
             for (GridResource gridResource : gridResources) {
-                String propertyAddress = gridResource.getResourcePath() +"@" + gridResource.getPropertyName();
-                String propertyValue = valuesMap.getOrDefault(propertyAddress, StringUtils.EMPTY);
-                if (propertyValue.isEmpty()) {
+                String propertyAddress = CsvUtil.buildLocation(gridResource.getResourcePath(), gridResource.getPropertyName());
+                if (!isUpdated(updatedItems, propertyAddress, gridResource.getHref())) {
                     continue;
                 }
+                String updatedLink = getUpdatedLink(updatedItems, propertyAddress);
                 linkHelper
-                        .getLinkStream(propertyValue)
+                        .getLinkStream(updatedLink)
                         .forEach(link -> {
                             linkHelper.validateLink(link, serviceResourceResolver);
                             link.setStatus("Modified");
@@ -301,5 +302,21 @@ public class DataFeedServiceImpl implements DataFeedService {
 
     private List<GridResource> doFiltering(List<GridResource> resources, DataFilter filter) {
         return resources.stream().filter(filter::validate).collect(Collectors.toList());
+    }
+
+    private static String getUpdatedLink(List<UpdatedItem> updatedItems, String propertyAddress) {
+        return updatedItems.stream()
+                .filter(item -> item.getPropertyLocation().equals(propertyAddress))
+                .map(UpdatedItem::getUpdatedLink)
+                .findFirst()
+                .orElse(StringUtils.EMPTY);
+    }
+
+    private boolean isUpdated(List<UpdatedItem> updatedItems, String propertyAddress, String currentLink) {
+        if (updatedItems == null || updatedItems.isEmpty() || StringUtils.isAnyBlank(propertyAddress, currentLink)) {
+            return false;
+        }
+        return updatedItems.stream()
+                .anyMatch(item -> item.getPropertyLocation().equals(propertyAddress) && item.getCurrentLink().equals(currentLink));
     }
 }
