@@ -73,7 +73,7 @@ public class TextResolverImpl implements Resolver {
     }
 
     @Override
-    public Collection<Result> getLinks(String source) {
+    public Collection<Result> getResults(String source) {
         if (!enabled ) {
             return Collections.emptyList();
         }

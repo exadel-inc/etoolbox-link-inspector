@@ -18,6 +18,10 @@ import org.apache.sling.api.resource.ResourceResolver;
 
 import java.util.Collection;
 
+/**
+ * Represents a service that extracts substrings that follow certain pattern (such as web links) from the given source
+ * string and validates them
+ */
 public interface Resolver {
 
     /**
@@ -33,11 +37,11 @@ public interface Resolver {
     String getId();
 
     /**
-     * Obtains link value(s) from the given string source
+     * Obtains from the given string source values that match a required pattern
      * @param source A string value. A non-blank string is expected
      * @return A collection of {@link Result} objects. Can be an empty collection, but never {@code null}
      */
-    Collection<Result> getLinks(String source);
+    Collection<Result> getResults(String source);
 
     /**
      * Validates the provided {@link Result}

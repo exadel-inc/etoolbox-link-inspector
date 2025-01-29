@@ -14,7 +14,7 @@ public class MockCustomLinkResolver implements Resolver {
     }
 
     @Override
-    public Collection<Result> getLinks(String source) {
+    public Collection<Result> getResults(String source) {
         return Collections.emptyList();
     }
 

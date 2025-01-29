@@ -71,7 +71,7 @@ public class LinkHelperImpl implements LinkHelper {
     private Stream<Result> getLinkStream(String source) {
         return linkResolvers
                 .stream()
-                .flatMap(linkResolver -> linkResolver.getLinks(source).stream());
+                .flatMap(linkResolver -> linkResolver.getResults(source).stream());
     }
 
     /**
