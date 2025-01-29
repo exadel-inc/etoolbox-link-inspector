@@ -16,7 +16,7 @@ package com.exadel.etoolbox.linkinspector.core.services.helpers.impl;
 
 import com.exadel.etoolbox.linkinspector.api.Result;
 import com.exadel.etoolbox.linkinspector.api.LinkResolver;
-import com.exadel.etoolbox.linkinspector.api.LinkStatus;
+import com.exadel.etoolbox.linkinspector.api.Status;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.LinkHelper;
 import com.exadel.etoolbox.linkinspector.core.services.util.LinkInspectorResourceUtil;
 import org.apache.http.HttpStatus;
@@ -94,10 +94,10 @@ public class LinkHelperImpl implements LinkHelper {
      * {@inheritDoc}
      */
     @Override
-    public LinkStatus validateLink(String href, ResourceResolver resourceResolver) {
+    public Status validateLink(String href, ResourceResolver resourceResolver) {
         Optional<Result> detectedLink = this.getLinkStream(href).findFirst();
         if (!detectedLink.isPresent() || !detectedLink.get().getValue().equals(href)) {
-            return new LinkStatus(HttpStatus.SC_BAD_REQUEST, "Unsupported link type");
+            return new Status(HttpStatus.SC_BAD_REQUEST, "Unsupported link type");
         }
         validateLink(detectedLink.get(), resourceResolver);
         return detectedLink.get().getStatus();

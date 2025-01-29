@@ -14,6 +14,7 @@
 
 package com.exadel.etoolbox.linkinspector.api;
 
+import lombok.Getter;
 import org.apache.http.HttpStatus;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -22,32 +23,24 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 /**
  * Represents the of the {@link Result} based on a result of checking link's validity
  */
-public final class LinkStatus {
+@Getter
+public final class Status {
 
-    public static final LinkStatus OK = new LinkStatus(HttpStatus.SC_OK, "OK");
-
-    private final int code;
-    private final String message;
-
-    public LinkStatus(int code, String message) {
-        this.code = code;
-        this.message = message;
-    }
+    public static final Status OK = new Status(HttpStatus.SC_OK, "OK");
 
     /**
-     * Gets the status code of a link
-     * @return the HTTP status code based on a result of checking link's validity
+     * Gets the status code
      */
-    public int getCode() {
-        return code;
-    }
+    private final int code;
 
     /**
      * Gets the status message
-     * @return the status message based on a result of checking link's validity
      */
-    public String getMessage() {
-        return message;
+    private final String message;
+
+    public Status(int code, String message) {
+        this.code = code;
+        this.message = message;
     }
 
     /**
@@ -70,7 +63,7 @@ public final class LinkStatus {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        LinkStatus that = (LinkStatus) o;
+        Status that = (Status) o;
         return new EqualsBuilder().append(code, that.code).append(message, that.message).isEquals();
     }
 

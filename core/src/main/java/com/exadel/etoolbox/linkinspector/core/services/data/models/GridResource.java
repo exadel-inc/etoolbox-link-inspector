@@ -15,11 +15,12 @@
 package com.exadel.etoolbox.linkinspector.core.services.data.models;
 
 import com.exadel.etoolbox.linkinspector.api.Result;
-import com.exadel.etoolbox.linkinspector.api.LinkStatus;
+import com.exadel.etoolbox.linkinspector.api.Status;
 import com.exadel.etoolbox.linkinspector.core.models.LinkResult;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Getter;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.lang3.StringUtils;
 
@@ -55,8 +56,13 @@ public class GridResource {
     @JsonIgnore
     private Result result;
 
+    @Getter
     private final String resourcePath;
+
+    @Getter
     private final String propertyName;
+
+    @Getter
     private final String resourceType;
 
     public GridResource(Result result, String resourcePath, String propertyName, String resourceType) {
@@ -88,7 +94,7 @@ public class GridResource {
         this.resourcePath = resourcePath;
         this.propertyName = propertyName;
         this.resourceType = resourceType;
-        this.result = new LinkResult(type, href, new LinkStatus(Integer.parseInt(statusCode), statusMessage));
+        this.result = new LinkResult(type, href, new Status(Integer.parseInt(statusCode), statusMessage));
     }
 
     public Result getLink() {
@@ -120,27 +126,15 @@ public class GridResource {
     public int getStatusCode() {
         return Optional.ofNullable(getLink())
                 .map(Result::getStatus)
-                .map(LinkStatus::getCode)
+                .map(Status::getCode)
                 .orElse(HttpStatus.SC_NOT_FOUND);
     }
 
     public String getStatusMessage() {
         return Optional.ofNullable(getLink())
                 .map(Result::getStatus)
-                .map(LinkStatus::getMessage)
+                .map(Status::getMessage)
                 .orElse(HttpStatus.getStatusText(HttpStatus.SC_NOT_FOUND));
-    }
-
-    public String getResourcePath() {
-        return resourcePath;
-    }
-
-    public String getPropertyName() {
-        return propertyName;
-    }
-
-    public String getResourceType() {
-        return resourceType;
     }
 
     @Override

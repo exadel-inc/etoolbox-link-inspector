@@ -16,7 +16,7 @@ package com.exadel.etoolbox.linkinspector.core.services.resolvers;
 
 import com.exadel.etoolbox.linkinspector.api.Result;
 import com.exadel.etoolbox.linkinspector.api.LinkResolver;
-import com.exadel.etoolbox.linkinspector.api.LinkStatus;
+import com.exadel.etoolbox.linkinspector.api.Status;
 import com.exadel.etoolbox.linkinspector.core.services.resolvers.configs.TextResolverConfig;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -45,7 +45,7 @@ import java.util.regex.Pattern;
 public class TextResolverImpl implements LinkResolver {
 
     private static final String TYPE_TEXT = "Text";
-    private static final LinkStatus STATUS_FOUND = new LinkStatus(HttpStatus.SC_OK, "Found");
+    private static final Status STATUS_FOUND = new Status(HttpStatus.SC_OK, "Found");
 
     private boolean enabled;
     private Pattern search;
@@ -113,7 +113,7 @@ public class TextResolverImpl implements LinkResolver {
         }
 
         @Override
-        public LinkStatus getStatus() {
+        public Status getStatus() {
             return STATUS_FOUND;
         }
 
@@ -123,7 +123,7 @@ public class TextResolverImpl implements LinkResolver {
         }
 
         @Override
-        public void setStatus(LinkStatus status) {
+        public void setStatus(Status status) {
             // No operation
         }
     }

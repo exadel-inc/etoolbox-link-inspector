@@ -16,7 +16,7 @@ package com.exadel.etoolbox.linkinspector.core.services.resolvers;
 
 import com.exadel.etoolbox.linkinspector.api.Result;
 import com.exadel.etoolbox.linkinspector.api.LinkResolver;
-import com.exadel.etoolbox.linkinspector.api.LinkStatus;
+import com.exadel.etoolbox.linkinspector.api.Status;
 import com.exadel.etoolbox.linkinspector.core.models.LinkResult;
 import com.exadel.etoolbox.linkinspector.core.services.resolvers.configs.InternalLinkResolverConfig;
 import org.apache.commons.lang3.StringUtils;
@@ -91,7 +91,7 @@ public class InternalLinkResolverImpl implements LinkResolver {
         if (result == null || !StringUtils.equalsIgnoreCase(getId(), result.getType())) {
             return;
         }
-        LinkStatus status = checkLink(result.getValue(), resourceResolver);
+        Status status = checkLink(result.getValue(), resourceResolver);
         if (status.getCode() == HttpStatus.SC_NOT_FOUND && StringUtils.isNotBlank(internalLinksHost)) {
             externalLinkResolver.validate(result, resourceResolver);
         } else {
@@ -104,8 +104,8 @@ public class InternalLinkResolverImpl implements LinkResolver {
         return enabled;
     }
 
-    private LinkStatus checkLink(String href, ResourceResolver resourceResolver) {
-        LinkStatus status = checkLinkInternal(href, resourceResolver);
+    private Status checkLink(String href, ResourceResolver resourceResolver) {
+        Status status = checkLinkInternal(href, resourceResolver);
         if (!status.isValid()) {
             String decodedLink = decode(href);
             if (!decodedLink.equals(href)) {
@@ -115,11 +115,11 @@ public class InternalLinkResolverImpl implements LinkResolver {
         return status;
     }
 
-    private LinkStatus checkLinkInternal(String href, ResourceResolver resourceResolver) {
+    private Status checkLinkInternal(String href, ResourceResolver resourceResolver) {
         return Optional.of(resourceResolver.resolve(href))
                 .filter(resource -> !ResourceUtil.isNonExistingResource(resource))
-                .map(resource -> new LinkStatus(HttpStatus.SC_OK, "OK"))
-                .orElse(new LinkStatus(HttpStatus.SC_NOT_FOUND, "Not Found"));
+                .map(resource -> new Status(HttpStatus.SC_OK, "OK"))
+                .orElse(new Status(HttpStatus.SC_NOT_FOUND, "Not Found"));
     }
 
     private String decode(String href) {

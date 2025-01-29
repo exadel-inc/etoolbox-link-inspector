@@ -16,7 +16,7 @@ package com.exadel.etoolbox.linkinspector.core.services.helpers.impl;
 
 import com.exadel.etoolbox.linkinspector.api.Result;
 import com.exadel.etoolbox.linkinspector.api.LinkResolver;
-import com.exadel.etoolbox.linkinspector.api.LinkStatus;
+import com.exadel.etoolbox.linkinspector.api.Status;
 import com.exadel.etoolbox.linkinspector.core.models.LinkResult;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.LinkHelper;
 import com.exadel.etoolbox.linkinspector.core.services.mocks.MockHttpClientBuilderFactory;
@@ -170,7 +170,7 @@ class ResultHelperImplTest {
     void testValidateInternalLink_valid() {
         context.create().resource(VALID_INTERNAL);
 
-        LinkStatus linkStatus = fixture.validateLink(VALID_INTERNAL, context.resourceResolver());
+        Status linkStatus = fixture.validateLink(VALID_INTERNAL, context.resourceResolver());
 
         testLinkStatus(HttpStatus.SC_OK, linkStatus);
     }
@@ -179,14 +179,14 @@ class ResultHelperImplTest {
     void testValidateInternalEncodedLink_valid() {
         context.create().resource(VALID_INTERNAL_DECODED);
 
-        LinkStatus linkStatus = fixture.validateLink(VALID_INTERNAL_ENCODED, context.resourceResolver());
+        Status linkStatus = fixture.validateLink(VALID_INTERNAL_ENCODED, context.resourceResolver());
 
         testLinkStatus(HttpStatus.SC_OK, linkStatus);
     }
 
     @Test
     void testValidateInternalLink_invalid() {
-        LinkStatus linkStatus = fixture.validateLink(VALID_INTERNAL, context.resourceResolver());
+        Status linkStatus = fixture.validateLink(VALID_INTERNAL, context.resourceResolver());
 
         testLinkStatus(HttpStatus.SC_NOT_FOUND, linkStatus);
     }
@@ -198,7 +198,7 @@ class ResultHelperImplTest {
                     URLDecoder.decode(eq(VALID_INTERNAL_ENCODED), anyString())
             ).thenThrow(new UnsupportedEncodingException());
 
-            LinkStatus linkStatus = fixture.validateLink(VALID_INTERNAL_ENCODED, context.resourceResolver());
+            Status linkStatus = fixture.validateLink(VALID_INTERNAL_ENCODED, context.resourceResolver());
 
             testLinkStatus(HttpStatus.SC_NOT_FOUND, linkStatus);
         }
@@ -208,7 +208,7 @@ class ResultHelperImplTest {
     void testValidateExternalLink_socketTimeout() throws IOException {
         when(httpClient.execute(any())).thenThrow(new SocketTimeoutException());
 
-        LinkStatus linkStatus = fixture.validateLink(VALID_EXTERNAL, context.resourceResolver());
+        Status linkStatus = fixture.validateLink(VALID_EXTERNAL, context.resourceResolver());
 
         testLinkStatus(HttpStatus.SC_REQUEST_TIMEOUT, "Request Timeout", linkStatus);
     }
@@ -218,7 +218,7 @@ class ResultHelperImplTest {
         Exception e = new IOException();
         when(httpClient.execute(any())).thenThrow(new IOException());
 
-        LinkStatus linkStatus = fixture.validateLink(VALID_EXTERNAL, context.resourceResolver());
+        Status linkStatus = fixture.validateLink(VALID_EXTERNAL, context.resourceResolver());
 
         testLinkStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR, e.toString(), linkStatus);
     }
@@ -265,14 +265,14 @@ class ResultHelperImplTest {
         when(response.getStatusLine()).thenReturn(new BasicStatusLine(HttpVersion.HTTP_1_0, HttpStatus.SC_OK, "OK"));
         when(httpClient.execute(any())).thenReturn(response);
 
-        LinkStatus linkStatus = fixture.validateLink(VALID_EXTERNAL, context.resourceResolver());
+        Status linkStatus = fixture.validateLink(VALID_EXTERNAL, context.resourceResolver());
 
         testLinkStatus(HttpStatus.SC_OK, linkStatus);
     }
 
     @Test
     void testValidateLink_invalidExternal() {
-        LinkStatus linkStatus = fixture.validateLink(INVALID_EXTERNAL, context.resourceResolver());
+        Status linkStatus = fixture.validateLink(INVALID_EXTERNAL, context.resourceResolver());
 
         testLinkStatus(HttpStatus.SC_BAD_REQUEST, INVALID_SYNTAX_MESSAGE, linkStatus);
     }
@@ -280,7 +280,7 @@ class ResultHelperImplTest {
     void testValidateLinkString_invalidSyntax() {
         String linkInsideText = String.format(SINGLE_LINK_HTML_TAG_PLACEHOLDER, VALID_INTERNAL);
 
-        LinkStatus linkStatus = fixture.validateLink(linkInsideText, context.resourceResolver());
+        Status linkStatus = fixture.validateLink(linkInsideText, context.resourceResolver());
 
         testLinkStatus(HttpStatus.SC_BAD_REQUEST, INVALID_SYNTAX_MESSAGE, linkStatus);
     }
@@ -317,11 +317,11 @@ class ResultHelperImplTest {
         assertEquals(VALID_INTERNAL, updatedValue);
     }
 
-    private void testLinkStatus(int expectedCode, LinkStatus linkStatus) {
+    private void testLinkStatus(int expectedCode, Status linkStatus) {
         assertEquals(expectedCode, linkStatus.getCode());
     }
 
-    private void testLinkStatus(int expectedCode, String expectedMessage, LinkStatus linkStatus) {
+    private void testLinkStatus(int expectedCode, String expectedMessage, Status linkStatus) {
         assertEquals(expectedCode, linkStatus.getCode());
         assertEquals(expectedMessage, linkStatus.getMessage());
     }

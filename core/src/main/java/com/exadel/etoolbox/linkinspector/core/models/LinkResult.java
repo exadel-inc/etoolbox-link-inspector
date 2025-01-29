@@ -1,7 +1,7 @@
 package com.exadel.etoolbox.linkinspector.core.models;
 
 import com.exadel.etoolbox.linkinspector.api.Result;
-import com.exadel.etoolbox.linkinspector.api.LinkStatus;
+import com.exadel.etoolbox.linkinspector.api.Status;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -12,13 +12,13 @@ public class LinkResult implements Result {
 
     private final String type;
     private final String value;
-    private LinkStatus status;
+    private Status status;
 
     public LinkResult(String type, String value) {
-        this(type, value, LinkStatus.OK);
+        this(type, value, Status.OK);
     }
 
-    public LinkResult(String type, String value, LinkStatus status) {
+    public LinkResult(String type, String value, Status status) {
         this.type = type;
         this.value = value;
         this.status = status;
@@ -40,12 +40,12 @@ public class LinkResult implements Result {
     }
 
     @Override
-    public LinkStatus getStatus() {
+    public Status getStatus() {
         return status;
     }
 
     @Override
-    public void setStatus(LinkStatus value) {
+    public void setStatus(Status value) {
         this.status = value;
     }
 

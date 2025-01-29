@@ -16,7 +16,7 @@ package com.exadel.etoolbox.linkinspector.core.services.helpers;
 
 import com.exadel.etoolbox.linkinspector.api.Result;
 import com.exadel.etoolbox.linkinspector.api.LinkResolver;
-import com.exadel.etoolbox.linkinspector.api.LinkStatus;
+import com.exadel.etoolbox.linkinspector.api.Status;
 import org.apache.sling.api.resource.ResourceResolver;
 
 import java.util.stream.Stream;
@@ -39,9 +39,9 @@ public interface LinkHelper {
      * Checks the given link {@code href} for validity using one of the registered {@link LinkResolver} implementations
      * @param link             - the string reference to be checked
      * @param resourceResolver - {@link ResourceResolver} object
-     * @return A {@link LinkStatus} object
+     * @return A {@link Status} object
      */
-    LinkStatus validateLink(String link, ResourceResolver resourceResolver);
+    Status validateLink(String link, ResourceResolver resourceResolver);
 
     /**
      * Replaces all the occurrences of the given link stored at the specified location ({@code resourcePath} +
