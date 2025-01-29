@@ -18,7 +18,7 @@ import org.apache.sling.api.resource.ResourceResolver;
 
 import java.util.Collection;
 
-public interface LinkResolver {
+public interface Resolver {
 
     /**
      * Gets whether the current resolver is enabled

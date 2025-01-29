@@ -1,13 +1,13 @@
 package com.exadel.etoolbox.linkinspector.core.services.mocks;
 
 import com.exadel.etoolbox.linkinspector.api.Result;
-import com.exadel.etoolbox.linkinspector.api.LinkResolver;
+import com.exadel.etoolbox.linkinspector.api.Resolver;
 import org.apache.sling.api.resource.ResourceResolver;
 
 import java.util.Collection;
 import java.util.Collections;
 
-public class MockCustomLinkResolver implements LinkResolver {
+public class MockCustomLinkResolver implements Resolver {
     @Override
     public String getId() {
         return "custom";

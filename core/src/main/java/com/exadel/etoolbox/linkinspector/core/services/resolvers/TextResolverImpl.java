@@ -15,7 +15,7 @@
 package com.exadel.etoolbox.linkinspector.core.services.resolvers;
 
 import com.exadel.etoolbox.linkinspector.api.Result;
-import com.exadel.etoolbox.linkinspector.api.LinkResolver;
+import com.exadel.etoolbox.linkinspector.api.Resolver;
 import com.exadel.etoolbox.linkinspector.api.Status;
 import com.exadel.etoolbox.linkinspector.core.services.resolvers.configs.TextResolverConfig;
 import lombok.EqualsAndHashCode;
@@ -39,10 +39,10 @@ import java.util.regex.Pattern;
 /**
  * Validates external links via sending HEAD requests concurrently using {@link PoolingHttpClientConnectionManager}
  */
-@Component(service = LinkResolver.class, immediate = true)
+@Component(service = Resolver.class, immediate = true)
 @Designate(ocd = TextResolverConfig.class)
 @Slf4j
-public class TextResolverImpl implements LinkResolver {
+public class TextResolverImpl implements Resolver {
 
     private static final String TYPE_TEXT = "Text";
     private static final Status STATUS_FOUND = new Status(HttpStatus.SC_OK, "Found");

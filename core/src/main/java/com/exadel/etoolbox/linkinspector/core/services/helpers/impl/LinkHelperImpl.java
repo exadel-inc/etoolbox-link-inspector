@@ -15,7 +15,7 @@
 package com.exadel.etoolbox.linkinspector.core.services.helpers.impl;
 
 import com.exadel.etoolbox.linkinspector.api.Result;
-import com.exadel.etoolbox.linkinspector.api.LinkResolver;
+import com.exadel.etoolbox.linkinspector.api.Resolver;
 import com.exadel.etoolbox.linkinspector.api.Status;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.LinkHelper;
 import com.exadel.etoolbox.linkinspector.core.services.util.LinkInspectorResourceUtil;
@@ -50,7 +50,7 @@ public class LinkHelperImpl implements LinkHelper {
             policy = ReferencePolicy.DYNAMIC,
             policyOption = ReferencePolicyOption.GREEDY
     )
-    private volatile List<LinkResolver> linkResolvers;
+    private volatile List<Resolver> linkResolvers;
 
     /**
      * {@inheritDoc}
@@ -80,7 +80,7 @@ public class LinkHelperImpl implements LinkHelper {
     @Override
     public void validateLink(Result result, ResourceResolver resourceResolver) {
         String type = result.getType();
-        LinkResolver linkResolver = linkResolvers.stream().filter(item -> item.getId().equals(type)).findFirst().orElse(null);
+        Resolver linkResolver = linkResolvers.stream().filter(item -> item.getId().equals(type)).findFirst().orElse(null);
         if (linkResolver == null) {
             result.setStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR, "Link resolver not found");
             return;

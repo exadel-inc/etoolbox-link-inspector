@@ -15,7 +15,7 @@
 package com.exadel.etoolbox.linkinspector.core.services.resolvers;
 
 import com.exadel.etoolbox.linkinspector.api.Result;
-import com.exadel.etoolbox.linkinspector.api.LinkResolver;
+import com.exadel.etoolbox.linkinspector.api.Resolver;
 import com.exadel.etoolbox.linkinspector.core.models.LinkResult;
 import com.exadel.etoolbox.linkinspector.core.services.resolvers.configs.ExternalLinkResolverConfig;
 import org.apache.commons.lang3.StringUtils;
@@ -56,9 +56,9 @@ import java.util.regex.Pattern;
 /**
  * Validates external links via sending HEAD requests concurrently using {@link PoolingHttpClientConnectionManager}
  */
-@Component(service = {LinkResolver.class, ExternalLinkResolverImpl.class}, immediate = true)
+@Component(service = {Resolver.class, ExternalLinkResolverImpl.class}, immediate = true)
 @Designate(ocd = ExternalLinkResolverConfig.class)
-public class ExternalLinkResolverImpl implements LinkResolver {
+public class ExternalLinkResolverImpl implements Resolver {
 
     private static final Logger LOG = LoggerFactory.getLogger(ExternalLinkResolverImpl.class);
 

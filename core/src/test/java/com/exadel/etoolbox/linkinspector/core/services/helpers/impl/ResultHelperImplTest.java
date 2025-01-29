@@ -15,7 +15,7 @@
 package com.exadel.etoolbox.linkinspector.core.services.helpers.impl;
 
 import com.exadel.etoolbox.linkinspector.api.Result;
-import com.exadel.etoolbox.linkinspector.api.LinkResolver;
+import com.exadel.etoolbox.linkinspector.api.Resolver;
 import com.exadel.etoolbox.linkinspector.api.Status;
 import com.exadel.etoolbox.linkinspector.core.models.LinkResult;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.LinkHelper;
@@ -80,7 +80,7 @@ class ResultHelperImplTest {
     private final AemContext context = new AemContext();
 
     private LinkHelper fixture;
-    private LinkResolver internalLinkResolver;
+    private Resolver internalLinkResolver;
     private CloseableHttpClient httpClient;
 
     @BeforeEach
