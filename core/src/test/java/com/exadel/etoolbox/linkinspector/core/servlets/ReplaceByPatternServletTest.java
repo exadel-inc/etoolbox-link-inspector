@@ -91,6 +91,7 @@ class ReplaceByPatternServletTest {
     private static final String OUTPUT_AS_CSV_PARAM = "isOutputAsCsv";
 
     private static final String SELECTED_PARAM = "selected";
+    private static final String LINKS_PARAM = "links";
 
     private static final String TEST_LINK_PATTERN = "test-pattern";
     private static final String TEST_REPLACEMENT = "test-replacement";
@@ -100,6 +101,7 @@ class ReplaceByPatternServletTest {
     private static final String TEST_PROPERTY_3 = "test3";
     private static final String TEST_DATAFEED_PATH = "/com/exadel/etoolbox/linkinspector/core/servlets/datafeed.json";
     private static final String TEST_SELECTED_VALUES_PATH = "com/exadel/etoolbox/linkinspector/core/servlets/selected.json";
+    private static final String TEST_SELECTED_LINKS_PATH = "com/exadel/etoolbox/linkinspector/core/servlets/links.json";
     private static final String REAL_DATAFEED_PATH = "/content/etoolbox-link-inspector/data/datafeed.json";
     private static final String TEST_RESOURCES_TREE_PATH = "/com/exadel/etoolbox/linkinspector/core/servlets/resources.json";
     private static final String TEST_FOLDER_PATH = "/content/test-folder";
@@ -391,9 +393,9 @@ class ReplaceByPatternServletTest {
 
     private RepositoryHelper getRepositoryHelperFromContext() throws NoSuchFieldException {
         ResourceResolverFactory resourceResolverFactory = context.getService(ResourceResolverFactory.class);
-        RepositoryHelper repositoryHelper = new RepositoryHelperImpl();
-        PrivateAccessor.setField(repositoryHelper, RESOURCE_RESOLVER_FACTORY_FIELD, resourceResolverFactory);
-        return repositoryHelper;
+        RepositoryHelper helper = new RepositoryHelperImpl();
+        PrivateAccessor.setField(helper, RESOURCE_RESOLVER_FACTORY_FIELD, resourceResolverFactory);
+        return helper;
     }
 
     private void setUpDataFeedService(RepositoryHelper repositoryHelper) throws NoSuchFieldException {
@@ -439,8 +441,11 @@ class ReplaceByPatternServletTest {
         request.addRequestParameter(LINK_PATTERN_PARAM, TEST_LINK_PATTERN);
         request.addRequestParameter(REPLACEMENT_PARAM, TEST_REPLACEMENT);
         request.addRequestParameter(ADVANCED_MODE, Boolean.TRUE.toString());
-        Arrays.stream(loadSelectedValues()).forEach(value ->
+        Arrays.stream(loadSelectedPropertiesValues()).forEach(value ->
                 request.addRequestParameter(SELECTED_PARAM, value)
+        );
+        Arrays.stream(loadSelectedLinksValues()).forEach(value ->
+                request.addRequestParameter(LINKS_PARAM, value)
         );
     }
 
@@ -448,7 +453,8 @@ class ReplaceByPatternServletTest {
         SlingHttpServletRequest requestMock = mock(SlingHttpServletRequest.class);
         mockRequestParam(LINK_PATTERN_PARAM, TEST_LINK_PATTERN, requestMock);
         mockRequestParam(REPLACEMENT_PARAM, TEST_REPLACEMENT, requestMock);
-        mockRequestParams(SELECTED_PARAM, loadSelectedValues(), requestMock);
+        mockRequestParams(SELECTED_PARAM, loadSelectedPropertiesValues(), requestMock);
+        mockRequestParams(LINKS_PARAM, loadSelectedLinksValues(), requestMock);
         return requestMock;
     }
 
@@ -464,9 +470,9 @@ class ReplaceByPatternServletTest {
     }
 
     private void mockLinkHelper(ResourceResolver resourceResolverMock) throws NoSuchFieldException {
-        LinkHelper linkHelper = mock(LinkHelper.class);
-        PrivateAccessor.setField(fixture, LINK_HELPER_FIELD, linkHelper);
-        when(linkHelper.replaceLink(eq(resourceResolverMock), anyString(), anyString(), anyString(), anyString()))
+        LinkHelper helper = mock(LinkHelper.class);
+        PrivateAccessor.setField(fixture, LINK_HELPER_FIELD, helper);
+        when(helper.replaceLink(eq(resourceResolverMock), anyString(), anyString(), anyString(), anyString()))
                 .thenReturn(true);
     }
 
@@ -489,9 +495,16 @@ class ReplaceByPatternServletTest {
         return lines.length;
     }
 
-    private String[] loadSelectedValues() throws IOException {
+    private String[] loadSelectedPropertiesValues() throws IOException {
         ClassLoader classLoader = getClass().getClassLoader();
         File file = new File(classLoader.getResource(TEST_SELECTED_VALUES_PATH).getFile());
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.readValue(file, String[].class);
+    }
+
+    private String[] loadSelectedLinksValues() throws IOException {
+        ClassLoader classLoader = getClass().getClassLoader();
+        File file = new File(classLoader.getResource(TEST_SELECTED_LINKS_PATH).getFile());
         ObjectMapper mapper = new ObjectMapper();
         return mapper.readValue(file, String[].class);
     }

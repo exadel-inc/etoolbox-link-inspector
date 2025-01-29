@@ -16,10 +16,10 @@ package com.exadel.etoolbox.linkinspector.core.servlets;
 
 import com.day.crx.JcrConstants;
 import com.exadel.etoolbox.linkinspector.api.LinkStatus;
+import com.exadel.etoolbox.linkinspector.core.services.data.models.UpdatedItem;
 import com.exadel.etoolbox.linkinspector.core.services.data.DataFeedService;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.LinkHelper;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.RepositoryHelper;
-import com.exadel.etoolbox.linkinspector.core.services.util.CsvUtil;
 import com.exadel.etoolbox.linkinspector.core.services.util.ServletUtil;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.lang3.StringUtils;
@@ -38,7 +38,9 @@ import org.slf4j.LoggerFactory;
 import javax.json.Json;
 import javax.servlet.Servlet;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 /**
  * The servlet for replacement a broken link with the new one within the specified resource property. The resource path,
@@ -133,6 +135,7 @@ public class FixBrokenLinkServlet extends SlingAllMethodsServlet {
     }
 
     private void modifyDataFeed(String path, String propertyName, String newLink) {
-        dataFeedService.modifyDataFeed(Collections.singletonMap(CsvUtil.buildLocation(path, propertyName), newLink));
+        UpdatedItem updatedItem = new UpdatedItem(StringUtils.EMPTY, newLink, path, propertyName);
+        dataFeedService.modifyDataFeed(Collections.singletonList(updatedItem));
     }
 }
