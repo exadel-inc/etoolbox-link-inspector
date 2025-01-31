@@ -20,23 +20,18 @@
     </td>
 
     <td class="result" is="coral-table-cell">
-        <div class="primary break-word">${model.result}</div>
-        <coral-quickactions placement="top" target="_prev">
-            <coral-quickactions-item class="open-modal" icon="copy" type="anchor" href="#">
+        <div class="content">
+            <div class="primary break-word ellipsis"
+                 data-path="${model.path}"
+                 data-property="./${model.propertyName}"
+                 data-matched="${model.matchedText}">${model.result}</div>
+            <div class="secondary result-type">${model.linkType}</div>
+        </div>
+        <coral-quickactions align="right top" target="_prev">
+            <coral-quickactions-item class="open-editproperty" icon="edit" type="anchor" href="#">
                 Edit
             </coral-quickactions-item>
         </coral-quickactions>
-        <div class="secondary result-type">${model.linkType}</div>
-        <form method="post" action="${model.path}" class="modal result-modal">
-            <div class="modal-content">
-                <span class="close close-modal">&times;</span>
-                <div class="editor" contenteditable="true">
-                    <p>${model.result}</p>
-                </div>
-                <input data-matched-text="${model.matchedText}" class="modal-textarea" name="./${model.propertyName}" hidden>
-                <div class="submit-modal"><input type="submit" class="modal-submit" value="Submit"></div>
-            </div>
-        </form>
     </td>
 
     <td class="page" is="coral-table-cell">
