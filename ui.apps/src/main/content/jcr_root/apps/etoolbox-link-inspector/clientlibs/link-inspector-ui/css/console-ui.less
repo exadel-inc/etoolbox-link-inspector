@@ -27,12 +27,24 @@
     &.status {
       max-width: 80px;
     }
+    &.page {
+      width: 15%;
+    }
+    &.component {
+      width: 15%;
+    }
+    &.property {
+      width: 30%;
+    }
   }
   .break-all {
     word-break: break-all;
   }
   .break-word {
     word-break: break-word;
+  }
+  .content {
+    height: 100%;
   }
   .indicator {
     margin-top: 0.2rem;
@@ -45,6 +57,12 @@
     display: block;
     font-size: 0.8rem;
     line-height: 0.8rem;
+  }
+  .ellipsis {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 10;
   }
 }
 
@@ -77,12 +95,12 @@
   }
 }
 
-.elc-link-status--ok {
-  color: #00FF00;
+.elc-result-status--ok {
+  color: #0FCB8C;
 }
 
-.elc-link-status--error {
-  color: #FF0000;
+.elc-result-status--error {
+  color: #f85647;
 }
 
 .elc-run-button {
@@ -91,7 +109,7 @@
     padding: 0 !important;
     font-family: arial, sans-serif;
     cursor: pointer;
-    color: blue;
+    color: #4178cd;
     margin: 0 0.5rem;
 }
 
@@ -131,7 +149,7 @@
   }
 }
 
-.options-page{
+.options-page {
     min-width: 40rem ;
     width: 50% ;
 }
