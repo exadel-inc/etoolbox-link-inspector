@@ -47,7 +47,7 @@
                             formId="elc-options-savesettings"
                             granite:title="Save settings"
                             icon="save"
-                            text="Save settings"/>
+                            text="Save"/>
                 </secondary>
             </actions>
             <content jcr:primaryType="nt:unstructured"
