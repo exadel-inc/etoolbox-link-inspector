@@ -89,7 +89,7 @@
     function showConfirmationModal(selection) {
         var deferred = $.Deferred();
 
-        var el = ELC.getSharableDlg();
+        var el = ELC.getDialog();
         el.variant = 'notice';
         el.header.textContent = UPDATE_LABEL;
         el.footer.innerHTML = ''; // Clean content
