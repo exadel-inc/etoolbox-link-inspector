@@ -2,19 +2,18 @@
     class="foundation-collection-item elc-item"
     is="coral-table-row"
     data-path="${model.path}"
-    data-current-result="${model.result}"
+    data-current-link="${model.result}"
     data-property-name="${model.propertyName}"
-    data-rootsource="${model.path}">
-    <td is="coral-table-cell" coral-table-rowselect>
-        <img itemprop="thumbnail" width="192" src="${model.thumbnail}" alt="">
-    </td>
+    data-matched="${model.matchedText}">
+
+    <td class="check" is="coral-table-cell" coral-table-rowselect>&nbsp;</td>
 
     <td class="status centered" is="coral-table-cell">
         <div data-sly-set.statuscode="${model.linkStatusCode == '200' ? 'ok' : 'error'}"
              class="indicator" title="HTTP Status ${model.linkStatusCode}">
             <coral-icon icon="circle" class="elc-result-status--${statuscode}"></coral-icon>
         </div>
-        <div class="secondary">
+        <div class="secondary centered break-none">
             ${model.linkStatusMessage}
         </div>
     </td>
@@ -26,12 +25,8 @@
                  data-property="./${model.propertyName}"
                  data-matched="${model.matchedText}">${model.result}</div>
             <div class="secondary result-type">${model.linkType}</div>
+            <button is="coral-button" class="elc-editproperty-button" icon="edit"></button>
         </div>
-        <coral-quickactions align="right top" target="_prev">
-            <coral-quickactions-item class="open-editproperty" icon="edit" type="anchor" href="#">
-                Edit
-            </coral-quickactions-item>
-        </coral-quickactions>
     </td>
 
     <td class="page" is="coral-table-cell">

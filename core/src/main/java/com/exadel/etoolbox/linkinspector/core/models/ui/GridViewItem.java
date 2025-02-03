@@ -57,12 +57,6 @@ public class GridViewItem {
      */
     public static final String CRX_DE_PATH = "/crx/de/index.jsp#";
 
-    /**
-     * Vanity path for the grid item thumbnail
-     */
-    public static final String THUMBNAIL_PATH =
-            "/etc.clientlibs/etoolbox-link-inspector/clientlibs/link-inspector-ui/resources/thumbnail.png";
-
     public static final String SLASH_CHAR = "/";
     public static final String HTML_EXTENSION = ".html";
 
@@ -122,10 +116,6 @@ public class GridViewItem {
 
     public String getTitle() {
         return getPath();
-    }
-
-    public String getThumbnail() {
-        return THUMBNAIL_PATH;
     }
 
     public String getPath() {
