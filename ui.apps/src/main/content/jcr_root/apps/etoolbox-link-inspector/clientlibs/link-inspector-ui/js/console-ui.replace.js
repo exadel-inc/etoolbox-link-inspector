@@ -40,7 +40,7 @@
     var PROCESSING_SUCCESS_MSG = 'Replacement completed. %s<br/><br/>Pattern: <b>{{pattern}}</b><br/>Replacement: <b>{{replacement}}</b>';
     var DRY_RUN_PREFIX_MSG = '(Dry run) ';
     var DOWNLOADED_CSV_MSG = 'Please see the downloaded CSV for more details.';
-    var PROCESSING_NOT_FOUND_MSG = 'Broken links containing the pattern <b>{{pattern}}</b> were not found or user has insufficient permissions to process them';
+    var PROCESSING_NOT_FOUND_MSG = 'Properties matching the pattern <b>{{pattern}}</b> were not found, or user has insufficient permissions to process them';
     var PROCESSING_IDENTICAL_MSG = 'The pattern <b>{{pattern}}</b> is equal to the replacement value, no processing was done';
 
     var REPLACE_BY_PATTERN_COMMAND = '/content/etoolbox-link-inspector/servlet/replaceByPattern';
@@ -216,7 +216,7 @@
                     return item.path + '@' + item.propertyName
                 }),
                 links: selection.map(item => {
-                    return item.currentLink
+                    return item.source
                 })
             }
             deferred.resolve(data);
@@ -252,7 +252,7 @@
 
     function buildConfirmationMessage(selections) {
         let list = selections.slice(0, 12).map(function (row) {
-            return '<li>' + row.currentLink + ' (' + row.count + ')' + '</li>';
+            return '<li>' + row.source + ' (' + row.count + ')' + '</li>';
         });
         if (selections.length > 12) {
             list.push('<li>&#8230;</li>'); // &#8230; is ellipsis
@@ -267,25 +267,25 @@
     function confirmationMessageSelectionItems(selections) {
          let valuesMap = {};
          selections.map(function (row) {
-            return row.currentLink;
+            return row.source;
          }).forEach(function (item) {
             valuesMap[item] = (valuesMap[item]||0) + 1;
          });
 
          let items = [];
          for (const [key, value] of Object.entries(valuesMap)) {
-           items.push({currentLink: key, count: value});
+           items.push({source: key, count: value});
          }
          return items;
     }
 
     function buildSelectionItems(selections) {
         return selections.map(function (v) {
-            let row = $(v);
+            const $row = $(v);
             return {
-                path: row.data('path'),
-                currentLink: row.data('currentLink'),
-                propertyName: row.data('propertyName')
+                path: $row.data('path'),
+                source: $row.find('.result .source').text(),
+                propertyName: $row.data('propertyName')
             };
         });
     }
