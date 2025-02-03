@@ -4,7 +4,7 @@
     data-path="${model.path}"
     data-current-link="${model.result}"
     data-property-name="${model.propertyName}"
-    data-matched="${model.matchedText}">
+    data-match="${model.matchedText}">
 
     <td class="check" is="coral-table-cell" coral-table-rowselect>&nbsp;</td>
 
@@ -20,10 +20,7 @@
 
     <td class="result" is="coral-table-cell">
         <div class="content">
-            <div class="primary break-word ellipsis"
-                 data-path="${model.path}"
-                 data-property="./${model.propertyName}"
-                 data-matched="${model.matchedText}">${model.result}</div>
+            <div class="primary break-word ellipsis">${model.result}</div>
             <div class="secondary result-type">${model.linkType}</div>
             <button is="coral-button" class="elc-editproperty-button" icon="edit"></button>
         </div>

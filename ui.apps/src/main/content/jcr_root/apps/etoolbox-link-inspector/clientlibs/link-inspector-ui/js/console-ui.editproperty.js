@@ -34,7 +34,7 @@
 
         const path = dataHolder.dataset.path;
         const propertyName = './' + dataHolder.dataset.propertyName;
-        const matchedText = dataHolder.dataset.matched;
+        const matchedText = dataHolder.dataset.match;
         const content = contentHolder.innerHTML;
 
         const dialog = ELC.getDialog('editproperty', {
@@ -60,7 +60,7 @@
         $(dialog).one('coral-overlay:open', function () {
             const editor = dialog.querySelector('.editor');
             editor.innerText = content;
-            editor.dataset.matched = matchedText;
+            editor.dataset.match = matchedText;
             editor.dataset.path = path;
             editor.dataset.property = propertyName;
             editor.sourceElement = contentHolder;
@@ -95,7 +95,7 @@
         const dialog = e.target.closest('coral-dialog');
         const editor = dialog.querySelector('.editor');
         editor.innerText = '';
-        delete editor.dataset.matched;
+        delete editor.dataset.match;
         delete editor.dataset.path;
         delete editor.dataset.property;
         delete editor.sourceElement;
@@ -103,7 +103,7 @@
 
     function onEditorInput(e) {
         const editor = e.target;
-        setHighlights(editor, editor.dataset.matched);
+        setHighlights(editor, editor.dataset.match);
     }
 
     /* ---------------
