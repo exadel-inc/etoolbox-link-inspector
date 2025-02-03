@@ -21,7 +21,7 @@
     const foundationUi = $(window).adaptTo('foundation-ui');
     const $document = $(document);
     $document.ready(function () {
-        $document.on('click', '.open-editproperty', onEditorButtonClick);
+        $document.on('click', '.elc-editproperty-button', onEditorButtonClick);
     });
 
     /* --------------
@@ -29,18 +29,18 @@
        -------------- */
 
     function onEditorButtonClick(e) {
-        const td = e.target.closest('td');
-        const contentHolder = td.querySelector('[data-path]');
+        const dataHolder = e.target.closest('tr');
+        const contentHolder = e.target.closest('td').querySelector('.primary');
 
+        const path = dataHolder.dataset.path;
+        const propertyName = './' + dataHolder.dataset.propertyName;
+        const matchedText = dataHolder.dataset.matched;
         const content = contentHolder.innerHTML;
-        const path = contentHolder.dataset.path;
-        const propertyName = contentHolder.dataset.property;
-        const matchedText = contentHolder.dataset.matched;
 
         const dialog = ELC.getDialog('editproperty', {
-            header: { textContent: 'Edit property' },
+            header: { textContent: 'Edit Property' },
             content: {
-                innerHTML: `<div class="coral3-Textfield editor" contenteditable="true"></div>`
+                innerHTML: `<div class="editor" contenteditable="true"></div>`
             },
             footer: {
                 innerHTML: `
@@ -49,20 +49,23 @@
             }
         });
 
-        const editor = dialog.querySelector('.editor');
-        editor.innerText = content;
-        editor.dataset.matched = matchedText;
-        editor.dataset.path = path;
-        editor.dataset.property = propertyName;
-        editor.sourceElement = contentHolder;
-        setHighlights(editor, matchedText);
-
         if (!dialog.classList.contains('initialized')) {
             dialog.classList.add('initialized');
-            editor.addEventListener('input', onEditorInput);
-            $(dialog).on('click', 'button[variant="primary"]', onEditDialogSubmit).on('coral-overlay:close', onEditDialogClose);
+            $(dialog)
+                .on('click', 'button[variant="primary"]', onEditDialogSubmit)
+                .on('coral-overlay:close', onEditDialogClose)
+                .on('input', '.editor', onEditorInput);
         }
 
+        $(dialog).one('coral-overlay:open', function () {
+            const editor = dialog.querySelector('.editor');
+            editor.innerText = content;
+            editor.dataset.matched = matchedText;
+            editor.dataset.path = path;
+            editor.dataset.property = propertyName;
+            editor.sourceElement = contentHolder;
+            setHighlights(editor, matchedText);
+        });
         dialog.show();
     }
 

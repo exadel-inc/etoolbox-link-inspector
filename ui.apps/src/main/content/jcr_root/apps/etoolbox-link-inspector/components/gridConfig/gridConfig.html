@@ -8,9 +8,9 @@
 
     <td class="check" is="coral-table-cell" coral-table-rowselect>&nbsp;</td>
 
-    <td class="status centered" is="coral-table-cell">
+    <td class="status" is="coral-table-cell">
         <div data-sly-set.statuscode="${model.linkStatusCode == '200' ? 'ok' : 'error'}"
-             class="indicator" title="HTTP Status ${model.linkStatusCode}">
+             class="indicator centered" title="HTTP Status ${model.linkStatusCode}">
             <coral-icon icon="circle" class="elc-result-status--${statuscode}"></coral-icon>
         </div>
         <div class="secondary centered break-none">
