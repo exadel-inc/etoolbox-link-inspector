@@ -93,6 +93,8 @@
 .elc-dialog {
   vertical-align: middle;
   .coral3-Dialog-wrapper {
+    max-height: 80vh;
+    overflow-y: scroll;
     width: 40vw;
   }
 }
@@ -104,6 +106,10 @@
 .elc-processing-link-list {
   > li {
     font-weight: bold;
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
   }
 }
 
