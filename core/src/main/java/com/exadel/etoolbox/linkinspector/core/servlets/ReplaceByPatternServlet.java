@@ -210,9 +210,9 @@ public class ReplaceByPatternServlet extends SlingAllMethodsServlet {
         Pattern pattern = Pattern.compile(linkPattern);
         return gridResources.stream()
                 .filter(gridResource ->
-                        StringUtils.isNoneBlank(gridResource.getHref(), gridResource.getResourcePath(), gridResource.getPropertyName())
+                        StringUtils.isNoneBlank(gridResource.getValue(), gridResource.getResourcePath(), gridResource.getPropertyName())
                 )
-                .filter(gridResource -> pattern.matcher(gridResource.getHref()).find())
+                .filter(gridResource -> pattern.matcher(gridResource.getValue()).find())
                 .filter(gridResource ->
                         repositoryHelper.hasReadWritePermissions(session, gridResource.getResourcePath()))
                 .collect(Collectors.toList());
@@ -229,7 +229,7 @@ public class ReplaceByPatternServlet extends SlingAllMethodsServlet {
             if (isDeactivated) {
                 break;
             }
-            String currentLink = gridResource.getHref();
+            String currentLink = gridResource.getValue();
             String path = gridResource.getResourcePath();
             String propertyName = gridResource.getPropertyName();
             Optional<String> updated = Optional.of(isAdvancedMode ? currentLink.replaceAll(linkPattern, replacement) : replacement)
@@ -344,7 +344,7 @@ public class ReplaceByPatternServlet extends SlingAllMethodsServlet {
         return dataFeedService.dataFeedToGridResources()
                 .stream().filter(gridResource -> selectedItemsProperties.contains(String
                         .format("%s@%s", gridResource.getResourcePath(), gridResource.getPropertyName())))
-                .filter(gridResource -> selectedItemsLinks.contains(gridResource.getHref()))
+                .filter(gridResource -> selectedItemsLinks.contains(gridResource.getValue()))
                 .collect(Collectors.toList());
     }
 

@@ -1,26 +1,26 @@
 <tr data-sly-use.model="com.exadel.etoolbox.linkinspector.core.models.ui.GridViewItem"
     class="foundation-collection-item elc-item"
     is="coral-table-row"
-    data-path="${model.path}"
+    data-path="${model.resourcePath}"
     data-property-name="${model.propertyName}"
-    data-match="${model.matchedText}">
+    data-match="${model.match}">
 
     <td class="check" is="coral-table-cell" coral-table-rowselect>&nbsp;</td>
 
     <td class="status" is="coral-table-cell">
-        <div data-sly-set.statuscode="${model.linkStatusCode == '200' ? 'ok' : 'error'}"
-             class="indicator centered" title="HTTP Status ${model.linkStatusCode}">
+        <div data-sly-set.statuscode="${model.statusCode == '200' ? 'ok' : 'error'}"
+             class="indicator centered" title="HTTP Status ${model.statusCode}">
             <coral-icon icon="circle" class="elc-result-status--${statuscode}"></coral-icon>
         </div>
         <div class="secondary centered break-none">
-            ${model.linkStatusMessage}
+            ${model.statusMessage}
         </div>
     </td>
 
     <td class="result" is="coral-table-cell">
         <div class="content">
-            <div class="primary source break-word ellipsis">${model.result}</div>
-            <div class="secondary result-type">${model.linkType}</div>
+            <div class="primary source break-word ellipsis">${model.value}</div>
+            <div class="secondary result-type">${model.type}</div>
             <button is="coral-button" class="elc-editproperty-button" icon="edit"></button>
         </div>
     </td>
@@ -49,6 +49,6 @@
     </td>
 
     <td class="property break-all" is="coral-table-cell">
-        ${model.path}@<strong>${model.propertyName}</strong>
+        ${model.resourcePath}@<strong>${model.propertyName}</strong>
     </td>
 </tr>
