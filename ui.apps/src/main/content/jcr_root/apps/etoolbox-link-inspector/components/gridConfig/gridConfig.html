@@ -5,7 +5,9 @@
     data-property-name="${model.propertyName}"
     data-match="${model.match}">
 
-    <td class="check" is="coral-table-cell" coral-table-rowselect>&nbsp;</td>
+    <td class="check" is="coral-table-cell">
+        <coral-checkbox coral-table-rowselect/>
+    </td>
 
     <td class="status" is="coral-table-cell">
         <div data-sly-set.statuscode="${model.statusCode == '200' ? 'ok' : 'error'}"
