@@ -19,7 +19,8 @@ import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
 import com.day.cq.wcm.api.components.Component;
 import com.day.cq.wcm.api.components.ComponentManager;
-import com.exadel.etoolbox.linkinspector.core.services.data.models.GridResource;
+import lombok.AccessLevel;
+import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
@@ -44,6 +45,7 @@ import java.util.stream.Collectors;
         adaptables = {SlingHttpServletRequest.class, Resource.class},
         defaultInjectionStrategy = DefaultInjectionStrategy.OPTIONAL
 )
+@Getter
 public class GridViewItem {
     private static final Logger LOG = LoggerFactory.getLogger(GridViewItem.class);
 
@@ -61,27 +63,28 @@ public class GridViewItem {
     public static final String HTML_EXTENSION = ".html";
 
     @SlingObject
+    @Getter(value = AccessLevel.NONE)
     private ResourceResolver resourceResolver;
 
-    @ValueMapValue(name = GridResource.PN_LINK)
-    private String result;
+    @ValueMapValue
+    private String value;
 
-    @ValueMapValue(name = "match")
-    private String matchedText;
+    @ValueMapValue
+    private String match;
 
-    @ValueMapValue(name = GridResource.PN_LINK_TYPE)
-    private String linkType;
+    @ValueMapValue
+    private String type;
 
-    @ValueMapValue(name = GridResource.PN_LINK_STATUS_CODE)
-    private String linkStatusCode;
+    @ValueMapValue
+    private String statusCode;
 
-    @ValueMapValue(name = GridResource.PN_LINK_STATUS_MESSAGE)
-    private String linkStatusMessage;
+    @ValueMapValue
+    private String statusMessage;
 
-    @ValueMapValue(name = GridResource.PN_RESOURCE_PATH)
-    private String path;
+    @ValueMapValue
+    private String resourcePath;
 
-    @ValueMapValue(name = GridResource.PN_PROPERTY_NAME)
+    @ValueMapValue
     private String propertyName;
 
     private String pagePath;
@@ -93,9 +96,11 @@ public class GridViewItem {
 
     @PostConstruct
     private void init() {
-        Resource resourceToShow = resourceResolver.getResource(path);
+        Resource resourceToShow = StringUtils.isNotBlank(resourcePath)
+                ? resourceResolver.getResource(resourcePath)
+                : null;
         if (resourceToShow == null) {
-            LOG.warn("Resource is null, path: {}", path);
+            LOG.warn("Resource is null, path: {}", resourcePath);
             return;
         }
 
@@ -107,67 +112,15 @@ public class GridViewItem {
         Optional<Page> pageOptional = Optional.ofNullable(resourceResolver.adaptTo(PageManager.class))
                 .map(pageManager -> pageManager.getContainingPage(resourceToShow));
         pagePath = pageOptional.map(page -> EDITOR_LINK + page.getPath() + HTML_EXTENSION)
-                .orElse(path);
+                .orElse(resourcePath);
         pageTitle = pageOptional.map(Page::getTitle).orElse(StringUtils.EMPTY);
         isValidPage = pageOptional.isPresent();
 
-        componentPath = encodePath(path);
+        componentPath = encodePath(resourcePath);
     }
 
     public String getTitle() {
-        return getPath();
-    }
-
-    public String getPath() {
-        return path;
-    }
-
-    public String getResult() {
-        return result;
-    }
-
-    public String getMatchedText() {
-        return matchedText;
-    }
-
-    public String getPropertyName() {
-        return propertyName;
-    }
-
-    public String getComponentName() {
-        return componentName;
-    }
-
-    public String getPagePath() {
-        return pagePath;
-    }
-
-    public String getComponentPath() {
-        return componentPath;
-    }
-
-    public String getLinkType() {
-        return linkType;
-    }
-
-    public String getLinkStatusCode() {
-        return linkStatusCode;
-    }
-
-    public String getLinkStatusMessage() {
-        return linkStatusMessage;
-    }
-
-    public String getComponentType() {
-        return componentType;
-    }
-
-    public String getPageTitle() {
-        return pageTitle;
-    }
-
-    public boolean isValidPage() {
-        return isValidPage;
+        return getResourcePath();
     }
 
     public String getCrxDePath() {

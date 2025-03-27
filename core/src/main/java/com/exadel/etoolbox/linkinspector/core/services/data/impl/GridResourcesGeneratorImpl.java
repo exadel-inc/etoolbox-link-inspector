@@ -101,7 +101,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
 
         List<GridResource> sortedGridResources = validateLinksInParallel(linkToGridResourcesMap, resourceResolver)
                 .stream()
-                .sorted(Comparator.comparing(GridResource::getHref))
+                .sorted(Comparator.comparing(GridResource::getValue))
                 .collect(Collectors.toList());
 
         stopWatch.stop();
@@ -203,7 +203,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
         executorService.submit(() -> {
                     linkHelper.validateLink(result, resourceResolver);
                     if (result.isReported() && isAllowedErrorCode(result.getStatus().getCode())) {
-                        currentLinkResources.forEach(gridResource -> gridResource.getLink().setStatus(result.getStatus()));
+                        currentLinkResources.forEach(gridResource -> gridResource.setStatus(result.getStatus()));
                         allReportedLinkResources.addAll(currentLinkResources);
                         reportedLinksCounter.checkIn(result);
                     }

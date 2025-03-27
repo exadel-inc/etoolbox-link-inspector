@@ -54,7 +54,8 @@
             $(dialog)
                 .on('click', 'button[variant="primary"]', onEditDialogSubmit)
                 .on('coral-overlay:close', onEditDialogClose)
-                .on('input', '.editor', onEditorInput);
+                .on('input', '.editor', onEditorInput)
+                .on('keydown', '.editor', onEditorKeyDown);
         }
 
         $(dialog).one('coral-overlay:open', function () {
@@ -104,6 +105,14 @@
     function onEditorInput(e) {
         const editor = e.target;
         setHighlights(editor, editor.dataset.match);
+    }
+
+    function onEditorKeyDown(e) {
+        const editor = e.target;
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            editor.closest('coral-dialog').querySelector('button[variant="primary"]').click();
+        }
     }
 
     /* ---------------

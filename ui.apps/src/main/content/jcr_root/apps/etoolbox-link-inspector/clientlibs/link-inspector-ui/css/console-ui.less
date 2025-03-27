@@ -22,13 +22,14 @@
     vertical-align: top;
 
     &.check {
+      padding: 4px 16px;
+      text-align: center;
+      vertical-align: middle;
       width: 0;
-      coral-checkbox {
-        margin-left: 4px;
-      }
     }
     &.status {
       max-width: 80px;
+      width: 0;
     }
     &.page {
       width: 15%;
@@ -192,18 +193,3 @@
     color: #cccccc;
     font-style: italic;
 }
-
-// AEM 6.5 UI tweaks
-coral-table-row-selectcheckbox {
-  background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0MCA0MCI+CiAgPGNpcmNsZSBzdHJva2U9IiNjY2MiIHN0cm9rZS13aWR0aD0iNCIgZmlsbD0ibm9uZSIgY3g9IjIwIiBjeT0iMjAiIHI9IjE4Ii8+Cjwvc3ZnPg==");
-  background-position: 50% 50%;
-  background-repeat: no-repeat;
-  background-size: 1.125rem 1.125rem;
-}
-.coral-Table-wrapper[selectable].coral-Table-wrapper--list .coral-Table-row.is-selected:focus [coral-table-rowselect]:after,
-.coral-Table-wrapper[selectable].coral-Table-wrapper--list .coral-Table-row.is-selected.is-focused [coral-table-rowselect]:after {
-  border: unset;
-  box-shadow: unset;
-  -webkit-box-shadow: unset;
-}
-

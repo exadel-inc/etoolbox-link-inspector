@@ -15,7 +15,6 @@
 package com.exadel.etoolbox.linkinspector.core.services.data.impl;
 
 import com.day.cq.replication.ReplicationStatus;
-import com.exadel.etoolbox.linkinspector.api.Result;
 import com.exadel.etoolbox.linkinspector.core.services.data.ConfigService;
 import com.exadel.etoolbox.linkinspector.core.services.data.DataFeedService;
 import com.exadel.etoolbox.linkinspector.core.services.data.models.GridResource;
@@ -179,7 +178,7 @@ class GridResourcesGeneratorImplTest {
 
         List<GridResource> expectedGridResources = buildExpectedGridResources().stream()
                 .filter(gr -> {
-                    Matcher matcher = pattern.matcher(gr.getLink().getValue());
+                    Matcher matcher = pattern.matcher(gr.getValue());
                     return !matcher.matches();
                 })
                 .collect(Collectors.toList());
@@ -193,8 +192,7 @@ class GridResourcesGeneratorImplTest {
 
         List<GridResource> gridResources = fixture.generateGridResources(GRID_RESOURCE_TYPE, context.resourceResolver());
         boolean notContainsExternal = gridResources.stream()
-                .map(GridResource::getLink)
-                .map(Result::getType)
+                .map(GridResource::getType)
                 .noneMatch("external"::equals);
 
         assertTrue(notContainsExternal);
@@ -217,7 +215,7 @@ class GridResourcesGeneratorImplTest {
 
         List<GridResource> gridResources = fixture.generateGridResources(GRID_RESOURCE_TYPE, context.resourceResolver());
         boolean notContainsExcluded = gridResources.stream()
-                .map(GridResource::getHref)
+                .map(GridResource::getValue)
                 .noneMatch(href ->
                         href.equals(TEST_EXCLUDED_LINK) || href.equals(TEST_EXCLUDED_CHILD_LINK)
                 );
@@ -231,7 +229,7 @@ class GridResourcesGeneratorImplTest {
 
         List<GridResource> gridResources = fixture.generateGridResources(GRID_RESOURCE_TYPE, context.resourceResolver());
         boolean notContainsExcluded = gridResources.stream()
-                .map(GridResource::getHref)
+                .map(GridResource::getValue)
                 .noneMatch(TEST_EXCLUDED_BY_LAST_MODIFIED::equals);
 
         assertTrue(notContainsExcluded);
@@ -245,10 +243,10 @@ class GridResourcesGeneratorImplTest {
         List<GridResource> gridResources = fixture.generateGridResources(GRID_RESOURCE_TYPE, context.resourceResolver());
 
         boolean containsExcluded = gridResources.stream()
-                .map(GridResource::getHref)
+                .map(GridResource::getValue)
                 .anyMatch(TEST_EXCLUDED_LINK::equals);
         boolean containsExcludedChild = gridResources.stream()
-                .map(GridResource::getHref)
+                .map(GridResource::getValue)
                 .anyMatch(TEST_EXCLUDED_CHILD_LINK::equals);
 
         assertTrue(containsExcluded && containsExcludedChild);
@@ -270,11 +268,11 @@ class GridResourcesGeneratorImplTest {
         List<GridResource> gridResources = fixture.generateGridResources(GRID_RESOURCE_TYPE, spyResourceResolver);
 
         boolean notContainsInactive = gridResources.stream()
-                .map(GridResource::getHref)
+                .map(GridResource::getValue)
                 .noneMatch(href -> href.contains(LINK_PART_INACTIVE));
 
         List<String> resultLinks = gridResources.stream()
-                .map(GridResource::getHref)
+                .map(GridResource::getValue)
                 .collect(Collectors.toList());
 
         assertTrue(notContainsInactive);
