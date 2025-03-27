@@ -2,16 +2,15 @@ package com.exadel.etoolbox.linkinspector.core.models.ui;
 
 import com.exadel.etoolbox.linkinspector.core.services.cache.GridResourcesCache;
 import com.exadel.etoolbox.linkinspector.core.services.data.models.GridResource;
+import lombok.Getter;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.request.RequestParameter;
-import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.models.annotations.DefaultInjectionStrategy;
 import org.apache.sling.models.annotations.Model;
 import org.apache.sling.models.annotations.injectorspecific.OSGiService;
 import org.apache.sling.models.annotations.injectorspecific.Self;
-import org.apache.sling.models.annotations.injectorspecific.SlingObject;
 
 import javax.annotation.PostConstruct;
 import java.util.*;
@@ -35,18 +34,18 @@ public class PaginationModel {
     @OSGiService
     private GridResourcesCache cache;
 
-    @SlingObject
-    private ResourceResolver resourceResolver;
-
     @Self
     private SlingHttpServletRequest request;
 
+    @Getter
     private int page;
 
+    @Getter
     private int size;
 
     @PostConstruct
     private void init() {
+        assert request != null;
         page = Optional
                 .ofNullable(request.getRequestParameter(REQUEST_PARAMETER_PAGE))
                 .map(RequestParameter::getString)
@@ -57,11 +56,13 @@ public class PaginationModel {
         String type = requestParameterToString(request.getRequestParameter(REQUEST_PARAMETER_TYPE));
         String substring = requestParameterToString(request.getRequestParameter(REQUEST_PARAMETER_SUBSTRING));
 
-        List<GridResource> resources = cache
+        List<GridResource> resources = cache == null
+                ? Collections.emptyList()
+                : cache
                 .getGridResourcesList()
                 .stream()
-                .filter(gridResource -> StringUtils.isBlank(type) || StringUtils.equals(gridResource.getLink().getType(), type))
-                .filter(gridResource -> StringUtils.isBlank(substring) || gridResource.getLink().getValue().contains(substring))
+                .filter(gridResource -> StringUtils.isBlank(type) || StringUtils.equals(gridResource.getType(), type))
+                .filter(gridResource -> StringUtils.isBlank(substring) || StringUtils.contains(gridResource.getValue(), substring))
                 .collect(Collectors.toList());
 
         size = resources.size() / DEFAULT_PAGE_SIZE + (resources.size() % DEFAULT_PAGE_SIZE == 0 ? 0 : 1);
@@ -72,14 +73,6 @@ public class PaginationModel {
                 .ofNullable(parameter)
                 .map(RequestParameter::getString)
                 .orElse(StringUtils.EMPTY);
-    }
-
-    public int getPage() {
-        return page;
-    }
-
-    public int getSize() {
-        return size;
     }
 
     public int getPreviousPage() {

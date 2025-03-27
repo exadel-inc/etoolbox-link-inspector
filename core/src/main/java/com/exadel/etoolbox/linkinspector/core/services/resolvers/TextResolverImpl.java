@@ -19,6 +19,7 @@ import com.exadel.etoolbox.linkinspector.api.Resolver;
 import com.exadel.etoolbox.linkinspector.api.Status;
 import com.exadel.etoolbox.linkinspector.core.services.resolvers.configs.TextResolverConfig;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpStatus;
@@ -92,24 +93,15 @@ public class TextResolverImpl implements Resolver {
     }
 
     @RequiredArgsConstructor
+    @Getter
     @EqualsAndHashCode
     private static class TextResult implements Result {
-        private final String content;
-        private final String matchedText;
+        private final String value;
+        private final String match;
 
         @Override
         public String getType() {
             return TYPE_TEXT;
-        }
-
-        @Override
-        public String getValue() {
-            return content;
-        }
-
-        @Override
-        public String getMatch() {
-            return matchedText;
         }
 
         @Override

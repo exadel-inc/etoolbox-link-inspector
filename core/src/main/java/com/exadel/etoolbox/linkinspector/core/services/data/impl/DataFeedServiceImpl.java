@@ -167,7 +167,7 @@ public class DataFeedServiceImpl implements DataFeedService {
         try (ResourceResolver serviceResourceResolver = repositoryHelper.getServiceResourceResolver()) {
             for (GridResource gridResource : gridResources) {
                 String propertyAddress = CsvUtil.buildLocation(gridResource.getResourcePath(), gridResource.getPropertyName());
-                if (!isUpdated(updatedItems, propertyAddress, gridResource.getHref())) {
+                if (!isUpdated(updatedItems, propertyAddress, gridResource.getValue())) {
                     continue;
                 }
                 String updatedLink = getUpdatedLink(updatedItems, propertyAddress);
@@ -176,7 +176,7 @@ public class DataFeedServiceImpl implements DataFeedService {
                         .forEach(link -> {
                             linkHelper.validateLink(link, serviceResourceResolver);
                             link.setStatus("Modified");
-                            gridResource.setLink(link);
+                            gridResource.setResult(link);
                         });
             }
             gridResourcesCache.setGridResourcesList(gridResources);
@@ -256,14 +256,7 @@ public class DataFeedServiceImpl implements DataFeedService {
     }
 
     private Resource toSlingResource(GridResource gridResource, ResourceResolver resourceResolver) {
-        ValueMap valueMap = new ValueMapDecorator(new HashMap<>());
-        valueMap.put(GridResource.PN_LINK, gridResource.getHref());
-        valueMap.put(GridResource.PN_LINK_TYPE, gridResource.getType());
-        valueMap.put(GridResource.PN_LINK_STATUS_CODE, gridResource.getStatusCode());
-        valueMap.put(GridResource.PN_LINK_STATUS_MESSAGE, gridResource.getStatusMessage());
-        valueMap.put(GridResource.PN_RESOURCE_PATH, gridResource.getResourcePath());
-        valueMap.put(GridResource.PN_PROPERTY_NAME, gridResource.getPropertyName());
-        valueMap.put("match", gridResource.getMatchedText());
+        ValueMap valueMap = new ValueMapDecorator(gridResource.toMap());
         return new ValueMapResource(resourceResolver, gridResource.getResourcePath(), gridResource.getResourceType(), valueMap);
     }
 
@@ -285,18 +278,18 @@ public class DataFeedServiceImpl implements DataFeedService {
     private void printViewItemToCsv(CSVPrinter csvPrinter, GridViewItem viewItem) {
         try {
             csvPrinter.printRecord(
-                    CsvUtil.wrapIfContainsSemicolon(viewItem.getResult()),
-                    viewItem.getLinkType(),
-                    viewItem.getLinkStatusCode(),
-                    CsvUtil.wrapIfContainsSemicolon(viewItem.getLinkStatusMessage()),
+                    CsvUtil.wrapIfContainsSemicolon(viewItem.getValue()),
+                    viewItem.getType(),
+                    viewItem.getStatusCode(),
+                    CsvUtil.wrapIfContainsSemicolon(viewItem.getStatusMessage()),
                     CsvUtil.wrapIfContainsSemicolon(viewItem.getPageTitle()),
                     viewItem.getPagePath(),
                     CsvUtil.wrapIfContainsSemicolon(viewItem.getComponentName()),
                     viewItem.getComponentType(),
-                    CsvUtil.buildLocation(viewItem.getPath(), viewItem.getPropertyName())
+                    CsvUtil.buildLocation(viewItem.getResourcePath(), viewItem.getPropertyName())
             );
         } catch (IOException e) {
-            LOG.error(String.format("Failed to build CSV for the grid resource %s", viewItem.getResult()), e);
+            LOG.error(String.format("Failed to build CSV for the grid resource %s", viewItem.getValue()), e);
         }
     }
 
