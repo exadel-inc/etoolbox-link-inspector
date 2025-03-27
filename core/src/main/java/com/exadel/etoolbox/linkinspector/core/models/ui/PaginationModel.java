@@ -61,7 +61,7 @@ public class PaginationModel {
                 .getGridResourcesList()
                 .stream()
                 .filter(gridResource -> StringUtils.isBlank(type) || StringUtils.equals(gridResource.getLink().getType(), type))
-                .filter(gridResource -> StringUtils.isBlank(substring) || gridResource.getLink().getHref().contains(substring))
+                .filter(gridResource -> StringUtils.isBlank(substring) || gridResource.getLink().getValue().contains(substring))
                 .collect(Collectors.toList());
 
         size = resources.size() / DEFAULT_PAGE_SIZE + (resources.size() % DEFAULT_PAGE_SIZE == 0 ? 0 : 1);

@@ -16,32 +16,34 @@ package com.exadel.etoolbox.linkinspector.api;
 
 import org.eclipse.jetty.http.HttpStatus;
 
-public interface Link {
+public interface Result {
 
     String getType();
 
-    String getHref();
+    String getValue();
 
-    LinkStatus getStatus();
+    String getMatch();
+
+    Status getStatus();
 
     default boolean isReported() {
         return !getStatus().isValid();
     }
 
-    void setStatus(LinkStatus status);
+    void setStatus(Status status);
 
     default void setStatus(int code) {
-        setStatus(new LinkStatus(code, HttpStatus.getMessage(code)));
+        setStatus(new Status(code, HttpStatus.getMessage(code)));
     }
 
     default void setStatus(String message) {
         if (getStatus() == null) {
-            setStatus(new LinkStatus(0, message));
+            setStatus(new Status(0, message));
         }
-        setStatus(new LinkStatus(getStatus().getCode(), message));
+        setStatus(new Status(getStatus().getCode(), message));
     }
 
     default void setStatus(int code, String message) {
-        setStatus(new LinkStatus(code, message));
+        setStatus(new Status(code, message));
     }
 }

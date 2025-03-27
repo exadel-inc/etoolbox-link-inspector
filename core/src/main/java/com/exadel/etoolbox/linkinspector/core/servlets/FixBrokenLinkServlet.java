@@ -15,7 +15,7 @@
 package com.exadel.etoolbox.linkinspector.core.servlets;
 
 import com.day.crx.JcrConstants;
-import com.exadel.etoolbox.linkinspector.api.LinkStatus;
+import com.exadel.etoolbox.linkinspector.api.Status;
 import com.exadel.etoolbox.linkinspector.core.services.data.models.UpdatedItem;
 import com.exadel.etoolbox.linkinspector.core.services.data.DataFeedService;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.LinkHelper;
@@ -38,9 +38,7 @@ import org.slf4j.LoggerFactory;
 import javax.json.Json;
 import javax.servlet.Servlet;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 
 /**
  * The servlet for replacement a broken link with the new one within the specified resource property. The resource path,
@@ -92,7 +90,7 @@ public class FixBrokenLinkServlet extends SlingAllMethodsServlet {
                 return;
             }
             if (!isSkipValidation) {
-                LinkStatus linkStatus = validateLink(newLink);
+                Status linkStatus = validateLink(newLink);
                 if (!linkStatus.isValid()) {
                     response.setStatus(HttpStatus.SC_BAD_REQUEST);
                     linkStatusToResponse(linkStatus, response);
@@ -119,13 +117,13 @@ public class FixBrokenLinkServlet extends SlingAllMethodsServlet {
         }
     }
 
-    private LinkStatus validateLink(String link) {
+    private Status validateLink(String link) {
         try (ResourceResolver resourceResolver = repositoryHelper.getServiceResourceResolver()) {
             return linkHelper.validateLink(link, resourceResolver);
         }
     }
 
-    private void linkStatusToResponse(LinkStatus linkStatus, SlingHttpServletResponse response) {
+    private void linkStatusToResponse(Status linkStatus, SlingHttpServletResponse response) {
         String jsonResponse = Json.createObjectBuilder()
                 .add(STATUS_CODE_RESP_PARAM, linkStatus.getCode())
                 .add(STATUS_MSG_RESP_PARAM, linkStatus.getMessage())

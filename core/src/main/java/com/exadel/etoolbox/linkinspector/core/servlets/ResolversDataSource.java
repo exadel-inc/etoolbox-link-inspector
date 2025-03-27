@@ -4,7 +4,7 @@ import com.adobe.granite.ui.components.ds.DataSource;
 import com.adobe.granite.ui.components.ds.SimpleDataSource;
 import com.adobe.granite.ui.components.ds.ValueMapResource;
 import com.day.cq.commons.jcr.JcrConstants;
-import com.exadel.etoolbox.linkinspector.api.LinkResolver;
+import com.exadel.etoolbox.linkinspector.api.Resolver;
 import com.exadel.etoolbox.linkinspector.core.services.util.GraniteUtil;
 import com.exadel.etoolbox.linkinspector.core.services.util.OcdUtil;
 import lombok.NonNull;
@@ -41,7 +41,7 @@ public class ResolversDataSource extends SlingSafeMethodsServlet {
             policy = ReferencePolicy.DYNAMIC,
             policyOption = ReferencePolicyOption.GREEDY
     )
-    private transient volatile List<LinkResolver> linkResolvers;
+    private transient volatile List<Resolver> linkResolvers;
 
     @Override
     protected void doGet(
@@ -52,7 +52,7 @@ public class ResolversDataSource extends SlingSafeMethodsServlet {
 
         List<Resource> resolverFields = new ArrayList<>();
         boolean isItemDataSource = StringUtils.endsWith(request.getResource().getResourceType(), "/resolvers");
-        for (LinkResolver linkResolver : linkResolvers) {
+        for (Resolver linkResolver : linkResolvers) {
             Resource item = isItemDataSource
                     ? createListItem(request, linkResolver, type)
                     : createCheckBox(request, linkResolver);
@@ -67,7 +67,7 @@ public class ResolversDataSource extends SlingSafeMethodsServlet {
         request.setAttribute(DataSource.class.getName(), dataSource);
     }
 
-    private Resource createCheckBox(SlingHttpServletRequest request, LinkResolver linkResolver) {
+    private Resource createCheckBox(SlingHttpServletRequest request, Resolver linkResolver) {
         Map<String, Object> fieldProperties = new HashMap<>();
         fieldProperties.put(JcrResourceConstants.SLING_RESOURCE_TYPE_PROPERTY, "granite/ui/components/coral/foundation/form/checkbox");
         String serviceName = linkResolver.getClass().getName();
@@ -84,7 +84,7 @@ public class ResolversDataSource extends SlingSafeMethodsServlet {
                 Collections.emptyList());
     }
 
-    private Resource createListItem(SlingHttpServletRequest request, LinkResolver linkResolver, String type) {
+    private Resource createListItem(SlingHttpServletRequest request, Resolver linkResolver, String type) {
         if (!linkResolver.isEnabled()) {
             return null;
         }

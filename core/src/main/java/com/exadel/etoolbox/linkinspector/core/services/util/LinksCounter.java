@@ -14,8 +14,8 @@
 
 package com.exadel.etoolbox.linkinspector.core.services.util;
 
-import com.exadel.etoolbox.linkinspector.api.Link;
-import com.exadel.etoolbox.linkinspector.core.models.LinkImpl;
+import com.exadel.etoolbox.linkinspector.api.Result;
+import com.exadel.etoolbox.linkinspector.core.models.LinkResult;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
@@ -40,8 +40,8 @@ public class LinksCounter {
                 .collect(HashMap::new, (m, v) -> m.put(v.getKey(), v.getValue().get()), HashMap::putAll);
     }
 
-    public void checkIn(Link link) {
-        String type = StringUtils.defaultIfBlank(link.getType(), LinkImpl.DEFAULT_TYPE);
+    public void checkIn(Result result) {
+        String type = StringUtils.defaultIfBlank(result.getType(), LinkResult.DEFAULT_TYPE);
         AtomicInteger count = statistics.get(type);
         if (count == null) {
             count = new AtomicInteger(0);

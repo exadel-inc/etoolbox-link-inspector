@@ -87,7 +87,7 @@ public class GridViewItemTest {
     @Test
     void testLink() {
         setupFullParamSet();
-        assertEquals(TEST_BROKEN_LINK_HREF, viewItem.getLink());
+        assertEquals(TEST_BROKEN_LINK_HREF, viewItem.getResult());
     }
 
     @Test
@@ -181,20 +181,16 @@ public class GridViewItemTest {
     }
 
     @Test
-    void testThumbnailPath() {
-        setupFullParamSet();
-        assertEquals(GridViewItem.THUMBNAIL_PATH, viewItem.getThumbnail());
-    }
-
-    @Test
     void shouldResourceExist() {
         setupFullParamSet();
+        assertNotNull(viewItem.getPath());
         assertNotNull(context.resourceResolver().getResource(viewItem.getPath()));
     }
 
     @Test
     void shouldResourceNotExist() {
         setupGridResourceAndViewItem(TEST_NON_EXISTING_RESOURCE_PATH);
+        assertNotNull(viewItem.getPath());
         assertNull(context.resourceResolver().getResource(viewItem.getPath()));
     }
 

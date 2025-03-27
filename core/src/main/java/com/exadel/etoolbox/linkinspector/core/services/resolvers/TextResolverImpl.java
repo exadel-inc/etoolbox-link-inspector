@@ -14,9 +14,9 @@
 
 package com.exadel.etoolbox.linkinspector.core.services.resolvers;
 
-import com.exadel.etoolbox.linkinspector.api.Link;
-import com.exadel.etoolbox.linkinspector.api.LinkResolver;
-import com.exadel.etoolbox.linkinspector.api.LinkStatus;
+import com.exadel.etoolbox.linkinspector.api.Result;
+import com.exadel.etoolbox.linkinspector.api.Resolver;
+import com.exadel.etoolbox.linkinspector.api.Status;
 import com.exadel.etoolbox.linkinspector.core.services.resolvers.configs.TextResolverConfig;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -39,13 +39,13 @@ import java.util.regex.Pattern;
 /**
  * Validates external links via sending HEAD requests concurrently using {@link PoolingHttpClientConnectionManager}
  */
-@Component(service = LinkResolver.class, immediate = true)
+@Component(service = Resolver.class, immediate = true)
 @Designate(ocd = TextResolverConfig.class)
 @Slf4j
-public class TextResolverImpl implements LinkResolver {
+public class TextResolverImpl implements Resolver {
 
     private static final String TYPE_TEXT = "Text";
-    private static final LinkStatus STATUS_FOUND = new LinkStatus(HttpStatus.SC_OK, "Found");
+    private static final Status STATUS_FOUND = new Status(HttpStatus.SC_OK, "Found");
 
     private boolean enabled;
     private Pattern search;
@@ -73,28 +73,29 @@ public class TextResolverImpl implements LinkResolver {
     }
 
     @Override
-    public Collection<Link> getLinks(String source) {
+    public Collection<Result> getResults(String source) {
         if (!enabled ) {
             return Collections.emptyList();
         }
 
         Matcher matcher = search.matcher(source);
-        Set<Link> result = new LinkedHashSet<>();
+        Set<Result> result = new LinkedHashSet<>();
         while (matcher.find()) {
-            result.add(new Match(matcher.group()));
+            result.add(new TextResult(source, matcher.group()));
         }
         return result;
     }
 
     @Override
-    public void validate(Link link, ResourceResolver resourceResolver) {
+    public void validate(Result result, ResourceResolver resourceResolver) {
         // No operation
     }
 
     @RequiredArgsConstructor
     @EqualsAndHashCode
-    private static class Match implements Link {
+    private static class TextResult implements Result {
         private final String content;
+        private final String matchedText;
 
         @Override
         public String getType() {
@@ -102,12 +103,17 @@ public class TextResolverImpl implements LinkResolver {
         }
 
         @Override
-        public String getHref() {
+        public String getValue() {
             return content;
         }
 
         @Override
-        public LinkStatus getStatus() {
+        public String getMatch() {
+            return matchedText;
+        }
+
+        @Override
+        public Status getStatus() {
             return STATUS_FOUND;
         }
 
@@ -117,7 +123,7 @@ public class TextResolverImpl implements LinkResolver {
         }
 
         @Override
-        public void setStatus(LinkStatus status) {
+        public void setStatus(Status status) {
             // No operation
         }
     }

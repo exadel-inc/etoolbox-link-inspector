@@ -21,18 +21,30 @@
     padding: 0.5rem 0.75rem;
     vertical-align: top;
 
-    &.centered {
-        text-align: center;
+    &.check {
+      width: 0;
+      coral-checkbox {
+        margin-left: 4px;
+      }
     }
     &.status {
       max-width: 80px;
     }
+    &.page {
+      width: 15%;
+    }
+    &.component {
+      width: 15%;
+    }
+    &.property {
+      padding-right: 16px;
+      width: 25%;
+    }
   }
-  .break-all {
-    word-break: break-all;
-  }
-  .break-word {
-    word-break: break-word;
+
+  .content {
+    height: 100%;
+    position: relative;
   }
   .indicator {
     margin-top: 0.2rem;
@@ -45,6 +57,24 @@
     display: block;
     font-size: 0.8rem;
     line-height: 0.8rem;
+  }
+  .break-all {
+    word-break: break-all;
+  }
+  .break-none {
+    white-space: nowrap;
+  }
+  .break-word {
+    word-break: break-word;
+  }
+  .centered {
+    text-align: center;
+  }
+  .ellipsis {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 10;
   }
 }
 
@@ -63,7 +93,9 @@
 .elc-dialog {
   vertical-align: middle;
   .coral3-Dialog-wrapper {
-    width: 35%;
+    max-height: 80vh;
+    overflow-y: scroll;
+    width: 40vw;
   }
 }
 
@@ -74,15 +106,19 @@
 .elc-processing-link-list {
   > li {
     font-weight: bold;
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
   }
 }
 
-.elc-link-status--ok {
-  color: #00FF00;
+.elc-result-status--ok {
+  color: #0FCB8C;
 }
 
-.elc-link-status--error {
-  color: #FF0000;
+.elc-result-status--error {
+  color: #f85647;
 }
 
 .elc-run-button {
@@ -91,7 +127,7 @@
     padding: 0 !important;
     font-family: arial, sans-serif;
     cursor: pointer;
-    color: blue;
+    color: #4178cd;
     margin: 0 0.5rem;
 }
 
@@ -131,7 +167,7 @@
   }
 }
 
-.options-page{
+.options-page {
     min-width: 40rem ;
     width: 50% ;
 }
@@ -152,4 +188,22 @@
     margin-bottom: 10px;
 }
 
+.result-type {
+    color: #cccccc;
+    font-style: italic;
+}
+
+// AEM 6.5 UI tweaks
+coral-table-row-selectcheckbox {
+  background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0MCA0MCI+CiAgPGNpcmNsZSBzdHJva2U9IiNjY2MiIHN0cm9rZS13aWR0aD0iNCIgZmlsbD0ibm9uZSIgY3g9IjIwIiBjeT0iMjAiIHI9IjE4Ii8+Cjwvc3ZnPg==");
+  background-position: 50% 50%;
+  background-repeat: no-repeat;
+  background-size: 1.125rem 1.125rem;
+}
+.coral-Table-wrapper[selectable].coral-Table-wrapper--list .coral-Table-row.is-selected:focus [coral-table-rowselect]:after,
+.coral-Table-wrapper[selectable].coral-Table-wrapper--list .coral-Table-row.is-selected.is-focused [coral-table-rowselect]:after {
+  border: unset;
+  box-shadow: unset;
+  -webkit-box-shadow: unset;
+}
 

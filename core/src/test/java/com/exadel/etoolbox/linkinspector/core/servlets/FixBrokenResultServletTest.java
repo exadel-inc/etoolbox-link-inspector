@@ -14,7 +14,7 @@
 
 package com.exadel.etoolbox.linkinspector.core.servlets;
 
-import com.exadel.etoolbox.linkinspector.api.LinkStatus;
+import com.exadel.etoolbox.linkinspector.api.Status;
 import com.exadel.etoolbox.linkinspector.core.services.data.DataFeedService;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.LinkHelper;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.RepositoryHelper;
@@ -40,7 +40,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(AemContextExtension.class)
-class FixBrokenLinkServletTest {
+class FixBrokenResultServletTest {
     private static final String REPOSITORY_HELPER_FIELD = "repositoryHelper";
     private static final String LINK_HELPER_FIELD = "linkHelper";
     private static final String DATA_FEED_SERVICE_FIELD = "dataFeedService";
@@ -111,8 +111,8 @@ class FixBrokenLinkServletTest {
 
     @Test
     void testValidateNewLink_notValid() {
-        LinkStatus expectedLinkStatus =
-                new LinkStatus(HttpStatus.SC_NOT_FOUND, HttpStatus.getStatusText(HttpStatus.SC_NOT_FOUND));
+        Status expectedLinkStatus =
+                new Status(HttpStatus.SC_NOT_FOUND, HttpStatus.getStatusText(HttpStatus.SC_NOT_FOUND));
         when(linkHelper.validateLink(eq(TEST_NEW_LINK), eq(resourceResolver))).thenReturn(expectedLinkStatus);
         when(repositoryHelper.getServiceResourceResolver()).thenReturn(resourceResolver);
 

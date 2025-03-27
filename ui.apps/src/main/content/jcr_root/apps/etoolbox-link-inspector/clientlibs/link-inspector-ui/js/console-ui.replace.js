@@ -20,7 +20,7 @@
     'use strict';
 
     var CANCEL_LABEL = Granite.I18n.get('Cancel');
-    var REPLACE_AND_MODIFY_LABEL = Granite.I18n.get('Replace and Modify by Pattern');
+    var REPLACE_AND_MODIFY_LABEL = Granite.I18n.get('Replace and modify by pattern');
     var REPLACE_LABEL = Granite.I18n.get('Replace');
     var MODIFY_LABEL = Granite.I18n.get('Modify');
     var PATTERN_LABEL = Granite.I18n.get('Please enter the regex pattern to be replaced');
@@ -28,11 +28,11 @@
     var DRY_RUN_CHECKBOX_LABEL = Granite.I18n.get('Dry run');
     var BACKUP_CHECKBOX_LABEL = Granite.I18n.get('Backup before replacement');
     var CSV_OUT_CHECKBOX_LABEL = Granite.I18n.get('Download CSV with updated items');
-    var DRY_RUN_TOOLTIP = Granite.I18n.get("If checked, no changes will be applied in the repository");
-    var REPLACEMENT_DESCRIPTION = Granite.I18n.get('* Replacement will be applied within the selected broken links scope');
-    var REPLACEMENT_ACL_DESCRIPTION = Granite.I18n.get('** User should have sufficient read/write permissions in order to complete replacement successfully and create the backup package');
-    var VALIDATION_MSG = Granite.I18n.get('Replacement can\'t be the same as pattern');
-    var LINK_TO_UPDATE_LABEL = Granite.I18n.get('The following links will be updated:');
+    var DRY_RUN_TOOLTIP = Granite.I18n.get("If checked, no changes will be stored in the repository");
+    var REPLACEMENT_DESCRIPTION = Granite.I18n.get('* Replacement will be applied within the selected scope');
+    var REPLACEMENT_ACL_DESCRIPTION = Granite.I18n.get('** User should have sufficient read/write permissions to complete replacement and create the backup package');
+    var VALIDATION_MSG = Granite.I18n.get('Replacement cannot be the same as pattern');
+    var LINK_TO_UPDATE_LABEL = Granite.I18n.get('The following content will be updated:');
 
     var PROCESSING_ERROR_MSG = 'Failed to replace by pattern<br/>Pattern: <b>{{pattern}}</b><br/>Replacement: <b>{{replacement}}</b>';
     var PERSISTENCE_ERROR_MSG = 'Replacement was interrupted due to the <b>error</b> occurred during persisting changes. Please see logs for more details';
@@ -40,7 +40,7 @@
     var PROCESSING_SUCCESS_MSG = 'Replacement completed. %s<br/><br/>Pattern: <b>{{pattern}}</b><br/>Replacement: <b>{{replacement}}</b>';
     var DRY_RUN_PREFIX_MSG = '(Dry run) ';
     var DOWNLOADED_CSV_MSG = 'Please see the downloaded CSV for more details.';
-    var PROCESSING_NOT_FOUND_MSG = 'Broken links containing the pattern <b>{{pattern}}</b> were not found or user has insufficient permissions to process them';
+    var PROCESSING_NOT_FOUND_MSG = 'Properties matching the pattern <b>{{pattern}}</b> were not found, or user has insufficient permissions to process them';
     var PROCESSING_IDENTICAL_MSG = 'The pattern <b>{{pattern}}</b> is equal to the replacement value, no processing was done';
 
     var REPLACE_BY_PATTERN_COMMAND = '/content/etoolbox-link-inspector/servlet/replaceByPattern';
@@ -137,7 +137,7 @@
     function showConfirmationModal(selection) {
         var deferred = $.Deferred();
 
-        var el = ELC.getSharableDlg();
+        var el = ELC.getDialog();
         el.variant = 'notice';
         el.header.textContent = REPLACE_AND_MODIFY_LABEL;
         el.footer.innerHTML = ''; // Clean content
@@ -216,7 +216,7 @@
                     return item.path + '@' + item.propertyName
                 }),
                 links: selection.map(item => {
-                    return item.currentLink
+                    return item.source
                 })
             }
             deferred.resolve(data);
@@ -252,7 +252,7 @@
 
     function buildConfirmationMessage(selections) {
         let list = selections.slice(0, 12).map(function (row) {
-            return '<li>' + row.currentLink + ' (' + row.count + ')' + '</li>';
+            return '<li>' + row.source + ' (' + row.count + ')' + '</li>';
         });
         if (selections.length > 12) {
             list.push('<li>&#8230;</li>'); // &#8230; is ellipsis
@@ -267,25 +267,25 @@
     function confirmationMessageSelectionItems(selections) {
          let valuesMap = {};
          selections.map(function (row) {
-            return row.currentLink;
+            return row.source;
          }).forEach(function (item) {
             valuesMap[item] = (valuesMap[item]||0) + 1;
          });
 
          let items = [];
          for (const [key, value] of Object.entries(valuesMap)) {
-           items.push({currentLink: key, count: value});
+           items.push({source: key, count: value});
          }
          return items;
     }
 
     function buildSelectionItems(selections) {
         return selections.map(function (v) {
-            let row = $(v);
+            const $row = $(v);
             return {
-                path: row.data('path'),
-                currentLink: row.data('currentLink'),
-                propertyName: row.data('propertyName')
+                path: $row.data('path'),
+                source: $row.find('.result .source').text(),
+                propertyName: $row.data('propertyName')
             };
         });
     }

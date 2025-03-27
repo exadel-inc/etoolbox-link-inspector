@@ -14,10 +14,10 @@
 
 package com.exadel.etoolbox.linkinspector.core.services.resolvers;
 
-import com.exadel.etoolbox.linkinspector.api.Link;
-import com.exadel.etoolbox.linkinspector.api.LinkResolver;
-import com.exadel.etoolbox.linkinspector.api.LinkStatus;
-import com.exadel.etoolbox.linkinspector.core.models.LinkImpl;
+import com.exadel.etoolbox.linkinspector.api.Result;
+import com.exadel.etoolbox.linkinspector.api.Resolver;
+import com.exadel.etoolbox.linkinspector.api.Status;
+import com.exadel.etoolbox.linkinspector.core.models.LinkResult;
 import com.exadel.etoolbox.linkinspector.core.services.resolvers.configs.InternalLinkResolverConfig;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
@@ -46,9 +46,9 @@ import java.util.regex.Pattern;
 /**
  * Validates external links via sending HEAD requests concurrently using {@link PoolingHttpClientConnectionManager}
  */
-@Component(service = LinkResolver.class, immediate = true)
+@Component(service = Resolver.class, immediate = true)
 @Designate(ocd = InternalLinkResolverConfig.class)
-public class InternalLinkResolverImpl implements LinkResolver {
+public class InternalLinkResolverImpl implements Resolver {
 
     private static final Logger LOG = LoggerFactory.getLogger(InternalLinkResolverImpl.class);
 
@@ -58,7 +58,7 @@ public class InternalLinkResolverImpl implements LinkResolver {
     private boolean enabled;
 
     @Reference
-    private LinkResolver externalLinkResolver;
+    private Resolver externalLinkResolver;
 
     @Activate
     @Modified
@@ -73,29 +73,29 @@ public class InternalLinkResolverImpl implements LinkResolver {
     }
 
     @Override
-    public Collection<Link> getLinks(String source) {
+    public Collection<Result> getResults(String source) {
         if (!enabled) {
             return Collections.emptyList();
         }
-        Set<Link> links = new HashSet<>();
+        Set<Result> results = new HashSet<>();
         Matcher matcher = PATTERN_INTERNAL_LINK.matcher(source);
         while (matcher.find()) {
             String href = matcher.group();
-            links.add(new LinkImpl(getId(), href));
+            results.add(new LinkResult(getId(), href));
         }
-        return links;
+        return results;
     }
 
     @Override
-    public void validate(Link link, ResourceResolver resourceResolver) {
-        if (link == null || !StringUtils.equalsIgnoreCase(getId(), link.getType())) {
+    public void validate(Result result, ResourceResolver resourceResolver) {
+        if (result == null || !StringUtils.equalsIgnoreCase(getId(), result.getType())) {
             return;
         }
-        LinkStatus status = checkLink(link.getHref(), resourceResolver);
+        Status status = checkLink(result.getValue(), resourceResolver);
         if (status.getCode() == HttpStatus.SC_NOT_FOUND && StringUtils.isNotBlank(internalLinksHost)) {
-            externalLinkResolver.validate(link, resourceResolver);
+            externalLinkResolver.validate(result, resourceResolver);
         } else {
-            link.setStatus(status.getCode(), status.getMessage());
+            result.setStatus(status.getCode(), status.getMessage());
         }
     }
 
@@ -104,8 +104,8 @@ public class InternalLinkResolverImpl implements LinkResolver {
         return enabled;
     }
 
-    private LinkStatus checkLink(String href, ResourceResolver resourceResolver) {
-        LinkStatus status = checkLinkInternal(href, resourceResolver);
+    private Status checkLink(String href, ResourceResolver resourceResolver) {
+        Status status = checkLinkInternal(href, resourceResolver);
         if (!status.isValid()) {
             String decodedLink = decode(href);
             if (!decodedLink.equals(href)) {
@@ -115,11 +115,11 @@ public class InternalLinkResolverImpl implements LinkResolver {
         return status;
     }
 
-    private LinkStatus checkLinkInternal(String href, ResourceResolver resourceResolver) {
+    private Status checkLinkInternal(String href, ResourceResolver resourceResolver) {
         return Optional.of(resourceResolver.resolve(href))
                 .filter(resource -> !ResourceUtil.isNonExistingResource(resource))
-                .map(resource -> new LinkStatus(HttpStatus.SC_OK, "OK"))
-                .orElse(new LinkStatus(HttpStatus.SC_NOT_FOUND, "Not Found"));
+                .map(resource -> new Status(HttpStatus.SC_OK, "OK"))
+                .orElse(new Status(HttpStatus.SC_NOT_FOUND, "Not Found"));
     }
 
     private String decode(String href) {

@@ -57,12 +57,6 @@ public class GridViewItem {
      */
     public static final String CRX_DE_PATH = "/crx/de/index.jsp#";
 
-    /**
-     * Vanity path for the grid item thumbnail
-     */
-    public static final String THUMBNAIL_PATH =
-            "/etc.clientlibs/etoolbox-link-inspector/clientlibs/link-inspector-ui/resources/thumbnail.png";
-
     public static final String SLASH_CHAR = "/";
     public static final String HTML_EXTENSION = ".html";
 
@@ -70,7 +64,10 @@ public class GridViewItem {
     private ResourceResolver resourceResolver;
 
     @ValueMapValue(name = GridResource.PN_LINK)
-    private String link;
+    private String result;
+
+    @ValueMapValue(name = "match")
+    private String matchedText;
 
     @ValueMapValue(name = GridResource.PN_LINK_TYPE)
     private String linkType;
@@ -121,16 +118,16 @@ public class GridViewItem {
         return getPath();
     }
 
-    public String getThumbnail() {
-        return THUMBNAIL_PATH;
-    }
-
     public String getPath() {
         return path;
     }
 
-    public String getLink() {
-        return link;
+    public String getResult() {
+        return result;
+    }
+
+    public String getMatchedText() {
+        return matchedText;
     }
 
     public String getPropertyName() {

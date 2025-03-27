@@ -18,7 +18,11 @@ import org.apache.sling.api.resource.ResourceResolver;
 
 import java.util.Collection;
 
-public interface LinkResolver {
+/**
+ * Represents a service that extracts substrings that follow certain pattern (such as web links) from the given source
+ * string and validates them
+ */
+public interface Resolver {
 
     /**
      * Gets whether the current resolver is enabled
@@ -33,16 +37,16 @@ public interface LinkResolver {
     String getId();
 
     /**
-     * Obtains link value(s) from the given string source
+     * Obtains from the given string source values that match a required pattern
      * @param source A string value. A non-blank string is expected
-     * @return A collection of {@link Link} objects. Can be an empty collection, but never {@code null}
+     * @return A collection of {@link Result} objects. Can be an empty collection, but never {@code null}
      */
-    Collection<Link> getLinks(String source);
+    Collection<Result> getResults(String source);
 
     /**
-     * Validates the provided {@link Link}
-     * @param link A @code Link} object; a non-null reference is expected
+     * Validates the provided {@link Result}
+     * @param result A @code Link} object; a non-null reference is expected
      * @param resourceResolver {@link ResourceResolver} object; a non-null reference is expected
      */
-    void validate(Link link, ResourceResolver resourceResolver);
+    void validate(Result result, ResourceResolver resourceResolver);
 }

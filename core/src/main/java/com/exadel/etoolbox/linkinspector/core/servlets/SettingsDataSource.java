@@ -2,7 +2,7 @@ package com.exadel.etoolbox.linkinspector.core.servlets;
 
 import com.adobe.granite.ui.components.ds.DataSource;
 import com.adobe.granite.ui.components.ds.SimpleDataSource;
-import com.exadel.etoolbox.linkinspector.api.LinkResolver;
+import com.exadel.etoolbox.linkinspector.api.Resolver;
 import com.exadel.etoolbox.linkinspector.core.services.util.GraniteUtil;
 import com.exadel.etoolbox.linkinspector.core.services.util.OcdUtil;
 import lombok.Getter;
@@ -50,7 +50,7 @@ public class SettingsDataSource extends SlingSafeMethodsServlet {
             policy = ReferencePolicy.DYNAMIC,
             policyOption = ReferencePolicyOption.GREEDY
     )
-    private transient volatile List<LinkResolver> linkResolvers;
+    private transient volatile List<Resolver> linkResolvers;
 
     @Override
     protected void doGet(@NonNull SlingHttpServletRequest request, @NonNull SlingHttpServletResponse response) {
@@ -113,7 +113,7 @@ public class SettingsDataSource extends SlingSafeMethodsServlet {
 
     private List<ServiceConfig> getServiceConfigs() {
         List<ServiceConfig> result = new ArrayList<>();
-        for (LinkResolver linkResolver : CollectionUtils.emptyIfNull(linkResolvers)) {
+        for (Resolver linkResolver : CollectionUtils.emptyIfNull(linkResolvers)) {
             Bundle bundle = FrameworkUtil.getBundle(linkResolver.getClass());
             MetaTypeInformation metaTypeInformation = metaTypeService.getMetaTypeInformation(bundle);
             ObjectClassDefinition objectClassDefinition = metaTypeInformation.getObjectClassDefinition(linkResolver.getClass().getName(), null);

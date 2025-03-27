@@ -81,8 +81,8 @@
                                     class="status"/>
                             <title
                                     jcr:primaryType="nt:unstructured"
-                                    jcr:title="Link"
-                                    class="link"/>
+                                    jcr:title="Matched result"
+                                    class="result"/>
                             <pagePath
                                     jcr:primaryType="nt:unstructured"
                                     jcr:title="Page"

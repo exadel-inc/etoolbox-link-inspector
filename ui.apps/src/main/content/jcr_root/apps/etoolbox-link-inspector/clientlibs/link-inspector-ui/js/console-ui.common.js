@@ -34,21 +34,26 @@
     }
     Utils.format = format;
 
-    let sharableDialog;
+    const sharableDialogs = {};
     /** Common sharable dialog instance getter */
-    function getDialog() {
-        if (!sharableDialog) {
-            sharableDialog = new Coral.Dialog().set({
+    function getDialog(id = 'default', options) {
+        if (!sharableDialogs[id]) {
+            let dialogOptions = {
                 backdrop: Coral.Dialog.backdrop.STATIC,
                 interaction: 'off'
-            }).on('coral-overlay:close', function (e) {
+            };
+            if (options && typeof options === 'object') {
+                dialogOptions = Object.assign(dialogOptions, options);
+            }
+            sharableDialogs[id] = new Coral.Dialog().set(dialogOptions).on('coral-overlay:close', function (e) {
                 e.target.remove();
             });
-            sharableDialog.classList.add('elc-dialog');
+            sharableDialogs[id].id = id;
+            sharableDialogs[id].classList.add('elc-dialog');
         }
-        return sharableDialog;
+        return sharableDialogs[id];
     }
-    Utils.getSharableDlg = getDialog;
+    Utils.getDialog = getDialog;
 
     var CLOSE_LABEL = Granite.I18n.get('Close');
     var FINISHED_LABEL = Granite.I18n.get('Finished');

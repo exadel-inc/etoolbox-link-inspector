@@ -48,7 +48,7 @@
         $jobStatusContainer = $('<p class="u-coral-margin"></p>').text('Job status: ');
         $('<b>...in progress</b>').appendTo($jobStatusContainer);
         $('<br/>').appendTo($jobStatusContainer);
-        $('<span>scan may take some time to complete</span>').appendTo($jobStatusContainer);;
+        $('<span>Scan may take some time to complete</span>').appendTo($jobStatusContainer);;
         $popover.find('coral-popover-content').append($jobStatusContainer);
     }
 

@@ -14,9 +14,9 @@
 
 package com.exadel.etoolbox.linkinspector.core.services.resolvers;
 
-import com.exadel.etoolbox.linkinspector.api.Link;
-import com.exadel.etoolbox.linkinspector.api.LinkResolver;
-import com.exadel.etoolbox.linkinspector.core.models.LinkImpl;
+import com.exadel.etoolbox.linkinspector.api.Result;
+import com.exadel.etoolbox.linkinspector.api.Resolver;
+import com.exadel.etoolbox.linkinspector.core.models.LinkResult;
 import com.exadel.etoolbox.linkinspector.core.services.resolvers.configs.ExternalLinkResolverConfig;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
@@ -56,9 +56,9 @@ import java.util.regex.Pattern;
 /**
  * Validates external links via sending HEAD requests concurrently using {@link PoolingHttpClientConnectionManager}
  */
-@Component(service = {LinkResolver.class, ExternalLinkResolverImpl.class}, immediate = true)
+@Component(service = {Resolver.class, ExternalLinkResolverImpl.class}, immediate = true)
 @Designate(ocd = ExternalLinkResolverConfig.class)
-public class ExternalLinkResolverImpl implements LinkResolver {
+public class ExternalLinkResolverImpl implements Resolver {
 
     private static final Logger LOG = LoggerFactory.getLogger(ExternalLinkResolverImpl.class);
 
@@ -86,39 +86,39 @@ public class ExternalLinkResolverImpl implements LinkResolver {
     }
 
     @Override
-    public Collection<Link> getLinks(String source) {
+    public Collection<Result> getResults(String source) {
         if (!enabled) {
             return Collections.emptyList();
         }
-        Set<Link> links = new HashSet<>();
+        Set<Result> results = new HashSet<>();
         Matcher matcher = PATTERN_EXTERNAL_LINK.matcher(source);
         while (matcher.find()) {
             String href = matcher.group();
-            links.add(new LinkImpl(getId(), href));
+            results.add(new LinkResult(getId(), href));
         }
-        return links;
+        return results;
     }
 
     @Override
-    public void validate(Link link, ResourceResolver resourceResolver) {
-        if (link == null || !StringUtils.equalsIgnoreCase(getId(), link.getType())) {
+    public void validate(Result result, ResourceResolver resourceResolver) {
+        if (result == null || !StringUtils.equalsIgnoreCase(getId(), result.getType())) {
             return;
         }
         try {
-            int statusCode = checkLink(link.getHref());
-            link.setStatus(statusCode);
+            int statusCode = checkLink(result.getValue());
+            result.setStatus(statusCode);
         } catch (SocketTimeoutException e) {
-            LOG.error("Timeout occurred while validating link {}", link.getHref(), e);
-            link.setStatus(HttpStatus.SC_REQUEST_TIMEOUT, "Request Timeout");
+            LOG.error("Timeout occurred while validating link {}", result.getValue(), e);
+            result.setStatus(HttpStatus.SC_REQUEST_TIMEOUT, "Request Timeout");
         } catch (UnknownHostException e) {
-            LOG.error("Unknown host detected when validating {}", link.getHref(), e);
-            link.setStatus(HttpStatus.SC_NOT_FOUND, "Unknown host");
+            LOG.error("Unknown host detected when validating {}", result.getValue(), e);
+            result.setStatus(HttpStatus.SC_NOT_FOUND, "Unknown host");
         } catch (URISyntaxException e) {
-            LOG.error("Invalid URI syntax when validating link {}", link.getHref(), e);
-            link.setStatus(HttpStatus.SC_BAD_REQUEST, "Invalid URI syntax");
+            LOG.error("Invalid URI syntax when validating link {}", result.getValue(), e);
+            result.setStatus(HttpStatus.SC_BAD_REQUEST, "Invalid URI syntax");
         } catch (Exception e) {
-            LOG.error("Failed to validate link {}", link.getHref(), e);
-            link.setStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR, StringUtils.defaultIfEmpty(e.getMessage(), e.toString()));
+            LOG.error("Failed to validate link {}", result.getValue(), e);
+            result.setStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR, StringUtils.defaultIfEmpty(e.getMessage(), e.toString()));
         }
     }
 

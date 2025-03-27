@@ -2,26 +2,27 @@
     class="foundation-collection-item elc-item"
     is="coral-table-row"
     data-path="${model.path}"
-    data-current-link="${model.link}"
     data-property-name="${model.propertyName}"
-    data-rootsource="${model.path}">
-    <td is="coral-table-cell" coral-table-rowselect>
-        <img itemprop="thumbnail" width="192" src="${model.thumbnail}" alt="">
-    </td>
+    data-match="${model.matchedText}">
 
-    <td class="status centered" is="coral-table-cell">
+    <td class="check" is="coral-table-cell" coral-table-rowselect>&nbsp;</td>
+
+    <td class="status" is="coral-table-cell">
         <div data-sly-set.statuscode="${model.linkStatusCode == '200' ? 'ok' : 'error'}"
-             class="indicator" title="HTTP Status ${model.linkStatusCode}">
-            <coral-icon icon="circle" class="elc-link-status--${statuscode}"></coral-icon>
+             class="indicator centered" title="HTTP Status ${model.linkStatusCode}">
+            <coral-icon icon="circle" class="elc-result-status--${statuscode}"></coral-icon>
         </div>
-        <div class="secondary">
+        <div class="secondary centered break-none">
             ${model.linkStatusMessage}
         </div>
     </td>
 
-    <td class="link" is="coral-table-cell">
-        <div class="primary break-word"><b>${model.link}</b></div>
-        <div class="secondary">${model.linkType}</div>
+    <td class="result" is="coral-table-cell">
+        <div class="content">
+            <div class="primary source break-word ellipsis">${model.result}</div>
+            <div class="secondary result-type">${model.linkType}</div>
+            <button is="coral-button" class="elc-editproperty-button" icon="edit"></button>
+        </div>
     </td>
 
     <td class="page" is="coral-table-cell">

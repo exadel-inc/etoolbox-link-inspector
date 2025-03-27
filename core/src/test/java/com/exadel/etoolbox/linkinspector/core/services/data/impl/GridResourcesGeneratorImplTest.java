@@ -15,7 +15,7 @@
 package com.exadel.etoolbox.linkinspector.core.services.data.impl;
 
 import com.day.cq.replication.ReplicationStatus;
-import com.exadel.etoolbox.linkinspector.api.Link;
+import com.exadel.etoolbox.linkinspector.api.Result;
 import com.exadel.etoolbox.linkinspector.core.services.data.ConfigService;
 import com.exadel.etoolbox.linkinspector.core.services.data.DataFeedService;
 import com.exadel.etoolbox.linkinspector.core.services.data.models.GridResource;
@@ -179,7 +179,7 @@ class GridResourcesGeneratorImplTest {
 
         List<GridResource> expectedGridResources = buildExpectedGridResources().stream()
                 .filter(gr -> {
-                    Matcher matcher = pattern.matcher(gr.getLink().getHref());
+                    Matcher matcher = pattern.matcher(gr.getLink().getValue());
                     return !matcher.matches();
                 })
                 .collect(Collectors.toList());
@@ -194,7 +194,7 @@ class GridResourcesGeneratorImplTest {
         List<GridResource> gridResources = fixture.generateGridResources(GRID_RESOURCE_TYPE, context.resourceResolver());
         boolean notContainsExternal = gridResources.stream()
                 .map(GridResource::getLink)
-                .map(Link::getType)
+                .map(Result::getType)
                 .noneMatch("external"::equals);
 
         assertTrue(notContainsExternal);
