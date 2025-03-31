@@ -14,11 +14,15 @@
 
 package com.exadel.etoolbox.linkinspector.core.models.ui;
 
+import com.exadel.etoolbox.linkinspector.core.services.job.DataFeedJobExecutor;
+import com.exadel.etoolbox.linkinspector.core.services.job.SlingJobUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.event.jobs.JobManager;
 import org.apache.sling.models.annotations.DefaultInjectionStrategy;
 import org.apache.sling.models.annotations.Model;
+import org.apache.sling.models.annotations.injectorspecific.OSGiService;
 import org.apache.sling.models.annotations.injectorspecific.SlingObject;
 
 import javax.inject.Inject;
@@ -36,6 +40,9 @@ public class StatsButton {
     @SlingObject
     private ResourceResolver resourceResolver;
 
+    @OSGiService
+    private JobManager jobManager;
+
     @Inject
     private String statsResourcePath;
 
@@ -49,5 +56,11 @@ public class StatsButton {
                 .filter(StringUtils::isNotBlank)
                 .map(resourceResolver::getResource)
                 .isPresent();
+    }
+
+    public boolean isStatsAvailable() {
+        return statsResourceExists() || StringUtils.contains("STARTED,ACTIVE,QUEUED,GIVEN_UP",
+                SlingJobUtil.getJobStatus(jobManager, DataFeedJobExecutor.GENERATE_DATA_FEED_TOPIC)
+        );
     }
 }
