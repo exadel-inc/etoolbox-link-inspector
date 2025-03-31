@@ -29,7 +29,7 @@ public class PaginationModel {
     private static final String REQUEST_PARAMETER_TYPE = "type";
     private static final String REQUEST_PARAMETER_SUBSTRING = "substring";
     private static final int DEFAULT_PAGE_NUMBER = 1;
-    private static final int DEFAULT_PAGE_SIZE = 500;
+    private static final int DEFAULT_PAGE_SIZE = 50;
 
     @OSGiService
     private GridResourcesCache cache;

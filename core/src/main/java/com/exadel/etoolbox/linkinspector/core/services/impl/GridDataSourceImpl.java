@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 public class GridDataSourceImpl implements GridDataSource {
     private static final Logger LOG = LoggerFactory.getLogger(GridDataSourceImpl.class);
     private static final int DEFAULT_PAGE_NUMBER = 1;
-    private static final int DEFAULT_PAGE_VALUES_SIZE = 500;
+    private static final int DEFAULT_PAGE_VALUES_SIZE = 50;
 
     @Reference
     private DataFeedService dataFeedService;
