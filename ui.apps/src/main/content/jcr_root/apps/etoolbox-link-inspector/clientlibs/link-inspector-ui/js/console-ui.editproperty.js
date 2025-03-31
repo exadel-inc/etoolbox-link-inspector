@@ -74,10 +74,13 @@
         const dialog = e.target.closest('coral-dialog');
         const editor = dialog.querySelector('.editor');
         const formData = new FormData();
-        formData.append(editor.dataset.property, editor.innerText);
+        formData.append('path', editor.dataset.path);
+        formData.append('propertyName', editor.dataset.property);
+        formData.append('updatedLink', editor.innerText);
+        formData.append('currentLink', editor.sourceElement.innerHTML);
         $.ajax({
             type: 'POST',
-            url: editor.dataset.path,
+            url: '/content/etoolbox-link-inspector/servlet/editValue',
             data: formData,
             processData: false,
             contentType: false,

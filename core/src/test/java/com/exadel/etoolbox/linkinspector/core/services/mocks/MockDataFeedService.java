@@ -26,7 +26,7 @@ public class MockDataFeedService implements DataFeedService {
     }
 
     @Override
-    public void modifyDataFeed(List<UpdatedItem> updatedItems) {
+    public void modifyDataFeed(List<UpdatedItem> updatedItems, boolean updateGridResource) {
         // No operation
     }
 
