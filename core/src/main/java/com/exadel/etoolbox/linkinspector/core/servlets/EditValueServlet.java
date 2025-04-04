@@ -3,6 +3,7 @@ package com.exadel.etoolbox.linkinspector.core.servlets;
 import com.exadel.etoolbox.linkinspector.core.services.data.DataFeedService;
 import com.exadel.etoolbox.linkinspector.core.services.data.models.UpdatedItem;
 import com.exadel.etoolbox.linkinspector.core.services.util.ServletUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -28,9 +29,8 @@ import java.util.Collections;
         resourceTypes = "/bin/etoolbox/link-inspector/edit-value",
         methods = HttpConstants.METHOD_POST
 )
+@Slf4j
 public class EditValueServlet extends SlingAllMethodsServlet {
-
-    private static final Logger LOG = LoggerFactory.getLogger(EditValueServlet.class);
 
     @Reference
     private transient DataFeedService dataFeedService;
@@ -43,7 +43,7 @@ public class EditValueServlet extends SlingAllMethodsServlet {
         String propertyName = StringUtils.substringAfterLast(ServletUtil.getRequestParamString(request, "propertyName"), "/");
         if (StringUtils.isAnyBlank(currentLink, updatedLink, path, propertyName)) {
             response.setStatus(HttpStatus.SC_BAD_REQUEST);
-            LOG.warn("Request params is empty");
+            log.warn("A required parameter is missing");
             return;
         }
         UpdatedItem updatedItem = new UpdatedItem(currentLink, updatedLink, path, propertyName);
@@ -52,13 +52,13 @@ public class EditValueServlet extends SlingAllMethodsServlet {
         Resource resource = resourceResolver.getResource(path);
         if (resource == null) {
             response.setStatus(HttpStatus.SC_NOT_FOUND);
-            LOG.warn("Resource not found by path: {}", path);
+            log.warn("Resource not found by path: {}", path);
             return;
         }
         ModifiableValueMap modifiableValueMap = resource.adaptTo(ModifiableValueMap.class);
         if (modifiableValueMap == null) {
             response.setStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR);
-            LOG.error("Resource is not adaptable to ModifiableValueMap: {}", resource.getPath());
+            log.error("Resource is not adaptable to ModifiableValueMap: {}", resource.getPath());
             return;
         }
         modifiableValueMap.put(propertyName, updatedLink);
