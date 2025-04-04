@@ -85,6 +85,7 @@
             type: 'GET',
             success: function(){
                 dialog.trigger('hide')
+                $('#statsPopover').attr('disabled', false);
             },
             error: function(e) {
                 ui.notify('Error', e.responseText || e.statusText, 'error');

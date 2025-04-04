@@ -16,6 +16,7 @@ package com.exadel.etoolbox.linkinspector.core.services.impl;
 
 import com.adobe.granite.ui.components.ds.DataSource;
 import com.adobe.granite.ui.components.ds.SimpleDataSource;
+import com.exadel.etoolbox.linkinspector.core.models.ui.PaginationModel;
 import com.exadel.etoolbox.linkinspector.core.services.GridDataSource;
 import com.exadel.etoolbox.linkinspector.core.services.data.DataFeedService;
 import com.exadel.etoolbox.linkinspector.core.services.data.models.DataFilter;
@@ -33,7 +34,6 @@ import java.util.stream.Collectors;
 public class GridDataSourceImpl implements GridDataSource {
     private static final Logger LOG = LoggerFactory.getLogger(GridDataSourceImpl.class);
     private static final int DEFAULT_PAGE_NUMBER = 1;
-    private static final int DEFAULT_PAGE_VALUES_SIZE = 500;
 
     @Reference
     private DataFeedService dataFeedService;
@@ -48,8 +48,8 @@ public class GridDataSourceImpl implements GridDataSource {
         int pageNumber = NumberUtils.isNumber(page) ? Integer.parseInt(page) : DEFAULT_PAGE_NUMBER;
 
         List<Resource> resources = dataFeedService.dataFeedToResources(new DataFilter(type, substring)).stream()
-                .skip((long) DEFAULT_PAGE_VALUES_SIZE * (pageNumber - 1))
-                .limit(DEFAULT_PAGE_VALUES_SIZE)
+                .skip((long) PaginationModel.DEFAULT_PAGE_SIZE * (pageNumber - 1))
+                .limit(PaginationModel.DEFAULT_PAGE_SIZE)
                 .collect(Collectors.toList());
 
         if (NumberUtils.isNumber(offset)) {

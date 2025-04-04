@@ -73,7 +73,6 @@ public class ResolversDataSource extends SlingSafeMethodsServlet {
         String serviceName = linkResolver.getClass().getName();
         fieldProperties.put("name", "./" + serviceName + "/enabled");
         fieldProperties.put(PROP_TEXT, OcdUtil.getLabel(linkResolver, metaTypeService));
-        fieldProperties.put("fieldDescription", StringUtils.substringAfterLast(serviceName, "."));
         fieldProperties.put("value", Boolean.TRUE);
         fieldProperties.put("uncheckedValue", Boolean.FALSE);
         fieldProperties.put("checked", Boolean.TRUE);

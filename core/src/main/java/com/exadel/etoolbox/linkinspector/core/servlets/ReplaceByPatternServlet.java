@@ -170,7 +170,7 @@ public class ReplaceByPatternServlet extends SlingAllMethodsServlet {
                 return;
             }
             if (!isDryRun) {
-                dataFeedService.modifyDataFeed(updatedItems);
+                dataFeedService.modifyDataFeed(updatedItems, false);
             }
             outputUpdatedItems(updatedItems, isDryRun, isOutputAsCsv, linkPattern, replacement, resourceResolver, response);
             stopWatch.stop();

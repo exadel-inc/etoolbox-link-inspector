@@ -134,6 +134,6 @@ public class FixBrokenLinkServlet extends SlingAllMethodsServlet {
 
     private void modifyDataFeed(String path, String propertyName, String newLink) {
         UpdatedItem updatedItem = new UpdatedItem(StringUtils.EMPTY, newLink, path, propertyName);
-        dataFeedService.modifyDataFeed(Collections.singletonList(updatedItem));
+        dataFeedService.modifyDataFeed(Collections.singletonList(updatedItem), false);
     }
 }

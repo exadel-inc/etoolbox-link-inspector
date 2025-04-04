@@ -58,8 +58,9 @@ public interface DataFeedService {
      * Method for modification links value in the data feed
      *
      * @param updatedItems - {@code List<UpdatedItem>} containing the updated items information
+     * @param updateGridResource - {@code boolean} flag indicating whether the grid resource should be updated
      */
-    void modifyDataFeed(List<UpdatedItem> updatedItems);
+    void modifyDataFeed(List<UpdatedItem> updatedItems, boolean updateGridResource);
 
     /**
      * Method for deleting data in data feed
