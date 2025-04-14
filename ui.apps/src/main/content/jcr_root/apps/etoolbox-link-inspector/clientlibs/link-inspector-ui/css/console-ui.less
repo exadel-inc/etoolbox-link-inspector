@@ -28,7 +28,8 @@
       width: 0;
     }
     &.status {
-      max-width: 80px;
+      max-width: 110px;
+      text-transform: capitalize;
       width: 0;
     }
     &.page {
@@ -48,11 +49,11 @@
     position: relative;
   }
   .indicator {
-    margin-top: 0.2rem;
+    margin: 0.25rem 0;
   }
   .primary {
     display: block;
-    margin-bottom: 0.2rem;
+    margin-bottom: 0.25rem;
   }
   .secondary {
     display: block;
@@ -71,11 +72,15 @@
   .centered {
     text-align: center;
   }
-  .ellipsis {
+  .full-ellipsis {
     display: -webkit-box;
     overflow: hidden;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 10;
+  }
+  .line-ellipsis {
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 }
 

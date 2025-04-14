@@ -14,14 +14,15 @@
              class="indicator centered" title="HTTP Status ${model.statusCode}">
             <coral-icon icon="circle" class="elc-result-status--${statuscode}"></coral-icon>
         </div>
-        <div class="secondary centered break-none">
-            ${model.statusMessage}
+        <div class="secondary centered break-none ${model.statusClampable ? 'line-ellipsis' : ''}"
+             data-sly-attribute.title="${model.statusClampable ? model.statusMessage : ''}">
+            ${model.mainStatusMessage}
         </div>
     </td>
 
     <td class="result" is="coral-table-cell">
         <div class="content">
-            <div class="primary source break-word ellipsis">${model.value}</div>
+            <div class="primary source break-word full-ellipsis">${model.value}</div>
             <div class="secondary result-type">${model.type}</div>
             <button is="coral-button" class="elc-editproperty-button" icon="edit"></button>
         </div>
