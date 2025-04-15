@@ -10,13 +10,12 @@
     </td>
 
     <td class="status" is="coral-table-cell">
-        <div data-sly-set.statuscode="${model.statusCode == '200' ? 'ok' : 'error'}"
-             class="indicator centered" title="HTTP Status ${model.statusCode}">
-            <coral-icon icon="circle" class="elc-result-status--${statuscode}"></coral-icon>
+        <div class="indicator centered" title="${model.statusCode}">
+            <coral-icon icon="circle" data-status="${model.statusTag}"></coral-icon>
         </div>
         <div class="secondary centered break-none ${model.statusClampable ? 'line-ellipsis' : ''}"
              data-sly-attribute.title="${model.statusClampable ? model.statusMessage : ''}">
-            ${model.mainStatusMessage}
+            ${model.statusMessageExcerpt}
         </div>
     </td>
 

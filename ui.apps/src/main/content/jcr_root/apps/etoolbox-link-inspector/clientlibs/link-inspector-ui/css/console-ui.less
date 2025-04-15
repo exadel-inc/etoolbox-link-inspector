@@ -82,6 +82,20 @@
     overflow: hidden;
     text-overflow: ellipsis;
   }
+
+  [data-status="ok"] {
+    color: #0FCB8C;
+  }
+
+  [data-status="error"] {
+    color: #f85647;
+  }
+
+  [data-status="undefined"] {
+    color: #bababa;
+  }
+
+
 }
 
 .elc-coral-alert {
@@ -117,14 +131,6 @@
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
   }
-}
-
-.elc-result-status--ok {
-  color: #0FCB8C;
-}
-
-.elc-result-status--error {
-  color: #f85647;
 }
 
 .foundation-collection-selectall {
