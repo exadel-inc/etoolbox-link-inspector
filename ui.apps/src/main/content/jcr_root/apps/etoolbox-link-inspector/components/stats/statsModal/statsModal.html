@@ -15,7 +15,14 @@
             <sly data-sly-call="${field @ title=statKey, value=model.statistics[statKey]}"></sly>
         </sly>
         <coral-popover-separator></coral-popover-separator>
-        <button data-shell-collection-target=".etoolbox-link-inspector" id="elc-delete-report" class="foundation-collection-action _coral-Button _coral-Button--primary" data-foundation-collection-action="{&quot;target&quot;:&quot;.etoolbox-link-inspector&quot;,&quot;action&quot;:&quot;cq-admin.etoolbox.linkinspector.action.delete-report&quot;}" type="button" autocomplete="off" is="coral-button" trackingfeature="" trackingelement="delete" tracking="ON" variant="default" size="M"><coral-button-label class="_coral-Button-label">Delete</coral-button-label></button>
+        <button is="coral-button"
+                variant="minimal"
+                id="elc-delete-report"
+                class="foundation-collection-action u-coral-margin u-coral-noPadding no-outline"
+                data-shell-collection-target=".etoolbox-link-inspector"
+                data-foundation-collection-action="{&quot;target&quot;:&quot;.etoolbox-link-inspector&quot;,&quot;action&quot;:&quot;cq-admin.etoolbox.linkinspector.action.delete-report&quot;}">
+            Delete last scan info
+        </button>
     </coral-popover-content>
 </sly>
 

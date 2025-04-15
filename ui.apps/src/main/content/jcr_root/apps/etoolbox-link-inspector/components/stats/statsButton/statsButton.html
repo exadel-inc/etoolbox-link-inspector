@@ -1,9 +1,7 @@
-<sly data-sly-use.model="${'com.exadel.etoolbox.linkinspector.core.models.ui.StatsButton' @ statsResourcePath=properties.path}">
-        <button data-sly-attribute.disabled="${!model.isStatsAvailable}" is="coral-button" id="statsPopover">Summary</button>
-        <coral-popover placement="bottom" target="#statsPopover" class="elc-coral-popover">
-            <sly data-sly-test="${model.statsResourceExists}"
-                 data-sly-resource="${properties.path @ resourceType='/apps/etoolbox-link-inspector/components/stats/statsModal'}"></sly>
-            <coral-popover-header>Last scan</coral-popover-header>
-        </coral-popover>
-    </sly>
-</sly>
+<sly data-sly-use.model="${'com.exadel.etoolbox.linkinspector.core.models.ui.StatsButton' @ statsResourcePath=properties.path}"></sly>
+<button data-sly-attribute.disabled="${!model.isStatsAvailable}" is="coral-button" id="statsPopover">Summary</button>
+<coral-popover placement="bottom" target="#statsPopover" class="elc-coral-popover">
+  <coral-popover-header data-sly-test="${model.statsResourceExists}">Last scan</coral-popover-header>
+    <sly data-sly-test="${model.statsResourceExists}"
+         data-sly-resource="${properties.path @ resourceType='/apps/etoolbox-link-inspector/components/stats/statsModal'}"></sly>
+</coral-popover>
