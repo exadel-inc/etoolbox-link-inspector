@@ -13,13 +13,16 @@
  */
 
 #editproperty {
-  coral-dialog-content {
+  .content {
     background-color: #FFF;
     border: 1px solid #E1E1E1;
     border-radius: 0.25rem;
-    margin: 0.9375rem;
     padding: 0.5rem;
+    html:not(.granite-coral-spectrum) & {
+      margin: 0.9375rem;
+    }
   }
+
   .editor {
     border: none;
     font-size: 1rem;

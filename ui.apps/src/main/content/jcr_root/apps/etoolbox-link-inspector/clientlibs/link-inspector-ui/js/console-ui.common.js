@@ -50,6 +50,7 @@
             });
             sharableDialogs[id].id = id;
             sharableDialogs[id].classList.add('elc-dialog');
+            sharableDialogs[id].content.classList.add('content');
         }
         return sharableDialogs[id];
     }
