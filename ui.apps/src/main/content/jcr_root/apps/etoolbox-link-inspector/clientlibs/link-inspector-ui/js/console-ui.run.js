@@ -19,8 +19,8 @@
 (function (document, $) {
     'use strict';
 
-    const TRIGGER_DATA_FEED_GENERATION = '/content/etoolbox-link-inspector/servlet/triggerDataFeedGeneration';
-    const CHECK_JOB_STATUS = '/content/etoolbox-link-inspector/servlet/jobStatus';
+    const TRIGGER_DATA_FEED_GENERATION = '/content/etoolbox/link-inspector/servlet/triggerDataFeedGeneration';
+    const CHECK_JOB_STATUS = '/content/etoolbox/link-inspector/servlet/jobStatus';
     let $jobStatusContainer = null;
 
     function jobIsActive(callback) {

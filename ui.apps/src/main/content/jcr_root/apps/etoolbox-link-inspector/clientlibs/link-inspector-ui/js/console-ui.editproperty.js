@@ -80,7 +80,7 @@
         formData.append('currentLink', editor.sourceElement.innerHTML);
         $.ajax({
             type: 'POST',
-            url: '/content/etoolbox-link-inspector/servlet/editValue',
+            url: '/content/etoolbox/link-inspector/servlet/editValue',
             data: formData,
             processData: false,
             contentType: false,

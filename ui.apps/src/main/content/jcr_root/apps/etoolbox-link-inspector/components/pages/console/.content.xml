@@ -104,7 +104,7 @@
                     <statistics
                             jcr:primaryType="nt:unstructured"
                             sling:resourceType="granite/ui/components/coral/foundation/include"
-                            path="/content/etoolbox-link-inspector/data/stats"
+                            path="/var/etoolbox/link-inspector/data/stats"
                             resourceType="etoolbox-link-inspector/components/stats/statsPanel"/>
                 </items>
             </container>
@@ -165,7 +165,7 @@
                 </scan>
                 <stats
                         jcr:primaryType="nt:unstructured"
-                        path="/content/etoolbox-link-inspector/data/stats"
+                        path="/var/etoolbox/link-inspector/data/stats"
                         sling:resourceType="etoolbox-link-inspector/components/stats/statsButton"/>
             </secondary>
         </actions>
@@ -243,7 +243,7 @@
             granite:class="modal-form">
         <items jcr:primaryType="nt:unstructured">
             <scan jcr:primaryType="nt:unstructured"
-                  path="/content/etoolbox-link-inspector/data/stats"
+                  path="/var/etoolbox/link-inspector/data/stats"
                   sling:resourceType="etoolbox-link-inspector/components/settings/model"/>
         </items>
         <footer jcr:primaryType="nt:unstructured">
