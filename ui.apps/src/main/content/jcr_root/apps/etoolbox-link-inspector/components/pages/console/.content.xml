@@ -61,7 +61,7 @@
                         sling:resourceType="granite/ui/components/coral/foundation/table"
                         granite:rel="etoolbox-link-inspector"
                         granite:class="elc-grid"
-                        src="/content/etoolbox-link-inspector/link-inspector/jcr:content/views/container/items/table{.offset,limit}.html{+id}?page=${param.page}&amp;type=${param.type}&amp;substring=${param.substring}"
+                        src="/apps/etoolbox-link-inspector/components/pages/console/jcr:content/views/container/items/table{.offset,limit}.html{+id}?page=${param.page}&amp;type=${param.type}&amp;substring=${param.substring}"
                         itemprop="item"
                         limit="{Long}50"
                         layoutId="list"
@@ -139,7 +139,7 @@
                         variant="minimal">
                     <data jcr:primaryType="nt:unstructured"
                           nesting="hide"
-                          src.uritemplate="/content/etoolbox-link-inspector/link-inspector/filterOptions.html?substring=${param.substring}"/>
+                          src.uritemplate="/apps/etoolbox-link-inspector/components/pages/console/filterOptions.html?substring=${param.substring}"/>
                 </filterOptions>
             </primary>
             <secondary jcr:primaryType="nt:unstructured">
@@ -161,7 +161,7 @@
                         variant="primary">
                     <data jcr:primaryType="nt:unstructured"
                           nesting="hide"
-                          src.uritemplate="/content/etoolbox-link-inspector/link-inspector/scanDialog.html"/>
+                          src.uritemplate="/apps/etoolbox-link-inspector/components/pages/console/scanDialog.html"/>
                 </scan>
                 <stats
                         jcr:primaryType="nt:unstructured"
