@@ -166,7 +166,7 @@ public class ReplaceByPatternServlet extends SlingAllMethodsServlet {
                     processResources(filteredGridResources, isDryRun, isBackup, isAdvancedMode, linkPattern, replacement, resourceResolver);
             if (CollectionUtils.isEmpty(updatedItems)) {
                 LOG.info("No links were updated, linkPattern: {}, replacement: {}", linkPattern, replacement);
-                response.setStatus(HttpStatus.SC_NO_CONTENT);
+                response.setStatus(HttpStatus.SC_OK);
                 return;
             }
             if (!isDryRun) {
@@ -233,7 +233,6 @@ public class ReplaceByPatternServlet extends SlingAllMethodsServlet {
             String path = gridResource.getResourcePath();
             String propertyName = gridResource.getPropertyName();
             Optional<String> updated = Optional.of(isAdvancedMode ? currentLink.replaceAll(linkPattern, replacement) : replacement)
-                    .filter(updatedLink -> !updatedLink.equals(currentLink))
                     .filter(updatedLink ->
                             linkHelper.replaceLink(resourceResolver, path, propertyName, currentLink, updatedLink)
                     );
