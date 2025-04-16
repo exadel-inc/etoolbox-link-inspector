@@ -98,10 +98,15 @@
 
 .elc-dialog {
   vertical-align: middle;
-  .coral3-Dialog-wrapper {
+
+  .content {
     max-height: 80vh;
-    overflow-y: scroll;
+    overflow-y: hidden;
     width: 40vw;
+    // Enable vertical scroll if there is more than one child element
+    &:has(:nth-child(2)) {
+      overflow-y: scroll;
+    }
   }
 }
 
@@ -197,4 +202,14 @@
 .result-type {
     color: #cccccc;
     font-style: italic;
+}
+
+/* ---------------
+   Utility classes
+   --------------- */
+
+.no-outline, .no-outline:not(:disabled):not(.is-disabled):focus {
+  border: none;
+  box-shadow: none;
+  -webkit-box-shadow: none;
 }
