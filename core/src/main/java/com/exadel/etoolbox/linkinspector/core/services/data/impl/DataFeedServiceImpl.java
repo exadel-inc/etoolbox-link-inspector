@@ -176,8 +176,7 @@ public class DataFeedServiceImpl implements DataFeedService {
                 linkHelper
                         .getLinkStream(updatedLink)
                         .forEach(link -> {
-                            linkHelper.validateLink(link, serviceResourceResolver);
-                            link.setStatus("Modified");
+                            link.setStatus(0, "Modified");
                             gridResource.setResult(link);
                         });
                 if (updateGridResource) {

@@ -37,7 +37,7 @@ public class CsvUtil {
     private CsvUtil() {}
 
     public static String wrapIfContainsSemicolon(String value) {
-        if (value.contains(SEMICOLON)) {
+        if (StringUtils.contains(value, SEMICOLON)) {
             return StringUtils.wrap(value, QUOTE);
         }
         return value;

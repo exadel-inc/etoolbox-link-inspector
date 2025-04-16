@@ -23,6 +23,8 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
+import org.apache.http.HttpStatus;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -122,7 +124,14 @@ public class GridViewItem {
         componentPath = encodePath(resourcePath);
     }
 
-    public String getMainStatusMessage() {
+    public String getStatusCode() {
+        if (NumberUtils.isParsable(statusCode) && Integer.parseInt(statusCode) > 0) {
+            return "HTTP " + statusCode;
+        }
+        return getStatusMessageExcerpt();
+    }
+
+    public String getStatusMessageExcerpt() {
         if (!isStatusClampable()) {
             return statusMessage;
         }
@@ -131,6 +140,17 @@ public class GridViewItem {
         }
         String result = StringUtils.substringAfterLast(statusMessage, DOT);
         return StringUtils.substringBefore(result, StringUtils.SPACE);
+    }
+
+    public String getStatusTag() {
+        if (!NumberUtils.isParsable(statusCode) || "0".equals(statusCode)) {
+            return "undefined";
+        }
+        int code = Integer.parseInt(statusCode);
+        if (code >= HttpStatus.SC_OK && code < HttpStatus.SC_MULTIPLE_CHOICES) {
+            return "ok";
+        }
+        return "error";
     }
 
     public String getTitle() {

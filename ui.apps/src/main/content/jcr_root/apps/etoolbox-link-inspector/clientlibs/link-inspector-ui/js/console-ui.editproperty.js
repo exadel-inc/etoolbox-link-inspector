@@ -73,13 +73,23 @@
     function onEditDialogSubmit(e) {
         const dialog = e.target.closest('coral-dialog');
         const editor = dialog.querySelector('.editor');
+
+        const sourceElement = editor.sourceElement;
+        const indicatorHolder = sourceElement.closest('tr').querySelector('.status .indicator');
+        const indicatorIcon = indicatorHolder.querySelector('[icon]');
+        const statusTextHolder = indicatorHolder.nextElementSibling;
+        const newValue = editor.innerText;
+
+        if (newValue === sourceElement.innerHTML) {
+            return;
+        }
+
         const formData = new FormData();
         formData.append('path', editor.dataset.path);
         formData.append('propertyName', editor.dataset.property);
         formData.append('updatedLink', editor.innerText);
         formData.append('currentLink', editor.sourceElement.innerHTML);
-        const sourceElement = editor.sourceElement;
-        const newValue = editor.innerText;
+
         foundationUi.wait();
         $.ajax({
             type: 'POST',
@@ -90,6 +100,9 @@
         })
             .done(function () {
                 sourceElement.innerHTML = newValue;
+                indicatorHolder.setAttribute('title', 'Modified');
+                statusTextHolder.innerText = 'Modified';
+                indicatorIcon.dataset.status = 'undefined';
                 foundationUi.notify('Success', 'Value saved successfully', 'info');
             })
             .fail(function () {

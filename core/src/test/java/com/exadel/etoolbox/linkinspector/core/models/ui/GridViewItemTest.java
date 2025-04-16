@@ -58,7 +58,7 @@ public class GridViewItemTest {
 
     private static final String TEST_BROKEN_LINK_HREF = "/content/internal-test-link";
     private static final String TEST_BROKEN_LINK_TYPE = "internal";
-    private static final String TEST_BROKEN_LINK_SC = String.valueOf(HttpStatus.SC_NOT_FOUND);
+    private static final String TEST_BROKEN_LINK_SC = "HTTP " + HttpStatus.SC_NOT_FOUND;
     private static final String TEST_BROKEN_LINK_STATUS_MESSAGE = HttpStatus.getStatusText(HttpStatus.SC_NOT_FOUND);
 
     private final AemContext context = new AemContext(ResourceResolverType.RESOURCERESOLVER_MOCK);
