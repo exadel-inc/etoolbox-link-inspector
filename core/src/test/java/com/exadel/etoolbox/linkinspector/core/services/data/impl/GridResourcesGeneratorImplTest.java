@@ -70,12 +70,12 @@ import static org.mockito.Mockito.*;
 class GridResourcesGeneratorImplTest {
     private static final String RESOURCE_RESOLVER_FACTORY_FIELD = "resourceResolverFactory";
     private static final String REPOSITORY_HELPER_FIELD = "repositoryHelper";
-    private static final String REAL_DATAFEED_PATH = "/content/etoolbox-link-inspector/data/datafeed.json";
+    private static final String REAL_DATAFEED_PATH = "/var/etoolbox/link-inspector/data/datafeed.json";
     private static final String EXECUTOR_SERVICE_FIELD = "executorService";
     private static final String GRID_RESOURCE_TYPE = "etoolbox-link-inspector/components/gridConfig";
     private static final String TEST_RESOURCES_TREE_PATH = "/com/exadel/etoolbox/linkinspector/core/services/data/impl/resources.json";
     private static final String TEST_DATAFEED_PATH = "/com/exadel/etoolbox/linkinspector/core/services/data/impl/expectedResources.json";
-    private static final String REAL_CSV_REPORT_NODE = "/content/etoolbox-link-inspector/data/content";
+    private static final String REAL_CSV_REPORT_NODE = "/var/etoolbox/link-inspector/data/content";
     private static final String TEST_CSV_SIZE_PROPERTY_NAME = "size";
     private static final int TEST_CSV_SIZE_PROPERTY_VALUE = 1;
     private static final String TEST_FOLDER_PATH = "/content/test-folder";

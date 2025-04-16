@@ -31,7 +31,7 @@
     var PROCESSING_NOT_FOUND_MSG = 'The value <b>{{source}}</b> was not found at <i>{{path}}@{{propertyName}}</i>';
     var PROCESSING_IDENTICAL_MSG = 'The value <b>{{source}}</b> is equal to the entered one, replacement was not applied';
 
-    var FIX_BROKEN_LINK_COMMAND = '/content/etoolbox-link-inspector/servlet/fixBrokenLink';
+    var FIX_BROKEN_LINK_COMMAND = '/content/etoolbox/link-inspector/servlet/fixBrokenLink';
     var READ_WRITE_PERMISSIONS = "read,set_property";
 
     /** Root action handler */

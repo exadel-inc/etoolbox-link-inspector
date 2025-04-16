@@ -73,26 +73,45 @@
     function onEditDialogSubmit(e) {
         const dialog = e.target.closest('coral-dialog');
         const editor = dialog.querySelector('.editor');
+
+        const sourceElement = editor.sourceElement;
+        const indicatorHolder = sourceElement.closest('tr').querySelector('.status .indicator');
+        const indicatorIcon = indicatorHolder.querySelector('[icon]');
+        const statusTextHolder = indicatorHolder.nextElementSibling;
+        const newValue = editor.innerText;
+
+        if (newValue === sourceElement.innerHTML) {
+            return;
+        }
+
         const formData = new FormData();
         formData.append('path', editor.dataset.path);
         formData.append('propertyName', editor.dataset.property);
         formData.append('updatedLink', editor.innerText);
         formData.append('currentLink', editor.sourceElement.innerHTML);
+
+        foundationUi.wait();
         $.ajax({
             type: 'POST',
-            url: '/content/etoolbox-link-inspector/servlet/editValue',
+            url: '/content/etoolbox/link-inspector/servlet/editValue',
             data: formData,
             processData: false,
-            contentType: false,
-            success: function () {
-                editor.sourceElement.innerHTML = editor.innerText;
+            contentType: false
+        })
+            .done(function () {
+                sourceElement.innerHTML = newValue;
+                indicatorHolder.setAttribute('title', 'Modified');
+                statusTextHolder.innerText = 'Modified';
+                indicatorIcon.dataset.status = 'undefined';
                 foundationUi.notify('Success', 'Value saved successfully', 'info');
-            },
-            error: function(err) {
+            })
+            .fail(function () {
                 console.log('Error while saving value', err);
                 foundationUi.notify('Error', 'Unable to save value', 'error');
-            }
-        });
+            })
+            .always(function () {
+                foundationUi.clearWait();
+            });
     }
 
     function onEditDialogClose(e) {

@@ -43,7 +43,7 @@
     var PROCESSING_NOT_FOUND_MSG = 'Properties matching the pattern <b>{{pattern}}</b> were not found, or user has insufficient permissions to process them';
     var PROCESSING_IDENTICAL_MSG = 'The pattern <b>{{pattern}}</b> is equal to the replacement value, no processing was done';
 
-    var REPLACE_BY_PATTERN_COMMAND = '/content/etoolbox-link-inspector/servlet/replaceByPattern';
+    var REPLACE_BY_PATTERN_COMMAND = '/content/etoolbox/link-inspector/servlet/replaceByPattern';
     var READ_PERMISSIONS = 'read';
 
     var currentDate = Date.now();
