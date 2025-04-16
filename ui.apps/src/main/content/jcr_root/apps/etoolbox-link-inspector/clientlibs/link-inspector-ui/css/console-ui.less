@@ -113,6 +113,9 @@
     &:has(:nth-child(2)) {
       overflow-y: scroll;
     }
+    &.no-scroll {
+        overflow-y: hidden;
+    }
   }
 }
 
@@ -169,22 +172,6 @@
 .options-page {
     min-width: 40rem ;
     width: 50% ;
-}
-
-.elc-scan-dialog-content {
-    height: 80px;
-    width: 400px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-}
-
-.elc-scan-dialog-content div {
-    font-family: adobe-clean, Helvetica, Arial, sans-serif;
-    font-weight: 300;
-    font-style: normal;
-    font-size: 1rem;
-    margin-bottom: 10px;
 }
 
 .result-type {
