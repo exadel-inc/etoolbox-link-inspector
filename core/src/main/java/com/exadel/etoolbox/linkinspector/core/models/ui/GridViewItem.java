@@ -21,7 +21,10 @@ import com.day.cq.wcm.api.components.Component;
 import com.day.cq.wcm.api.components.ComponentManager;
 import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
+import org.apache.http.HttpStatus;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -29,12 +32,11 @@ import org.apache.sling.models.annotations.DefaultInjectionStrategy;
 import org.apache.sling.models.annotations.Model;
 import org.apache.sling.models.annotations.injectorspecific.SlingObject;
 import org.apache.sling.models.annotations.injectorspecific.ValueMapValue;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -46,8 +48,9 @@ import java.util.stream.Collectors;
         defaultInjectionStrategy = DefaultInjectionStrategy.OPTIONAL
 )
 @Getter
+@Slf4j
 public class GridViewItem {
-    private static final Logger LOG = LoggerFactory.getLogger(GridViewItem.class);
+    private static final Pattern EXCEPTION = Pattern.compile("(\\w+\\.)+\\w+");
 
     /**
      * The prefix for building a page link on Author instance
@@ -59,8 +62,10 @@ public class GridViewItem {
      */
     public static final String CRX_DE_PATH = "/crx/de/index.jsp#";
 
-    public static final String SLASH_CHAR = "/";
-    public static final String HTML_EXTENSION = ".html";
+    private static final String DOT = ".";
+    private static final String SLASH = "/";
+    private static final String HTML_EXTENSION = ".html";
+    private static final String COLON = ":";
 
     @SlingObject
     @Getter(value = AccessLevel.NONE)
@@ -100,7 +105,7 @@ public class GridViewItem {
                 ? resourceResolver.getResource(resourcePath)
                 : null;
         if (resourceToShow == null) {
-            LOG.warn("Resource is null, path: {}", resourcePath);
+            log.warn("Resource is null, path: {}", resourcePath);
             return;
         }
 
@@ -119,6 +124,35 @@ public class GridViewItem {
         componentPath = encodePath(resourcePath);
     }
 
+    public String getStatusCode() {
+        if (NumberUtils.isParsable(statusCode) && Integer.parseInt(statusCode) > 0) {
+            return "HTTP " + statusCode;
+        }
+        return getStatusMessageExcerpt();
+    }
+
+    public String getStatusMessageExcerpt() {
+        if (!isStatusClampable()) {
+            return statusMessage;
+        }
+        if (StringUtils.contains(statusMessage, COLON)) {
+            return StringUtils.substringAfterLast(statusMessage, COLON);
+        }
+        String result = StringUtils.substringAfterLast(statusMessage, DOT);
+        return StringUtils.substringBefore(result, StringUtils.SPACE);
+    }
+
+    public String getStatusTag() {
+        if (!NumberUtils.isParsable(statusCode) || "0".equals(statusCode)) {
+            return "undefined";
+        }
+        int code = Integer.parseInt(statusCode);
+        if (code >= HttpStatus.SC_OK && code < HttpStatus.SC_MULTIPLE_CHOICES) {
+            return "ok";
+        }
+        return "error";
+    }
+
     public String getTitle() {
         return getResourcePath();
     }
@@ -127,9 +161,14 @@ public class GridViewItem {
         return CRX_DE_PATH;
     }
 
+    public boolean isStatusClampable() {
+        return StringUtils.contains(statusMessage, COLON)
+                || (StringUtils.isNotEmpty(statusMessage) && EXCEPTION.matcher(statusMessage).find());
+    }
+
     private static String encodePath(String path) {
-        return Arrays.stream(path.split(SLASH_CHAR))
+        return Arrays.stream(path.split(SLASH))
                 .map(JcrUtil::escapeIllegalJcrChars)
-                .collect(Collectors.joining(SLASH_CHAR));
+                .collect(Collectors.joining(SLASH));
     }
 }

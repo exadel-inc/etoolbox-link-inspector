@@ -24,11 +24,11 @@
     &.check {
       padding: 4px 16px;
       text-align: center;
-      vertical-align: middle;
       width: 0;
     }
     &.status {
-      max-width: 80px;
+      max-width: 110px;
+      text-transform: capitalize;
       width: 0;
     }
     &.page {
@@ -48,11 +48,11 @@
     position: relative;
   }
   .indicator {
-    margin-top: 0.2rem;
+    margin: 0.25rem 0;
   }
   .primary {
     display: block;
-    margin-bottom: 0.2rem;
+    margin-bottom: 0.25rem;
   }
   .secondary {
     display: block;
@@ -71,11 +71,27 @@
   .centered {
     text-align: center;
   }
-  .ellipsis {
+  .full-ellipsis {
     display: -webkit-box;
     overflow: hidden;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 10;
+  }
+  .line-ellipsis {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  [data-status="ok"] {
+    color: #0FCB8C;
+  }
+
+  [data-status="error"] {
+    color: #f85647;
+  }
+
+  [data-status="undefined"] {
+    color: #bababa;
   }
 }
 
@@ -86,17 +102,17 @@
   display: block;
 }
 
-.elc-coral-popover {
-  width: 15%;
-  word-break: break-word;
-}
-
 .elc-dialog {
   vertical-align: middle;
-  .coral3-Dialog-wrapper {
+
+  .content {
     max-height: 80vh;
-    overflow-y: scroll;
+    overflow-y: hidden;
     width: 40vw;
+    // Enable vertical scroll if there is more than one child element
+    &:has(:nth-child(2)) {
+      overflow-y: scroll;
+    }
   }
 }
 
@@ -112,24 +128,6 @@
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
   }
-}
-
-.elc-result-status--ok {
-  color: #0FCB8C;
-}
-
-.elc-result-status--error {
-  color: #f85647;
-}
-
-.elc-run-button {
-    border: none;
-    background: none !important;
-    padding: 0 !important;
-    font-family: arial, sans-serif;
-    cursor: pointer;
-    color: #4178cd;
-    margin: 0 0.5rem;
 }
 
 .foundation-collection-selectall {
@@ -192,4 +190,14 @@
 .result-type {
     color: #cccccc;
     font-style: italic;
+}
+
+/* ---------------
+   Utility classes
+   --------------- */
+
+.no-outline, .no-outline:not(:disabled):not(.is-disabled):focus {
+  border: none;
+  box-shadow: none;
+  -webkit-box-shadow: none;
 }

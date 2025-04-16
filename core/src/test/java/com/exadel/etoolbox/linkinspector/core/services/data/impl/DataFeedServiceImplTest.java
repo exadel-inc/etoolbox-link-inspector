@@ -73,8 +73,8 @@ class DataFeedServiceImplTest {
     private static final String LINK_HELPER_FIELD = "linkHelper";
     private static final String CONFIG_FIELD = "configService";
 
-    private static final String DATAFEED_PATH = "/content/etoolbox-link-inspector/data/datafeed.json";
-    private static final String CSV_REPORT_PATH = "/content/etoolbox-link-inspector/download/report.csv";
+    private static final String DATAFEED_PATH = "/var/etoolbox/link-inspector/data/datafeed.json";
+    private static final String CSV_REPORT_PATH = "/var/etoolbox/link-inspector/download/report.csv";
 
     private static final String TEST_RESOURCES_TREE_PATH = "/com/exadel/etoolbox/linkinspector/core/services/data/impl/resources.json";
     private static final String TEST_FOLDER_PATH = "/content/test-folder";

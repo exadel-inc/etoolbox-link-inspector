@@ -62,7 +62,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
     private static final Logger LOG = LoggerFactory.getLogger(GridResourcesGeneratorImpl.class);
 
     private static final String TAGS_LOCATION = "/content/cq:tags";
-    public static final String STATS_RESOURCE_PATH = "/content/etoolbox-link-inspector/data/stats";
+    public static final String STATS_RESOURCE_PATH = "/var/etoolbox/link-inspector/data/stats";
 
     @Reference
     private LinkHelper linkHelper;
