@@ -78,21 +78,27 @@
         formData.append('propertyName', editor.dataset.property);
         formData.append('updatedLink', editor.innerText);
         formData.append('currentLink', editor.sourceElement.innerHTML);
+        const sourceElement = editor.sourceElement;
+        const newValue = editor.innerText;
+        foundationUi.wait();
         $.ajax({
             type: 'POST',
-            url: '/content/etoolbox-link-inspector/servlet/editValue',
+            url: '/content/etoolbox/link-inspector/servlet/editValue',
             data: formData,
             processData: false,
-            contentType: false,
-            success: function () {
-                editor.sourceElement.innerHTML = editor.innerText;
+            contentType: false
+        })
+            .done(function () {
+                sourceElement.innerHTML = newValue;
                 foundationUi.notify('Success', 'Value saved successfully', 'info');
-            },
-            error: function(err) {
+            })
+            .fail(function () {
                 console.log('Error while saving value', err);
                 foundationUi.notify('Error', 'Unable to save value', 'error');
-            }
-        });
+            })
+            .always(function () {
+                foundationUi.clearWait();
+            });
     }
 
     function onEditDialogClose(e) {

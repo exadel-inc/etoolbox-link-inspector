@@ -19,7 +19,7 @@
 (function (window, document, $, Granite) {
     "use strict";
 
-    var CHECK_URL = '/content/etoolbox-link-inspector/servlet/pendingGenerationCheck';
+    var CHECK_URL = '/content/etoolbox/link-inspector/servlet/pendingGenerationCheck';
     var UPDATE_MSG = Granite.I18n.get('Some links were updated. Changes will be reflected in the report after data feed regeneration');
 
     $(document).ready(function () {

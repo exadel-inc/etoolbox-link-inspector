@@ -83,12 +83,12 @@ public class DataFeedServiceImpl implements DataFeedService {
     /**
      * The location of the data feed json in the repository
      */
-    private static final String JSON_FEED_PATH = "/content/etoolbox-link-inspector/data/datafeed.json";
+    private static final String JSON_FEED_PATH = "/var/etoolbox/link-inspector/data/datafeed.json";
 
     /**
      * The location of the generated Csv report in the repository
      */
-    private static final String CSV_REPORT_PATH = "/content/etoolbox-link-inspector/download/report.csv";
+    private static final String CSV_REPORT_PATH = "/var/etoolbox/link-inspector/download/report.csv";
 
     /**
      * The columns represented in the Csv report

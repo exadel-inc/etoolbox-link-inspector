@@ -133,7 +133,7 @@
     }
     Utils.bulkLinksUpdate = bulkLinksUpdate;
 
-    var ACL_CHECK_COMMAND = '/content/etoolbox-link-inspector/servlet/aclCheck';
+    var ACL_CHECK_COMMAND = '/content/etoolbox/link-inspector/servlet/aclCheck';
 
     /**
      * Check if user has specified permissions for the given path.
@@ -161,7 +161,7 @@
     }
     Utils.aclCheck = aclCheck;
 
-    var RESOURCE_EXIST_CHECK_COMMAND = '/content/etoolbox-link-inspector/servlet/resourceExistCheck';
+    var RESOURCE_EXIST_CHECK_COMMAND = '/content/etoolbox/link-inspector/servlet/resourceExistCheck';
 
     /**
      * Checks if the resource with specified paths exists

@@ -31,7 +31,7 @@ public interface DataFeedService {
      * If the node presents, users are informed that data feed regeneration is required
      * in order to display up-to-date results.
      */
-    String PENDING_GENERATION_NODE = "/content/etoolbox-link-inspector/data/pendingDataFeedUpdate";
+    String PENDING_GENERATION_NODE = "/var/etoolbox/link-inspector/data/pendingDataFeedUpdate";
 
     /**
      * Collects broken links and generates json data feed for further usage in the Link Inspector grid.
