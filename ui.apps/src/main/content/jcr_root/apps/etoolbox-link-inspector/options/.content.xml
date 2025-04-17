@@ -154,6 +154,7 @@
                                                         sling:resourceType="granite/ui/components/coral/foundation/form/datepicker"
                                                         wrapperClass="last-modified-date-picker"
                                                         fieldLabel="Last Modified"
+                                                        required="{Boolean}true"
                                                         fieldDescription="The content modified before the specified date will be excluded. Tha date should has the ISO-like date-time format, such as '2011-12-03T10:15:30+01:00')"
                                                         name="./lastModified">
                                                 </lastModified>
