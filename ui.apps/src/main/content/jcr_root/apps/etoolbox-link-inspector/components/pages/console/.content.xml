@@ -182,7 +182,7 @@
             jcr:primaryType="nt:unstructured"
             jcr:title="Filter Links"
             sling:resourceType="granite/ui/components/coral/foundation/dialog"
-            granite:class="modal-form"
+            granite:class="elc-dialog"
             granite:id="filter--dialog">
         <items jcr:primaryType="nt:unstructured">
             <form jcr:primaryType="nt:unstructured"
@@ -248,7 +248,7 @@
             jcr:title="Scan"
             granite:id="elc-scan-now-dialog"
             sling:resourceType="granite/ui/components/coral/foundation/dialog"
-            granite:class="modal-form">
+            granite:class="elc-dialog">
         <items jcr:primaryType="nt:unstructured">
             <scan jcr:primaryType="nt:unstructured"
                   path="/var/etoolbox/link-inspector/data/stats"

@@ -39,8 +39,7 @@
     function getDialog(id = 'default', options) {
         if (!sharableDialogs[id]) {
             let dialogOptions = {
-                backdrop: Coral.Dialog.backdrop.STATIC,
-                interaction: 'off'
+                backdrop: Coral.Dialog.backdrop.STATIC
             };
             if (options && typeof options === 'object') {
                 dialogOptions = Object.assign(dialogOptions, options);

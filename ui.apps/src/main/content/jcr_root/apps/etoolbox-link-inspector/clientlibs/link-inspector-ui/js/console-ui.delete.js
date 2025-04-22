@@ -18,35 +18,28 @@
  */
 (function (window, document, $, ELC, Granite, Coral) {
     'use strict';
-    const DIALOG_TITLE_LABEL = Granite.I18n.get('Delete Report');
-    const CANCEL_LABEL = Granite.I18n.get('Cancel');
-    const SUBMIT_FILTER_LABEL = Granite.I18n.get('Delete');
-    const ERROR_MSG = Granite.I18n.get('Something went wrong');
 
-    function onFilterAction(name, el, config, collection, selections) {
-        const dialog = document.querySelector('#delete-dialog');
+    function onFilterAction() {
+        const dialog = document.querySelector('#delete-report');
         dialog.show();
     }
 
     function initDeleteDialog(){
-        const dialog = new Coral.Dialog().set({
-            id : 'delete-dialog',
-            closable: Coral.Dialog.closable.ON,
-            backdrop: Coral.Dialog.backdrop.STATIC,
-            interaction: 'off',
-            header :{
-                innerHTML : DIALOG_TITLE_LABEL
+        const dialog = ELC.getDialog('delete-report', {
+            id: 'delete-dialog',
+            header: {
+                textContent: Granite.I18n.get('Delete Report')
+            },
+            content: {
+                innerHTML: '<div class="elc-dialog-content">Are you sure you want to delete the report?</div>'
+            },
+            footer: {
+                innerHTML: `
+                  <button is="coral-button" variant="default" coral-close>${Granite.I18n.get('Cancel')}</button>
+                  <button data-dialog-action is="coral-button" variant="primary" coral-close>${Granite.I18n.get('Delete')}</button>
+                `
             }
         });
-
-        $('<p>').html('Are you sure you want to delete the report?').appendTo(dialog.content);
-
-        const $cancelBtn = $('<button is="coral-button" variant="default" coral-close>').text(CANCEL_LABEL);
-        const $updateBtn =
-            $('<button data-dialog-action is="coral-button" variant="primary" coral-close>').text(SUBMIT_FILTER_LABEL);
-
-        $cancelBtn.appendTo(dialog.footer);
-        $updateBtn.appendTo(dialog.footer);
 
         function onDeleteDialogSubmit(){
             dialog.trigger('coral-overlay:close');
@@ -57,17 +50,10 @@
                     window.location.reload();
                 },
                 error: function(){
-                    var alertPopup = new Coral.Alert().set({
-                        variant: "error",
-                        header: {
-                            innerHTML: 'ERROR'
-                        },
-                        content: {
-                            textContent: ERROR_MSG
-                        }
-                    });
-                    alertPopup.classList.add('elc-coral-alert');
-                    document.body.append(alertPopup);
+                    $(window).adaptTo('foundation-ui').alert(
+                        Granite.I18n.get('Error'),
+                        Granite.I18n.get('Error while deleting report'),
+                        'error');
                 }
             });
         }
