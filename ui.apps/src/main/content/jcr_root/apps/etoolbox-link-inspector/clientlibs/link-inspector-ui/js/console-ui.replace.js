@@ -110,8 +110,9 @@
         }
         if (data && data.updatedItemsCount) {
             var updatedItemsCount = data.updatedItemsCount;
-            var countMessage = `The number of updated items: <b>${updatedItemsCount}</b>`;
-            PROCESSING_SUCCESS_MSG = PROCESSING_SUCCESS_MSG.replace("%s", countMessage);
+            var updatedItems = data.updatedItems;
+            var updatedItemsMessage = `The number of updated items: <b>${updatedItemsCount}</b>${updatedItems}`;
+            PROCESSING_SUCCESS_MSG = PROCESSING_SUCCESS_MSG.replace("%s", updatedItemsMessage);
         } else {
             PROCESSING_SUCCESS_MSG = PROCESSING_SUCCESS_MSG.replace("%s", "");
         }

@@ -270,7 +270,7 @@ public class ReplaceByPatternServlet extends SlingAllMethodsServlet {
         if (isOutputAsCsv) {
             generateCsvOutput(updatedItems, response);
         } else {
-            itemsCountToResponse(updatedItems.size(), response);
+            updatedItemsToResponse(updatedItems, response);
         }
         LOG.info("{} link(s) were updated, linkPattern: {}, replacement: {}",
                 updatedItems.size(),
@@ -331,9 +331,18 @@ public class ReplaceByPatternServlet extends SlingAllMethodsServlet {
         }
     }
 
-    private void itemsCountToResponse(int count, SlingHttpServletResponse response) {
+    private void updatedItemsToResponse(List<UpdatedItem> updatedItems, SlingHttpServletResponse response) {
+        StringBuilder htmlListBuilder = new StringBuilder();
+        htmlListBuilder.append("<ul>");
+        for (UpdatedItem item : updatedItems) {
+            htmlListBuilder.append("<li>")
+                    .append(item.getCurrentLink()).append(" -> ").append(item.getUpdatedLink())
+                    .append("</li>");
+        }
+        htmlListBuilder.append("</ul>");
         String jsonResponse = Json.createObjectBuilder()
-                .add(ITEMS_COUNT_RESP_PARAM, count)
+                .add(ITEMS_COUNT_RESP_PARAM, updatedItems.size())
+                .add("updatedItems", htmlListBuilder.toString())
                 .build()
                 .toString();
         ServletUtil.writeJsonResponse(response, jsonResponse);
