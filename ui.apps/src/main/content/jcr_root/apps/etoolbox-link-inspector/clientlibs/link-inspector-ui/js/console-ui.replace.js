@@ -37,7 +37,7 @@
     var PROCESSING_ERROR_MSG = 'Failed to replace by pattern<br/>Pattern: <b>{{pattern}}</b><br/>Replacement: <b>{{replacement}}</b>';
     var PERSISTENCE_ERROR_MSG = 'Replacement was interrupted due to the <b>error</b> occurred during persisting changes. Please see logs for more details';
     var FORBIDDEN_ERROR_MSG = 'Failed to build the backup package. Possible reasons: lack of permissions, please see logs for more details.<br/><b>No replacement was applied</b>';
-    var PROCESSING_SUCCESS_MSG = 'Replacement completed. %s<br/><br/>Pattern: <b>{{pattern}}</b><br/>Replacement: <b>{{replacement}}</b>';
+    var processingSuccessMsg = 'Replacement completed. %s<br/><br/>Pattern: <b>{{pattern}}</b><br/>Replacement: <b>{{replacement}}</b>';
     var DRY_RUN_PREFIX_MSG = '(Dry run) ';
     var DOWNLOADED_CSV_MSG = 'Please see the downloaded CSV for more details.';
     var PROCESSING_NOT_FOUND_MSG = 'Properties matching the pattern <b>{{pattern}}</b> were not found, or user has insufficient permissions to process them';
@@ -102,21 +102,21 @@
 
     function handleSuccessRequest(xhr, data, logger, item) {
         if (item.isDryRun) {
-            PROCESSING_SUCCESS_MSG = DRY_RUN_PREFIX_MSG + PROCESSING_SUCCESS_MSG;
+            processingSuccessMsg = DRY_RUN_PREFIX_MSG + processingSuccessMsg;
         }
         if (xhr.getResponseHeader("Content-disposition") && data) {
-            PROCESSING_SUCCESS_MSG = PROCESSING_SUCCESS_MSG.replace("%s", DOWNLOADED_CSV_MSG);
+            processingSuccessMsg = processingSuccessMsg.replace("%s", DOWNLOADED_CSV_MSG);
             downloadCsvOutput(data);
         }
         if (data && data.updatedItemsCount) {
             var updatedItemsCount = data.updatedItemsCount;
             var updatedItems = data.updatedItems;
             var updatedItemsMessage = `The number of updated items: <b>${updatedItemsCount}</b>${updatedItems}`;
-            PROCESSING_SUCCESS_MSG = PROCESSING_SUCCESS_MSG.replace("%s", updatedItemsMessage);
+            processingSuccessMsg = processingSuccessMsg.replace("%s", updatedItemsMessage);
         } else {
-            PROCESSING_SUCCESS_MSG = PROCESSING_SUCCESS_MSG.replace("%s", "");
+            processingSuccessMsg = processingSuccessMsg.replace("%s", "");
         }
-        logger.log(ELC.format(PROCESSING_SUCCESS_MSG, item), false);
+        logger.log(ELC.format(processingSuccessMsg, item), false);
     }
 
     function downloadCsvOutput(data) {
