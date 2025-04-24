@@ -131,12 +131,6 @@ public class LinkHelperImpl implements LinkHelper {
     }
 
     private Object updatePropertyWithNewLink(Object value, String currentLink, String newLink) {
-        return getLinkStream(value)
-                .map(Result::getValue)
-                .filter(currentLink::equals)
-                .findFirst()
-                .map(currentLinkToReplace ->
-                        LinkInspectorResourceUtil.replaceStringInPropValue(value, currentLinkToReplace, newLink))
-                .orElse(null);
+        return LinkInspectorResourceUtil.replaceStringInPropValue(value, currentLink, newLink);
     }
 }
