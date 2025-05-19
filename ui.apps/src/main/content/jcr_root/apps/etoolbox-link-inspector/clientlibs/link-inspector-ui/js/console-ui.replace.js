@@ -154,18 +154,18 @@
         let $replaceRadio = new Coral.Radio();
             $replaceRadio.label.textContent = REPLACE_LABEL;
             $replaceRadio.name = 'replace-modify';
-            $replaceRadio.checked = true;
             $replaceRadio.value = 'replace';
 
         let $modifyRadio = new Coral.Radio();
             $modifyRadio.label.textContent = MODIFY_LABEL;
             $modifyRadio.name = 'replace-modify';
+            $modifyRadio.checked = true;
             $modifyRadio.value = 'modify';
 
-            el.content.appendChild($replaceRadio);
             el.content.appendChild($modifyRadio);
+            el.content.appendChild($replaceRadio);
 
-        let $patternFieldGroup = $('<div class="elc-pattern-field-group" hidden>');
+        let $patternFieldGroup = $('<div class="elc-pattern-field-group">');
         var $patternTextField =
             $('<input is="coral-textfield" class="elc-pattern-input" name="pattern" value="" placeholder=".+" required>');
         $('<p>').text(PATTERN_LABEL).appendTo($patternFieldGroup);

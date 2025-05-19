@@ -122,21 +122,11 @@ public class LinkHelperImpl implements LinkHelper {
                                               String propertyName, String currentLink, String newLink) {
         boolean updated = false;
         Optional<Object> updatedValue = Optional.ofNullable(modifiableValueMap.get(propertyName))
-                .map(value -> updatePropertyWithNewLink(value, currentLink, newLink));
+                .map(value -> LinkInspectorResourceUtil.replaceStringInPropValue(value, currentLink, newLink));
         if (updatedValue.isPresent()) {
             modifiableValueMap.put(propertyName, updatedValue.get());
             updated = true;
         }
         return updated;
-    }
-
-    private Object updatePropertyWithNewLink(Object value, String currentLink, String newLink) {
-        return getLinkStream(value)
-                .map(Result::getValue)
-                .filter(currentLink::equals)
-                .findFirst()
-                .map(currentLinkToReplace ->
-                        LinkInspectorResourceUtil.replaceStringInPropValue(value, currentLinkToReplace, newLink))
-                .orElse(null);
     }
 }
