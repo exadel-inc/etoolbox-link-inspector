@@ -2,6 +2,7 @@ package com.exadel.etoolbox.linkinspector.core.services.util;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
@@ -10,6 +11,7 @@ import org.osgi.service.metatype.MetaTypeService;
 import org.osgi.service.metatype.ObjectClassDefinition;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
+@Slf4j
 public class OcdUtil {
 
     private static final String SEPARATOR_COLON = ":";
@@ -28,9 +30,14 @@ public class OcdUtil {
         if (metaTypeInformation == null) {
             return result;
         }
-        ObjectClassDefinition objectClassDefinition = metaTypeInformation.getObjectClassDefinition(
-                component.getClass().getName(),
-                null);
+        ObjectClassDefinition objectClassDefinition = null;
+        try {
+            objectClassDefinition = metaTypeInformation.getObjectClassDefinition(
+                    component.getClass().getName(),
+                    null);
+        } catch (IllegalArgumentException e) {
+            log.error("Failed to get ObjectClassDefinition for {}.", component.getClass().getName());
+        }
         if (objectClassDefinition == null || StringUtils.isBlank(objectClassDefinition.getName())) {
             return result;
         }

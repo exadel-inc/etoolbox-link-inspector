@@ -6,8 +6,8 @@ import com.exadel.etoolbox.linkinspector.api.Resolver;
 import com.exadel.etoolbox.linkinspector.core.services.util.GraniteUtil;
 import com.exadel.etoolbox.linkinspector.core.services.util.OcdUtil;
 import lombok.Getter;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
@@ -19,11 +19,7 @@ import org.apache.sling.jcr.resource.api.JcrResourceConstants;
 import org.apache.sling.servlets.annotations.SlingServletResourceTypes;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
-import org.osgi.service.component.annotations.ReferencePolicyOption;
+import org.osgi.service.component.annotations.*;
 import org.osgi.service.metatype.AttributeDefinition;
 import org.osgi.service.metatype.MetaTypeInformation;
 import org.osgi.service.metatype.MetaTypeService;
@@ -36,6 +32,7 @@ import java.util.*;
 @SlingServletResourceTypes(
         resourceTypes = "/bin/etoolbox/link-inspector/settings",
         methods = HttpConstants.METHOD_GET)
+@Slf4j
 public class SettingsDataSource extends SlingSafeMethodsServlet {
 
     private static final String RESTYPE_CHECKBOX = "granite/ui/components/coral/foundation/form/checkbox";
@@ -53,7 +50,7 @@ public class SettingsDataSource extends SlingSafeMethodsServlet {
     private transient volatile List<Resolver> linkResolvers;
 
     @Override
-    protected void doGet(@NonNull SlingHttpServletRequest request, @NonNull SlingHttpServletResponse response) {
+    protected void doGet(SlingHttpServletRequest request, SlingHttpServletResponse response) {
         String rootPath = request.getRequestPathInfo().getResourcePath();
         Resource mainTab = request.getResourceResolver().getResource(rootPath + "/main");
         Resource advancedTab = request.getResourceResolver().getResource(rootPath + "/advanced");
@@ -116,7 +113,15 @@ public class SettingsDataSource extends SlingSafeMethodsServlet {
         for (Resolver linkResolver : CollectionUtils.emptyIfNull(linkResolvers)) {
             Bundle bundle = FrameworkUtil.getBundle(linkResolver.getClass());
             MetaTypeInformation metaTypeInformation = metaTypeService.getMetaTypeInformation(bundle);
-            ObjectClassDefinition objectClassDefinition = metaTypeInformation.getObjectClassDefinition(linkResolver.getClass().getName(), null);
+            ObjectClassDefinition objectClassDefinition = null;
+            try {
+                objectClassDefinition = metaTypeInformation.getObjectClassDefinition(linkResolver.getClass().getName(), null);
+            } catch (IllegalArgumentException e) {
+                log.error("Unable to get ObjectClassDefinition for {}.", linkResolver.getClass().getName());
+            }
+            if (objectClassDefinition == null) {
+                continue;
+            }
             AttributeDefinition[] definitions = objectClassDefinition.getAttributeDefinitions(ObjectClassDefinition.ALL);
 
             String id = linkResolver.getClass().getName();
