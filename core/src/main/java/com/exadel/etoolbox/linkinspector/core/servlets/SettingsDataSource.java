@@ -113,6 +113,9 @@ public class SettingsDataSource extends SlingSafeMethodsServlet {
         for (Resolver linkResolver : CollectionUtils.emptyIfNull(linkResolvers)) {
             Bundle bundle = FrameworkUtil.getBundle(linkResolver.getClass());
             MetaTypeInformation metaTypeInformation = metaTypeService.getMetaTypeInformation(bundle);
+            if (metaTypeInformation == null) {
+                return result;
+            }
             ObjectClassDefinition objectClassDefinition = null;
             try {
                 objectClassDefinition = metaTypeInformation.getObjectClassDefinition(linkResolver.getClass().getName(), null);
