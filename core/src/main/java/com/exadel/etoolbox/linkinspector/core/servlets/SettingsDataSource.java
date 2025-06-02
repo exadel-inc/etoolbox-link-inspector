@@ -88,6 +88,8 @@ public class SettingsDataSource extends SlingSafeMethodsServlet {
                         fieldProperties.put("emptyText", attributeDefinition.getDefaultValue()[0]);
                     } else if (RESTYPE_NUMBER_FIELD.equals(resourceType)) {
                         fieldProperties.put("value", attributeDefinition.getDefaultValue()[0]);
+                    } else if (RESTYPE_CHECKBOX.equals(resourceType)) {
+                        fieldProperties.put("checked", Boolean.parseBoolean(attributeDefinition.getDefaultValue()[0]));
                     }
                 }
                 Resource field = GraniteUtil.createResource(
