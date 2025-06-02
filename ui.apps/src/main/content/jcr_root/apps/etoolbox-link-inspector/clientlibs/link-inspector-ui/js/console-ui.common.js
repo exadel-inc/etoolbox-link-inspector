@@ -186,23 +186,4 @@
     }
     Utils.resourceExistCheck = resourceExistCheck;
 
-    $(document).on('submit', '#elc-options-savesettings', function (e) {
-        e.preventDefault();
-        const form = $(this);
-        $.ajax({
-            type: "POST",
-            url: $(this).attr('action'),
-            data: $(this).serialize(),
-            success: function () {
-                location.replace("/etoolbox/link-inspector.html")
-            },
-            error: function() {
-                $(window).adaptTo('foundation-ui').alert(
-                    Granite.I18n.get('Error'),
-                    Granite.I18n.get('Error while saving settings'),
-                    'error');
-            }
-        });
-    })
-
 })(window, document, Granite.$, Granite, Coral);
