@@ -15,7 +15,6 @@
 <workspaceFilter version="1.0">
     <filter root="/apps/etoolbox-link-inspector/clientlibs"/>
     <filter root="/apps/etoolbox-link-inspector/components"/>
-    <filter root="/apps/etoolbox-link-inspector/options"/>
     <filter root="/apps/etoolbox-link-inspector/nav"/>
-    <filter root="/apps/cq/core/content/nav/tools/etoolbox/link-inspector" mode="update"/>
+    <filter root="/apps/cq/core/content/nav/tools/etoolbox/link-inspector"/>
 </workspaceFilter>
