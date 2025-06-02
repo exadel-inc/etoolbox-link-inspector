@@ -59,9 +59,9 @@ public class SettingsDataSource extends SlingSafeMethodsServlet {
         tabs.add(mainTab);
         tabs.add(advancedTab);
 
-        for (ServiceConfig serviceConfig : getServiceConfigs()) {
+        for (ConfigDefinition configDefinition : getConfigDefinitions()) {
             List<Resource> innerFields = new ArrayList<>();
-            for (AttributeDefinition attributeDefinition : serviceConfig.getDefinitions()) {
+            for (AttributeDefinition attributeDefinition : configDefinition.getDefinitions()) {
                 if (attributeDefinition.getID().equals("enabled")) {
                     continue;
                 }
@@ -69,7 +69,7 @@ public class SettingsDataSource extends SlingSafeMethodsServlet {
                 String resourceType = getResourceType(attributeDefinition.getType());
                 // Generic properties
                 fieldProperties.put(JcrResourceConstants.SLING_RESOURCE_TYPE_PROPERTY, resourceType);
-                fieldProperties.put("name", "./" + serviceConfig.getId() + "/" + attributeDefinition.getID());
+                fieldProperties.put("name", "./" + configDefinition.getId() + "/" + attributeDefinition.getID());
                 fieldProperties.put("fieldDescription", attributeDefinition.getDescription());
                 // Labels
                 if (RESTYPE_CHECKBOX.equals(resourceType)) {
@@ -94,7 +94,7 @@ public class SettingsDataSource extends SlingSafeMethodsServlet {
                 }
                 Resource field = GraniteUtil.createResource(
                         request.getResourceResolver(),
-                        serviceConfig.getId() + "." + attributeDefinition.getID(),
+                        configDefinition.getId() + "." + attributeDefinition.getID(),
                         fieldProperties, Collections.emptyList());
 
                 innerFields.add(field);
@@ -102,7 +102,7 @@ public class SettingsDataSource extends SlingSafeMethodsServlet {
             if (innerFields.isEmpty()) {
                 continue;
             }
-            Resource tab = GraniteUtil.createTab(request.getResourceResolver(), serviceConfig.getId(), serviceConfig.getLabel(), innerFields);
+            Resource tab = GraniteUtil.createTab(request.getResourceResolver(), configDefinition.getId(), configDefinition.getLabel(), innerFields);
             tabs.add(tab);
         }
 
@@ -110,8 +110,8 @@ public class SettingsDataSource extends SlingSafeMethodsServlet {
         request.setAttribute(DataSource.class.getName(), dataSource);
     }
 
-    private List<ServiceConfig> getServiceConfigs() {
-        List<ServiceConfig> result = new ArrayList<>();
+    private List<ConfigDefinition> getConfigDefinitions() {
+        List<ConfigDefinition> result = new ArrayList<>();
         for (Resolver linkResolver : CollectionUtils.emptyIfNull(linkResolvers)) {
             Bundle bundle = FrameworkUtil.getBundle(linkResolver.getClass());
             MetaTypeInformation metaTypeInformation = metaTypeService.getMetaTypeInformation(bundle);
@@ -131,9 +131,9 @@ public class SettingsDataSource extends SlingSafeMethodsServlet {
 
             String id = linkResolver.getClass().getName();
             String label = OcdUtil.getLabel(linkResolver, metaTypeService);
-            result.add(new ServiceConfig(id, label, definitions));
+            result.add(new ConfigDefinition(id, label, definitions));
         }
-        result.sort(Comparator.comparing(ServiceConfig::getLabel));
+        result.sort(Comparator.comparing(ConfigDefinition::getLabel));
         return result;
     }
 
@@ -149,7 +149,7 @@ public class SettingsDataSource extends SlingSafeMethodsServlet {
 
     @RequiredArgsConstructor
     @Getter
-    private static class ServiceConfig {
+    private static class ConfigDefinition {
         private final String id;
         private final String label;
         private final AttributeDefinition[] definitions;
