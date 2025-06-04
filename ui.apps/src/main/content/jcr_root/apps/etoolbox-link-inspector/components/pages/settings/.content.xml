@@ -161,7 +161,7 @@
                                                     jcr:primaryType="nt:unstructured"
                                                     sling:resourceType="granite/ui/components/coral/foundation/form/multifield"
                                                     fieldLabel="Status codes"
-                                                    fieldDescription="The list of status codes allowed for broken links in the report. Set a single negative value to allow all HTTP error codes">
+                                                    fieldDescription="The list of status codes allowed for broken links in the report. Leave empty to allow all status codes.">
                                                 <field
                                                         jcr:primaryType="nt:unstructured"
                                                         sling:resourceType="granite/ui/components/coral/foundation/form/numberfield"
