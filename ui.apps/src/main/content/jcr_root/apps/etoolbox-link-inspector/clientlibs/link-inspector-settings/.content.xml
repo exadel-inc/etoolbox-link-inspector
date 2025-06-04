@@ -12,9 +12,9 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<workspaceFilter version="1.0">
-    <filter root="/apps/etoolbox-link-inspector/clientlibs"/>
-    <filter root="/apps/etoolbox-link-inspector/components"/>
-    <filter root="/apps/etoolbox-link-inspector/nav"/>
-    <filter root="/apps/cq/core/content/nav/tools/etoolbox/link-inspector"/>
-</workspaceFilter>
+<jcr:root xmlns:cq="http://www.day.com/jcr/cq/1.0"
+          xmlns:jcr="http://www.jcp.org/jcr/1.0"
+          jcr:primaryType="cq:ClientLibraryFolder"
+          allowProxy="{Boolean}true"
+          categories="[link-inspector-settings]"
+          jsProcessor="[default:none;languageOut=ECMASCRIPT5,min:gcc;languageIn=STABLE;compilationLevel=whitespace]"/>
