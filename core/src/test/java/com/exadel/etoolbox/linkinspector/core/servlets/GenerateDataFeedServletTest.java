@@ -54,13 +54,13 @@ class GenerateDataFeedServletTest {
     }
 
     @Test
-    void testDoGet() {
+    void testDoPost() {
         verifySlingJobAdded();
     }
 
     private void verifySlingJobAdded() {
         try (MockedStatic<SlingJobUtil> slingJobUtil = mockStatic(SlingJobUtil.class)) {
-            fixture.doGet(requestMock, responseMock);
+            fixture.doPost(requestMock, responseMock);
 
             slingJobUtil.verify(() ->
                     SlingJobUtil.addJob(any(JobManager.class), eq(DataFeedJobExecutor.GENERATE_DATA_FEED_TOPIC), anyMap())
