@@ -17,6 +17,7 @@
         let $targetElement = $('.' + targetElementSelector);
 
         $targetElement.attr('hidden', !isChecked);
+        $targetElement.children('coral-datepicker').attr('required', !!isChecked);
     }
 
 })(document,Granite.$);
