@@ -77,7 +77,7 @@
         formData.append('exclusive', 'true');
         $.ajax({
             url: TRIGGER_DATA_FEED_GENERATION,
-            type: 'GET',
+            type: 'POST',
             success: function(){
                 dialog.trigger('hide')
                 $('#statsPopover').attr('disabled', false);
