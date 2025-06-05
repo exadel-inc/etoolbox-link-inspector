@@ -14,8 +14,8 @@
 
 package com.exadel.etoolbox.linkinspector.core.services.util;
 
-import org.apache.commons.lang.CharEncoding;
-import org.apache.commons.lang.math.NumberUtils;
+import org.apache.commons.lang3.CharEncoding;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.entity.ContentType;
 import org.apache.sling.api.SlingHttpServletRequest;

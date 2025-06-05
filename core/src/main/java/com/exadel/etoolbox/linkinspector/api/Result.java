@@ -14,7 +14,10 @@
 
 package com.exadel.etoolbox.linkinspector.api;
 
-import org.eclipse.jetty.http.HttpStatus;
+import org.apache.http.ReasonPhraseCatalog;
+import org.apache.http.impl.EnglishReasonPhraseCatalog;
+
+import java.util.Locale;
 
 public interface Result {
 
@@ -33,7 +36,9 @@ public interface Result {
     void setStatus(Status status);
 
     default void setStatus(int code) {
-        setStatus(new Status(code, HttpStatus.getMessage(code)));
+        ReasonPhraseCatalog catalog = EnglishReasonPhraseCatalog.INSTANCE;
+        String message = catalog.getReason(code, Locale.ENGLISH);
+        setStatus(new Status(code, message));
     }
 
     default void setStatus(String message) {

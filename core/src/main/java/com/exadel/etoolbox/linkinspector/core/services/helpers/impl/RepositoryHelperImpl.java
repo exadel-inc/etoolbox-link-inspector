@@ -15,7 +15,6 @@
 package com.exadel.etoolbox.linkinspector.core.services.helpers.impl;
 
 import com.exadel.etoolbox.linkinspector.core.services.helpers.RepositoryHelper;
-import com.google.common.collect.ImmutableMap;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.PersistenceException;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -28,6 +27,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.jcr.RepositoryException;
 import javax.jcr.Session;
+import java.util.Collections;
 
 /**
  * Implements {@link RepositoryHelper} interface to provide an OSGi service which handles repository related operations.
@@ -50,7 +50,7 @@ public class RepositoryHelperImpl implements RepositoryHelper {
     public ResourceResolver getServiceResourceResolver() {
         try {
             return resourceResolverFactory.getServiceResourceResolver(
-                    ImmutableMap.of(ResourceResolverFactory.SUBSERVICE, LINK_INSPECTOR_SERVICE_NAME));
+                    Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, LINK_INSPECTOR_SERVICE_NAME));
         } catch (LoginException e) {
             LOG.error("Failed to get service resource resolver", e);
         }

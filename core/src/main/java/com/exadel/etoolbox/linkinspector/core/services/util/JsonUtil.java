@@ -19,15 +19,14 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.IOUtils;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.json.*;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Optional;
@@ -39,20 +38,23 @@ public class JsonUtil {
 
     private JsonUtil() {}
 
-    public static JSONArray objectsToJsonArray(Collection<?> objects) {
-        JSONArray jsonArray = new JSONArray();
+    public static JsonArray objectsToJsonArray(Collection<?> objects) {
+        JsonArrayBuilder jsonArrayBuilder = Json.createArrayBuilder();
         objects.forEach(object -> {
             try {
                 String json = OBJECT_MAPPER.writeValueAsString(object);
-                jsonArray.put(new JSONObject(json));
-            } catch (JsonProcessingException | JSONException e) {
+                try (JsonReader jsonReader = Json.createReader(new StringReader(json))) {
+                    JsonObject jsonObject = jsonReader.readObject();
+                    jsonArrayBuilder.add(jsonObject);
+                }
+            } catch (JsonProcessingException e) {
                 LOG.error("Failed to convert gridResources to JSON", e);
             }
         });
-        return jsonArray;
+        return jsonArrayBuilder.build();
     }
 
-    public static <T> T jsonToModel(JSONObject json, Class<T> modelClass) {
+    public static <T> T jsonToModel(JsonObject json, Class<T> modelClass) {
         try (InputStream is = new ByteArrayInputStream(json.toString().getBytes(StandardCharsets.UTF_8))) {
             final JavaType type = OBJECT_MAPPER.getTypeFactory().constructType(modelClass);
             return OBJECT_MAPPER.readValue(is, type);
@@ -62,21 +64,21 @@ public class JsonUtil {
         return null;
     }
 
-    public static JSONArray getJsonArrayFromFile(String jsonPath, ResourceResolver resourceResolver) {
+    public static JsonArray getJsonArrayFromFile(String jsonPath, ResourceResolver resourceResolver) {
         Optional<InputStream> streamOptional = Optional.ofNullable(resourceResolver.getResource(jsonPath))
                 .map(resource -> resource.adaptTo(InputStream.class));
         if (streamOptional.isPresent()) {
             try {
                 String stringValue = IOUtils.toString(streamOptional.get(), StandardCharsets.UTF_8);
-                return new JSONArray(stringValue);
+                try (JsonReader jsonReader = Json.createReader(new StringReader(stringValue))) {
+                    return jsonReader.readArray();
+                }
             } catch (IOException e) {
                 LOG.error("Failed to convert file stream to string", e);
-            } catch (JSONException e) {
-                LOG.error("Failed to get json array", e);
             }
         } else {
             LOG.debug("Failed to get json array from {}", jsonPath);
         }
-        return new JSONArray();
+        return Json.createArrayBuilder().build();
     }
 }

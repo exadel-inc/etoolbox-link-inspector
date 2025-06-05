@@ -21,7 +21,8 @@ import com.exadel.etoolbox.linkinspector.core.services.helpers.RepositoryHelper;
 import io.wcm.testing.mock.aem.junit5.AemContext;
 import io.wcm.testing.mock.aem.junit5.AemContextExtension;
 import junitx.util.PrivateAccessor;
-import org.apache.commons.httpclient.HttpStatus;
+import org.apache.http.HttpStatus;
+import org.apache.http.impl.EnglishReasonPhraseCatalog;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.request.RequestParameter;
 import org.apache.sling.api.resource.PersistenceException;
@@ -34,6 +35,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import javax.json.Json;
+import java.util.Locale;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.*;
@@ -111,8 +113,8 @@ class FixBrokenResultServletTest {
 
     @Test
     void testValidateNewLink_notValid() {
-        Status expectedLinkStatus =
-                new Status(HttpStatus.SC_NOT_FOUND, HttpStatus.getStatusText(HttpStatus.SC_NOT_FOUND));
+        String reasonPhrase = EnglishReasonPhraseCatalog.INSTANCE.getReason(HttpStatus.SC_NOT_FOUND, Locale.ENGLISH);
+        Status expectedLinkStatus = new Status(HttpStatus.SC_NOT_FOUND, reasonPhrase);
         when(linkHelper.validateLink(eq(TEST_NEW_LINK), eq(resourceResolver))).thenReturn(expectedLinkStatus);
         when(repositoryHelper.getServiceResourceResolver()).thenReturn(resourceResolver);
 

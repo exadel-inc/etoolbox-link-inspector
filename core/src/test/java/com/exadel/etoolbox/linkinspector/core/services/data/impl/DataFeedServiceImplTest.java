@@ -29,8 +29,6 @@ import com.exadel.etoolbox.linkinspector.core.services.resolvers.ExternalLinkRes
 import com.exadel.etoolbox.linkinspector.core.services.resolvers.InternalLinkResolverImpl;
 import com.exadel.etoolbox.linkinspector.core.services.util.CsvUtil;
 import com.exadel.etoolbox.linkinspector.core.services.util.LinkInspectorResourceUtil;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import io.wcm.testing.mock.aem.junit5.AemContext;
 import io.wcm.testing.mock.aem.junit5.AemContextExtension;
 import junitx.util.PrivateAccessor;
@@ -49,20 +47,14 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyCollection;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockStatic;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(AemContextExtension.class)
 class DataFeedServiceImplTest {
@@ -216,10 +208,7 @@ class DataFeedServiceImplTest {
 
     private GridResourcesCache getGridResourcesCacheFromContext() throws NoSuchFieldException {
         GridResourcesCache gridResourcesCache = new GridResourcesCacheImpl();
-        Cache<String, CopyOnWriteArrayList<GridResource>> cache = CacheBuilder.newBuilder()
-                .maximumSize(100)
-                .expireAfterWrite(100000, TimeUnit.DAYS)
-                .build();
+        ConcurrentHashMap<String, CopyOnWriteArrayList<GridResource>> cache = new ConcurrentHashMap<>();
         PrivateAccessor.setField(gridResourcesCache, GRID_RESOURCES_CACHE_FIELD, cache);
         return gridResourcesCache;
     }

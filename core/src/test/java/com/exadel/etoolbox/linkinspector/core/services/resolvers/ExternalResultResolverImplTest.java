@@ -18,7 +18,6 @@ import com.exadel.etoolbox.linkinspector.api.Result;
 import com.exadel.etoolbox.linkinspector.core.models.LinkResult;
 import com.exadel.etoolbox.linkinspector.core.services.mocks.MockHttpClientBuilderFactory;
 import com.exadel.etoolbox.linkinspector.core.services.mocks.MockRepositoryHelper;
-import com.google.common.collect.ImmutableMap;
 import io.wcm.testing.mock.aem.junit5.AemContext;
 import io.wcm.testing.mock.aem.junit5.AemContextExtension;
 import org.apache.http.HttpStatus;
@@ -33,6 +32,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -42,11 +42,15 @@ import static org.mockito.Mockito.*;
 @ExtendWith(AemContextExtension.class)
 class ExternalResultResolverImplTest {
 
-    private static final Map<String, Object> HTTP_PARAMS = ImmutableMap.of(
-            "connectionTimeout", 5000,
-            "socketTimeout", 15000,
-            "userAgent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.111 Safari/537.36"
-    );
+    private static final Map<String, Object> HTTP_PARAMS;
+
+    static {
+        Map<String, Object> params = new HashMap<>();
+        params.put("connectionTimeout", 5000);
+        params.put("socketTimeout", 15000);
+        params.put("userAgent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.111 Safari/537.36");
+        HTTP_PARAMS = Collections.unmodifiableMap(params);
+    }
 
     private final AemContext context = new AemContext();
 
@@ -107,9 +111,10 @@ class ExternalResultResolverImplTest {
     void testCheckLink_returnStatusCode200when200Head() {
         context.registerInjectActivateService(
                 new MockHttpClientBuilderFactory(),
-                ImmutableMap.of(
-                        MockHttpClientBuilderFactory.PN_STATUS_CODE, HttpStatus.SC_OK,
-                        MockHttpClientBuilderFactory.PN_STATUS_MESSAGE, "OK"));
+                Collections.unmodifiableMap(new HashMap<String, Object>() {{
+                    put(MockHttpClientBuilderFactory.PN_STATUS_CODE, HttpStatus.SC_OK);
+                    put(MockHttpClientBuilderFactory.PN_STATUS_MESSAGE, "OK");
+                }}));
 
         Result testResult = getTestLink();
         context.registerInjectActivateService(new MockRepositoryHelper(context.resourceResolver()));

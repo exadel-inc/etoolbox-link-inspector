@@ -15,13 +15,13 @@
 package com.exadel.etoolbox.linkinspector.core.services.data.impl;
 
 import com.adobe.granite.ui.components.ds.ValueMapResource;
-import com.exadel.etoolbox.linkinspector.core.services.data.models.UpdatedItem;
 import com.exadel.etoolbox.linkinspector.core.models.ui.GridViewItem;
 import com.exadel.etoolbox.linkinspector.core.services.cache.GridResourcesCache;
 import com.exadel.etoolbox.linkinspector.core.services.data.DataFeedService;
 import com.exadel.etoolbox.linkinspector.core.services.data.GridResourcesGenerator;
 import com.exadel.etoolbox.linkinspector.core.services.data.models.DataFilter;
 import com.exadel.etoolbox.linkinspector.core.services.data.models.GridResource;
+import com.exadel.etoolbox.linkinspector.core.services.data.models.UpdatedItem;
 import com.exadel.etoolbox.linkinspector.core.services.exceptions.DataFeedException;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.LinkHelper;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.RepositoryHelper;
@@ -38,14 +38,13 @@ import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ValueMap;
 import org.apache.sling.api.wrappers.ValueMapDecorator;
 import org.apache.sling.jcr.contentloader.ContentTypeUtil;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.json.JsonArray;
+import javax.json.JsonObject;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -205,15 +204,15 @@ public class DataFeedServiceImpl implements DataFeedService {
 
     private List<GridResource> dataFeedToGridResources(ResourceResolver resourceResolver) {
         List<GridResource> gridResources = new ArrayList<>();
-        JSONArray jsonArray = JsonUtil.getJsonArrayFromFile(JSON_FEED_PATH, resourceResolver);
-        int allItemsSize = jsonArray.length();
+        JsonArray jsonArray = JsonUtil.getJsonArrayFromFile(JSON_FEED_PATH, resourceResolver);
+        int allItemsSize = jsonArray.size();
         if (allItemsSize > 0) {
             for (int i = 0; i < allItemsSize; i++) {
                 try {
-                    JSONObject jsonObject = jsonArray.getJSONObject(i);
+                    JsonObject jsonObject = jsonArray.getJsonObject(i);
                     Optional.ofNullable(JsonUtil.jsonToModel(jsonObject, GridResource.class))
                             .ifPresent(gridResources::add);
-                } catch (JSONException e) {
+                } catch (Exception e) {
                     LOG.error("Failed to convert json object to GridResource", e);
                 }
             }
@@ -223,7 +222,7 @@ public class DataFeedServiceImpl implements DataFeedService {
 
     private synchronized void gridResourcesToDataFeed(Collection<GridResource> gridResources, ResourceResolver resourceResolver) {
         try {
-            JSONArray resourcesJsonArray = JsonUtil.objectsToJsonArray(gridResources);
+            JsonArray resourcesJsonArray = JsonUtil.objectsToJsonArray(gridResources);
             removePreviousDataFeed(resourceResolver);
             saveGridResourcesToJcr(resourceResolver, resourcesJsonArray);
             removePendingNode(resourceResolver);
@@ -242,7 +241,7 @@ public class DataFeedServiceImpl implements DataFeedService {
         LinkInspectorResourceUtil.removeResource(CSV_REPORT_PATH, resourceResolver);
     }
 
-    private void saveGridResourcesToJcr(ResourceResolver resourceResolver, JSONArray jsonArray) {
+    private void saveGridResourcesToJcr(ResourceResolver resourceResolver, JsonArray jsonArray) {
         LinkInspectorResourceUtil.saveFileToJCR(
                 JSON_FEED_PATH,
                 jsonArray.toString().getBytes(StandardCharsets.UTF_8),
