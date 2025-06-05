@@ -19,7 +19,7 @@ import com.exadel.etoolbox.linkinspector.core.services.job.SlingJobUtil;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.servlets.HttpConstants;
-import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
+import org.apache.sling.api.servlets.SlingAllMethodsServlet;
 import org.apache.sling.event.jobs.JobManager;
 import org.apache.sling.servlets.annotations.SlingServletResourceTypes;
 import org.osgi.service.component.annotations.Component;
@@ -32,16 +32,16 @@ import java.util.Collections;
 @Component(service = {Servlet.class})
 @SlingServletResourceTypes(
         resourceTypes = "/bin/etoolbox/link-inspector/datafeed/generate",
-        methods = HttpConstants.METHOD_GET
+        methods = HttpConstants.METHOD_POST
 )
 @ServiceDescription("The servlet for manual triggering data feed generation")
-public class GenerateDataFeedServlet extends SlingSafeMethodsServlet {
+public class GenerateDataFeedServlet extends SlingAllMethodsServlet {
 
     @Reference
     private transient JobManager jobManager;
 
     @Override
-    protected void doGet(final SlingHttpServletRequest request, final SlingHttpServletResponse response) {
+    protected void doPost(final SlingHttpServletRequest request, final SlingHttpServletResponse response) {
         SlingJobUtil.addJob(
                 jobManager,
                 DataFeedJobExecutor.GENERATE_DATA_FEED_TOPIC,
