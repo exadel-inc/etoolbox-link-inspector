@@ -26,7 +26,6 @@ import com.exadel.etoolbox.linkinspector.core.services.mocks.MockCustomLinkResol
 import com.exadel.etoolbox.linkinspector.core.services.mocks.MockRepositoryHelper;
 import com.exadel.etoolbox.linkinspector.core.services.resolvers.ExternalLinkResolverImpl;
 import com.exadel.etoolbox.linkinspector.core.services.resolvers.InternalLinkResolverImpl;
-import com.google.common.collect.ImmutableMap;
 import io.wcm.testing.mock.aem.junit5.AemContext;
 import io.wcm.testing.mock.aem.junit5.AemContextExtension;
 import junitx.util.PrivateAccessor;
@@ -52,8 +51,11 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -135,9 +137,10 @@ class GridResourcesGeneratorImplTest {
 
         context.registerInjectActivateService(
                 new MockHttpClientBuilderFactory(),
-                ImmutableMap.of(
-                        MockHttpClientBuilderFactory.PN_STATUS_CODE, HttpStatus.SC_NOT_FOUND,
-                        MockHttpClientBuilderFactory.PN_STATUS_MESSAGE, "Not Found")
+                new HashMap<String, Object>() {{
+                    put(MockHttpClientBuilderFactory.PN_STATUS_CODE, HttpStatus.SC_NOT_FOUND);
+                    put(MockHttpClientBuilderFactory.PN_STATUS_MESSAGE, "Not Found");
+                }}
         );
 
         context.registerInjectActivateService(new ExternalLinkResolverImpl());

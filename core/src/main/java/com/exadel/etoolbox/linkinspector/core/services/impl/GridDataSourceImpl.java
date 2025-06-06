@@ -20,7 +20,7 @@ import com.exadel.etoolbox.linkinspector.core.models.ui.PaginationModel;
 import com.exadel.etoolbox.linkinspector.core.services.GridDataSource;
 import com.exadel.etoolbox.linkinspector.core.services.data.DataFeedService;
 import com.exadel.etoolbox.linkinspector.core.services.data.models.DataFilter;
-import org.apache.commons.lang.math.NumberUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.sling.api.resource.Resource;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;

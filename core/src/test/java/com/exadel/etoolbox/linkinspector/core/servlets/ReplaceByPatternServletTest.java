@@ -31,9 +31,6 @@ import com.exadel.etoolbox.linkinspector.core.services.resolvers.ExternalLinkRes
 import com.exadel.etoolbox.linkinspector.core.services.resolvers.InternalLinkResolverImpl;
 import com.exadel.etoolbox.linkinspector.core.services.util.CsvUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.collect.ImmutableMap;
 import io.wcm.testing.mock.aem.junit5.AemContext;
 import io.wcm.testing.mock.aem.junit5.AemContextExtension;
 import junitx.util.PrivateAccessor;
@@ -63,12 +60,10 @@ import javax.servlet.ServletOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.net.URL;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -130,9 +125,10 @@ class ReplaceByPatternServletTest {
 
         context.registerInjectActivateService(
                 new MockHttpClientBuilderFactory(),
-                ImmutableMap.of(
-                        "statusCode", org.apache.http.HttpStatus.SC_NOT_FOUND,
-                        "statusMessage", "Not Found")
+                new HashMap<String, Object>() {{
+                    put("statusCode", org.apache.http.HttpStatus.SC_NOT_FOUND);
+                    put("statusMessage", "Not Found");
+                }}
         );
         context.registerInjectActivateService(new ExternalLinkResolverImpl());
         context.registerInjectActivateService(new InternalLinkResolverImpl());
@@ -181,7 +177,7 @@ class ReplaceByPatternServletTest {
 
         fixture.doPost(request, response);
 
-        assertEquals(HttpStatus.SC_NO_CONTENT, response.getStatus());
+        assertEquals(HttpStatus.SC_OK, response.getStatus());
         verifyNoInteractions(linkHelper);
         verifyNoInteractions(repositoryHelper);
         verifyNoInteractions(packageHelper);
@@ -195,7 +191,9 @@ class ReplaceByPatternServletTest {
         fixture.doPost(request, response);
 
         assertEquals(1, ((MockRepositoryHelper) repositoryHelper).getCreationsCount());
+
         assertEquals(HttpStatus.SC_OK, response.getStatus());
+
         assertTrue(isReplacementDone(TEST_RESOURCE_PATH_1, TEST_PROPERTY_1, TEST_REPLACEMENT));
         assertTrue(isReplacementDone(TEST_RESOURCE_PATH_3, TEST_PROPERTY_3, TEST_REPLACEMENT));
     }
@@ -210,7 +208,7 @@ class ReplaceByPatternServletTest {
         fixture.deactivate();
         fixture.doPost(request, response);
 
-        assertEquals(HttpStatus.SC_NO_CONTENT, response.getStatus());
+        assertEquals(HttpStatus.SC_OK, response.getStatus());
         verifyNoInteractions(packageHelper);
         verifyNoInteractions(linkHelper);
     }
@@ -224,16 +222,17 @@ class ReplaceByPatternServletTest {
         SlingHttpServletRequest requestMock = mockSlingRequest();
         mockRequestParam(DRY_RUN_PARAM, Boolean.TRUE.toString(), requestMock);
 
-        ResourceResolver resourceResolverMock = mockResourceResolver(requestMock);
-        mockLinkHelper(resourceResolverMock);
-        mockSession(resourceResolverMock);
+        try (ResourceResolver resourceResolverMock = mockResourceResolver(requestMock)) {
+            mockLinkHelper(resourceResolverMock);
+            mockSession(resourceResolverMock);
 
-        when(resourceResolverMock.hasChanges()).thenReturn(true);
+            when(resourceResolverMock.hasChanges()).thenReturn(true);
 
-        fixture.doPost(requestMock, response);
+            fixture.doPost(requestMock, response);
 
-        assertEquals(0, ((MockRepositoryHelper) repositoryHelper).getCreationsCount());
-        verify(resourceResolverMock, never()).commit();
+            assertEquals(0, ((MockRepositoryHelper) repositoryHelper).getCreationsCount());
+            verify(resourceResolverMock, never()).commit();
+        }
     }
 
     @Test
@@ -341,7 +340,7 @@ class ReplaceByPatternServletTest {
 
         fixture.doPost(requestMock, response);
 
-        assertEquals(HttpStatus.SC_NO_CONTENT, response.getStatus());
+        assertEquals(HttpStatus.SC_OK, response.getStatus());
         verifyNoInteractions(linkHelper);
         verifyNoInteractions(repositoryHelper);
         verifyNoInteractions(packageHelper);
@@ -354,16 +353,17 @@ class ReplaceByPatternServletTest {
         setUpResources();
 
         SlingHttpServletRequest requestMock = mockSlingRequest();
-        ResourceResolver resourceResolverMock = mockResourceResolver(requestMock);
-        mockLinkHelper(resourceResolverMock);
-        mockSession(resourceResolverMock);
+        try (ResourceResolver resourceResolverMock = mockResourceResolver(requestMock)) {
+            mockLinkHelper(resourceResolverMock);
+            mockSession(resourceResolverMock);
 
-        when(resourceResolverMock.hasChanges()).thenReturn(true);
-        doThrow(new PersistenceException(TEST_EXCEPTION_MSG)).when(resourceResolverMock).commit();
+            when(resourceResolverMock.hasChanges()).thenReturn(true);
+            doThrow(new PersistenceException(TEST_EXCEPTION_MSG)).when(resourceResolverMock).commit();
 
-        fixture.doPost(requestMock, response);
+            fixture.doPost(requestMock, response);
 
-        assertEquals(HttpStatus.SC_INTERNAL_SERVER_ERROR, response.getStatus());
+            assertEquals(HttpStatus.SC_INTERNAL_SERVER_ERROR, response.getStatus());
+        }
     }
 
     @Test
@@ -373,16 +373,17 @@ class ReplaceByPatternServletTest {
         setUpResources();
 
         SlingHttpServletRequest requestMock = mockSlingRequest();
-        ResourceResolver resourceResolverMock = mockResourceResolver(requestMock);
-        mockLinkHelper(resourceResolverMock);
-        mockSession(resourceResolverMock);
+        try (ResourceResolver resourceResolverMock = mockResourceResolver(requestMock)) {
+            mockLinkHelper(resourceResolverMock);
+            mockSession(resourceResolverMock);
 
-        when(resourceResolverMock.hasChanges()).thenReturn(false);
+            when(resourceResolverMock.hasChanges()).thenReturn(false);
 
-        fixture.doPost(requestMock, response);
+            fixture.doPost(requestMock, response);
 
-        verify(resourceResolverMock, atLeastOnce()).commit();
-        assertEquals(HttpStatus.SC_OK, response.getStatus());
+            verify(resourceResolverMock, atLeastOnce()).commit();
+            assertEquals(HttpStatus.SC_OK, response.getStatus());
+        }
     }
 
     private void setUpHelpersResources() throws NoSuchFieldException {
@@ -401,10 +402,7 @@ class ReplaceByPatternServletTest {
     private void setUpDataFeedService(RepositoryHelper repositoryHelper) throws NoSuchFieldException {
         DataFeedService dataFeedService = new DataFeedServiceImpl();
         GridResourcesCache gridResourcesCache = new GridResourcesCacheImpl();
-        Cache<String, CopyOnWriteArrayList<GridResource>> cache = CacheBuilder.newBuilder()
-                .maximumSize(100)
-                .expireAfterWrite(100000, TimeUnit.DAYS)
-                .build();
+        ConcurrentHashMap<String, CopyOnWriteArrayList<GridResource>> cache = new ConcurrentHashMap<>();
         PrivateAccessor.setField(gridResourcesCache, "gridResourcesCache", cache);
         PrivateAccessor.setField(dataFeedService, "gridResourcesCache", gridResourcesCache);
         PrivateAccessor.setField(dataFeedService, REPOSITORY_HELPER_FIELD, repositoryHelper);
@@ -482,11 +480,11 @@ class ReplaceByPatternServletTest {
         when(requestParameter.getString()).thenReturn(value);
     }
 
-    private boolean isReplacementDone(String resourcePath, String property, String replacement) {
+    private boolean isReplacementDone(String resourcePath, String property, String expectedReplacement) {
         return Optional.ofNullable(context.resourceResolver().getResource(resourcePath))
                 .map(Resource::getValueMap)
                 .map(valueMap -> valueMap.get(property, String.class))
-                .filter(href -> href.contains(replacement))
+                .filter(href -> href.contains(expectedReplacement))
                 .isPresent();
     }
 
@@ -497,14 +495,22 @@ class ReplaceByPatternServletTest {
 
     private String[] loadSelectedPropertiesValues() throws IOException {
         ClassLoader classLoader = getClass().getClassLoader();
-        File file = new File(classLoader.getResource(TEST_SELECTED_VALUES_PATH).getFile());
+        URL resourceUrl = classLoader.getResource(TEST_SELECTED_VALUES_PATH);
+        if (resourceUrl == null) {
+            return new String[0];
+        }
+        File file = new File(resourceUrl.getFile());
         ObjectMapper mapper = new ObjectMapper();
         return mapper.readValue(file, String[].class);
     }
 
     private String[] loadSelectedLinksValues() throws IOException {
         ClassLoader classLoader = getClass().getClassLoader();
-        File file = new File(classLoader.getResource(TEST_SELECTED_LINKS_PATH).getFile());
+        URL resourceUrl = classLoader.getResource(TEST_SELECTED_LINKS_PATH);
+        if (resourceUrl == null) {
+            return new String[0];
+        }
+        File file = new File(resourceUrl.getFile());
         ObjectMapper mapper = new ObjectMapper();
         return mapper.readValue(file, String[].class);
     }
