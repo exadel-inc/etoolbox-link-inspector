@@ -28,6 +28,8 @@ import com.exadel.etoolbox.linkinspector.core.services.helpers.RepositoryHelper;
 import com.exadel.etoolbox.linkinspector.core.services.util.CsvUtil;
 import com.exadel.etoolbox.linkinspector.core.services.util.JsonUtil;
 import com.exadel.etoolbox.linkinspector.core.services.util.LinkInspectorResourceUtil;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.lang3.StringUtils;
@@ -43,8 +45,6 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.json.JsonArray;
-import javax.json.JsonObject;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -204,16 +204,16 @@ public class DataFeedServiceImpl implements DataFeedService {
 
     private List<GridResource> dataFeedToGridResources(ResourceResolver resourceResolver) {
         List<GridResource> gridResources = new ArrayList<>();
-        JsonArray jsonArray = JsonUtil.getJsonArrayFromFile(JSON_FEED_PATH, resourceResolver);
+        ArrayNode jsonArray = JsonUtil.getJsonArrayFromFile(JSON_FEED_PATH, resourceResolver);
         int allItemsSize = jsonArray.size();
         if (allItemsSize > 0) {
             for (int i = 0; i < allItemsSize; i++) {
                 try {
-                    JsonObject jsonObject = jsonArray.getJsonObject(i);
-                    Optional.ofNullable(JsonUtil.jsonToModel(jsonObject, GridResource.class))
+                    JsonNode jsonNode = jsonArray.get(i);
+                    Optional.ofNullable(JsonUtil.jsonToModel(jsonNode, GridResource.class))
                             .ifPresent(gridResources::add);
                 } catch (Exception e) {
-                    LOG.error("Failed to convert json object to GridResource", e);
+                    LOG.error("Failed to convert JSON object to GridResource", e);
                 }
             }
         }
@@ -222,7 +222,7 @@ public class DataFeedServiceImpl implements DataFeedService {
 
     private synchronized void gridResourcesToDataFeed(Collection<GridResource> gridResources, ResourceResolver resourceResolver) {
         try {
-            JsonArray resourcesJsonArray = JsonUtil.objectsToJsonArray(gridResources);
+            ArrayNode resourcesJsonArray = JsonUtil.objectsToJsonArray(gridResources);
             removePreviousDataFeed(resourceResolver);
             saveGridResourcesToJcr(resourceResolver, resourcesJsonArray);
             removePendingNode(resourceResolver);
@@ -241,7 +241,7 @@ public class DataFeedServiceImpl implements DataFeedService {
         LinkInspectorResourceUtil.removeResource(CSV_REPORT_PATH, resourceResolver);
     }
 
-    private void saveGridResourcesToJcr(ResourceResolver resourceResolver, JsonArray jsonArray) {
+    private void saveGridResourcesToJcr(ResourceResolver resourceResolver, ArrayNode jsonArray) {
         LinkInspectorResourceUtil.saveFileToJCR(
                 JSON_FEED_PATH,
                 jsonArray.toString().getBytes(StandardCharsets.UTF_8),

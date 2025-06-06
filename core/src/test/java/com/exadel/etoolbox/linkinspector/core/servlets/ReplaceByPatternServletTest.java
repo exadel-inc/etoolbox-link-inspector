@@ -60,6 +60,7 @@ import javax.servlet.ServletOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.URL;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -124,10 +125,10 @@ class ReplaceByPatternServletTest {
 
         context.registerInjectActivateService(
                 new MockHttpClientBuilderFactory(),
-                Collections.unmodifiableMap(new HashMap<String, Object>() {{
+                new HashMap<String, Object>() {{
                     put("statusCode", org.apache.http.HttpStatus.SC_NOT_FOUND);
                     put("statusMessage", "Not Found");
-                }})
+                }}
         );
         context.registerInjectActivateService(new ExternalLinkResolverImpl());
         context.registerInjectActivateService(new InternalLinkResolverImpl());
@@ -494,7 +495,7 @@ class ReplaceByPatternServletTest {
 
     private String[] loadSelectedPropertiesValues() throws IOException {
         ClassLoader classLoader = getClass().getClassLoader();
-        java.net.URL resourceUrl = classLoader.getResource(TEST_SELECTED_VALUES_PATH);
+        URL resourceUrl = classLoader.getResource(TEST_SELECTED_VALUES_PATH);
         if (resourceUrl == null) {
             return new String[0];
         }
@@ -505,7 +506,7 @@ class ReplaceByPatternServletTest {
 
     private String[] loadSelectedLinksValues() throws IOException {
         ClassLoader classLoader = getClass().getClassLoader();
-        java.net.URL resourceUrl = classLoader.getResource(TEST_SELECTED_LINKS_PATH);
+        URL resourceUrl = classLoader.getResource(TEST_SELECTED_LINKS_PATH);
         if (resourceUrl == null) {
             return new String[0];
         }

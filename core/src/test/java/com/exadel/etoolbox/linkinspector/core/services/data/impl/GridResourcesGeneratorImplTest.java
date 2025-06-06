@@ -137,10 +137,10 @@ class GridResourcesGeneratorImplTest {
 
         context.registerInjectActivateService(
                 new MockHttpClientBuilderFactory(),
-                Collections.unmodifiableMap(new HashMap<String, Object>() {{
+                new HashMap<String, Object>() {{
                     put(MockHttpClientBuilderFactory.PN_STATUS_CODE, HttpStatus.SC_NOT_FOUND);
                     put(MockHttpClientBuilderFactory.PN_STATUS_MESSAGE, "Not Found");
-                }})
+                }}
         );
 
         context.registerInjectActivateService(new ExternalLinkResolverImpl());

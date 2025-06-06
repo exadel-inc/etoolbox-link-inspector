@@ -14,19 +14,18 @@
 
 package com.exadel.etoolbox.linkinspector.core.services.util;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import org.apache.commons.io.IOUtils;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.json.*;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Optional;
@@ -38,23 +37,20 @@ public class JsonUtil {
 
     private JsonUtil() {}
 
-    public static JsonArray objectsToJsonArray(Collection<?> objects) {
-        JsonArrayBuilder jsonArrayBuilder = Json.createArrayBuilder();
+    public static ArrayNode objectsToJsonArray(Collection<?> objects) {
+        ArrayNode arrayNode = OBJECT_MAPPER.createArrayNode();
         objects.forEach(object -> {
             try {
-                String json = OBJECT_MAPPER.writeValueAsString(object);
-                try (JsonReader jsonReader = Json.createReader(new StringReader(json))) {
-                    JsonObject jsonObject = jsonReader.readObject();
-                    jsonArrayBuilder.add(jsonObject);
-                }
-            } catch (JsonProcessingException e) {
+                JsonNode jsonNode = OBJECT_MAPPER.valueToTree(object);
+                arrayNode.add(jsonNode);
+            } catch (IllegalArgumentException e) {
                 LOG.error("Failed to convert gridResources to JSON", e);
             }
         });
-        return jsonArrayBuilder.build();
+        return arrayNode;
     }
 
-    public static <T> T jsonToModel(JsonObject json, Class<T> modelClass) {
+    public static <T> T jsonToModel(JsonNode json, Class<T> modelClass) {
         try (InputStream is = new ByteArrayInputStream(json.toString().getBytes(StandardCharsets.UTF_8))) {
             final JavaType type = OBJECT_MAPPER.getTypeFactory().constructType(modelClass);
             return OBJECT_MAPPER.readValue(is, type);
@@ -64,21 +60,19 @@ public class JsonUtil {
         return null;
     }
 
-    public static JsonArray getJsonArrayFromFile(String jsonPath, ResourceResolver resourceResolver) {
+    public static ArrayNode getJsonArrayFromFile(String jsonPath, ResourceResolver resourceResolver) {
         Optional<InputStream> streamOptional = Optional.ofNullable(resourceResolver.getResource(jsonPath))
                 .map(resource -> resource.adaptTo(InputStream.class));
         if (streamOptional.isPresent()) {
             try {
                 String stringValue = IOUtils.toString(streamOptional.get(), StandardCharsets.UTF_8);
-                try (JsonReader jsonReader = Json.createReader(new StringReader(stringValue))) {
-                    return jsonReader.readArray();
-                }
+                return (ArrayNode) OBJECT_MAPPER.readTree(stringValue);
             } catch (IOException e) {
-                LOG.error("Failed to convert file stream to string", e);
+                LOG.error("Failed to get JSON array", e);
             }
         } else {
             LOG.debug("Failed to get json array from {}", jsonPath);
         }
-        return Json.createArrayBuilder().build();
+        return OBJECT_MAPPER.createArrayNode();
     }
 }

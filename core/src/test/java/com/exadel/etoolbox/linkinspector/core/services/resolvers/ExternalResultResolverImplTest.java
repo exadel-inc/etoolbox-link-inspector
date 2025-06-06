@@ -111,10 +111,10 @@ class ExternalResultResolverImplTest {
     void testCheckLink_returnStatusCode200when200Head() {
         context.registerInjectActivateService(
                 new MockHttpClientBuilderFactory(),
-                Collections.unmodifiableMap(new HashMap<String, Object>() {{
+                new HashMap<String, Object>() {{
                     put(MockHttpClientBuilderFactory.PN_STATUS_CODE, HttpStatus.SC_OK);
                     put(MockHttpClientBuilderFactory.PN_STATUS_MESSAGE, "OK");
-                }}));
+                }});
 
         Result testResult = getTestLink();
         context.registerInjectActivateService(new MockRepositoryHelper(context.resourceResolver()));
