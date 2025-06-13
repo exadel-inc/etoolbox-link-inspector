@@ -8,8 +8,8 @@
         Object.keys(data).forEach(function (key) {
             const $input = $document.find(`[name="${key}"]`);
             if ($input.length) {
-                if ($input.is(':checkbox')) {
-                    $input.prop('checked', data[key]);
+                if ($input.is(':checkbox') && data[key]) {
+                    $input.prop('checked');
                 } else {
                     $input.val(data[key]);
                 }
