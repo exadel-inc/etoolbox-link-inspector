@@ -1,4 +1,4 @@
 #base=js
 
 settings.js
-console-ui.dialog.js
+ui.js

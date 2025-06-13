@@ -4,7 +4,6 @@
     const $document = $(document);
 
     function preloadSettings(data) {
-        console.log(data);
         Object.keys(data).forEach(function (key) {
             const $input = $document.find(`[name="${key}"]`);
             if ($input.length) {
