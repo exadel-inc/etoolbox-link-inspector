@@ -8,6 +8,5 @@ console-ui.replace.js
 console-ui.pagination.js
 console-ui.run.js
 console-ui.delete.js
-console-ui.dialog.js
 console-ui.filter.js
 console-ui.editproperty.js

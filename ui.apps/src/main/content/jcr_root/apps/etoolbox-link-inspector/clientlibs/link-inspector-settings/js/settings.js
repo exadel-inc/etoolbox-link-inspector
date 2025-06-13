@@ -4,12 +4,11 @@
     const $document = $(document);
 
     function preloadSettings(data) {
-        console.log(data);
         Object.keys(data).forEach(function (key) {
             const $input = $document.find(`[name="${key}"]`);
             if ($input.length) {
-                if ($input.is(':checkbox')) {
-                    $input.prop('checked', data[key]);
+                if ($input.is(':checkbox') && data[key]) {
+                    $input.prop('checked');
                 } else {
                     $input.val(data[key]);
                 }
@@ -26,9 +25,9 @@
                     console.error('Error preloading settings', error);
                 });
         })
-        .on('submit.elc-settings', '#elc-settings-save', function (e) {
+        .on('click.elc-settings', '#button-settings-save', function (e) {
             e.preventDefault();
-            const $form = $(this);
+            const $form = $('#elc-settings');
             $.ajax({
                 type: "POST", url: $form.attr('action'), data: $form.serialize(), success: function () {
                     location.replace("/etoolbox/link-inspector.html")
