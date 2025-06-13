@@ -25,9 +25,9 @@
                     console.error('Error preloading settings', error);
                 });
         })
-        .on('submit.elc-settings', '#elc-settings-save', function (e) {
+        .on('click.elc-settings', '#button-settings-save', function (e) {
             e.preventDefault();
-            const $form = $(this);
+            const $form = $('#elc-settings');
             $.ajax({
                 type: "POST", url: $form.attr('action'), data: $form.serialize(), success: function () {
                     location.replace("/etoolbox/link-inspector.html")

@@ -1,15 +1,16 @@
 (function(document, $) {
     "use strict";
 
-    $(document).on("foundation-contentloaded", function(e) {
-        $(".etoolbox-dialog-checkbox-showhide").each(function() {
+    $(document)
+        .off('.elc-settings-ui')
+        .one("foundation-contentloaded.elc-settings-ui", function() {
+            $(".etoolbox-dialog-checkbox-showhide").each(function() {
+                showHide($(this));
+            });
+        })
+        .on("change.elc-settings-ui", ".etoolbox-dialog-checkbox-showhide", function() {
             showHide($(this));
         });
-    });
-
-    $(document).on("change", ".etoolbox-dialog-checkbox-showhide", function(e) {
-        showHide($(this));
-    });
 
     function showHide($el){
         let isChecked = $el.attr("checked");
