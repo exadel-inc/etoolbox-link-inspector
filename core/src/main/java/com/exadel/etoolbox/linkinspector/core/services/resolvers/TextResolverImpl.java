@@ -23,7 +23,6 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpStatus;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -63,19 +62,38 @@ public class TextResolverImpl implements Resolver {
         }
     }
 
+    /**
+     * Indicates whether this resolver is currently enabled.
+     *
+     * @return True if the resolver is enabled, false otherwise
+     */
     @Override
     public boolean isEnabled() {
         return enabled;
     }
 
+    /**
+     * Gets the unique identifier for this resolver.
+     *
+     * @return String "Text" as the resolver's identifier
+     */
     @Override
     public String getId() {
         return TYPE_TEXT;
     }
 
+    /**
+     * Finds text patterns in the provided source content based on the configured regular expression.
+     * <p>
+     * This method searches the source text for matches against the configured pattern
+     * and creates a Result object for each match found.
+     *
+     * @param source The content to search for pattern matches
+     * @return Collection of Result objects representing found matches, or empty collection if disabled
+     */
     @Override
     public Collection<Result> getResults(String source) {
-        if (!enabled ) {
+        if (!enabled) {
             return Collections.emptyList();
         }
 
@@ -87,11 +105,26 @@ public class TextResolverImpl implements Resolver {
         return result;
     }
 
+    /**
+     * No validation is performed for text matches.
+     * <p>
+     * This method is a no-operation implementation as text patterns are considered
+     * immediately found and don't require additional validation.
+     *
+     * @param result The Result object containing the text match (not used)
+     * @param resourceResolver ResourceResolver (not used)
+     */
     @Override
     public void validate(Result result, ResourceResolver resourceResolver) {
         // No operation
     }
 
+    /**
+     * Internal implementation of {@link Result} specific to text pattern matches.
+     * <p>
+     * This class represents a match of the configured text pattern in content.
+     * It always reports a "Found" status and is considered reportable.
+     */
     @RequiredArgsConstructor
     @Getter
     @EqualsAndHashCode
@@ -99,21 +132,43 @@ public class TextResolverImpl implements Resolver {
         private final String value;
         private final String match;
 
+        /**
+         * Gets the type identifier for this result.
+         *
+         * @return String "Text" as the result type
+         */
         @Override
         public String getType() {
             return TYPE_TEXT;
         }
 
+        /**
+         * Gets the status of this text match.
+         * <p>
+         * Always returns STATUS_FOUND as text matches don't undergo validation.
+         *
+         * @return Status object with SC_OK and "Found" message
+         */
         @Override
         public Status getStatus() {
             return STATUS_FOUND;
         }
 
+        /**
+         * Indicates that this result should always be reported.
+         *
+         * @return True as text matches should always be reported
+         */
         @Override
         public boolean isReported() {
             return true;
         }
 
+        /**
+         * No-operation implementation as text match status is always "Found".
+         *
+         * @param status Status to set (ignored)
+         */
         @Override
         public void setStatus(Status status) {
             // No operation

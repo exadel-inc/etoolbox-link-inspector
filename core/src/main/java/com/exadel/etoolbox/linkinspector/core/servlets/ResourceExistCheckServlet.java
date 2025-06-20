@@ -31,6 +31,17 @@ import javax.json.Json;
 import javax.servlet.Servlet;
 import java.util.Optional;
 
+/**
+ * Servlet that verifies the existence of a repository resource at a specified path.
+ * <p>
+ * This servlet exposes an HTTP POST endpoint that accepts a repository path parameter
+ * and checks whether a resource exists at that location. The result is returned as a
+ * JSON object with a boolean flag indicating whether the resource was found.
+ * <p>
+ * The servlet is registered at the path "/bin/etoolbox/link-inspector/resource-exist-check"
+ * and is used by the Link Inspector UI to validate resource paths before performing
+ * operations that depend on resource existence.
+ */
 @Component(service = {Servlet.class})
 @SlingServletResourceTypes(
         resourceTypes = "/bin/etoolbox/link-inspector/resource-exist-check",

@@ -22,6 +22,11 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
 
+/**
+ * Listens to changes in configuration resources and updates OSGi configurations accordingly.
+ * This component observes resource changes (add, change, remove) in the configuration path
+ * and synchronizes them with the OSGi ConfigurationAdmin service.
+ */
 @Component(
         service = ResourceChangeListener.class,
         immediate = true,
@@ -58,6 +63,11 @@ public class ConfigResourceListenerImpl implements ResourceChangeListener {
         }
     }
 
+    /**
+     * Handles resource change events
+     *
+     * @param list List of resource changes to process
+     */
     @Override
     public void onChange(List<ResourceChange> list) {
         try (ResourceResolver resolver = repositoryHelper.getServiceResourceResolver()) {

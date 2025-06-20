@@ -67,11 +67,25 @@ public class InternalLinkResolverImpl implements Resolver {
         this.internalLinksHost = config.internalLinksHost();
     }
 
+    /**
+     * Gets the unique identifier for this resolver.
+     *
+     * @return String "Internal" as the resolver's identifier
+     */
     @Override
     public String getId() {
         return "Internal";
     }
 
+    /**
+     * Extracts internal links from the provided source content.
+     * <p>
+     * This method searches for paths matching the internal link pattern (/content/...)
+     * and creates a Result object for each match found.
+     *
+     * @param source The content to search for internal links
+     * @return Collection of Result objects representing found internal links, or empty collection if disabled
+     */
     @Override
     public Collection<Result> getResults(String source) {
         if (!enabled) {
@@ -86,6 +100,16 @@ public class InternalLinkResolverImpl implements Resolver {
         return results;
     }
 
+    /**
+     * Validates an internal link by checking if the referenced resource exists in the repository.
+     * <p>
+     * This method attempts to resolve the path using the ResourceResolver. If the resource
+     * doesn't exist and an internal links host is configured, it falls back to validating
+     * the link as an external URL using the external link resolver.
+     *
+     * @param result The Result object containing the link to validate
+     * @param resourceResolver ResourceResolver used to check if the referenced resource exists
+     */
     @Override
     public void validate(Result result, ResourceResolver resourceResolver) {
         if (result == null || !StringUtils.equalsIgnoreCase(getId(), result.getType())) {
@@ -99,6 +123,11 @@ public class InternalLinkResolverImpl implements Resolver {
         }
     }
 
+    /**
+     * Indicates whether this resolver is currently enabled.
+     *
+     * @return True if the resolver is enabled, false otherwise
+     */
     @Override
     public boolean isEnabled() {
         return enabled;

@@ -21,7 +21,9 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 /**
- * Represents the of the {@link Result} based on a result of checking link's validity
+ * Represents the status of a link checking operation.
+ * This class encapsulates the HTTP status code and message for a link validation result.
+ * It provides methods to determine if a link is valid based on the status code.
  */
 @Getter
 public final class Status {

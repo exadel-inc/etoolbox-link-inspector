@@ -30,6 +30,14 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Implementation of the {@link GridDataSource} service interface that provides data sources
+ * for the Link Inspector grid.
+ * <p>
+ * This implementation retrieves link data from the {@link DataFeedService} and applies
+ * pagination, filtering, and sorting as required by the UI. It transforms the data into
+ * a format that can be consumed by the AEM Granite UI components.
+ */
 @Component(service = GridDataSource.class)
 public class GridDataSourceImpl implements GridDataSource {
     private static final Logger LOG = LoggerFactory.getLogger(GridDataSourceImpl.class);

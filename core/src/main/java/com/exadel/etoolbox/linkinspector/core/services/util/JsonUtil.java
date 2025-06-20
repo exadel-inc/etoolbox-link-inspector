@@ -30,6 +30,15 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Optional;
 
+/**
+ * Utility class providing helper methods for JSON manipulation and conversion.
+ * <p>
+ * This class contains static utility methods for common JSON operations in the link inspector
+ * context, such as converting objects to JSON, parsing JSON data into model objects, and
+ * reading JSON files from the JCR repository.
+ * <p>
+ * All methods are static and the class cannot be instantiated.
+ */
 public class JsonUtil {
     private static final Logger LOG = LoggerFactory.getLogger(JsonUtil.class);
 
@@ -37,6 +46,16 @@ public class JsonUtil {
 
     private JsonUtil() {}
 
+    /**
+     * Converts a collection of objects to a JSON array.
+     * <p>
+     * This method takes any collection of objects and transforms them into a JSON array
+     * representation using Jackson's ObjectMapper. Each object in the collection becomes
+     * an element in the resulting array.
+     *
+     * @param objects The collection of objects to convert
+     * @return An ArrayNode containing the JSON representation of all objects
+     */
     public static ArrayNode objectsToJsonArray(Collection<?> objects) {
         ArrayNode arrayNode = OBJECT_MAPPER.createArrayNode();
         objects.forEach(object -> {
@@ -50,6 +69,18 @@ public class JsonUtil {
         return arrayNode;
     }
 
+    /**
+     * Converts a JSON node to a typed model object.
+     * <p>
+     * This method deserializes a JsonNode into an instance of the specified model class
+     * using Jackson's ObjectMapper. It converts the JSON to a byte stream and then
+     * deserializes it into the target type.
+     *
+     * @param <T> The target model type
+     * @param json The JSON node to convert
+     * @param modelClass The class of the model to create
+     * @return An instance of the model class populated with data from the JSON, or null if conversion fails
+     */
     public static <T> T jsonToModel(JsonNode json, Class<T> modelClass) {
         try (InputStream is = new ByteArrayInputStream(json.toString().getBytes(StandardCharsets.UTF_8))) {
             final JavaType type = OBJECT_MAPPER.getTypeFactory().constructType(modelClass);
@@ -60,6 +91,17 @@ public class JsonUtil {
         return null;
     }
 
+    /**
+     * Reads a JSON array from a file in the JCR repository.
+     * <p>
+     * This method resolves the specified path to a resource, reads its contents as a JSON string,
+     * and parses it into an ArrayNode. If the file doesn't exist or cannot be parsed,
+     * an empty array is returned.
+     *
+     * @param jsonPath The repository path to the JSON file
+     * @param resourceResolver ResourceResolver used to access the file
+     * @return An ArrayNode containing the parsed JSON array, or an empty array if reading fails
+     */
     public static ArrayNode getJsonArrayFromFile(String jsonPath, ResourceResolver resourceResolver) {
         Optional<InputStream> streamOptional = Optional.ofNullable(resourceResolver.getResource(jsonPath))
                 .map(resource -> resource.adaptTo(InputStream.class));

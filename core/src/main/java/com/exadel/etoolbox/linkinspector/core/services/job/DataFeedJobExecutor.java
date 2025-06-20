@@ -24,6 +24,17 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Job executor that handles the asynchronous generation of the link data feed.
+ * <p>
+ * This class consumes jobs on the data feed generation topic and delegates the
+ * actual data feed creation to the {@link DataFeedService}. Using Sling jobs allows
+ * for decoupling the generation request from the actual processing, enabling
+ * long-running tasks to execute in the background without blocking user interactions.
+ * <p>
+ * The executor registers itself for the {@link #GENERATE_DATA_FEED_TOPIC} topic and
+ * processes any jobs posted to that topic.
+ */
 @Component(service = JobExecutor.class,
         property = {
                 JobExecutor.PROPERTY_TOPICS + "=" + DataFeedJobExecutor.GENERATE_DATA_FEED_TOPIC
@@ -36,6 +47,20 @@ public class DataFeedJobExecutor implements JobExecutor {
     @Reference
     private DataFeedService dataFeedService;
 
+    /**
+     * Processes a data feed generation job.
+     * <p>
+     * This method is called by the Sling job manager when a job with the
+     * {@link #GENERATE_DATA_FEED_TOPIC} topic is ready to be processed. It delegates
+     * the actual work to the {@link DataFeedService#generateDataFeed()} method.
+     * <p>
+     * The method handles job cancellation by checking if the job execution context
+     * has been stopped during processing.
+     *
+     * @param job The job to process
+     * @param jobExecutionContext Context for the job execution
+     * @return A job execution result indicating success, failure, or cancellation
+     */
     @Override
     public JobExecutionResult process(Job job, JobExecutionContext jobExecutionContext) {
         LOG.debug("DataFeedJobExecutor - start Data Feed Generation sling job processing");

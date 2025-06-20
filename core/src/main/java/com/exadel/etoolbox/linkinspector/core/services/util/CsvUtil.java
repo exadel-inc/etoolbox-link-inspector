@@ -26,6 +26,15 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.function.BiConsumer;
 
+/**
+ * Utility class providing helper methods for CSV file generation and manipulation.
+ * <p>
+ * This class contains static utility methods for working with CSV data in the link inspector
+ * context, such as creating CSV exports of link data, handling special characters in CSV fields,
+ * and building location strings for resources.
+ * <p>
+ * All methods are static and the class cannot be instantiated.
+ */
 public class CsvUtil {
     private static final Logger LOG = LoggerFactory.getLogger(CsvUtil.class);
 
@@ -36,6 +45,15 @@ public class CsvUtil {
 
     private CsvUtil() {}
 
+    /**
+     * Wraps a string value with quotes if it contains semicolons.
+     * <p>
+     * This method is used to ensure proper CSV formatting by escaping fields
+     * containing the delimiter character.
+     *
+     * @param value The string value to check and potentially wrap
+     * @return The original string wrapped in quotes if it contains semicolons, otherwise the original string
+     */
     public static String wrapIfContainsSemicolon(String value) {
         if (StringUtils.contains(value, SEMICOLON)) {
             return StringUtils.wrap(value, QUOTE);
@@ -43,10 +61,33 @@ public class CsvUtil {
         return value;
     }
 
+    /**
+     * Builds a location string by combining a path with a property name.
+     * <p>
+     * The format of the resulting string is "path@propertyName", which provides
+     * a concise representation of where a link is stored in the content repository.
+     *
+     * @param path The path to the resource containing the property
+     * @param propertyName The name of the property
+     * @return A combined location string in the format "path@propertyName"
+     */
     public static String buildLocation(String path, String propertyName) {
         return path + AT_SIGN + propertyName;
     }
 
+    /**
+     * Converts a collection of items to a CSV byte array.
+     * <p>
+     * This method provides a generic way to convert any collection of items into a CSV format
+     * using a custom print function to determine how each item is represented in the CSV.
+     * The method handles the creation of the CSV format, including optional column headers.
+     *
+     * @param <T> The type of items in the collection
+     * @param items The collection of items to convert to CSV
+     * @param printRecord A function that defines how to print each item to the CSV
+     * @param columnHeaders Optional array of column headers (null for no headers)
+     * @return Byte array containing the CSV data, or an empty array if conversion fails
+     */
     public static <T> byte[] itemsToCsvByteArray(Collection<T> items, BiConsumer<CSVPrinter, T> printRecord,
                                                  String[] columnHeaders) {
         if (items.isEmpty()) {

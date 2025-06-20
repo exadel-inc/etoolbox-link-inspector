@@ -20,7 +20,8 @@ import java.util.Collection;
 
 /**
  * Represents a service that extracts substrings that follow certain pattern (such as web links) from the given source
- * string and validates them
+ * string and validates them. Resolvers are responsible for identifying, extracting, and validating different types
+ * of links within content.
  */
 public interface Resolver {
 

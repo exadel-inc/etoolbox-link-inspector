@@ -80,11 +80,25 @@ public class ExternalLinkResolverImpl implements Resolver {
     private String userAgent;
     private boolean enabled;
 
+    /**
+     * Gets the unique identifier for this resolver.
+     *
+     * @return String "External" as the resolver's identifier
+     */
     @Override
     public String getId() {
         return "External";
     }
 
+    /**
+     * Extracts external links from the provided source content.
+     * <p>
+     * This method searches for URLs matching the external link pattern and creates
+     * a Result object for each match found.
+     *
+     * @param source The content to search for external links
+     * @return Collection of Result objects representing found external links, or empty collection if disabled
+     */
     @Override
     public Collection<Result> getResults(String source) {
         if (!enabled) {
@@ -99,6 +113,16 @@ public class ExternalLinkResolverImpl implements Resolver {
         return results;
     }
 
+    /**
+     * Validates an external link by sending HTTP requests and checking the response.
+     * <p>
+     * This method first tries a HEAD request for efficiency, and if that doesn't return
+     * an OK status, it falls back to a GET request. It handles various types of exceptions
+     * that can occur during HTTP communication and sets appropriate status codes on the result.
+     *
+     * @param result The Result object containing the link to validate
+     * @param resourceResolver ResourceResolver (not used in this implementation but required by interface)
+     */
     @Override
     public void validate(Result result, ResourceResolver resourceResolver) {
         if (result == null || !StringUtils.equalsIgnoreCase(getId(), result.getType())) {
@@ -122,6 +146,11 @@ public class ExternalLinkResolverImpl implements Resolver {
         }
     }
 
+    /**
+     * Indicates whether this resolver is currently enabled.
+     *
+     * @return True if the resolver is enabled, false otherwise
+     */
     @Override
     public boolean isEnabled() {
         return enabled;

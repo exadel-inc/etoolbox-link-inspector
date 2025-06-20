@@ -19,28 +19,73 @@ import org.apache.http.impl.EnglishReasonPhraseCatalog;
 
 import java.util.Locale;
 
+/**
+ * Interface representing the result of a link validation operation.
+ * Provides methods to access information about a link's type, value,
+ * any matched content, and the validation status.
+ */
 public interface Result {
 
+    /**
+     * Gets the type of the link
+     *
+     * @return The link type identifier
+     */
     String getType();
 
+    /**
+     * Gets the value of the link
+     *
+     * @return The link value (URL)
+     */
     String getValue();
 
+    /**
+     * Gets any matched content for the link
+     *
+     * @return The matched content or empty string if no match
+     */
     String getMatch();
 
+    /**
+     * Gets the status of the link validation
+     *
+     * @return The Status object containing code and message
+     */
     Status getStatus();
 
+    /**
+     * Determines if the link has been reported based on its status
+     *
+     * @return true if the link is not valid; false otherwise
+     */
     default boolean isReported() {
         return !getStatus().isValid();
     }
 
+    /**
+     * Sets the status of the link validation
+     *
+     * @param status The new status to be set
+     */
     void setStatus(Status status);
 
+    /**
+     * Sets the status of the link validation using a status code
+     *
+     * @param code The status code
+     */
     default void setStatus(int code) {
         ReasonPhraseCatalog catalog = EnglishReasonPhraseCatalog.INSTANCE;
         String message = catalog.getReason(code, Locale.ENGLISH);
         setStatus(new Status(code, message));
     }
 
+    /**
+     * Sets the status of the link validation using a status message
+     *
+     * @param message The status message
+     */
     default void setStatus(String message) {
         if (getStatus() == null) {
             setStatus(new Status(0, message));
@@ -48,6 +93,12 @@ public interface Result {
         setStatus(new Status(getStatus().getCode(), message));
     }
 
+    /**
+     * Sets the status of the link validation using both a status code and message
+     *
+     * @param code    The status code
+     * @param message The status message
+     */
     default void setStatus(int code, String message) {
         setStatus(new Status(code, message));
     }

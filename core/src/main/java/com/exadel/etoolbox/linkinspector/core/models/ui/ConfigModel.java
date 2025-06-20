@@ -8,6 +8,10 @@ import org.apache.sling.models.annotations.DefaultInjectionStrategy;
 import org.apache.sling.models.annotations.Model;
 import org.apache.sling.models.annotations.injectorspecific.OSGiService;
 
+/**
+ * Sling Model for providing configuration data to UI components.
+ * This model exposes configuration settings from the ConfigService for use in the frontend.
+ */
 @Model(
         adaptables = {SlingHttpServletRequest.class, Resource.class},
         defaultInjectionStrategy = DefaultInjectionStrategy.OPTIONAL
@@ -17,6 +21,11 @@ public class ConfigModel {
     @OSGiService
     private ConfigService configService;
 
+    /**
+     * Returns the configured search path for the Link Inspector tool
+     *
+     * @return The content path that will be searched for links
+     */
     public String getSearchPath() {
         return configService.getSearchPath();
     }

@@ -17,7 +17,10 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * Represents the model with pagination logic.
+ * Represents the model with pagination logic for the Link Inspector grid view.
+ * This model handles the pagination implementation for the grid display, including
+ * page number calculation, filtering by link type or substring, and determining
+ * the range of pages to show in the pagination UI.
  */
 @Model(
         adaptables = SlingHttpServletRequest.class,
@@ -75,18 +78,38 @@ public class PaginationModel {
                 .orElse(StringUtils.EMPTY);
     }
 
+    /**
+     * Returns the previous page number.
+     *
+     * @return the previous page number
+     */
     public int getPreviousPage() {
         return page - 1;
     }
 
+    /**
+     * Returns the page number before the previous page.
+     *
+     * @return the page number before the previous page
+     */
     public int getPageBeforePrevious() {
         return page - 2;
     }
 
+    /**
+     * Returns the next page number.
+     *
+     * @return the next page number
+     */
     public int getNextPage() {
         return page + 1;
     }
 
+    /**
+     * Returns the page number after the previous page.
+     *
+     * @return the page number after the previous page
+     */
     public int getPageAfterPrevious() {
         return page + 2;
     }
