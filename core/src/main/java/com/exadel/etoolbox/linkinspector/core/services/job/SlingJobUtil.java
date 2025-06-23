@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
+ * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  * Utility class for working with Sling Jobs.
  * Provides helper methods for adding, finding, and checking the status of Sling jobs.
  */

@@ -20,6 +20,7 @@ import org.apache.sling.api.resource.ResourceResolver;
 import java.util.List;
 
 /**
+ * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  * Provides the service responsible for collecting broken links and building models necessary for data feed creation.
  */
 public interface GridResourcesGenerator {

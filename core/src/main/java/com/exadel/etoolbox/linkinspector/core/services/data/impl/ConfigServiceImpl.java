@@ -15,6 +15,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 /**
+ * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  * Implementation of the ConfigService interface that provides configuration settings
  * for the Link Inspector tool. This service retrieves configuration values from the
  * repository and provides default values when configurations are not defined.

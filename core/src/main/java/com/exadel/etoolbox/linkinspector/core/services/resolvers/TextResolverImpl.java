@@ -37,6 +37,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
+ * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  * Validates external links via sending HEAD requests concurrently using {@link PoolingHttpClientConnectionManager}
  */
 @Component(service = Resolver.class, immediate = true)
@@ -63,9 +64,7 @@ public class TextResolverImpl implements Resolver {
     }
 
     /**
-     * Indicates whether this resolver is currently enabled.
-     *
-     * @return True if the resolver is enabled, false otherwise
+     * {@inheritDoc}
      */
     @Override
     public boolean isEnabled() {
@@ -73,9 +72,7 @@ public class TextResolverImpl implements Resolver {
     }
 
     /**
-     * Gets the unique identifier for this resolver.
-     *
-     * @return String "Text" as the resolver's identifier
+     * {@inheritDoc}
      */
     @Override
     public String getId() {
@@ -83,13 +80,7 @@ public class TextResolverImpl implements Resolver {
     }
 
     /**
-     * Finds text patterns in the provided source content based on the configured regular expression.
-     * <p>
-     * This method searches the source text for matches against the configured pattern
-     * and creates a Result object for each match found.
-     *
-     * @param source The content to search for pattern matches
-     * @return Collection of Result objects representing found matches, or empty collection if disabled
+     * {@inheritDoc}
      */
     @Override
     public Collection<Result> getResults(String source) {
@@ -106,13 +97,7 @@ public class TextResolverImpl implements Resolver {
     }
 
     /**
-     * No validation is performed for text matches.
-     * <p>
-     * This method is a no-operation implementation as text patterns are considered
-     * immediately found and don't require additional validation.
-     *
-     * @param result The Result object containing the text match (not used)
-     * @param resourceResolver ResourceResolver (not used)
+     * {@inheritDoc}
      */
     @Override
     public void validate(Result result, ResourceResolver resourceResolver) {
@@ -133,9 +118,7 @@ public class TextResolverImpl implements Resolver {
         private final String match;
 
         /**
-         * Gets the type identifier for this result.
-         *
-         * @return String "Text" as the result type
+         * {@inheritDoc}
          */
         @Override
         public String getType() {
@@ -143,11 +126,7 @@ public class TextResolverImpl implements Resolver {
         }
 
         /**
-         * Gets the status of this text match.
-         * <p>
-         * Always returns STATUS_FOUND as text matches don't undergo validation.
-         *
-         * @return Status object with SC_OK and "Found" message
+         * {@inheritDoc}
          */
         @Override
         public Status getStatus() {
@@ -155,9 +134,7 @@ public class TextResolverImpl implements Resolver {
         }
 
         /**
-         * Indicates that this result should always be reported.
-         *
-         * @return True as text matches should always be reported
+         * {@inheritDoc}
          */
         @Override
         public boolean isReported() {
@@ -165,9 +142,7 @@ public class TextResolverImpl implements Resolver {
         }
 
         /**
-         * No-operation implementation as text match status is always "Found".
-         *
-         * @param status Status to set (ignored)
+         * {@inheritDoc}
          */
         @Override
         public void setStatus(Status status) {

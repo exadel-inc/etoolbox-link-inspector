@@ -40,7 +40,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Servlet that provides configuration settings data for Link Inspector resolvers.
+ * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
+ * Provides configuration settings data for Link Inspector resolvers.
  * <p>
  * This servlet exposes an HTTP GET endpoint that retrieves and returns the current
  * configuration settings for all active link resolvers in the system. It uses the

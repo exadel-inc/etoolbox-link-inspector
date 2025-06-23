@@ -35,7 +35,8 @@ import javax.servlet.Servlet;
 import java.util.Optional;
 
 /**
- * Servlet that checks if the current user has specific permissions at a given repository path.
+ * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
+ * Checks if the current user has specific permissions at a given repository path.
  * <p>
  * This servlet exposes an HTTP POST endpoint that accepts a repository path and a comma-separated
  * list of permissions to check. It verifies whether the current user's session has the requested

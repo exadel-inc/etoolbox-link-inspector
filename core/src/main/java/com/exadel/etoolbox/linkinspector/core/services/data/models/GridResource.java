@@ -24,11 +24,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  * Data model used for building data feed and further adaptation to sling resources for rendering
  * the Link Inspector grid. Represents data for a single row in the grid.
- * <p>
- * This class implements the Result interface and provides additional properties specifically needed
- * for grid display, including resource path, property name, and other display-related attributes.
  */
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor

@@ -40,6 +40,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
+ * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  * Represents a row in the UI grid. The row consists of the information about links, such as type, href, status code,
  * status code, status message, along with the details about containing page and the component.
  */
@@ -125,7 +126,7 @@ public class GridViewItem {
     }
 
     /**
-     * Gets the status code of the link check
+     * Gets the validation status of a text fragments, such as a link
      *
      * @return The String representation of the HTTP status code or a status message excerpt if not available
      */
@@ -153,7 +154,7 @@ public class GridViewItem {
     }
 
     /**
-     * Gets the CSS class name for styling the status indicator
+     * Gets a string token for styling the status indicator
      *
      * @return The status tag value: "ok", "error", or "undefined"
      */

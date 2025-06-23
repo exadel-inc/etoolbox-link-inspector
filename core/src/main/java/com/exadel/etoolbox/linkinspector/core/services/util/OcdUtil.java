@@ -25,6 +25,7 @@ import org.osgi.service.metatype.MetaTypeService;
 import org.osgi.service.metatype.ObjectClassDefinition;
 
 /**
+ * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  * Utility class providing helper methods for working with OSGi Object Class Definitions (OCDs).
  * <p>
  * This class offers utilities for retrieving and formatting component labels from OSGi metadata.
@@ -42,14 +43,6 @@ public class OcdUtil {
 
     /**
      * Gets a human-readable label for an OSGi component.
-     * <p>
-     * This method attempts to retrieve the user-friendly name of the component from
-     * its OSGi metadata using the MetaTypeService. If metadata is not available or
-     * doesn't contain a name, it falls back to using the class name with camel case
-     * formatting and "Impl" suffix removal.
-     * <p>
-     * If a label is found in the metadata but has a prefix (e.g., "namespace:label"
-     * or "namespace-label"), the prefix is removed.
      *
      * @param component The OSGi component instance to get the label for
      * @param metaTypeService The MetaTypeService used to access component metadata

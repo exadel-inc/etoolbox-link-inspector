@@ -38,7 +38,8 @@ import javax.servlet.Servlet;
 import java.util.*;
 
 /**
- * Servlet that provides DataSource for resolver-related UI components of the Link Inspector.
+ * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
+ * Provides DataSource for resolver-related UI components of the Link Inspector.
  * <p>
  * This servlet dynamically creates resources based on the available link resolvers,
  * exposing them as a DataSource for Granite UI components. It serves two types of resources:

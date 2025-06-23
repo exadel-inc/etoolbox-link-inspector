@@ -25,7 +25,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Job executor that handles the asynchronous generation of the link data feed.
+ * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
+ * Handles the asynchronous generation of the link data feed via a Sling job.
  * <p>
  * This class consumes jobs on the data feed generation topic and delegates the
  * actual data feed creation to the {@link DataFeedService}. Using Sling jobs allows

@@ -30,7 +30,8 @@ import javax.json.Json;
 import javax.servlet.Servlet;
 
 /**
- * Servlet that retrieves and provides information about the status of data feed generation jobs.
+ * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
+ * Retrieves and provides information about the status of data feed generation jobs.
  * <p>
  * This servlet exposes an HTTP GET endpoint that queries the Sling Job Manager for information
  * about jobs with the data feed generation topic. It returns the current status of any active or

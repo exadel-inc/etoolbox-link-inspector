@@ -37,7 +37,8 @@ import java.io.IOException;
 import java.util.Collections;
 
 /**
- * Servlet that handles link value editing requests from the Link Inspector UI.
+ * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
+ * Handles link value editing requests from the Link Inspector UI.
  * <p>
  * This servlet exposes an HTTP POST endpoint that allows updating link values in the repository.
  * It accepts parameters for the current link value, updated link value, resource path, and

@@ -43,7 +43,8 @@ import javax.servlet.Servlet;
 import java.util.*;
 
 /**
- * Servlet that provides a DataSource for the Link Inspector settings UI.
+ * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
+ * Provides a DataSource for the Link Inspector settings UI.
  * <p>
  * This servlet dynamically generates UI components for configuring resolver settings
  * based on the available link resolvers and their OSGi metadata. It creates tabs and

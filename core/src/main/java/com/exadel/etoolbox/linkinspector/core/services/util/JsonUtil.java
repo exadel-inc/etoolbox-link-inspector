@@ -31,6 +31,7 @@ import java.util.Collection;
 import java.util.Optional;
 
 /**
+ * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  * Utility class providing helper methods for JSON manipulation and conversion.
  * <p>
  * This class contains static utility methods for common JSON operations in the link inspector
@@ -48,10 +49,6 @@ public class JsonUtil {
 
     /**
      * Converts a collection of objects to a JSON array.
-     * <p>
-     * This method takes any collection of objects and transforms them into a JSON array
-     * representation using Jackson's ObjectMapper. Each object in the collection becomes
-     * an element in the resulting array.
      *
      * @param objects The collection of objects to convert
      * @return An ArrayNode containing the JSON representation of all objects
@@ -71,10 +68,6 @@ public class JsonUtil {
 
     /**
      * Converts a JSON node to a typed model object.
-     * <p>
-     * This method deserializes a JsonNode into an instance of the specified model class
-     * using Jackson's ObjectMapper. It converts the JSON to a byte stream and then
-     * deserializes it into the target type.
      *
      * @param <T> The target model type
      * @param json The JSON node to convert
@@ -93,10 +86,6 @@ public class JsonUtil {
 
     /**
      * Reads a JSON array from a file in the JCR repository.
-     * <p>
-     * This method resolves the specified path to a resource, reads its contents as a JSON string,
-     * and parses it into an ArrayNode. If the file doesn't exist or cannot be parsed,
-     * an empty array is returned.
      *
      * @param jsonPath The repository path to the JSON file
      * @param resourceResolver ResourceResolver used to access the file

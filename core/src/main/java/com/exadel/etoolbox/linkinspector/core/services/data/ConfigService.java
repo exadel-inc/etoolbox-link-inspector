@@ -17,7 +17,8 @@ package com.exadel.etoolbox.linkinspector.core.services.data;
 import java.time.ZonedDateTime;
 
 /**
- * Service interface for providing configuration settings used by the link inspection functionality.
+ * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
+ * Provides generic configuration settings used by the content inspection functionality.
  * <p>
  * This interface defines methods to retrieve various configuration options that control
  * how links are discovered, filtered, and validated throughout the content repository.
@@ -33,14 +34,14 @@ public interface ConfigService {
     String[] getExcludedLinksPatterns();
 
     /**
-     * Gets the root path where link inspection begins.
+     * Gets the root path where content inspection begins.
      *
      * @return The base content path to search for links
      */
     String getSearchPath();
 
     /**
-     * Gets the paths that should be excluded from link inspection.
+     * Gets the paths that should be excluded from content inspection.
      *
      * @return Array of paths to exclude from validation
      */
@@ -64,7 +65,7 @@ public interface ConfigService {
     ZonedDateTime getLastModified();
 
     /**
-     * Gets the property names that should be excluded from link inspection.
+     * Gets the property names that should be excluded from content inspection.
      *
      * @return Array of property names to exclude from validation
      */

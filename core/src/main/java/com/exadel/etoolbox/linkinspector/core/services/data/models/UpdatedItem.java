@@ -5,7 +5,8 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 /**
- * Represents an item that has been updated during link fixing operations.
+ * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
+ * Represents an item that has been updated during a link fixing operation.
  * This class stores information about the link before and after updating,
  * as well as the location where the update was performed.
  */

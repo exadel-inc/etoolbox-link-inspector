@@ -54,6 +54,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
+ * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  * Validates external links via sending HEAD requests concurrently using {@link PoolingHttpClientConnectionManager}
  */
 @Component(service = {Resolver.class, ExternalLinkResolverImpl.class}, immediate = true)
@@ -81,9 +82,7 @@ public class ExternalLinkResolverImpl implements Resolver {
     private boolean enabled;
 
     /**
-     * Gets the unique identifier for this resolver.
-     *
-     * @return String "External" as the resolver's identifier
+     * {@inheritDoc}
      */
     @Override
     public String getId() {
@@ -91,13 +90,7 @@ public class ExternalLinkResolverImpl implements Resolver {
     }
 
     /**
-     * Extracts external links from the provided source content.
-     * <p>
-     * This method searches for URLs matching the external link pattern and creates
-     * a Result object for each match found.
-     *
-     * @param source The content to search for external links
-     * @return Collection of Result objects representing found external links, or empty collection if disabled
+     * {@inheritDoc}
      */
     @Override
     public Collection<Result> getResults(String source) {
@@ -114,14 +107,7 @@ public class ExternalLinkResolverImpl implements Resolver {
     }
 
     /**
-     * Validates an external link by sending HTTP requests and checking the response.
-     * <p>
-     * This method first tries a HEAD request for efficiency, and if that doesn't return
-     * an OK status, it falls back to a GET request. It handles various types of exceptions
-     * that can occur during HTTP communication and sets appropriate status codes on the result.
-     *
-     * @param result The Result object containing the link to validate
-     * @param resourceResolver ResourceResolver (not used in this implementation but required by interface)
+     * {@inheritDoc}
      */
     @Override
     public void validate(Result result, ResourceResolver resourceResolver) {
@@ -147,9 +133,7 @@ public class ExternalLinkResolverImpl implements Resolver {
     }
 
     /**
-     * Indicates whether this resolver is currently enabled.
-     *
-     * @return True if the resolver is enabled, false otherwise
+     * {@inheritDoc}
      */
     @Override
     public boolean isEnabled() {

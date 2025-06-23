@@ -20,58 +20,58 @@ import org.apache.http.impl.EnglishReasonPhraseCatalog;
 import java.util.Locale;
 
 /**
- * Interface representing the result of a link validation operation.
- * Provides methods to access information about a link's type, value,
+ * Represents the text fragment (such as a link) extracted from a JCR property value by a {@link Resolver}.
+ * Provides methods to access information about a text fragment's type, value,
  * any matched content, and the validation status.
  */
 public interface Result {
 
     /**
-     * Gets the type of the link
+     * Gets the type of the text fragment
      *
-     * @return The link type identifier
+     * @return The text fragment type identifier
      */
     String getType();
 
     /**
-     * Gets the value of the link
+     * Gets the value of the text fragment
      *
-     * @return The link value (URL)
+     * @return The text fragment value (URL)
      */
     String getValue();
 
     /**
-     * Gets any matched content for the link
+     * Gets any matched content for the text fragment
      *
      * @return The matched content or empty string if no match
      */
     String getMatch();
 
     /**
-     * Gets the status of the link validation
+     * Gets the status of the text fragment validation
      *
      * @return The Status object containing code and message
      */
     Status getStatus();
 
     /**
-     * Determines if the link has been reported based on its status
+     * Determines if the text fragment has been reported based on its status
      *
-     * @return true if the link is not valid; false otherwise
+     * @return true if the text fragment is not valid; false otherwise
      */
     default boolean isReported() {
         return !getStatus().isValid();
     }
 
     /**
-     * Sets the status of the link validation
+     * Sets the status of the text fragment validation
      *
      * @param status The new status to be set
      */
     void setStatus(Status status);
 
     /**
-     * Sets the status of the link validation using a status code
+     * Sets the status of the text fragment validation using a status code
      *
      * @param code The status code
      */
@@ -82,7 +82,7 @@ public interface Result {
     }
 
     /**
-     * Sets the status of the link validation using a status message
+     * Sets the status of the text fragment validation using a status message
      *
      * @param message The status message
      */
@@ -94,7 +94,7 @@ public interface Result {
     }
 
     /**
-     * Sets the status of the link validation using both a status code and message
+     * Sets the status of the text fragment validation using both a status code and message
      *
      * @param code    The status code
      * @param message The status message

@@ -23,6 +23,7 @@ import java.util.Hashtable;
 import java.util.List;
 
 /**
+ * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  * Listens to changes in configuration resources and updates OSGi configurations accordingly.
  * This component observes resource changes (add, change, remove) in the configuration path
  * and synchronizes them with the OSGi ConfigurationAdmin service.

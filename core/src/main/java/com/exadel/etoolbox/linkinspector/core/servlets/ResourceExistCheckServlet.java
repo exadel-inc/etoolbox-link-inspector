@@ -32,7 +32,8 @@ import javax.servlet.Servlet;
 import java.util.Optional;
 
 /**
- * Servlet that verifies the existence of a repository resource at a specified path.
+ * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
+ * Verifies the existence of a repository resource at a specified path.
  * <p>
  * This servlet exposes an HTTP POST endpoint that accepts a repository path parameter
  * and checks whether a resource exists at that location. The result is returned as a

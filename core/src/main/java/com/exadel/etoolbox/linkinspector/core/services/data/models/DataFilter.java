@@ -3,6 +3,7 @@ package com.exadel.etoolbox.linkinspector.core.services.data.models;
 import org.apache.commons.lang3.StringUtils;
 
 /**
+ * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  * Filter model which is used to obtain the final list of data to display.
  * This class provides filtering capabilities for GridResource objects based on
  * link type and substring matching.

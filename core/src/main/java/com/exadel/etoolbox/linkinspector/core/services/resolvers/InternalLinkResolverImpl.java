@@ -44,6 +44,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
+ * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  * Validates external links via sending HEAD requests concurrently using {@link PoolingHttpClientConnectionManager}
  */
 @Component(service = Resolver.class, immediate = true)
@@ -68,9 +69,7 @@ public class InternalLinkResolverImpl implements Resolver {
     }
 
     /**
-     * Gets the unique identifier for this resolver.
-     *
-     * @return String "Internal" as the resolver's identifier
+     * {@inheritDoc}
      */
     @Override
     public String getId() {
@@ -78,13 +77,7 @@ public class InternalLinkResolverImpl implements Resolver {
     }
 
     /**
-     * Extracts internal links from the provided source content.
-     * <p>
-     * This method searches for paths matching the internal link pattern (/content/...)
-     * and creates a Result object for each match found.
-     *
-     * @param source The content to search for internal links
-     * @return Collection of Result objects representing found internal links, or empty collection if disabled
+     * {@inheritDoc}
      */
     @Override
     public Collection<Result> getResults(String source) {
@@ -101,14 +94,7 @@ public class InternalLinkResolverImpl implements Resolver {
     }
 
     /**
-     * Validates an internal link by checking if the referenced resource exists in the repository.
-     * <p>
-     * This method attempts to resolve the path using the ResourceResolver. If the resource
-     * doesn't exist and an internal links host is configured, it falls back to validating
-     * the link as an external URL using the external link resolver.
-     *
-     * @param result The Result object containing the link to validate
-     * @param resourceResolver ResourceResolver used to check if the referenced resource exists
+     * {@inheritDoc}
      */
     @Override
     public void validate(Result result, ResourceResolver resourceResolver) {
@@ -124,9 +110,7 @@ public class InternalLinkResolverImpl implements Resolver {
     }
 
     /**
-     * Indicates whether this resolver is currently enabled.
-     *
-     * @return True if the resolver is enabled, false otherwise
+     * {@inheritDoc}
      */
     @Override
     public boolean isEnabled() {

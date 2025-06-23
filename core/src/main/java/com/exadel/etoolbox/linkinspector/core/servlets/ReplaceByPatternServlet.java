@@ -62,6 +62,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
+ * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  * Performs replacement by pattern within the detected broken links scope.
  * The link pattern and replacement are retrieved from the UI dialog and passed to the servlet via an ajax call.
  */

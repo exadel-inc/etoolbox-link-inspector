@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
+ * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  * Implementation of the {@link GridDataSource} service interface that provides data sources
  * for the Link Inspector grid.
  * <p>

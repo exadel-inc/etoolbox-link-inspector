@@ -21,7 +21,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 /**
- * Represents the status of a link checking operation.
+ * Represents the validation status of a text fragments, such as a link.
  * This class encapsulates the HTTP status code and message for a link validation result.
  * It provides methods to determine if a link is valid based on the status code.
  */

@@ -27,6 +27,7 @@ import java.util.Collection;
 import java.util.function.BiConsumer;
 
 /**
+ * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  * Utility class providing helper methods for CSV file generation and manipulation.
  * <p>
  * This class contains static utility methods for working with CSV data in the link inspector

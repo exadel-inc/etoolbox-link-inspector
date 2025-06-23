@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.util.Collection;
 
 /**
+ * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  * Handles JCR packages creation
  */
 public interface PackageHelper {

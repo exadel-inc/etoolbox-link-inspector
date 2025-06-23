@@ -35,6 +35,7 @@ import java.util.*;
 import java.util.stream.Stream;
 
 /**
+ * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  * Utility class providing helper methods for JCR resource manipulation in the link inspector context.
  * <p>
  * This class contains methods for common operations such as creating, modifying, and removing resources,
@@ -42,14 +43,9 @@ import java.util.stream.Stream;
  * All methods are static and the class cannot be instantiated.
  */
 public class LinkInspectorResourceUtil {
-    /**
-     * Logger instance for this class
-     */
+
     private static final Logger LOG = LoggerFactory.getLogger(LinkInspectorResourceUtil.class);
 
-    /**
-     * Private constructor to prevent instantiation of utility class
-     */
     private LinkInspectorResourceUtil() {
     }
 
