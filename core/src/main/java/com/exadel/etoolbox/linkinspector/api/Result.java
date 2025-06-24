@@ -34,16 +34,14 @@ public interface Result {
     String getType();
 
     /**
-     * Gets the value of the text fragment
-     *
-     * @return The text fragment value (URL)
+     * Retrieves the value of a text fragment as extracted from a JCR property by a {@link Resolver}. The value can be, e.g., an URL when produced by a {@code Resolver} dedicated to links, or the text of a property when produced by a {@code Resolver} dedicated to string values. The exact return value is up to the business logic of a particular {@code Resolver}
+     * @return a possibly empty string value
      */
     String getValue();
 
     /**
-     * Gets any matched content for the text fragment
-     *
-     * @return The matched content or empty string if no match
+     * Retrieves the "matching part" of a text fragment as extracted from a JCR property by a {@link Resolver}. The value can be, e.g., the string {@code Foo} if extracted by a text searching {@code Resolver} that processes the search expression {@code ^F\w+}. The value is expected to be a substring of the result returned by the {@link Result#getValue} method, or a string equal to {@link Result#getValue}, or else an empty string. The exact return value is up to the business logic of a particular {@code Resolver}
+     * @return a possibly empty string value
      */
     String getMatch();
 
