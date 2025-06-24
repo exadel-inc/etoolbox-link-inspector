@@ -29,6 +29,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
+ * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  * Represents content of the Stats popover that contains the generation statistics data written
  * by {@link GridResourcesGenerator#generateGridResources}. Most of the
  * fields correspond to the configuration values from the
@@ -72,35 +73,74 @@ public class StatsModal {
     @ValueMapValue
     private String[] statistics;
 
-
+    /**
+     * Gets the timestamp of when the data was last generated
+     *
+     * @return The timestamp as a string
+     */
     public String getLastGenerated() {
         return lastGenerated;
     }
 
+    /**
+     * Gets the root path used for link inspection
+     *
+     * @return The search path
+     */
     public String getSearchPath() {
         return searchPath;
     }
 
+    /**
+     * Gets the paths excluded from link inspection as a comma-separated string
+     *
+     * @return The excluded paths as a comma-separated string or empty string if none
+     */
     public String getExcludedPaths() {
         return arrayToStringValue(excludedPaths);
     }
 
+    /**
+     * Gets the flag indicating whether to skip resources modified after activation
+     *
+     * @return True if resources modified after activation should be skipped, false otherwise
+     */
     public boolean getSkipModifiedAfterActivation() {
         return skipModifiedAfterActivation;
     }
 
+    /**
+     * Gets the timestamp boundary for last modified date check
+     *
+     * @return The last modified boundary as a string
+     */
     public String getLastModifiedBoundary() {
         return lastModifiedBoundary;
     }
 
+    /**
+     * Gets the properties excluded from link inspection as a comma-separated string
+     *
+     * @return The excluded properties as a comma-separated string or empty string if none
+     */
     public String getExcludedProperties() {
         return arrayToStringValue(excludedProperties);
     }
 
+    /**
+     * Gets the link patterns excluded from inspection as a comma-separated string
+     *
+     * @return The excluded link patterns as a comma-separated string or empty string if none
+     */
     public String getExcludedLinksPatterns() {
         return arrayToStringValue(excludedLinksPatterns);
     }
 
+    /**
+     * Gets the tags used for exclusion criteria
+     *
+     * @return The exclude tags as a string
+     */
     public String getExcludeTags() {
         return excludeTags;
     }
@@ -129,6 +169,11 @@ public class StatsModal {
         }
     }
 
+    /**
+     * Gets the statistics data as a map of key-value pairs
+     *
+     * @return A map containing statistics data, with keys and values parsed from the statistics array
+     */
     public Map<String, String> getStatistics() {
         return Arrays.stream(ArrayUtils.nullToEmpty(statistics))
                 .map(stat -> StringUtils.split(stat, ":"))

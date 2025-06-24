@@ -41,7 +41,8 @@ import java.io.IOException;
 import java.util.Collections;
 
 /**
- * The servlet for replacement a broken link with the new one within the specified resource property. The resource path,
+ * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
+ * Replaces a broken link with the new one within the specified resource property. The resource path,
  * property name, link for replacement and the desired link are passed from js during ajax call.
  */
 @Component(service = {Servlet.class})

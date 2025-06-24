@@ -23,7 +23,6 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpStatus;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -38,6 +37,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
+ * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  * Validates external links via sending HEAD requests concurrently using {@link PoolingHttpClientConnectionManager}
  */
 @Component(service = Resolver.class, immediate = true)
@@ -63,19 +63,28 @@ public class TextResolverImpl implements Resolver {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean isEnabled() {
         return enabled;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String getId() {
         return TYPE_TEXT;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Collection<Result> getResults(String source) {
-        if (!enabled ) {
+        if (!enabled) {
             return Collections.emptyList();
         }
 
@@ -87,11 +96,20 @@ public class TextResolverImpl implements Resolver {
         return result;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void validate(Result result, ResourceResolver resourceResolver) {
         // No operation
     }
 
+    /**
+     * Internal implementation of {@link Result} specific to text pattern matches.
+     * <p>
+     * This class represents a match of the configured text pattern in content.
+     * It always reports a "Found" status and is considered reportable.
+     */
     @RequiredArgsConstructor
     @Getter
     @EqualsAndHashCode
@@ -99,21 +117,33 @@ public class TextResolverImpl implements Resolver {
         private final String value;
         private final String match;
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
         public String getType() {
             return TYPE_TEXT;
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
         public Status getStatus() {
             return STATUS_FOUND;
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
         public boolean isReported() {
             return true;
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
         public void setStatus(Status status) {
             // No operation

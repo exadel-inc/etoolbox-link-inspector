@@ -62,6 +62,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
+ * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  * Performs replacement by pattern within the detected broken links scope.
  * The link pattern and replacement are retrieved from the UI dialog and passed to the servlet via an ajax call.
  */
@@ -312,6 +313,18 @@ public class ReplaceByPatternServlet extends SlingAllMethodsServlet {
         }
     }
 
+    /**
+     * Creates a backup package containing the resources to be modified.
+     * <p>
+     * This method builds a package containing all resources that will be modified
+     * by the replacement operation, providing a way to restore the original state.
+     *
+     * @param filteredGridResources The list of resources that will be modified
+     * @param session The JCR session to use for package operations
+     * @throws RepositoryException If a repository error occurs
+     * @throws PackageException If an error occurs during package operations
+     * @throws IOException If an I/O error occurs
+     */
     void createBackupPackage(List<GridResource> filteredGridResources, Session session) throws RepositoryException,
             PackageException, IOException {
         Set<String> backupPaths = filteredGridResources.stream()

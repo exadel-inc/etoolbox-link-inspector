@@ -1,3 +1,17 @@
+/*
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.exadel.etoolbox.linkinspector.core.servlets;
 
 import com.exadel.etoolbox.linkinspector.core.services.data.DataFeedService;
@@ -16,14 +30,27 @@ import org.apache.sling.api.servlets.SlingAllMethodsServlet;
 import org.apache.sling.servlets.annotations.SlingServletResourceTypes;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import java.io.IOException;
 import java.util.Collections;
 
+/**
+ * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
+ * Handles link value editing requests from the Link Inspector UI.
+ * <p>
+ * This servlet exposes an HTTP POST endpoint that allows updating link values in the repository.
+ * It accepts parameters for the current link value, updated link value, resource path, and
+ * property name. The servlet performs two main operations:
+ * <ol>
+ *   <li>Updates the link in the data feed through the {@link DataFeedService}</li>
+ *   <li>Updates the actual property in the repository content</li>
+ * </ol>
+ * <p>
+ * The servlet is registered at the path "/bin/etoolbox/link-inspector/edit-value" and is used
+ * by the Link Inspector UI to implement the link editing functionality.
+ */
 @Component(service = {Servlet.class})
 @SlingServletResourceTypes(
         resourceTypes = "/bin/etoolbox/link-inspector/edit-value",

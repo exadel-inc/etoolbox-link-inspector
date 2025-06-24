@@ -29,6 +29,11 @@ import javax.inject.Inject;
 import java.util.Optional;
 
 /**
+ * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
+ * Represents the content of the statistics button in the Link Inspector UI.
+ * This model provides data about the data feed generation status to determine
+ * whether statistics are available and how they should be displayed.
+ *
  * Represents the Stats button in the UI grid. After clicking this button, the popover represented
  * by {@link StatsModal} is displayed.
  */
@@ -58,6 +63,12 @@ public class StatsButton {
                 .isPresent();
     }
 
+    /**
+     * Checks if statistics are available based on the existence of the statistics resource
+     * or the status of the data feed generation job.
+     *
+     * @return true if statistics are available, false otherwise
+     */
     public boolean isStatsAvailable() {
         return statsResourceExists() || StringUtils.contains("STARTED,ACTIVE,QUEUED,GIVEN_UP",
                 SlingJobUtil.getJobStatus(jobManager, DataFeedJobExecutor.GENERATE_DATA_FEED_TOPIC)

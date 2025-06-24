@@ -30,6 +30,7 @@ import javax.jcr.Session;
 import java.util.Collections;
 
 /**
+ * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  * Implements {@link RepositoryHelper} interface to provide an OSGi service which handles repository related operations.
  */
 @Component(service = RepositoryHelper.class)

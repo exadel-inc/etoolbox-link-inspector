@@ -24,6 +24,14 @@ import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+/**
+ * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
+ * Utility class for counting and accumulating statistics about links by their types.
+ * <p>
+ * This class is used to track the frequency of different link types during
+ * link inspection and validation processes. It provides thread-safe counting operations
+ * and methods to retrieve statistics about the processed links.
+ */
 public class LinksCounter {
     public static final LinksCounter EMPTY = new LinksCounter();
 
@@ -33,6 +41,12 @@ public class LinksCounter {
         statistics = new TreeMap<>();
     }
 
+    /**
+     * Retrieves a copy of the accumulated statistics as a simple Map.
+     * Converts the AtomicInteger values to plain Integer values.
+     *
+     * @return Map containing link types as keys and their counts as values
+     */
     public Map<String, Integer> getStatistics() {
         return statistics
                 .entrySet()
@@ -40,6 +54,13 @@ public class LinksCounter {
                 .collect(HashMap::new, (m, v) -> m.put(v.getKey(), v.getValue().get()), HashMap::putAll);
     }
 
+    /**
+     * Increments the counter for the specified link result type.
+     * If the link type is blank, uses the default link type.
+     * Creates a new counter for the type if it doesn't exist yet.
+     *
+     * @param result The link validation result to be counted
+     */
     public void checkIn(Result result) {
         String type = StringUtils.defaultIfBlank(result.getType(), LinkResult.DEFAULT_TYPE);
         AtomicInteger count = statistics.get(type);
@@ -50,6 +71,12 @@ public class LinksCounter {
         count.incrementAndGet();
     }
 
+    /**
+     * Returns a string representation of the counter's statistics.
+     * Includes the total count of all link types and a breakdown by type.
+     *
+     * @return A formatted string showing the statistics summary
+     */
     @Override
     public String toString() {
         Map<String, Integer> stats = getStatistics();

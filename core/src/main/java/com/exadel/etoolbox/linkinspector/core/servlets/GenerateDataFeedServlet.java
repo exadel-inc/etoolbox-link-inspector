@@ -29,6 +29,21 @@ import org.osgi.service.component.propertytypes.ServiceDescription;
 import javax.servlet.Servlet;
 import java.util.Collections;
 
+/**
+ * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
+ * Handles requests to generate a link inspection data feed.
+ * <p>
+ * This servlet exposes an HTTP POST endpoint that initiates an asynchronous job
+ * for generating a link inspection data feed. It uses the Sling Job framework to
+ * create a background job that will be processed by the {@link DataFeedJobExecutor}.
+ * <p>
+ * Triggering data feed generation through this servlet allows the UI to request
+ * a new link inspection run without blocking the user interface while the potentially
+ * long-running operation completes.
+ * <p>
+ * The servlet is registered at the path "/bin/etoolbox/link-inspector/datafeed/generate"
+ * and is used by the Link Inspector UI to manually trigger data generation.
+ */
 @Component(service = {Servlet.class})
 @SlingServletResourceTypes(
         resourceTypes = "/bin/etoolbox/link-inspector/datafeed/generate",

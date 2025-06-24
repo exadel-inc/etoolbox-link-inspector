@@ -40,6 +40,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
+ * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  * Represents a row in the UI grid. The row consists of the information about links, such as type, href, status code,
  * status code, status message, along with the details about containing page and the component.
  */
@@ -124,6 +125,11 @@ public class GridViewItem {
         componentPath = encodePath(resourcePath);
     }
 
+    /**
+     * Gets the validation status of a text fragments, such as a link
+     *
+     * @return The String representation of the HTTP status code or a status message excerpt if not available
+     */
     public String getStatusCode() {
         if (NumberUtils.isParsable(statusCode) && Integer.parseInt(statusCode) > 0) {
             return "HTTP " + statusCode;
@@ -131,6 +137,11 @@ public class GridViewItem {
         return getStatusMessageExcerpt();
     }
 
+    /**
+     * Gets a concise excerpt from the status message
+     *
+     * @return The simplified status message excerpt
+     */
     public String getStatusMessageExcerpt() {
         if (!isStatusClampable()) {
             return statusMessage;
@@ -142,6 +153,11 @@ public class GridViewItem {
         return StringUtils.substringBefore(result, StringUtils.SPACE);
     }
 
+    /**
+     * Gets a string token for styling the status indicator
+     *
+     * @return The status tag value: "ok", "error", or "undefined"
+     */
     public String getStatusTag() {
         if (!NumberUtils.isParsable(statusCode) || "0".equals(statusCode)) {
             return "undefined";
@@ -153,14 +169,29 @@ public class GridViewItem {
         return "error";
     }
 
+    /**
+     * Gets the title for display in the UI
+     *
+     * @return The resource path as title
+     */
     public String getTitle() {
         return getResourcePath();
     }
 
+    /**
+     * Gets the CRX DE path prefix
+     *
+     * @return The CRX DE path prefix
+     */
     public String getCrxDePath() {
         return CRX_DE_PATH;
     }
 
+    /**
+     * Determines if the status message can be clipped/clamped in the UI
+     *
+     * @return True if the status message can be clamped, false otherwise
+     */
     public boolean isStatusClampable() {
         return StringUtils.contains(statusMessage, COLON)
                 || (StringUtils.isNotEmpty(statusMessage) && EXCEPTION.matcher(statusMessage).find());

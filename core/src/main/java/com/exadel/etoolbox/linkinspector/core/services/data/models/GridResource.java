@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  * Data model used for building data feed and further adaptation to sling resources for rendering
  * the Link Inspector grid. Represents data for a single row in the grid.
  */
@@ -63,6 +64,11 @@ public class GridResource implements Result {
         setResult(result);
     }
 
+    /**
+     * Updates this GridResource with data from a Result object
+     *
+     * @param result The Result object containing updated link validation data
+     */
     public void setResult(Result result) {
         this.type = result.getType();
         this.value = result.getValue();
@@ -70,12 +76,22 @@ public class GridResource implements Result {
         setStatus(result.getStatus());
     }
 
+    /**
+     * Sets the status information from a Status object
+     *
+     * @param status The Status object containing code and message
+     */
     @Override
     public void setStatus(Status status) {
         this.statusCode = status.getCode();
         this.statusMessage = status.getMessage();
     }
 
+    /**
+     * Converts this object to a Map representation for easy serialization and storage
+     *
+     * @return Map containing all the relevant properties of this GridResource
+     */
     public Map<String, Object> toMap() {
         Map<String, Object> map = new HashMap<>();
         map.put("resourcePath", resourcePath);

@@ -34,6 +34,18 @@ import javax.json.Json;
 import javax.servlet.Servlet;
 import java.util.Optional;
 
+/**
+ * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
+ * Checks if the current user has specific permissions at a given repository path.
+ * <p>
+ * This servlet exposes an HTTP POST endpoint that accepts a repository path and a comma-separated
+ * list of permissions to check. It verifies whether the current user's session has the requested
+ * permissions at the specified path and returns the result as a JSON response.
+ * <p>
+ * The servlet is registered at the path "/bin/etoolbox/link-inspector/acl-check" and is used
+ * by the Link Inspector UI to verify access rights before attempting operations that require
+ * specific permissions.
+ */
 @Component(service = {Servlet.class})
 @SlingServletResourceTypes(
         resourceTypes = "/bin/etoolbox/link-inspector/acl-check",

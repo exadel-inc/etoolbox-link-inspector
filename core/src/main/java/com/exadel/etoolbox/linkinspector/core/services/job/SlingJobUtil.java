@@ -23,11 +23,23 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
+ * Utility class for working with Sling Jobs.
+ * Provides helper methods for adding, finding, and checking the status of Sling jobs.
+ */
 public class SlingJobUtil {
     private SlingJobUtil() {}
 
     private static final Logger LOG = LoggerFactory.getLogger(SlingJobUtil.class);
 
+    /**
+     * Adds a new job to the Sling Job Manager
+     *
+     * @param jobManager The Sling JobManager service
+     * @param jobTopic The topic for the job
+     * @param payload Map of properties to include with the job
+     */
     public static void addJob(JobManager jobManager, String jobTopic, Map<String, Object> payload) {
         boolean jobAdded = Optional.ofNullable(jobManager.addJob(jobTopic, payload))
                 .isPresent();
@@ -38,6 +50,12 @@ public class SlingJobUtil {
         }
     }
 
+    /**
+     * Stops and removes jobs with the given topic
+     *
+     * @param jobManager The Sling JobManager service
+     * @param topic The topic of the jobs to stop and remove
+     */
     @SuppressWarnings("unchecked")
     public static void stopAndRemoveJobs(JobManager jobManager, String topic) {
         Collection<Job> jobs = jobManager.findJobs(JobManager.QueryType.ALL, topic, -1);
@@ -54,6 +72,13 @@ public class SlingJobUtil {
         }
     }
 
+    /**
+     * Gets the status of the job with the given topic
+     *
+     * @param jobManager The Sling JobManager service
+     * @param topic The topic of the job whose status is to be checked
+     * @return The status of the job, or STOPPED if no job with the given topic is found
+     */
     public static String getJobStatus(JobManager jobManager, String topic) {
         Collection<Job> jobs = jobManager.findJobs(JobManager.QueryType.ALL, topic, -1);
         if (!jobs.isEmpty()) {

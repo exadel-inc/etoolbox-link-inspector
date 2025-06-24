@@ -54,6 +54,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
+ * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  * Validates external links via sending HEAD requests concurrently using {@link PoolingHttpClientConnectionManager}
  */
 @Component(service = {Resolver.class, ExternalLinkResolverImpl.class}, immediate = true)
@@ -80,11 +81,17 @@ public class ExternalLinkResolverImpl implements Resolver {
     private String userAgent;
     private boolean enabled;
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String getId() {
         return "External";
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Collection<Result> getResults(String source) {
         if (!enabled) {
@@ -99,6 +106,9 @@ public class ExternalLinkResolverImpl implements Resolver {
         return results;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void validate(Result result, ResourceResolver resourceResolver) {
         if (result == null || !StringUtils.equalsIgnoreCase(getId(), result.getType())) {
@@ -122,6 +132,9 @@ public class ExternalLinkResolverImpl implements Resolver {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean isEnabled() {
         return enabled;

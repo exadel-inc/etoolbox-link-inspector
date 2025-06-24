@@ -34,12 +34,28 @@ import java.time.Instant;
 import java.util.*;
 import java.util.stream.Stream;
 
+/**
+ * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
+ * Utility class providing helper methods for JCR resource manipulation in the link inspector context.
+ * <p>
+ * This class contains methods for common operations such as creating, modifying, and removing resources,
+ * working with JCR nodes and properties, and checking resource metadata like modification times.
+ * All methods are static and the class cannot be instantiated.
+ */
 public class LinkInspectorResourceUtil {
+
     private static final Logger LOG = LoggerFactory.getLogger(LinkInspectorResourceUtil.class);
 
     private LinkInspectorResourceUtil() {
     }
 
+    /**
+     * Removes a resource at the specified path using the provided ResourceResolver.
+     * Logs an error if the deletion fails.
+     *
+     * @param path Path of the resource to be removed
+     * @param resourceResolver ResourceResolver to use for the operation
+     */
     public static void removeResource(String path, ResourceResolver resourceResolver) {
         try {
             Resource resource = resourceResolver.getResource(path);
@@ -52,6 +68,13 @@ public class LinkInspectorResourceUtil {
         }
     }
 
+    /**
+     * Creates a JCR node at the specified path with the default node type (nt:unstructured).
+     * Logs a warning if the session is null, and an error if the node creation fails.
+     *
+     * @param path Path where the node should be created
+     * @param resourceResolver ResourceResolver to use for the operation
+     */
     public static void createNode(String path, ResourceResolver resourceResolver) {
         try {
             Session session = resourceResolver.adaptTo(Session.class);
@@ -66,6 +89,15 @@ public class LinkInspectorResourceUtil {
         }
     }
 
+    /**
+     * Adds or updates a Long parameter to a JCR node at the specified path.
+     * Logs an error if the operation fails.
+     *
+     * @param path Path of the node to modify
+     * @param resourceResolver ResourceResolver to use for the operation
+     * @param paramName Name of the parameter to add
+     * @param paramValue Long value to set
+     */
     public static void addParamToNode(String path, ResourceResolver resourceResolver, String paramName, Long paramValue) {
         try {
             Resource resource = resourceResolver.getResource(path);
@@ -82,6 +114,16 @@ public class LinkInspectorResourceUtil {
         }
     }
 
+    /**
+     * Saves a file to the JCR repository at the specified path.
+     * Creates the necessary nodes and sets appropriate metadata properties.
+     * Logs warnings if file content or session is null, and errors if the operation fails.
+     *
+     * @param path Path where the file should be created
+     * @param contentBytes Byte array containing the file content
+     * @param mimeType MIME type of the file
+     * @param resolver ResourceResolver to use for the operation
+     */
     public static void saveFileToJCR(String path, byte[] contentBytes, String mimeType, ResourceResolver resolver) {
         if (contentBytes == null) {
             LOG.warn("File is null, saving to JCR is interrupted");
@@ -112,6 +154,15 @@ public class LinkInspectorResourceUtil {
         }
     }
 
+    /**
+     * Replaces a string within a property value, supporting both String and String[] types.
+     * Returns null if no changes were made, otherwise returns the new value.
+     *
+     * @param value Original property value (String or String[])
+     * @param current String to be replaced
+     * @param replacement Replacement string
+     * @return Modified value if changes were made, or null if no changes
+     */
     public static Object replaceStringInPropValue(Object value, String current, String replacement) {
         if (value instanceof String) {
             String currentValue = (String) value;
@@ -131,6 +182,13 @@ public class LinkInspectorResourceUtil {
         return null;
     }
 
+    /**
+     * Gets the last modification timestamp of a resource by checking both cq:lastModified
+     * and jcr:lastModified properties. Returns the most recent timestamp if both exist.
+     *
+     * @param resource The resource to check
+     * @return The last modification time as an Instant, or null if not available
+     */
     public static Instant getLastModified(Resource resource) {
         ValueMap properties = resource.getValueMap();
         Date cqLastModified = properties.get(NameConstants.PN_PAGE_LAST_MOD, Date.class);
@@ -144,6 +202,12 @@ public class LinkInspectorResourceUtil {
                 .orElse(null);
     }
 
+    /**
+     * Gets the last replication timestamp of a resource by checking the cq:lastReplicated property.
+     *
+     * @param resource The resource to check
+     * @return The last replication time as an Instant, or null if not available
+     */
     public static Instant getCqReplicated(Resource resource) {
         return Optional.of(resource.getValueMap())
                 .map(valueMap -> valueMap.get(ReplicationStatus.NODE_PROPERTY_LAST_REPLICATED, Date.class))
@@ -151,6 +215,12 @@ public class LinkInspectorResourceUtil {
                 .orElse(null);
     }
 
+    /**
+     * Checks if a resource is a Page or Asset based on its jcr:primaryType.
+     *
+     * @param resource The resource to check
+     * @return True if the resource is a Page or Asset, false otherwise
+     */
     public static boolean isPageOrAsset(Resource resource) {
         return Optional.of(resource.getValueMap())
                 .map(valueMap -> valueMap.get(JcrConstants.JCR_PRIMARYTYPE))
@@ -158,10 +228,24 @@ public class LinkInspectorResourceUtil {
                 .isPresent();
     }
 
+    /**
+     * Checks if a resource was modified before its activation by comparing
+     * the last modified timestamp with the last replicated timestamp.
+     *
+     * @param resource The resource to check
+     * @return True if the resource was modified before activation, false otherwise
+     */
     public static boolean isModifiedBeforeActivation(Resource resource) {
         return isModifiedBeforeActivation(getLastModified(resource), getCqReplicated(resource));
     }
 
+    /**
+     * Checks if a modification timestamp is before an activation timestamp.
+     *
+     * @param lastModified The last modification timestamp
+     * @param lastReplicated The last replication timestamp
+     * @return True if modified before activation, or if either timestamp is null
+     */
     public static boolean isModifiedBeforeActivation(Instant lastModified, Instant lastReplicated) {
         if (lastModified != null && lastReplicated != null) {
             return lastModified.isBefore(lastReplicated);
