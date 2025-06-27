@@ -6,8 +6,11 @@
     <groupId>com.exadel.etoolbox</groupId>
     <artifactId>etoolbox-link-inspector</artifactId>
     <packaging>pom</packaging>
-    <version>1.0.1-SNAPSHOT</version>
-    <description>EToolbox Link Inspector</description>
+    <version>2.0.0</version>
+
+    <name>EToolbox Link Inspector</name>
+    <description>Searches and modifies broken links and other textual patterns in AEM repositories</description>
+    <url>https://github.com/exadel-inc/etoolbox-link-inspector</url>
 
     <organization>
         <name>Exadel, Inc.</name>
