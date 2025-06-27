@@ -25,14 +25,13 @@ import org.osgi.service.metatype.MetaTypeService;
 import org.osgi.service.metatype.ObjectClassDefinition;
 
 /**
- * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  * Utility class providing helper methods for working with OSGi Object Class Definitions (OCDs).
  * <p>
  * This class offers utilities for retrieving and formatting component labels from OSGi metadata.
  * It uses the OSGi MetaType service to access component definitions and their display names,
  * falling back to formatted class names when metadata is not available.
  * <p>
- * All methods are static and the class cannot be instantiated.
+ * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @Slf4j

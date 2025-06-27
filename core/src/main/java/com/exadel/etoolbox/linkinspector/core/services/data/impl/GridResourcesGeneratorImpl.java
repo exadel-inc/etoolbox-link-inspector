@@ -54,9 +54,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  * Implements {@link GridResourcesGenerator} interface to provide an OSGi service which is responsible for the data feed
  * generation and further adaptation the data feed to the models for building the UI grid
+ * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  */
 @Component(service = GridResourcesGenerator.class)
 public class GridResourcesGeneratorImpl implements GridResourcesGenerator {

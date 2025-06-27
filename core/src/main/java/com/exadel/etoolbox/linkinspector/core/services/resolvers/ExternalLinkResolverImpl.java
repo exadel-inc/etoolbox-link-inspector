@@ -54,8 +54,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
+ * Validates external links in JCR properties
  * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
- * Validates external links via sending HEAD requests concurrently using {@link PoolingHttpClientConnectionManager}
  */
 @Component(service = {Resolver.class, ExternalLinkResolverImpl.class}, immediate = true)
 @Designate(ocd = ExternalLinkResolverConfig.class)

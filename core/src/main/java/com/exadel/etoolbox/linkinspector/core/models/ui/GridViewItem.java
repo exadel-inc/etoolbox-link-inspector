@@ -40,9 +40,9 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
- * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  * Represents a row in the UI grid. The row consists of the information about links, such as type, href, status code,
  * status code, status message, along with the details about containing page and the component.
+ * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  */
 @Model(
         adaptables = {SlingHttpServletRequest.class, Resource.class},

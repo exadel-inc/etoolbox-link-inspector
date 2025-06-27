@@ -33,9 +33,9 @@ import javax.servlet.Servlet;
 import java.util.Optional;
 
 /**
- * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  * After fixing broken links the node, indicating that data feed regeneration is required in order to reflect
  * the latest changes, is created. The purpose of the servlet is to check presence of the mentioned node.
+ * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  */
 @Component(service = {Servlet.class})
 @SlingServletResourceTypes(

@@ -37,7 +37,6 @@ import java.io.IOException;
 import java.util.Collections;
 
 /**
- * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  * Handles link value editing requests from the Link Inspector UI.
  * <p>
  * This servlet exposes an HTTP POST endpoint that allows updating link values in the repository.
@@ -50,6 +49,7 @@ import java.util.Collections;
  * <p>
  * The servlet is registered at the path "/bin/etoolbox/link-inspector/edit-value" and is used
  * by the Link Inspector UI to implement the link editing functionality.
+ * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  */
 @Component(service = {Servlet.class})
 @SlingServletResourceTypes(

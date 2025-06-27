@@ -21,7 +21,6 @@ import com.exadel.etoolbox.linkinspector.core.models.LinkResult;
 import com.exadel.etoolbox.linkinspector.core.services.resolvers.configs.InternalLinkResolverConfig;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceUtil;
 import org.osgi.service.component.annotations.Activate;
@@ -44,8 +43,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
+ * Validates internal AEM links in JCR properties
  * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
- * Validates external links via sending HEAD requests concurrently using {@link PoolingHttpClientConnectionManager}
  */
 @Component(service = Resolver.class, immediate = true)
 @Designate(ocd = InternalLinkResolverConfig.class)
