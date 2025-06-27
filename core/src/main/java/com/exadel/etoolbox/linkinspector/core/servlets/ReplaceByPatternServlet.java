@@ -15,6 +15,7 @@
 package com.exadel.etoolbox.linkinspector.core.servlets;
 
 import com.day.crx.JcrConstants;
+import com.exadel.etoolbox.linkinspector.core.services.data.models.UpdatedItem;
 import com.exadel.etoolbox.linkinspector.core.services.data.DataFeedService;
 import com.exadel.etoolbox.linkinspector.core.services.data.models.GridResource;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.LinkHelper;
@@ -55,12 +56,7 @@ import javax.json.Json;
 import javax.servlet.Servlet;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -68,6 +64,7 @@ import java.util.stream.Collectors;
 /**
  * Performs replacement by pattern within the detected broken links scope.
  * The link pattern and replacement are retrieved from the UI dialog and passed to the servlet via an ajax call.
+ * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  */
 @Component(service = {Servlet.class})
 @SlingServletResourceTypes(
@@ -103,6 +100,7 @@ public class ReplaceByPatternServlet extends SlingAllMethodsServlet {
     private static final String BACKUP_PACKAGE_NAME = "replace_by_pattern_backup_%s";
     private static final String BACKUP_PACKAGE_VERSION = "1.0";
     private static final String SELECTED_PARAM = "selected";
+    private static final String LINKS_PARAM = "links";
 
     private static final String[] CSV_COLUMNS = {
             "Link",
@@ -140,7 +138,8 @@ public class ReplaceByPatternServlet extends SlingAllMethodsServlet {
         boolean isDryRun = ServletUtil.getRequestParamBoolean(request, DRY_RUN_PARAM);
         boolean isBackup = ServletUtil.getRequestParamBoolean(request, BACKUP_PARAM);
         boolean isOutputAsCsv = ServletUtil.getRequestParamBoolean(request, OUTPUT_AS_CSV_PARAM);
-        List<String> selectedItems = ServletUtil.getRequestParamStringList(request, SELECTED_PARAM);
+        List<String> selectedItemsProperties = ServletUtil.getRequestParamStringList(request, SELECTED_PARAM);
+        List<String> selectedItemsLinks = ServletUtil.getRequestParamStringList(request, LINKS_PARAM);
 
         if (StringUtils.isBlank(replacement)) {
             response.setStatus(HttpStatus.SC_BAD_REQUEST);
@@ -163,18 +162,17 @@ public class ReplaceByPatternServlet extends SlingAllMethodsServlet {
         LOG.info("Starting replacement by pattern, linkPattern: {}, replacement: {}", linkPattern, replacement);
         try {
             ResourceResolver resourceResolver = request.getResourceResolver();
-            List<GridResource> filteredGridResources = dataFeedService.dataFeedToGridResources()
-                    .stream().filter(gridResource -> selectedItems.contains(String
-                            .format("%s@%s", gridResource.getResourcePath(), gridResource.getPropertyName())))
-                    .collect(Collectors.toList());
+            List<GridResource> filteredGridResources = getFilteredGridResources(selectedItemsProperties, selectedItemsLinks);
             List<UpdatedItem> updatedItems =
                     processResources(filteredGridResources, isDryRun, isBackup, isAdvancedMode, linkPattern, replacement, resourceResolver);
             if (CollectionUtils.isEmpty(updatedItems)) {
                 LOG.info("No links were updated, linkPattern: {}, replacement: {}", linkPattern, replacement);
-                response.setStatus(HttpStatus.SC_NO_CONTENT);
+                response.setStatus(HttpStatus.SC_OK);
                 return;
             }
-            modifyDataFeed(isDryRun, updatedItems);
+            if (!isDryRun) {
+                dataFeedService.modifyDataFeed(updatedItems, true);
+            }
             outputUpdatedItems(updatedItems, isDryRun, isOutputAsCsv, linkPattern, replacement, resourceResolver, response);
             stopWatch.stop();
             LOG.info("Replacement by pattern is finished in {} ms", stopWatch.getTime(TimeUnit.MILLISECONDS));
@@ -213,9 +211,9 @@ public class ReplaceByPatternServlet extends SlingAllMethodsServlet {
         Pattern pattern = Pattern.compile(linkPattern);
         return gridResources.stream()
                 .filter(gridResource ->
-                        StringUtils.isNoneBlank(gridResource.getHref(), gridResource.getResourcePath(), gridResource.getPropertyName())
+                        StringUtils.isNoneBlank(gridResource.getValue(), gridResource.getResourcePath(), gridResource.getPropertyName())
                 )
-                .filter(gridResource -> pattern.matcher(gridResource.getHref()).find())
+                .filter(gridResource -> pattern.matcher(gridResource.getValue()).find())
                 .filter(gridResource ->
                         repositoryHelper.hasReadWritePermissions(session, gridResource.getResourcePath()))
                 .collect(Collectors.toList());
@@ -232,11 +230,10 @@ public class ReplaceByPatternServlet extends SlingAllMethodsServlet {
             if (isDeactivated) {
                 break;
             }
-            String currentLink = gridResource.getHref();
+            String currentLink = gridResource.getValue();
             String path = gridResource.getResourcePath();
             String propertyName = gridResource.getPropertyName();
             Optional<String> updated = Optional.of(isAdvancedMode ? currentLink.replaceAll(linkPattern, replacement) : replacement)
-                    .filter(updatedLink -> !updatedLink.equals(currentLink))
                     .filter(updatedLink ->
                             linkHelper.replaceLink(resourceResolver, path, propertyName, currentLink, updatedLink)
                     );
@@ -274,7 +271,7 @@ public class ReplaceByPatternServlet extends SlingAllMethodsServlet {
         if (isOutputAsCsv) {
             generateCsvOutput(updatedItems, response);
         } else {
-            itemsCountToResponse(updatedItems.size(), response);
+            updatedItemsToResponse(updatedItems, response);
         }
         LOG.info("{} link(s) were updated, linkPattern: {}, replacement: {}",
                 updatedItems.size(),
@@ -307,15 +304,27 @@ public class ReplaceByPatternServlet extends SlingAllMethodsServlet {
     private void printUpdatedItemToCsv(CSVPrinter csvPrinter, UpdatedItem item) {
         try {
             csvPrinter.printRecord(
-                    CsvUtil.wrapIfContainsSemicolon(item.currentLink),
-                    CsvUtil.wrapIfContainsSemicolon(item.updatedLink),
-                    CsvUtil.buildLocation(item.path, item.propertyName)
+                    CsvUtil.wrapIfContainsSemicolon(item.getCurrentLink()),
+                    CsvUtil.wrapIfContainsSemicolon(item.getUpdatedLink()),
+                    item.getPropertyLocation()
             );
         } catch (IOException e) {
-            LOG.error(String.format("Failed to build CSV for the item %s", item.currentLink), e);
+            LOG.error(String.format("Failed to build CSV for the item %s", item.getCurrentLink()), e);
         }
     }
 
+    /**
+     * Creates a backup package containing the resources to be modified.
+     * <p>
+     * This method builds a package containing all resources that will be modified
+     * by the replacement operation, providing a way to restore the original state.
+     *
+     * @param filteredGridResources The list of resources that will be modified
+     * @param session The JCR session to use for package operations
+     * @throws RepositoryException If a repository error occurs
+     * @throws PackageException If an error occurs during package operations
+     * @throws IOException If an I/O error occurs
+     */
     void createBackupPackage(List<GridResource> filteredGridResources, Session session) throws RepositoryException,
             PackageException, IOException {
         Set<String> backupPaths = filteredGridResources.stream()
@@ -335,48 +344,34 @@ public class ReplaceByPatternServlet extends SlingAllMethodsServlet {
         }
     }
 
-    private void itemsCountToResponse(int count, SlingHttpServletResponse response) {
+    private void updatedItemsToResponse(List<UpdatedItem> updatedItems, SlingHttpServletResponse response) {
+        StringBuilder htmlListBuilder = new StringBuilder();
+        htmlListBuilder.append("<ul>");
+        for (UpdatedItem item : updatedItems) {
+            htmlListBuilder.append("<li>")
+                    .append(item.getCurrentLink()).append(" -> ").append(item.getUpdatedLink())
+                    .append("</li>");
+        }
+        htmlListBuilder.append("</ul>");
         String jsonResponse = Json.createObjectBuilder()
-                .add(ITEMS_COUNT_RESP_PARAM, count)
+                .add(ITEMS_COUNT_RESP_PARAM, updatedItems.size())
+                .add("updatedItems", htmlListBuilder.toString())
                 .build()
                 .toString();
         ServletUtil.writeJsonResponse(response, jsonResponse);
     }
 
-    private void modifyDataFeed(boolean isDryRun, List<UpdatedItem> updatedItems) {
-        if (!isDryRun) {
-            dataFeedService.modifyDataFeed(updatedItems.stream().collect(Collectors.toMap(
-                UpdatedItem::getPropertyLocation,
-                UpdatedItem::getUpdatedLink,
-                    (r1, r2) -> r1)));
-        }
+    private List<GridResource> getFilteredGridResources(List<String> selectedItemsProperties, List<String> selectedItemsLinks) {
+        return dataFeedService.dataFeedToGridResources()
+                .stream().filter(gridResource -> selectedItemsProperties.contains(String
+                        .format("%s@%s", gridResource.getResourcePath(), gridResource.getPropertyName())))
+                .filter(gridResource -> selectedItemsLinks.contains(gridResource.getValue()))
+                .collect(Collectors.toList());
     }
 
     @Deactivate
     protected void deactivate() {
         isDeactivated = true;
         LOG.debug("ReplaceByPatternServlet - deactivated");
-    }
-
-    private static class UpdatedItem {
-        private final String currentLink;
-        private final String updatedLink;
-        private final String path;
-        private final String propertyName;
-
-        public UpdatedItem(String currentLink, String updatedLink, String path, String propertyName) {
-            this.currentLink = currentLink;
-            this.updatedLink = updatedLink;
-            this.path = path;
-            this.propertyName = propertyName;
-        }
-
-        public String getPropertyLocation() {
-            return CsvUtil.buildLocation(path, propertyName);
-        }
-
-        public String getUpdatedLink() {
-            return updatedLink;
-        }
     }
 }

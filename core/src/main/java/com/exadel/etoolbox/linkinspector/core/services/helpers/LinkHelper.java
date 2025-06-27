@@ -14,34 +14,35 @@
 
 package com.exadel.etoolbox.linkinspector.core.services.helpers;
 
-import com.exadel.etoolbox.linkinspector.api.Link;
-import com.exadel.etoolbox.linkinspector.api.LinkResolver;
-import com.exadel.etoolbox.linkinspector.api.LinkStatus;
+import com.exadel.etoolbox.linkinspector.api.Result;
+import com.exadel.etoolbox.linkinspector.api.Resolver;
+import com.exadel.etoolbox.linkinspector.api.Status;
 import org.apache.sling.api.resource.ResourceResolver;
 
 import java.util.stream.Stream;
 
 /**
  * Contains methods that assist in processing links
+ * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  */
 public interface LinkHelper {
 
-    Stream<Link> getLinkStream(Object source);
+    Stream<Result> getLinkStream(Object source);
 
     /**
-     * Checks the given {@link Link} for validity using one of the registered {@link LinkResolver} implementations
-     * @param link             - the link object to be checked
+     * Checks the given {@link Result} for validity using one of the registered {@link Resolver} implementations
+     * @param result             - the link object to be checked
      * @param resourceResolver - {@link ResourceResolver} object
      */
-    void validateLink(Link link, ResourceResolver resourceResolver);
+    void validateLink(Result result, ResourceResolver resourceResolver);
 
     /**
-     * Checks the given link {@code href} for validity using one of the registered {@link LinkResolver} implementations
+     * Checks the given link {@code href} for validity using one of the registered {@link Resolver} implementations
      * @param link             - the string reference to be checked
      * @param resourceResolver - {@link ResourceResolver} object
-     * @return A {@link LinkStatus} object
+     * @return A {@link Status} object
      */
-    LinkStatus validateLink(String link, ResourceResolver resourceResolver);
+    Status validateLink(String link, ResourceResolver resourceResolver);
 
     /**
      * Replaces all the occurrences of the given link stored at the specified location ({@code resourcePath} +

@@ -19,8 +19,12 @@ import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.PageManager;
 import com.day.cq.wcm.api.components.Component;
 import com.day.cq.wcm.api.components.ComponentManager;
-import com.exadel.etoolbox.linkinspector.core.services.data.models.GridResource;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
+import org.apache.http.HttpStatus;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -28,24 +32,26 @@ import org.apache.sling.models.annotations.DefaultInjectionStrategy;
 import org.apache.sling.models.annotations.Model;
 import org.apache.sling.models.annotations.injectorspecific.SlingObject;
 import org.apache.sling.models.annotations.injectorspecific.ValueMapValue;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
  * Represents a row in the UI grid. The row consists of the information about links, such as type, href, status code,
  * status code, status message, along with the details about containing page and the component.
+ * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  */
 @Model(
         adaptables = {SlingHttpServletRequest.class, Resource.class},
         defaultInjectionStrategy = DefaultInjectionStrategy.OPTIONAL
 )
+@Getter
+@Slf4j
 public class GridViewItem {
-    private static final Logger LOG = LoggerFactory.getLogger(GridViewItem.class);
+    private static final Pattern EXCEPTION = Pattern.compile("(\\w+\\.)+\\w+");
 
     /**
      * The prefix for building a page link on Author instance
@@ -57,34 +63,34 @@ public class GridViewItem {
      */
     public static final String CRX_DE_PATH = "/crx/de/index.jsp#";
 
-    /**
-     * Vanity path for the grid item thumbnail
-     */
-    public static final String THUMBNAIL_PATH =
-            "/etc.clientlibs/etoolbox-link-inspector/clientlibs/link-inspector-ui/resources/thumbnail.png";
-
-    public static final String SLASH_CHAR = "/";
-    public static final String HTML_EXTENSION = ".html";
+    private static final String DOT = ".";
+    private static final String SLASH = "/";
+    private static final String HTML_EXTENSION = ".html";
+    private static final String COLON = ":";
 
     @SlingObject
+    @Getter(value = AccessLevel.NONE)
     private ResourceResolver resourceResolver;
 
-    @ValueMapValue(name = GridResource.PN_LINK)
-    private String link;
+    @ValueMapValue
+    private String value;
 
-    @ValueMapValue(name = GridResource.PN_LINK_TYPE)
-    private String linkType;
+    @ValueMapValue
+    private String match;
 
-    @ValueMapValue(name = GridResource.PN_LINK_STATUS_CODE)
-    private String linkStatusCode;
+    @ValueMapValue
+    private String type;
 
-    @ValueMapValue(name = GridResource.PN_LINK_STATUS_MESSAGE)
-    private String linkStatusMessage;
+    @ValueMapValue
+    private String statusCode;
 
-    @ValueMapValue(name = GridResource.PN_RESOURCE_PATH)
-    private String path;
+    @ValueMapValue
+    private String statusMessage;
 
-    @ValueMapValue(name = GridResource.PN_PROPERTY_NAME)
+    @ValueMapValue
+    private String resourcePath;
+
+    @ValueMapValue
     private String propertyName;
 
     private String pagePath;
@@ -96,9 +102,11 @@ public class GridViewItem {
 
     @PostConstruct
     private void init() {
-        Resource resourceToShow = resourceResolver.getResource(path);
+        Resource resourceToShow = StringUtils.isNotBlank(resourcePath)
+                ? resourceResolver.getResource(resourcePath)
+                : null;
         if (resourceToShow == null) {
-            LOG.warn("Resource is null, path: {}", path);
+            log.warn("Resource is null, path: {}", resourcePath);
             return;
         }
 
@@ -110,76 +118,88 @@ public class GridViewItem {
         Optional<Page> pageOptional = Optional.ofNullable(resourceResolver.adaptTo(PageManager.class))
                 .map(pageManager -> pageManager.getContainingPage(resourceToShow));
         pagePath = pageOptional.map(page -> EDITOR_LINK + page.getPath() + HTML_EXTENSION)
-                .orElse(path);
+                .orElse(resourcePath);
         pageTitle = pageOptional.map(Page::getTitle).orElse(StringUtils.EMPTY);
         isValidPage = pageOptional.isPresent();
 
-        componentPath = encodePath(path);
+        componentPath = encodePath(resourcePath);
     }
 
+    /**
+     * Gets the validation status of a text fragments, such as a link
+     *
+     * @return The String representation of the HTTP status code or a status message excerpt if not available
+     */
+    public String getStatusCode() {
+        if (NumberUtils.isParsable(statusCode) && Integer.parseInt(statusCode) > 0) {
+            return "HTTP " + statusCode;
+        }
+        return getStatusMessageExcerpt();
+    }
+
+    /**
+     * Gets a concise excerpt from the status message
+     *
+     * @return The simplified status message excerpt
+     */
+    public String getStatusMessageExcerpt() {
+        if (!isStatusClampable()) {
+            return statusMessage;
+        }
+        if (StringUtils.contains(statusMessage, COLON)) {
+            return StringUtils.substringAfterLast(statusMessage, COLON);
+        }
+        String result = StringUtils.substringAfterLast(statusMessage, DOT);
+        return StringUtils.substringBefore(result, StringUtils.SPACE);
+    }
+
+    /**
+     * Gets a string token for styling the status indicator
+     *
+     * @return The status tag value: "ok", "error", or "undefined"
+     */
+    public String getStatusTag() {
+        if (!NumberUtils.isParsable(statusCode) || "0".equals(statusCode)) {
+            return "undefined";
+        }
+        int code = Integer.parseInt(statusCode);
+        if (code >= HttpStatus.SC_OK && code < HttpStatus.SC_MULTIPLE_CHOICES) {
+            return "ok";
+        }
+        return "error";
+    }
+
+    /**
+     * Gets the title for display in the UI
+     *
+     * @return The resource path as title
+     */
     public String getTitle() {
-        return getPath();
+        return getResourcePath();
     }
 
-    public String getThumbnail() {
-        return THUMBNAIL_PATH;
-    }
-
-    public String getPath() {
-        return path;
-    }
-
-    public String getLink() {
-        return link;
-    }
-
-    public String getPropertyName() {
-        return propertyName;
-    }
-
-    public String getComponentName() {
-        return componentName;
-    }
-
-    public String getPagePath() {
-        return pagePath;
-    }
-
-    public String getComponentPath() {
-        return componentPath;
-    }
-
-    public String getLinkType() {
-        return linkType;
-    }
-
-    public String getLinkStatusCode() {
-        return linkStatusCode;
-    }
-
-    public String getLinkStatusMessage() {
-        return linkStatusMessage;
-    }
-
-    public String getComponentType() {
-        return componentType;
-    }
-
-    public String getPageTitle() {
-        return pageTitle;
-    }
-
-    public boolean isValidPage() {
-        return isValidPage;
-    }
-
+    /**
+     * Gets the CRX DE path prefix
+     *
+     * @return The CRX DE path prefix
+     */
     public String getCrxDePath() {
         return CRX_DE_PATH;
     }
 
+    /**
+     * Determines if the status message can be clipped/clamped in the UI
+     *
+     * @return True if the status message can be clamped, false otherwise
+     */
+    public boolean isStatusClampable() {
+        return StringUtils.contains(statusMessage, COLON)
+                || (StringUtils.isNotEmpty(statusMessage) && EXCEPTION.matcher(statusMessage).find());
+    }
+
     private static String encodePath(String path) {
-        return Arrays.stream(path.split(SLASH_CHAR))
+        return Arrays.stream(path.split(SLASH))
                 .map(JcrUtil::escapeIllegalJcrChars)
-                .collect(Collectors.joining(SLASH_CHAR));
+                .collect(Collectors.joining(SLASH));
     }
 }

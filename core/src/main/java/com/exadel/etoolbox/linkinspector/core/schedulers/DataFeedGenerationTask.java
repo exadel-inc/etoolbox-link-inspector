@@ -31,6 +31,7 @@ import java.util.Collections;
 
 /**
  * The task for scheduled data feed generation.
+ * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  */
 @Designate(ocd = DataFeedGenerationTask.Config.class)
 @Component(service = Runnable.class)

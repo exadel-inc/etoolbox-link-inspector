@@ -14,22 +14,20 @@
 
 package com.exadel.etoolbox.linkinspector.core.services.resolvers;
 
-import com.exadel.etoolbox.linkinspector.api.Link;
-import com.exadel.etoolbox.linkinspector.api.LinkResolver;
-import com.exadel.etoolbox.linkinspector.api.LinkStatus;
-import com.exadel.etoolbox.linkinspector.core.models.LinkImpl;
-import org.apache.http.HttpStatus;
+import com.exadel.etoolbox.linkinspector.api.Result;
+import com.exadel.etoolbox.linkinspector.api.Resolver;
+import com.exadel.etoolbox.linkinspector.api.Status;
+import com.exadel.etoolbox.linkinspector.core.models.LinkResult;
+import com.exadel.etoolbox.linkinspector.core.services.resolvers.configs.InternalLinkResolverConfig;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.http.HttpStatus;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceUtil;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
-import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,6 +35,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -44,71 +43,81 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Validates external links via sending HEAD requests concurrently using {@link PoolingHttpClientConnectionManager}
+ * Validates internal AEM links in JCR properties
+ * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  */
-@Component(service = LinkResolver.class )
-@Designate(ocd = InternalLinkResolverImpl.Config.class)
-public class InternalLinkResolverImpl implements LinkResolver {
+@Component(service = Resolver.class, immediate = true)
+@Designate(ocd = InternalLinkResolverConfig.class)
+public class InternalLinkResolverImpl implements Resolver {
 
     private static final Logger LOG = LoggerFactory.getLogger(InternalLinkResolverImpl.class);
 
     private static final Pattern PATTERN_INTERNAL_LINK = Pattern.compile("(^|(?<=\"))/content/([-\\w\\d():%_+.~#?&/=\\s]*)", Pattern.UNICODE_CHARACTER_CLASS);
 
-    @ObjectClassDefinition(
-            name = "EToolbox Link Inspector - Link Helper",
-            description = "Assists in link processing"
-    )
-    @interface Config{
-        @AttributeDefinition(
-                name = "Internal Links Host",
-                description = "Host to be used for verifying internal links. " +
-                        "If no value is set, links will be verified against local JCR.")
-        String internalLinksHost() default StringUtils.EMPTY;
-    }
-
     private String internalLinksHost;
+    private boolean enabled;
 
     @Reference
-    private LinkResolver externalLinkResolver;
+    private Resolver externalLinkResolver;
 
     @Activate
     @Modified
-    private void activate(Config config){
+    private void activate(InternalLinkResolverConfig config) {
+        this.enabled = config.enabled();
         this.internalLinksHost = config.internalLinksHost();
     }
 
-
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String getId() {
         return "Internal";
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public Collection<Link> getLinks(String source) {
-        Set<Link> links = new HashSet<>();
+    public Collection<Result> getResults(String source) {
+        if (!enabled) {
+            return Collections.emptyList();
+        }
+        Set<Result> results = new HashSet<>();
         Matcher matcher = PATTERN_INTERNAL_LINK.matcher(source);
         while (matcher.find()) {
             String href = matcher.group();
-            links.add(new LinkImpl(getId(), href));
+            results.add(new LinkResult(getId(), href));
         }
-        return links;
+        return results;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public void validate(Link link, ResourceResolver resourceResolver) {
-        if (link == null || !StringUtils.equalsIgnoreCase(getId(), link.getType())) {
+    public void validate(Result result, ResourceResolver resourceResolver) {
+        if (result == null || !StringUtils.equalsIgnoreCase(getId(), result.getType())) {
             return;
         }
-        LinkStatus status = checkLink(link.getHref(), resourceResolver);
+        Status status = checkLink(result.getValue(), resourceResolver);
         if (status.getCode() == HttpStatus.SC_NOT_FOUND && StringUtils.isNotBlank(internalLinksHost)) {
-            externalLinkResolver.validate(link, resourceResolver);
+            externalLinkResolver.validate(result, resourceResolver);
         } else {
-            link.setStatus(status.getCode(), status.getMessage());
+            result.setStatus(status.getCode(), status.getMessage());
         }
     }
 
-    private LinkStatus checkLink(String href, ResourceResolver resourceResolver) {
-        LinkStatus status = checkLinkInternal(href, resourceResolver);
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    private Status checkLink(String href, ResourceResolver resourceResolver) {
+        Status status = checkLinkInternal(href, resourceResolver);
         if (!status.isValid()) {
             String decodedLink = decode(href);
             if (!decodedLink.equals(href)) {
@@ -118,11 +127,11 @@ public class InternalLinkResolverImpl implements LinkResolver {
         return status;
     }
 
-    private LinkStatus checkLinkInternal(String href, ResourceResolver resourceResolver) {
+    private Status checkLinkInternal(String href, ResourceResolver resourceResolver) {
         return Optional.of(resourceResolver.resolve(href))
                 .filter(resource -> !ResourceUtil.isNonExistingResource(resource))
-                .map(resource -> new LinkStatus(HttpStatus.SC_OK, "OK"))
-                .orElse(new LinkStatus(HttpStatus.SC_NOT_FOUND, "Not Found"));
+                .map(resource -> new Status(HttpStatus.SC_OK, "OK"))
+                .orElse(new Status(HttpStatus.SC_NOT_FOUND, "Not Found"));
     }
 
     private String decode(String href) {

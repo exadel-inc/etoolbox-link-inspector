@@ -4,9 +4,9 @@ console-ui.common.js
 console-ui.pending.js
 console-ui.download.js
 console-ui.fix.js
-console-ui.conf.js
 console-ui.replace.js
-console-ui.filter.js
 console-ui.pagination.js
 console-ui.run.js
 console-ui.delete.js
+console-ui.filter.js
+console-ui.editproperty.js

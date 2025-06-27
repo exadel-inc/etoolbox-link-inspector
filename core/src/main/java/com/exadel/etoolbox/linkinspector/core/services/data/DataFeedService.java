@@ -14,25 +14,25 @@
 
 package com.exadel.etoolbox.linkinspector.core.services.data;
 
+import com.exadel.etoolbox.linkinspector.core.services.data.models.UpdatedItem;
 import com.exadel.etoolbox.linkinspector.core.services.data.models.DataFilter;
 import com.exadel.etoolbox.linkinspector.core.services.data.models.GridResource;
 import com.exadel.etoolbox.linkinspector.core.services.exceptions.DataFeedException;
 import org.apache.sling.api.resource.Resource;
 
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Provides the service responsible for managing the data feed based on the set of resources generated
  * by ${@link GridResourcesGenerator}
+ * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  */
 public interface DataFeedService {
     /**
      * If the node presents, users are informed that data feed regeneration is required
      * in order to display up-to-date results.
      */
-    String PENDING_GENERATION_NODE = "/content/etoolbox-link-inspector/data/pendingDataFeedUpdate";
+    String PENDING_GENERATION_NODE = "/var/etoolbox/link-inspector/data/pendingDataFeedUpdate";
 
     /**
      * Collects broken links and generates json data feed for further usage in the Link Inspector grid.
@@ -58,9 +58,10 @@ public interface DataFeedService {
     /**
      * Method for modification links value in the data feed
      *
-     * @param valuesMap - {@code Map<String, String>} property location as key and new url as value
+     * @param updatedItems - {@code List<UpdatedItem>} containing the updated items information
+     * @param updateGridResource - {@code boolean} flag indicating whether the grid resource should be updated
      */
-    void modifyDataFeed(Map<String, String> valuesMap);
+    void modifyDataFeed(List<UpdatedItem> updatedItems, boolean updateGridResource);
 
     /**
      * Method for deleting data in data feed

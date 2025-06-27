@@ -17,15 +17,15 @@ package com.exadel.etoolbox.linkinspector.core.services.data.impl;
 import com.day.cq.replication.ReplicationActionType;
 import com.day.cq.replication.ReplicationStatus;
 import com.day.crx.JcrConstants;
-import com.exadel.etoolbox.linkinspector.api.Link;
+import com.exadel.etoolbox.linkinspector.api.Result;
+import com.exadel.etoolbox.linkinspector.core.services.data.ConfigService;
 import com.exadel.etoolbox.linkinspector.core.services.data.GenerationStatsProps;
 import com.exadel.etoolbox.linkinspector.core.services.data.GridResourcesGenerator;
-import com.exadel.etoolbox.linkinspector.core.services.data.ConfigService;
-import com.exadel.etoolbox.linkinspector.core.services.helpers.LinkHelper;
 import com.exadel.etoolbox.linkinspector.core.services.data.models.GridResource;
+import com.exadel.etoolbox.linkinspector.core.services.helpers.LinkHelper;
 import com.exadel.etoolbox.linkinspector.core.services.util.LinkInspectorResourceUtil;
 import com.exadel.etoolbox.linkinspector.core.services.util.LinksCounter;
-import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.sling.api.resource.PersistenceException;
@@ -56,13 +56,14 @@ import java.util.stream.Stream;
 /**
  * Implements {@link GridResourcesGenerator} interface to provide an OSGi service which is responsible for the data feed
  * generation and further adaptation the data feed to the models for building the UI grid
+ * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  */
 @Component(service = GridResourcesGenerator.class)
 public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
     private static final Logger LOG = LoggerFactory.getLogger(GridResourcesGeneratorImpl.class);
 
     private static final String TAGS_LOCATION = "/content/cq:tags";
-    private static final String STATS_RESOURCE_PATH = "/content/etoolbox-link-inspector/data/stats";
+    public static final String STATS_RESOURCE_PATH = "/var/etoolbox/link-inspector/data/stats";
 
     @Reference
     private LinkHelper linkHelper;
@@ -86,7 +87,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
             return Collections.emptyList();
         }
 
-        Map<Link, List<GridResource>> linkToGridResourcesMap = new HashMap<>();
+        Map<Result, List<GridResource>> linkToGridResourcesMap = new HashMap<>();
         int traversedNodesCounter = getGridResourcesViaTraversing(rootResource, gridResourceType, linkToGridResourcesMap);
         LOG.debug("Traversal is completed in {} ms, path: {}, traversed nodes count: {}",
                 stopWatch.getTime(TimeUnit.MILLISECONDS), searchPath, traversedNodesCounter);
@@ -101,7 +102,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
 
         List<GridResource> sortedGridResources = validateLinksInParallel(linkToGridResourcesMap, resourceResolver)
                 .stream()
-                .sorted(Comparator.comparing(GridResource::getHref))
+                .sorted(Comparator.comparing(GridResource::getValue))
                 .collect(Collectors.toList());
 
         stopWatch.stop();
@@ -113,7 +114,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
 
     private int getGridResourcesViaTraversing(Resource resource,
                                               String gridResourceType,
-                                              Map<Link, List<GridResource>> allLinkToGridResourcesMap) {
+                                              Map<Result, List<GridResource>> allLinkToGridResourcesMap) {
         int traversedNodesCount = 0;
         if (!isAllowedResource(resource)) {
             return traversedNodesCount;
@@ -134,7 +135,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
         return traversedNodesCount;
     }
 
-    private Map<Link, List<GridResource>> getLinkToGridResourcesMap(Resource resource, String gridResourceType) {
+    private Map<Result, List<GridResource>> getLinkToGridResourcesMap(Resource resource, String gridResourceType) {
         return ResourceUtil.getValueMap(resource)
                 .entrySet()
                 .stream()
@@ -146,10 +147,10 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
                 );
     }
 
-    private Stream<Map.Entry<Link, GridResource>> getLinkToGridResourceMap(String property,
-                                                                           Object propertyValue,
-                                                                           Resource resource,
-                                                                           String gridResourceType) {
+    private Stream<Map.Entry<Result, GridResource>> getLinkToGridResourceMap(String property,
+                                                                             Object propertyValue,
+                                                                             Resource resource,
+                                                                             String gridResourceType) {
         return linkHelper.getLinkStream(propertyValue)
                 .filter(this::isAllowedLink)
                 .collect(Collectors.toMap(
@@ -161,7 +162,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
                 .stream();
     }
 
-    private Set<GridResource> validateLinksInParallel(Map<Link, List<GridResource>> linkToGridResourcesMap,
+    private Set<GridResource> validateLinksInParallel(Map<Result, List<GridResource>> linkToGridResourcesMap,
                                                       ResourceResolver resourceResolver) {
         LinksCounter allLinksCounter = new LinksCounter();
         LinksCounter reportedLinksCounter = new LinksCounter();
@@ -193,19 +194,19 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
         return allReportedLinkResources;
     }
 
-    private void submitLinkForValidation(Link link,
+    private void submitLinkForValidation(Result result,
                                          List<GridResource> currentLinkResources,
                                          Set<GridResource> allReportedLinkResources,
                                          LinksCounter allLinksCounter,
                                          LinksCounter reportedLinksCounter,
                                          ResourceResolver resourceResolver) {
-        allLinksCounter.checkIn(link);
+        allLinksCounter.checkIn(result);
         executorService.submit(() -> {
-                    linkHelper.validateLink(link, resourceResolver);
-                    if (link.isReported() && isAllowedErrorCode(link.getStatus().getCode())) {
-                        currentLinkResources.forEach(gridResource -> gridResource.getLink().setStatus(link.getStatus()));
+                    linkHelper.validateLink(result, resourceResolver);
+                    if (result.isReported() && isAllowedErrorCode(result.getStatus().getCode())) {
+                        currentLinkResources.forEach(gridResource -> gridResource.setStatus(result.getStatus()));
                         allReportedLinkResources.addAll(currentLinkResources);
-                        reportedLinksCounter.checkIn(link);
+                        reportedLinksCounter.checkIn(result);
                     }
                 }
         );
@@ -238,8 +239,8 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
                 .orElse(true);
     }
 
-    private boolean isAllowedLink(Link link) {
-        return !isExcludedTagLink(link.getHref()) && !isExcludedByPattern(link.getHref());
+    private boolean isAllowedLink(Result result) {
+        return !isExcludedTagLink(result.getValue()) && !isExcludedByPattern(result.getValue());
     }
 
     private boolean isExcludedByPattern(String href) {
@@ -247,7 +248,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
     }
 
     private boolean isExcludedTagLink(String href) {
-        return configService.excludeTagLinks() && href.startsWith(TAGS_LOCATION);
+        return configService.excludeTagLinks() && StringUtils.startsWith(href, TAGS_LOCATION);
     }
 
     private boolean isExcludedProperty(String propertyName) {
@@ -275,7 +276,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
     }
 
     private boolean isAllowedReplicationStatus(Resource resource) {
-        if (configService.activatedContent()) {
+        if (configService.isSkipContentModifiedAfterActivation()) {
             if (LinkInspectorResourceUtil.isPageOrAsset(resource)) {
                 return isActivatedPageOrAsset(resource);
             } else {
@@ -283,7 +284,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
                         .map(valueMap -> valueMap.get(ReplicationStatus.NODE_PROPERTY_LAST_REPLICATION_ACTION, String.class));
                 if (replicationAction.isPresent()) {
                     return ReplicationActionType.ACTIVATE.getName().equals(replicationAction.get()) &&
-                            (!configService.isSkipContentModifiedAfterActivation() || LinkInspectorResourceUtil.isModifiedBeforeActivation(resource));
+                            LinkInspectorResourceUtil.isModifiedBeforeActivation(resource);
                 }
             }
         }
@@ -294,13 +295,10 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
         Optional<ReplicationStatus> replicationStatus =
                 Optional.ofNullable(pageOrAssetResource.adaptTo(ReplicationStatus.class))
                         .filter(ReplicationStatus::isActivated);
-        if (!replicationStatus.isPresent()) {
-            return false;
-        }
-        return !configService.isSkipContentModifiedAfterActivation() || replicationStatus.map(ReplicationStatus::getLastPublished)
+        return replicationStatus.map(ReplicationStatus::getLastPublished)
                 .map(Calendar::toInstant)
                 .map(instant -> isModifiedBeforeActivation(pageOrAssetResource, instant))
-                .orElse(true);
+                .isPresent();
     }
 
     private boolean isModifiedBeforeActivation(Resource pageOrAssetResource, Instant lastReplicated) {
@@ -311,7 +309,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
     }
 
     private boolean isStringMatchAnyPattern(String value, String[] patterns) {
-        if (ArrayUtils.isEmpty(patterns)) {
+        if (value == null || ArrayUtils.isEmpty(patterns)) {
             return false;
         }
         for (String pattern : patterns) {
@@ -346,7 +344,6 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
                 ZonedDateTime.now().format(DateTimeFormatter.RFC_1123_DATE_TIME));
         stats.put(GenerationStatsProps.PN_SEARCH_PATH, configService.getSearchPath());
         stats.put(GenerationStatsProps.PN_EXCLUDED_PATHS, configService.getExcludedPaths());
-        stats.put(GenerationStatsProps.PN_CHECK_ACTIVATION, configService.activatedContent());
         stats.put(GenerationStatsProps.PN_SKIP_MODIFIED_AFTER_ACTIVATION, configService.isSkipContentModifiedAfterActivation());
         stats.put(GenerationStatsProps.PN_LAST_MODIFIED_BOUNDARY, dateToIsoDateTimeString(configService.getLastModified()));
         stats.put(GenerationStatsProps.PN_EXCLUDED_PROPERTIES, configService.getExcludedProperties());
@@ -354,8 +351,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
         stats.put(GenerationStatsProps.PN_EXCLUDED_LINK_PATTERNS, getExcludedLinksPatterns());
 
         stats.put(GenerationStatsProps.PN_EXCLUDED_TAGS, configService.excludeTagLinks());
-        // TODO: Why is the next line commented out?
-//        stats.put(GenerationStatsProps.PN_ALLOWED_STATUS_CODES, uiConfigService.getStatusCodes());
+        stats.put(GenerationStatsProps.PN_ALLOWED_STATUS_CODES, configService.getStatusCodes());
 
         List<String> perTypeStatistics = new ArrayList<>();
         for (String type : allLinksCounter.getStatistics().keySet()) {

@@ -19,67 +19,73 @@
 (function (document, $) {
     'use strict';
 
-    const TRIGGER_DATA_FEED_GENERATION = '/content/etoolbox-link-inspector/servlet/triggerDataFeedGeneration';
-    const CHECK_JOB_STATUS = '/content/etoolbox-link-inspector/servlet/jobStatus';
+    const TRIGGER_DATA_FEED_GENERATION = '/content/etoolbox/link-inspector/servlet/triggerDataFeedGeneration';
+    const CHECK_JOB_STATUS = '/content/etoolbox/link-inspector/servlet/jobStatus';
+    let $jobStatusContainer = null;
 
-    function jobIsActive() {
-        let isActive = false;
+    function checkJobIsActive(ifActive, ifInactive) {
         $.ajax({
             url: CHECK_JOB_STATUS,
             type: 'GET',
             async: false,
             success: function (data) {
-                isActive = data && data.status && data.status == 'ACTIVE' | 'QUEUED' | 'GIVEN_UP';
+                if (data && $.inArray(data.status ,['ACTIVE','QUEUED','GIVEN_UP']) !== -1) {
+                    ifActive();
+                } else {
+                    ifInactive();
+                }
             }
         });
-        return isActive;
     }
 
-    function onRunAction(callback) {
-        $.ajax({
-            url: TRIGGER_DATA_FEED_GENERATION,
-            type: 'GET',
-            success: callback
-        });
+    function addActiveJobStatusMessage(popover) {
+        $jobStatusContainer = $('<p class="u-coral-margin"></p>').text('Job status: ');
+        $('<b>...in progress</b>').appendTo($jobStatusContainer);
+        $('<br/>').appendTo($jobStatusContainer);
+        $('<span>Scan may take some time to complete</span>').appendTo($jobStatusContainer);
+        $(popover).find('coral-popover-content').append($jobStatusContainer);
     }
 
-    function createInProgressMessage($popover) {
-        const $container = $('<p class="u-coral-margin"></p>').text('Job status: ');
-        $('<b>...in progress</b>').appendTo($container);
-        $('<br/>').appendTo($container);
-        $('<span>scan may take some time to complete</span>').appendTo($container);;
-        $popover.find('coral-popover-content').append($container);
-    }
-
-    function createRunJobMessage($popover) {
-        const $container = $('<p class="u-coral-margin"></p>');
-        $('<button class="elc-run-button">Scan</button>').appendTo($container);
-        $popover.find('coral-popover-content').append($container);
+    function addInactiveJobStatusMessage(popover) {
+        $jobStatusContainer = $('<p class="u-coral-margin if-no-data"></p>').text('Please refresh the page ');
+        $(popover).find('coral-popover-content').append($jobStatusContainer);
     }
 
     function beforeOpenPopover(e) {
-        jobIsActive() ? createInProgressMessage($(e.currentTarget)) : createRunJobMessage($(e.currentTarget));
+        !$jobStatusContainer && checkJobIsActive(
+            () => addActiveJobStatusMessage(e.currentTarget),
+            () => addInactiveJobStatusMessage(e.currentTarget));
     }
 
     function beforeClosePopover(e) {
-        removeLastChild($(e.currentTarget));
+        removeJobStatusMessage();
     }
 
-    function removeLastChild($popover){
-       const $popoverContent = $popover.find('coral-popover-content');
-       $popoverContent.children().last().remove();
+    function removeJobStatusMessage() {
+        $jobStatusContainer && $jobStatusContainer.remove() && ($jobStatusContainer = null);
     }
 
-    $(document).on('coral-overlay:beforeopen', '.elc-coral-popover', beforeOpenPopover);
+    $(document).on('coral-overlay:beforeopen', '[target="#statsPopover"]', beforeOpenPopover);
 
-    $(document).on('coral-overlay:beforeclose', '.elc-coral-popover', beforeClosePopover);
+    $(document).on('coral-overlay:beforeclose', '[target="#statsPopover"]', beforeClosePopover);
 
-    $(document).on('click', '.elc-run-button', function() {
-        onRunAction(function() {
-            const $popover = $('.elc-coral-popover');
-            removeLastChild($popover);
-            createInProgressMessage($popover);
+    $(document).on('click', '#scan', onScanClicked);
+    function onScanClicked() {
+        const formData = new FormData();
+        const dialog = $('#elc-scan-now-dialog');
+        formData.append('topic', 'etoolbox/link-inspector/job/datafeed/generate');
+        formData.append('exclusive', 'true');
+        $.ajax({
+            url: TRIGGER_DATA_FEED_GENERATION,
+            type: 'POST',
+            success: function(){
+                dialog.trigger('hide')
+                $('#statsPopover').attr('disabled', false);
+            },
+            error: function(e) {
+                ui.notify('Error', e.responseText || e.statusText, 'error');
+            }
         });
-    });
+    }
 
 })(document, Granite.$);

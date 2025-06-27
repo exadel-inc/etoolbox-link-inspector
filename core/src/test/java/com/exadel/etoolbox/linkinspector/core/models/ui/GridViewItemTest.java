@@ -36,7 +36,6 @@ import static org.junit.jupiter.api.Assertions.*;
 public class GridViewItemTest {
     private static final String MODELS_PACKAGE = "com.exadel.etoolbox.linkinspector.core.models";
     private static final String COMPONENT_TYPE_FIELD = "componentType";
-    private static final String GRID_RESOURCE_TYPE = "etoolbox-link-inspector/components/gridConfig";
     private static final String HTML_EXTENSION = ".html";
     private static final String EDITOR_LINK = "/editor.html";
 
@@ -59,7 +58,7 @@ public class GridViewItemTest {
 
     private static final String TEST_BROKEN_LINK_HREF = "/content/internal-test-link";
     private static final String TEST_BROKEN_LINK_TYPE = "internal";
-    private static final String TEST_BROKEN_LINK_SC = String.valueOf(HttpStatus.SC_NOT_FOUND);
+    private static final String TEST_BROKEN_LINK_SC = "HTTP " + HttpStatus.SC_NOT_FOUND;
     private static final String TEST_BROKEN_LINK_STATUS_MESSAGE = HttpStatus.getStatusText(HttpStatus.SC_NOT_FOUND);
 
     private final AemContext context = new AemContext(ResourceResolverType.RESOURCERESOLVER_MOCK);
@@ -75,7 +74,7 @@ public class GridViewItemTest {
     @Test
     public void testPath() {
         setupFullParamSet();
-        assertEquals(TEST_RESOURCE_PATH, viewItem.getPath());
+        assertEquals(TEST_RESOURCE_PATH, viewItem.getResourcePath());
     }
 
     @Test
@@ -87,7 +86,7 @@ public class GridViewItemTest {
     @Test
     void testLink() {
         setupFullParamSet();
-        assertEquals(TEST_BROKEN_LINK_HREF, viewItem.getLink());
+        assertEquals(TEST_BROKEN_LINK_HREF, viewItem.getValue());
     }
 
     @Test
@@ -146,19 +145,19 @@ public class GridViewItemTest {
     @Test
     void testLinkType() {
         setupFullParamSet();
-        assertEquals(TEST_BROKEN_LINK_TYPE, viewItem.getLinkType());
+        assertEquals(TEST_BROKEN_LINK_TYPE, viewItem.getType());
     }
 
     @Test
     void testLinkStatusCode() {
         setupFullParamSet();
-        assertEquals(TEST_BROKEN_LINK_SC, viewItem.getLinkStatusCode());
+        assertEquals(TEST_BROKEN_LINK_SC, viewItem.getStatusCode());
     }
 
     @Test
     void testLinkStatusMessage() {
         setupFullParamSet();
-        assertEquals(TEST_BROKEN_LINK_STATUS_MESSAGE, viewItem.getLinkStatusMessage());
+        assertEquals(TEST_BROKEN_LINK_STATUS_MESSAGE, viewItem.getStatusMessage());
     }
 
     @Test
@@ -181,21 +180,17 @@ public class GridViewItemTest {
     }
 
     @Test
-    void testThumbnailPath() {
-        setupFullParamSet();
-        assertEquals(GridViewItem.THUMBNAIL_PATH, viewItem.getThumbnail());
-    }
-
-    @Test
     void shouldResourceExist() {
         setupFullParamSet();
-        assertNotNull(context.resourceResolver().getResource(viewItem.getPath()));
+        assertNotNull(viewItem.getResourcePath());
+        assertNotNull(context.resourceResolver().getResource(viewItem.getResourcePath()));
     }
 
     @Test
     void shouldResourceNotExist() {
         setupGridResourceAndViewItem(TEST_NON_EXISTING_RESOURCE_PATH);
-        assertNull(context.resourceResolver().getResource(viewItem.getPath()));
+        assertNotNull(viewItem.getResourcePath());
+        assertNull(context.resourceResolver().getResource(viewItem.getResourcePath()));
     }
 
     private void setupFullParamSet() {
@@ -225,16 +220,18 @@ public class GridViewItemTest {
     }
 
     private void setupGridResourceAndViewItem(String resourceWithBrokenLinkPath) {
-        Resource gridResource = context.create().resource(TEST_GRID_RESOURCE_PATH,
-                JcrResourceConstants.SLING_RESOURCE_TYPE_PROPERTY, GRID_RESOURCE_TYPE,
-                GridResource.PN_LINK, TEST_BROKEN_LINK_HREF,
-                GridResource.PN_LINK_TYPE, TEST_BROKEN_LINK_TYPE,
-                GridResource.PN_LINK_STATUS_CODE, TEST_BROKEN_LINK_SC,
-                GridResource.PN_LINK_STATUS_MESSAGE, TEST_BROKEN_LINK_STATUS_MESSAGE,
-                GridResource.PN_RESOURCE_PATH, resourceWithBrokenLinkPath,
-                GridResource.PN_PROPERTY_NAME, TEST_PROPERTY
-        );
-
+        GridResource gridResourceModel = GridResource
+                .builder()
+                .resourcePath(resourceWithBrokenLinkPath)
+                .propertyName(TEST_PROPERTY)
+                .value(TEST_BROKEN_LINK_HREF)
+                .type(TEST_BROKEN_LINK_TYPE)
+                .statusCode(HttpStatus.SC_NOT_FOUND)
+                .statusMessage(TEST_BROKEN_LINK_STATUS_MESSAGE)
+                .build();
+        Resource gridResource = context
+                .create()
+                .resource(TEST_GRID_RESOURCE_PATH, gridResourceModel.toMap());
         viewItem = gridResource.adaptTo(GridViewItem.class);
     }
 }

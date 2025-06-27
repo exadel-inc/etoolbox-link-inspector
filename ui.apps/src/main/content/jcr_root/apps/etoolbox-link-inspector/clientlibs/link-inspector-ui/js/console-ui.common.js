@@ -16,7 +16,7 @@
  * EToolbox Link Inspector clientlib.
  * Common utilities
  */
-(function (window, document, $, Granite) {
+(function (window, document, $, Granite, Coral) {
     'use strict';
 
     var Utils = Granite.ELC = (Granite.ELC || {});
@@ -34,21 +34,26 @@
     }
     Utils.format = format;
 
-    let sharableDialog;
+    const sharableDialogs = {};
     /** Common sharable dialog instance getter */
-    function getDialog() {
-        if (!sharableDialog) {
-            sharableDialog = new Coral.Dialog().set({
-                backdrop: Coral.Dialog.backdrop.STATIC,
-                interaction: 'off'
-            }).on('coral-overlay:close', function (e) {
+    function getDialog(id = 'default', options) {
+        if (!sharableDialogs[id]) {
+            let dialogOptions = {
+                backdrop: Coral.Dialog.backdrop.STATIC
+            };
+            if (options && typeof options === 'object') {
+                dialogOptions = Object.assign(dialogOptions, options);
+            }
+            sharableDialogs[id] = new Coral.Dialog().set(dialogOptions).on('coral-overlay:close', function (e) {
                 e.target.remove();
             });
-            sharableDialog.classList.add('elc-dialog');
+            sharableDialogs[id].id = id;
+            sharableDialogs[id].classList.add('elc-dialog');
+            sharableDialogs[id].content.classList.add('content');
         }
-        return sharableDialog;
+        return sharableDialogs[id];
     }
-    Utils.getSharableDlg = getDialog;
+    Utils.getDialog = getDialog;
 
     var CLOSE_LABEL = Granite.I18n.get('Close');
     var FINISHED_LABEL = Granite.I18n.get('Finished');
@@ -127,7 +132,7 @@
     }
     Utils.bulkLinksUpdate = bulkLinksUpdate;
 
-    var ACL_CHECK_COMMAND = '/content/etoolbox-link-inspector/servlet/aclCheck';
+    var ACL_CHECK_COMMAND = '/content/etoolbox/link-inspector/servlet/aclCheck';
 
     /**
      * Check if user has specified permissions for the given path.
@@ -155,7 +160,7 @@
     }
     Utils.aclCheck = aclCheck;
 
-    var RESOURCE_EXIST_CHECK_COMMAND = '/content/etoolbox-link-inspector/servlet/resourceExistCheck';
+    var RESOURCE_EXIST_CHECK_COMMAND = '/content/etoolbox/link-inspector/servlet/resourceExistCheck';
 
     /**
      * Checks if the resource with specified paths exists
@@ -181,4 +186,4 @@
     }
     Utils.resourceExistCheck = resourceExistCheck;
 
-})(window, document, Granite.$, Granite);
+})(window, document, Granite.$, Granite, Coral);

@@ -14,14 +14,12 @@
 
 package com.exadel.etoolbox.linkinspector.core.services.util;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import org.apache.commons.io.IOUtils;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,6 +30,15 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Optional;
 
+/**
+ * Utility class providing helper methods for JSON manipulation and conversion.
+ * <p>
+ * This class contains static utility methods for common JSON operations in the link inspector
+ * context, such as converting objects to JSON, parsing JSON data into model objects, and
+ * reading JSON files from the JCR repository.
+ * <p>
+ * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
+ */
 public class JsonUtil {
     private static final Logger LOG = LoggerFactory.getLogger(JsonUtil.class);
 
@@ -39,20 +46,34 @@ public class JsonUtil {
 
     private JsonUtil() {}
 
-    public static JSONArray objectsToJsonArray(Collection<?> objects) {
-        JSONArray jsonArray = new JSONArray();
+    /**
+     * Converts a collection of objects to a JSON array.
+     *
+     * @param objects The collection of objects to convert
+     * @return An ArrayNode containing the JSON representation of all objects
+     */
+    public static ArrayNode objectsToJsonArray(Collection<?> objects) {
+        ArrayNode arrayNode = OBJECT_MAPPER.createArrayNode();
         objects.forEach(object -> {
             try {
-                String json = OBJECT_MAPPER.writeValueAsString(object);
-                jsonArray.put(new JSONObject(json));
-            } catch (JsonProcessingException | JSONException e) {
+                JsonNode jsonNode = OBJECT_MAPPER.valueToTree(object);
+                arrayNode.add(jsonNode);
+            } catch (IllegalArgumentException e) {
                 LOG.error("Failed to convert gridResources to JSON", e);
             }
         });
-        return jsonArray;
+        return arrayNode;
     }
 
-    public static <T> T jsonToModel(JSONObject json, Class<T> modelClass) {
+    /**
+     * Converts a JSON node to a typed model object.
+     *
+     * @param <T> The target model type
+     * @param json The JSON node to convert
+     * @param modelClass The class of the model to create
+     * @return An instance of the model class populated with data from the JSON, or null if conversion fails
+     */
+    public static <T> T jsonToModel(JsonNode json, Class<T> modelClass) {
         try (InputStream is = new ByteArrayInputStream(json.toString().getBytes(StandardCharsets.UTF_8))) {
             final JavaType type = OBJECT_MAPPER.getTypeFactory().constructType(modelClass);
             return OBJECT_MAPPER.readValue(is, type);
@@ -62,21 +83,26 @@ public class JsonUtil {
         return null;
     }
 
-    public static JSONArray getJsonArrayFromFile(String jsonPath, ResourceResolver resourceResolver) {
+    /**
+     * Reads a JSON array from a file in the JCR repository.
+     *
+     * @param jsonPath The repository path to the JSON file
+     * @param resourceResolver ResourceResolver used to access the file
+     * @return An ArrayNode containing the parsed JSON array, or an empty array if reading fails
+     */
+    public static ArrayNode getJsonArrayFromFile(String jsonPath, ResourceResolver resourceResolver) {
         Optional<InputStream> streamOptional = Optional.ofNullable(resourceResolver.getResource(jsonPath))
                 .map(resource -> resource.adaptTo(InputStream.class));
         if (streamOptional.isPresent()) {
             try {
                 String stringValue = IOUtils.toString(streamOptional.get(), StandardCharsets.UTF_8);
-                return new JSONArray(stringValue);
+                return (ArrayNode) OBJECT_MAPPER.readTree(stringValue);
             } catch (IOException e) {
-                LOG.error("Failed to convert file stream to string", e);
-            } catch (JSONException e) {
-                LOG.error("Failed to get json array", e);
+                LOG.error("Failed to get JSON array", e);
             }
         } else {
             LOG.debug("Failed to get json array from {}", jsonPath);
         }
-        return new JSONArray();
+        return OBJECT_MAPPER.createArrayNode();
     }
 }

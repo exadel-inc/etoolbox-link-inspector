@@ -16,10 +16,11 @@ package com.exadel.etoolbox.linkinspector.core.services.impl;
 
 import com.adobe.granite.ui.components.ds.DataSource;
 import com.adobe.granite.ui.components.ds.SimpleDataSource;
+import com.exadel.etoolbox.linkinspector.core.models.ui.PaginationModel;
 import com.exadel.etoolbox.linkinspector.core.services.GridDataSource;
 import com.exadel.etoolbox.linkinspector.core.services.data.DataFeedService;
 import com.exadel.etoolbox.linkinspector.core.services.data.models.DataFilter;
-import org.apache.commons.lang.math.NumberUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.sling.api.resource.Resource;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -29,11 +30,19 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Implementation of the {@link GridDataSource} service interface that provides data sources
+ * for the Link Inspector grid.
+ * <p>
+ * This implementation retrieves link data from the {@link DataFeedService} and applies
+ * pagination, filtering, and sorting as required by the UI. It transforms the data into
+ * a format that can be consumed by the AEM Granite UI components.
+ * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
+ */
 @Component(service = GridDataSource.class)
 public class GridDataSourceImpl implements GridDataSource {
     private static final Logger LOG = LoggerFactory.getLogger(GridDataSourceImpl.class);
     private static final int DEFAULT_PAGE_NUMBER = 1;
-    private static final int DEFAULT_PAGE_VALUES_SIZE = 500;
 
     @Reference
     private DataFeedService dataFeedService;
@@ -48,8 +57,8 @@ public class GridDataSourceImpl implements GridDataSource {
         int pageNumber = NumberUtils.isNumber(page) ? Integer.parseInt(page) : DEFAULT_PAGE_NUMBER;
 
         List<Resource> resources = dataFeedService.dataFeedToResources(new DataFilter(type, substring)).stream()
-                .skip((long) DEFAULT_PAGE_VALUES_SIZE * (pageNumber - 1))
-                .limit(DEFAULT_PAGE_VALUES_SIZE)
+                .skip((long) PaginationModel.DEFAULT_PAGE_SIZE * (pageNumber - 1))
+                .limit(PaginationModel.DEFAULT_PAGE_SIZE)
                 .collect(Collectors.toList());
 
         if (NumberUtils.isNumber(offset)) {

@@ -16,6 +16,10 @@ package com.exadel.etoolbox.linkinspector.core.services;
 
 import com.adobe.granite.ui.components.ds.DataSource;
 
+/**
+ * Interface for generating a data source for the Link Inspector's grid
+ * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
+ */
 public interface GridDataSource {
     /**
      * Generates {@link DataSource} necessary for displaying items on the Link Inspector's page

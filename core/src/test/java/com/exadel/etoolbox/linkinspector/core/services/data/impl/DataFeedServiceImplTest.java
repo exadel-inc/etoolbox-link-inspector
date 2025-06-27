@@ -14,7 +14,9 @@
 
 package com.exadel.etoolbox.linkinspector.core.services.data.impl;
 
-import com.exadel.etoolbox.linkinspector.api.LinkResolver;
+import com.exadel.etoolbox.linkinspector.api.Resolver;
+import com.exadel.etoolbox.linkinspector.core.services.cache.GridResourcesCache;
+import com.exadel.etoolbox.linkinspector.core.services.cache.impl.GridResourcesCacheImpl;
 import com.exadel.etoolbox.linkinspector.core.services.data.ConfigService;
 import com.exadel.etoolbox.linkinspector.core.services.data.GridResourcesGenerator;
 import com.exadel.etoolbox.linkinspector.core.services.data.models.DataFilter;
@@ -45,29 +47,26 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.BiConsumer;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyCollection;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockStatic;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(AemContextExtension.class)
 class DataFeedServiceImplTest {
     private static final String GRID_RESOURCES_GENERATOR_FIELD = "gridResourcesGenerator";
     private static final String RESOURCE_RESOLVER_FACTORY_FIELD = "resourceResolverFactory";
+    private static final String GRID_RESOURCES_CACHE_FIELD = "gridResourcesCache";
     private static final String REPOSITORY_HELPER_FIELD = "repositoryHelper";
     private static final String LINK_HELPER_FIELD = "linkHelper";
     private static final String CONFIG_FIELD = "configService";
 
-    private static final String DATAFEED_PATH = "/content/etoolbox-link-inspector/data/datafeed.json";
-    private static final String CSV_REPORT_PATH = "/content/etoolbox-link-inspector/download/report.csv";
+    private static final String DATAFEED_PATH = "/var/etoolbox/link-inspector/data/datafeed.json";
+    private static final String CSV_REPORT_PATH = "/var/etoolbox/link-inspector/download/report.csv";
 
     private static final String TEST_RESOURCES_TREE_PATH = "/com/exadel/etoolbox/linkinspector/core/services/data/impl/resources.json";
     private static final String TEST_FOLDER_PATH = "/content/test-folder";
@@ -79,6 +78,7 @@ class DataFeedServiceImplTest {
     @BeforeEach
     void setup() throws NoSuchFieldException, IOException, URISyntaxException {
         PrivateAccessor.setField(fixture, REPOSITORY_HELPER_FIELD, getRepositoryHelperFromContext());
+        PrivateAccessor.setField(fixture, GRID_RESOURCES_CACHE_FIELD, getGridResourcesCacheFromContext());
         GridResourcesGeneratorImpl gridResourcesGenerator = getGridResourcesGenerator();
         PrivateAccessor.setField(fixture, GRID_RESOURCES_GENERATOR_FIELD, gridResourcesGenerator);
     }
@@ -176,10 +176,10 @@ class DataFeedServiceImplTest {
         }
     }
 
-    private GridResourcesGeneratorImpl getGridResourcesGenerator() throws NoSuchFieldException, IOException, URISyntaxException {
+    private GridResourcesGeneratorImpl getGridResourcesGenerator() throws NoSuchFieldException {
         GridResourcesGeneratorImpl gridResourcesGenerator = new GridResourcesGeneratorImpl();
 
-        List<LinkResolver> linkResolvers = Arrays.asList(
+        List<Resolver> linkResolvers = Arrays.asList(
                 new ExternalLinkResolverImpl(),
                 new InternalLinkResolverImpl()
         );
@@ -204,5 +204,12 @@ class DataFeedServiceImplTest {
         RepositoryHelper repositoryHelper = new RepositoryHelperImpl();
         PrivateAccessor.setField(repositoryHelper, RESOURCE_RESOLVER_FACTORY_FIELD, resourceResolverFactory);
         return repositoryHelper;
+    }
+
+    private GridResourcesCache getGridResourcesCacheFromContext() throws NoSuchFieldException {
+        GridResourcesCache gridResourcesCache = new GridResourcesCacheImpl();
+        ConcurrentHashMap<String, CopyOnWriteArrayList<GridResource>> cache = new ConcurrentHashMap<>();
+        PrivateAccessor.setField(gridResourcesCache, GRID_RESOURCES_CACHE_FIELD, cache);
+        return gridResourcesCache;
     }
 }

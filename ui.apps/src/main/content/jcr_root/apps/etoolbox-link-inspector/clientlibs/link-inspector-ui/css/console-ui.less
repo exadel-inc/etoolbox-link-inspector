@@ -12,56 +12,87 @@
  * limitations under the License.
  */
 
-tr.elc-card {
-  .card-page {
-    padding-left: 2.8125rem;
-    border-bottom: 0.0625rem solid #f2f2f2;
-    padding-right: 0.625rem;
+.elc-grid {
+  font-size: 0.9rem;
+}
+
+.elc-item {
+  td {
+    padding: 0.5rem 0.75rem;
+    vertical-align: top;
+
+    &.check {
+      padding: 4px 16px;
+      text-align: center;
+      width: 0;
+    }
+    &.status {
+      max-width: 110px;
+      text-transform: capitalize;
+      width: 0;
+    }
+    &.page {
+      width: 15%;
+    }
+    &.component {
+      width: 15%;
+    }
+    &.property {
+      padding-right: 16px;
+      width: 25%;
+    }
   }
 
-  .etoolbox-link-inspector,
-  .coral-Tooltip {
+  .content {
+    height: 100%;
+    position: relative;
+  }
+  .indicator {
+    margin: 0.25rem 0;
+  }
+  .primary {
+    display: block;
+    margin-bottom: 0.25rem;
+  }
+  .secondary {
+    display: block;
+    font-size: 0.8rem;
+    line-height: 0.8rem;
+  }
+  .break-all {
+    word-break: break-all;
+  }
+  .break-none {
+    white-space: nowrap;
+  }
+  .break-word {
     word-break: break-word;
   }
-}
-
-.elc-complex-col {
-  margin: 0.2rem 0;
-  max-width: 600px;
-  overflow: hidden;
-
-  .elc-primary-info {
-    display: block;
-    max-width: 100%;
-    margin-top: 0;
-    margin-bottom: 0;
-    // Fallback for browsers that not support word-break: break-word
-    word-break: normal;
-    word-break: break-word;
+  .centered {
+    text-align: center;
+  }
+  .full-ellipsis {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 10;
+  }
+  .line-ellipsis {
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
-  .elc-secondary-info {
-    display: block;
+  [data-status="ok"] {
+    color: #0FCB8C;
   }
-}
-.els-component-col {
-  max-width: 350px;
-  // Fallback for browsers that not support word-break: break-word
-  word-break: break-all;
-}
-.els-page-col {
-  max-width: 250px;
-  overflow: hidden;
-}
-.els-status-msg-col {
-  max-width: 200px;
-}
-.els-property-col {
-  margin: 0.2rem 0;
-  max-width: 550px;
-  // Fallback for browsers that not support word-break: break-word
-  word-break: normal;
-  word-break: break-word;
+
+  [data-status="error"] {
+    color: #f85647;
+  }
+
+  [data-status="undefined"] {
+    color: #bababa;
+  }
 }
 
 .elc-coral-alert {
@@ -71,15 +102,20 @@ tr.elc-card {
   display: block;
 }
 
-.elc-coral-popover {
-  width: 15%;
-  word-break: break-word;
-}
-
 .elc-dialog {
   vertical-align: middle;
-  .coral3-Dialog-wrapper {
-    width: 35%;
+
+  .content {
+    max-height: 80vh;
+    overflow-y: hidden;
+    width: 40vw;
+    // Enable vertical scroll if there is more than one child element
+    &:has(:nth-child(2)) {
+      overflow-y: scroll;
+    }
+    &.no-scroll {
+        overflow-y: hidden;
+    }
   }
 }
 
@@ -90,49 +126,15 @@ tr.elc-card {
 .elc-processing-link-list {
   > li {
     font-weight: bold;
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
   }
-}
-
-.elc-link-status--ok {
-  color: #00FF00;
-}
-
-.elc-link-status--error {
-  color: #FF0000;
-}
-
-.elc-run-button {
-    border: none;
-    background: none !important;
-    padding: 0 !important;
-    font-family: arial, sans-serif;
-    cursor: pointer;
-    color: blue;
-    margin: 0 0.5rem;
 }
 
 .foundation-collection-selectall {
     display: none;
-}
-
-.collection-item_link-type{
-    width:30%;
-}
-
-.collection-item_page_title{
-    width:15%;
-}
-
-.collection-item_component_name{
-    width:15%;
-}
-
-.collection-item_property_name{
-    width:30%
-}
-
-.collection-item_status_code {
-    text-align: center;
 }
 
 #elc-filter-options.elc-filter-active, #elc-filter-options.elc-filter-active:hover {
@@ -142,6 +144,10 @@ tr.elc-card {
 .filter-dialog-button-group {
     display: flex;
     justify-content: space-between;
+}
+
+.granite-collection-loading-title .granite-collection-loading-container {
+    display: none;
 }
 
 #filter-dialog{
@@ -163,3 +169,17 @@ tr.elc-card {
   }
 }
 
+.result-type {
+    color: #cccccc;
+    font-style: italic;
+}
+
+/* ---------------
+   Utility classes
+   --------------- */
+
+.no-outline, .no-outline:not(:disabled):not(.is-disabled):focus {
+  border: none;
+  box-shadow: none;
+  -webkit-box-shadow: none;
+}

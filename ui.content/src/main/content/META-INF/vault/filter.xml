@@ -13,9 +13,17 @@
   ~ limitations under the License.
   -->
 <workspaceFilter version="1.0">
-    <filter root="/home/users/system/etoolbox" mode="merge"/>
-    <filter root="/content/rep:policy" mode="merge"/>
-    <filter root="/content/etoolbox-link-inspector/link-inspector" mode="replace"/>
-    <filter root="/content/etoolbox-link-inspector" mode="merge"/>
-    <filter root="/conf/etoolbox-link-inspector" mode="merge"/>
+    <!-- System user -->
+    <filter root="/home/users/system/etoolbox/YhFMjFNu-eqtti9pXW7O"/>
+    <filter root="/conf/etoolbox/link-inspector/rep:policy"/>
+    <filter root="/content/rep:policy"/>
+    <filter root="/content/etoolbox/rep:policy"/>
+    <!-- Main content -->
+    <filter root="/content/etoolbox/link-inspector"/>
+    <!-- Subsidiary content -->
+    <filter root="/var/etoolbox/link-inspector/data/rep:policy"/>
+    <filter root="/var/etoolbox/link-inspector/download/rep:policy"/>
+    <!-- Removal of obsolete paths -->
+    <filter root="/conf/etoolbox-link-inspector"/>
+    <filter root="/content/etoolbox-link-inspector"/>
 </workspaceFilter>

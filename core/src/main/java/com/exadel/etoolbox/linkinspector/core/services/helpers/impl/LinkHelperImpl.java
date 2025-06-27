@@ -14,9 +14,9 @@
 
 package com.exadel.etoolbox.linkinspector.core.services.helpers.impl;
 
-import com.exadel.etoolbox.linkinspector.api.Link;
-import com.exadel.etoolbox.linkinspector.api.LinkResolver;
-import com.exadel.etoolbox.linkinspector.api.LinkStatus;
+import com.exadel.etoolbox.linkinspector.api.Result;
+import com.exadel.etoolbox.linkinspector.api.Resolver;
+import com.exadel.etoolbox.linkinspector.api.Status;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.LinkHelper;
 import com.exadel.etoolbox.linkinspector.core.services.util.LinkInspectorResourceUtil;
 import org.apache.http.HttpStatus;
@@ -25,6 +25,8 @@ import org.apache.sling.api.resource.ResourceResolver;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.component.annotations.ReferencePolicyOption;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,6 +37,7 @@ import java.util.stream.Stream;
 
 /**
  * Implements {@link LinkHelper} interface to provide an OSGi service which provides helper methods for processing links
+ * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  */
 @Component(
         service = LinkHelper.class
@@ -43,15 +46,19 @@ public class LinkHelperImpl implements LinkHelper {
 
     private static final Logger LOG = LoggerFactory.getLogger(LinkHelperImpl.class);
 
-    @Reference(cardinality = ReferenceCardinality.MULTIPLE)
-    private List<LinkResolver> linkResolvers;
+    @Reference(
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            policyOption = ReferencePolicyOption.GREEDY
+    )
+    private volatile List<Resolver> linkResolvers;
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Stream<Link> getLinkStream(Object source) {
-        Stream<Link> linkStream = Stream.empty();
+    public Stream<Result> getLinkStream(Object source) {
+        Stream<Result> linkStream = Stream.empty();
         if (source instanceof String) {
             String stringValue = String.valueOf(source);
             linkStream = getLinkStream(stringValue);
@@ -62,36 +69,36 @@ public class LinkHelperImpl implements LinkHelper {
         return linkStream;
     }
 
-    private Stream<Link> getLinkStream(String source) {
+    private Stream<Result> getLinkStream(String source) {
         return linkResolvers
                 .stream()
-                .flatMap(linkResolver -> linkResolver.getLinks(source).stream());
+                .flatMap(linkResolver -> linkResolver.getResults(source).stream());
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void validateLink(Link link, ResourceResolver resourceResolver) {
-        String type = link.getType();
-        LinkResolver linkResolver = linkResolvers.stream().filter(item -> item.getId().equals(type)).findFirst().orElse(null);
+    public void validateLink(Result result, ResourceResolver resourceResolver) {
+        String type = result.getType();
+        Resolver linkResolver = linkResolvers.stream().filter(item -> item.getId().equals(type)).findFirst().orElse(null);
         if (linkResolver == null) {
-            link.setStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR, "Link resolver not found");
+            result.setStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR, "Link resolver not found");
             return;
         }
-        LOG.trace("Started validation of {}", link.getHref());
-        linkResolver.validate(link, resourceResolver);
-        LOG.trace("Completed validation of {}", link.getHref());
+        LOG.trace("Started validation of {}", result.getValue());
+        linkResolver.validate(result, resourceResolver);
+        LOG.trace("Completed validation of {}", result.getValue());
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public LinkStatus validateLink(String href, ResourceResolver resourceResolver) {
-        Optional<Link> detectedLink = this.getLinkStream(href).findFirst();
-        if (!detectedLink.isPresent() || !detectedLink.get().getHref().equals(href)) {
-            return new LinkStatus(HttpStatus.SC_BAD_REQUEST, "Unsupported link type");
+    public Status validateLink(String href, ResourceResolver resourceResolver) {
+        Optional<Result> detectedLink = this.getLinkStream(href).findFirst();
+        if (!detectedLink.isPresent() || !detectedLink.get().getValue().equals(href)) {
+            return new Status(HttpStatus.SC_BAD_REQUEST, "Unsupported link type");
         }
         validateLink(detectedLink.get(), resourceResolver);
         return detectedLink.get().getStatus();
@@ -116,21 +123,11 @@ public class LinkHelperImpl implements LinkHelper {
                                               String propertyName, String currentLink, String newLink) {
         boolean updated = false;
         Optional<Object> updatedValue = Optional.ofNullable(modifiableValueMap.get(propertyName))
-                .map(value -> updatePropertyWithNewLink(value, currentLink, newLink));
+                .map(value -> LinkInspectorResourceUtil.replaceStringInPropValue(value, currentLink, newLink));
         if (updatedValue.isPresent()) {
             modifiableValueMap.put(propertyName, updatedValue.get());
             updated = true;
         }
         return updated;
-    }
-
-    private Object updatePropertyWithNewLink(Object value, String currentLink, String newLink) {
-        return getLinkStream(value)
-                .map(Link::getHref)
-                .filter(currentLink::equals)
-                .findFirst()
-                .map(currentLinkToReplace ->
-                        LinkInspectorResourceUtil.replaceStringInPropValue(value, currentLinkToReplace, newLink))
-                .orElse(null);
     }
 }

@@ -3,7 +3,6 @@
         <sly data-sly-call="${field @ title='Last generated', value=model.lastGenerated}"></sly>
         <sly data-sly-call="${field @ title='Search path', value=model.searchPath}"></sly>
         <sly data-sly-call="${field @ title='Excluded paths', value=model.excludedPaths}"></sly>
-        <sly data-sly-call="${field @ title='Activated content only', value=model.checkActivation}"></sly>
         <sly data-sly-call="${field @ title='Skip content modified after activation', value=model.skipModifiedAfterActivation}"></sly>
         <sly data-sly-call="${field @ title='Last Modified Boundary', value=model.lastModifiedBoundary}"></sly>
         <sly data-sly-call="${field @ title='Excluded Properties', value=model.excludedProperties}"></sly>
@@ -16,6 +15,14 @@
             <sly data-sly-call="${field @ title=statKey, value=model.statistics[statKey]}"></sly>
         </sly>
         <coral-popover-separator></coral-popover-separator>
+        <button is="coral-button"
+                variant="minimal"
+                id="elc-delete-report"
+                class="foundation-collection-action u-coral-margin u-coral-noPadding no-outline"
+                data-shell-collection-target=".etoolbox-link-inspector"
+                data-foundation-collection-action="{&quot;target&quot;:&quot;.etoolbox-link-inspector&quot;,&quot;action&quot;:&quot;cq-admin.etoolbox.linkinspector.action.delete-report&quot;}">
+            Delete last scan info
+        </button>
     </coral-popover-content>
 </sly>
 

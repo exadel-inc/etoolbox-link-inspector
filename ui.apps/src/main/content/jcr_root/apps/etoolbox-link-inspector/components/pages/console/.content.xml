@@ -1,0 +1,282 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:granite="http://www.adobe.com/jcr/granite/1.0"
+          xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:jcr="http://www.jcp.org/jcr/1.0"
+          xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+          jcr:primaryType="cq:Page">
+    <jcr:content
+            jcr:mixinTypes="[sling:VanityPath]"
+            jcr:primaryType="nt:unstructured"
+            jcr:title="Scan Results"
+            sling:resourceType="granite/ui/components/shell/collectionpage"
+            currentView="list"
+            modeGroup="etoolbox-link-inspector"
+            sling:vanityPath="/etoolbox/link-inspector"
+            pageURITemplate="#"
+            targetCollection=".etoolbox-link-inspector">
+        <head jcr:primaryType="nt:unstructured">
+            <viewport
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/admin/page/viewport"/>
+            <meta
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/meta"
+                    content="chrome=1"
+                    name="X-UA-Compatible"/>
+            <winmode
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="cq/gui/components/siteadmin/admin/page/winmode"/>
+            <title
+                    jcr:primaryType="nt:unstructured"
+                    jcr:title="Scan Results"
+                    sling:resourceType="cq/gui/components/siteadmin/admin/page/title"/>
+            <favicon
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/page/favicon"/>
+            <clientlibs
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/includeclientlibs"
+                    categories="[coralui3,granite.ui.coral.foundation,link-inspector-ui]"/>
+        </head>
+        <views jcr:primaryType="nt:unstructured">
+            <container
+                    jcr:primaryType="nt:unstructured"
+                    granite:class="elc-report-container"
+                    sling:resourceType="granite/ui/components/foundation/container">
+                <items jcr:primaryType="nt:unstructured">
+                    <table
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="granite/ui/components/coral/foundation/table"
+                        granite:rel="etoolbox-link-inspector"
+                        granite:class="elc-grid"
+                        src="/apps/etoolbox-link-inspector/components/pages/console/jcr:content/views/container/items/table{.offset,limit}.html{+id}?page=${param.page}&amp;type=${param.type}&amp;substring=${param.substring}"
+                        itemprop="item"
+                        limit="{Long}50"
+                        layoutId="list"
+                        maximized="{Boolean}true"
+                        modeGroup="etoolbox-link-inspector"
+                        path="${requestPathInfo.suffix}"
+                        selectionMode="row"
+                        sortMode="local"
+                        stateId="link-inspector-ui">
+                        <columns jcr:primaryType="nt:unstructured">
+                            <select
+                                    jcr:primaryType="nt:unstructured"
+                                    select="{Boolean}true"/>
+                            <status
+                                    jcr:primaryType="nt:unstructured"
+                                    jcr:title="Status"
+                                    class="status"/>
+                            <title
+                                    jcr:primaryType="nt:unstructured"
+                                    jcr:title="Matched result"
+                                    class="result"/>
+                            <pagePath
+                                    jcr:primaryType="nt:unstructured"
+                                    jcr:title="Page"
+                                    class="pagePath"/>
+                            <component
+                                    jcr:primaryType="nt:unstructured"
+                                    jcr:title="Component"
+                                    class="component"/>
+                            <property
+                                    jcr:primaryType="nt:unstructured"
+                                    jcr:title="Property"
+                                    class="propertyName"/>
+                        </columns>
+                        <datasource
+                                jcr:primaryType="nt:unstructured"
+                                sling:resourceType="etoolbox-link-inspector/components/gridDatasource"
+                                itemResourceType="etoolbox-link-inspector/components/gridConfig"/>
+                    </table>
+                    <statistics
+                            jcr:primaryType="nt:unstructured"
+                            sling:resourceType="granite/ui/components/coral/foundation/include"
+                            path="/var/etoolbox/link-inspector/data/stats"
+                            resourceType="etoolbox-link-inspector/components/stats/statsPanel"/>
+                </items>
+            </container>
+        </views>
+        <footer jcr:primaryType="nt:unstructured"
+                sling:resourceType="etoolbox-link-inspector/components/footer"/>
+        <actions jcr:primaryType="nt:unstructured">
+            <primary jcr:primaryType="nt:unstructured">
+                <fixSelected
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="granite/ui/components/coral/foundation/collection/action"
+                        action="cq-admin.etoolbox.linkinspector.action.replace-by-pattern"
+                        activeCondition="cq-admin.etoolbox.linkinspector.actioncondition.replace-by-pattern"
+                        disabled="{Boolean}true"
+                        icon="findAndReplace"
+                        rel="etoolbox-link-inspector-fix-by-pattern"
+                        target=".etoolbox-link-inspector"
+                        text="Fix Selected"
+                        title="Fix Selected"
+                        granite:id="elc-replace-by-pattern"
+                        variant="primary"/>
+                <filterOptions
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="granite/ui/components/coral/foundation/collection/action"
+                        granite:id="elc-filter-options"
+                        action="foundation.dialog"
+                        icon="filter"
+                        rel="etoolbox-link-inspector-filter-options"
+                        target=".etoolbox-link-inspector"
+                        text="Filter"
+                        title="Filter"
+                        variant="minimal">
+                    <data jcr:primaryType="nt:unstructured"
+                          nesting="hide"
+                          src.uritemplate="/apps/etoolbox-link-inspector/components/pages/console/filterOptions.html?substring=${param.substring}"/>
+                </filterOptions>
+            </primary>
+            <secondary jcr:primaryType="nt:unstructured">
+                <settings
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="granite/ui/components/coral/foundation/anchorbutton"
+                        href="/etoolbox/link-inspector/settings.html"
+                        icon="gears"
+                        text="Settings"
+                        granite:title="Settings"
+                        variant="secondary"/>
+                <scan
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="granite/ui/components/coral/foundation/collection/action"
+                        granite:title="Scan for links"
+                        action="foundation.dialog"
+                        text="Scan"
+                        icon="play"
+                        variant="primary">
+                    <data jcr:primaryType="nt:unstructured"
+                          nesting="hide"
+                          src.uritemplate="/apps/etoolbox-link-inspector/components/pages/console/scanDialog.html"/>
+                </scan>
+                <stats
+                        jcr:primaryType="nt:unstructured"
+                        path="/var/etoolbox/link-inspector/data/stats"
+                        sling:resourceType="etoolbox-link-inspector/components/stats/statsButton"/>
+                <download
+                        jcr:primaryType="nt:unstructured"
+                        sling:resourceType="granite/ui/components/coral/foundation/anchorbutton"
+                        text="Download Report"
+                        granite:title="Download Full Report"
+                        variant="primary"
+                        granite:class="elc-download-report-button"
+                        x-cq-linkchecker="skip"/>
+            </secondary>
+        </actions>
+    </jcr:content>
+    <filterOptions
+            jcr:primaryType="nt:unstructured"
+            jcr:title="Filter Links"
+            sling:resourceType="granite/ui/components/coral/foundation/dialog"
+            granite:class="elc-dialog"
+            granite:id="filter--dialog">
+        <items jcr:primaryType="nt:unstructured">
+            <form jcr:primaryType="nt:unstructured"
+                  sling:resourceType="granite/ui/components/coral/foundation/form"
+                  foundationForm="{Boolean}true"
+                  style="vertical">
+                <items jcr:primaryType="nt:unstructured">
+                    <content jcr:primaryType="nt:unstructured"
+                             jcr:title="Add by Path"
+                             sling:resourceType="granite/ui/components/coral/foundation/fixedcolumns">
+                        <items jcr:primaryType="nt:unstructured">
+                            <column jcr:primaryType="nt:unstructured"
+                                    sling:resourceType="granite/ui/components/coral/foundation/container">
+                                <items jcr:primaryType="nt:unstructured">
+                                    <type
+                                            jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/form/select"
+                                            granite:id="linkTypesSelect"
+                                            fieldLabel="By type"
+                                            name="./linkTypes">
+                                        <datasource jcr:primaryType="nt:unstructured"
+                                                    sling:resourceType="/bin/etoolbox/link-inspector/settings/resolvers"/>
+                                    </type>
+                                    <text jcr:primaryType="nt:unstructured"
+                                            sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
+                                            granite:id="byTextFilter"
+                                            fieldLabel="By text"
+                                            value="${param.substring}"
+                                            name="./byText"/>
+                                </items>
+                            </column>
+                        </items>
+                    </content>
+                </items>
+            </form>
+        </items>
+        <footer jcr:primaryType="nt:unstructured">
+            <resetButton
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/button"
+                    granite:id="dialog-reset"
+                    text="Reset"
+                    variant="secondary"/>
+            <cancelButton
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/button"
+                    granite:id="dialog-cancel"
+                    text="Cancel"
+                    variant="secondary">
+                <parentConfig
+                        jcr:primaryType="nt:unstructured"
+                        close="{Boolean}true"/>
+            </cancelButton>
+            <okButton
+                    jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/button"
+                    granite:id="dialog-action"
+                    text="Apply"
+                    variant="primary"/>
+        </footer>
+    </filterOptions>
+    <scanDialog jcr:primaryType="nt:unstructured"
+            jcr:title="Scan"
+            granite:id="elc-scan-now-dialog"
+            sling:resourceType="granite/ui/components/coral/foundation/dialog"
+            granite:class="elc-dialog">
+        <items jcr:primaryType="nt:unstructured">
+            <scan jcr:primaryType="nt:unstructured"
+                  path="/var/etoolbox/link-inspector/data/stats"
+                  sling:resourceType="etoolbox-link-inspector/components/settings/model"/>
+        </items>
+        <footer jcr:primaryType="nt:unstructured">
+            <settings jcr:primaryType="nt:unstructured"
+                    sling:resourceType="granite/ui/components/coral/foundation/anchorbutton"
+                    href="/etoolbox/link-inspector/settings.html"
+                    icon="gears"
+                    text="Settings"
+                    granite:title="Settings"
+                    variant="secondary"/>
+            <cancel jcr:primaryType="nt:unstructured"
+                          sling:resourceType="granite/ui/components/coral/foundation/button"
+                          granite:id="dialog-cancel"
+                          text="Cancel"
+                          variant="secondary">
+                <parentConfig jcr:primaryType="nt:unstructured"
+                              close="{Boolean}true"/>
+            </cancel>
+            <scan jcr:primaryType="nt:unstructured"
+                      sling:resourceType="granite/ui/components/coral/foundation/button"
+                      granite:id="scan"
+                      granite:title="Scan for links"
+                      text="Scan now"
+                      variant="primary">
+            </scan>
+        </footer>
+    </scanDialog>
+</jcr:root>

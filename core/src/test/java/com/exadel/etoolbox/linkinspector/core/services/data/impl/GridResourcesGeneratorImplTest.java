@@ -15,7 +15,6 @@
 package com.exadel.etoolbox.linkinspector.core.services.data.impl;
 
 import com.day.cq.replication.ReplicationStatus;
-import com.exadel.etoolbox.linkinspector.api.Link;
 import com.exadel.etoolbox.linkinspector.core.services.data.ConfigService;
 import com.exadel.etoolbox.linkinspector.core.services.data.DataFeedService;
 import com.exadel.etoolbox.linkinspector.core.services.data.models.GridResource;
@@ -27,7 +26,6 @@ import com.exadel.etoolbox.linkinspector.core.services.mocks.MockCustomLinkResol
 import com.exadel.etoolbox.linkinspector.core.services.mocks.MockRepositoryHelper;
 import com.exadel.etoolbox.linkinspector.core.services.resolvers.ExternalLinkResolverImpl;
 import com.exadel.etoolbox.linkinspector.core.services.resolvers.InternalLinkResolverImpl;
-import com.google.common.collect.ImmutableMap;
 import io.wcm.testing.mock.aem.junit5.AemContext;
 import io.wcm.testing.mock.aem.junit5.AemContextExtension;
 import junitx.util.PrivateAccessor;
@@ -53,8 +51,11 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -71,12 +72,12 @@ import static org.mockito.Mockito.*;
 class GridResourcesGeneratorImplTest {
     private static final String RESOURCE_RESOLVER_FACTORY_FIELD = "resourceResolverFactory";
     private static final String REPOSITORY_HELPER_FIELD = "repositoryHelper";
-    private static final String REAL_DATAFEED_PATH = "/content/etoolbox-link-inspector/data/datafeed.json";
+    private static final String REAL_DATAFEED_PATH = "/var/etoolbox/link-inspector/data/datafeed.json";
     private static final String EXECUTOR_SERVICE_FIELD = "executorService";
     private static final String GRID_RESOURCE_TYPE = "etoolbox-link-inspector/components/gridConfig";
     private static final String TEST_RESOURCES_TREE_PATH = "/com/exadel/etoolbox/linkinspector/core/services/data/impl/resources.json";
     private static final String TEST_DATAFEED_PATH = "/com/exadel/etoolbox/linkinspector/core/services/data/impl/expectedResources.json";
-    private static final String REAL_CSV_REPORT_NODE = "/content/etoolbox-link-inspector/data/content";
+    private static final String REAL_CSV_REPORT_NODE = "/var/etoolbox/link-inspector/data/content";
     private static final String TEST_CSV_SIZE_PROPERTY_NAME = "size";
     private static final int TEST_CSV_SIZE_PROPERTY_VALUE = 1;
     private static final String TEST_FOLDER_PATH = "/content/test-folder";
@@ -136,14 +137,14 @@ class GridResourcesGeneratorImplTest {
 
         context.registerInjectActivateService(
                 new MockHttpClientBuilderFactory(),
-                ImmutableMap.of(
-                        MockHttpClientBuilderFactory.PN_STATUS_CODE, HttpStatus.SC_NOT_FOUND,
-                        MockHttpClientBuilderFactory.PN_STATUS_MESSAGE, "Not Found")
+                new HashMap<String, Object>() {{
+                    put(MockHttpClientBuilderFactory.PN_STATUS_CODE, HttpStatus.SC_NOT_FOUND);
+                    put(MockHttpClientBuilderFactory.PN_STATUS_MESSAGE, "Not Found");
+                }}
         );
+
         context.registerInjectActivateService(new ExternalLinkResolverImpl());
-
         context.registerInjectActivateService(new InternalLinkResolverImpl());
-
         context.registerInjectActivateService(new MockCustomLinkResolver());
 
         configService = mock(ConfigServiceImpl.class);
@@ -180,7 +181,7 @@ class GridResourcesGeneratorImplTest {
 
         List<GridResource> expectedGridResources = buildExpectedGridResources().stream()
                 .filter(gr -> {
-                    Matcher matcher = pattern.matcher(gr.getLink().getHref());
+                    Matcher matcher = pattern.matcher(gr.getValue());
                     return !matcher.matches();
                 })
                 .collect(Collectors.toList());
@@ -194,8 +195,7 @@ class GridResourcesGeneratorImplTest {
 
         List<GridResource> gridResources = fixture.generateGridResources(GRID_RESOURCE_TYPE, context.resourceResolver());
         boolean notContainsExternal = gridResources.stream()
-                .map(GridResource::getLink)
-                .map(Link::getType)
+                .map(GridResource::getType)
                 .noneMatch("external"::equals);
 
         assertTrue(notContainsExternal);
@@ -218,7 +218,7 @@ class GridResourcesGeneratorImplTest {
 
         List<GridResource> gridResources = fixture.generateGridResources(GRID_RESOURCE_TYPE, context.resourceResolver());
         boolean notContainsExcluded = gridResources.stream()
-                .map(GridResource::getHref)
+                .map(GridResource::getValue)
                 .noneMatch(href ->
                         href.equals(TEST_EXCLUDED_LINK) || href.equals(TEST_EXCLUDED_CHILD_LINK)
                 );
@@ -232,7 +232,7 @@ class GridResourcesGeneratorImplTest {
 
         List<GridResource> gridResources = fixture.generateGridResources(GRID_RESOURCE_TYPE, context.resourceResolver());
         boolean notContainsExcluded = gridResources.stream()
-                .map(GridResource::getHref)
+                .map(GridResource::getValue)
                 .noneMatch(TEST_EXCLUDED_BY_LAST_MODIFIED::equals);
 
         assertTrue(notContainsExcluded);
@@ -246,10 +246,10 @@ class GridResourcesGeneratorImplTest {
         List<GridResource> gridResources = fixture.generateGridResources(GRID_RESOURCE_TYPE, context.resourceResolver());
 
         boolean containsExcluded = gridResources.stream()
-                .map(GridResource::getHref)
+                .map(GridResource::getValue)
                 .anyMatch(TEST_EXCLUDED_LINK::equals);
         boolean containsExcludedChild = gridResources.stream()
-                .map(GridResource::getHref)
+                .map(GridResource::getValue)
                 .anyMatch(TEST_EXCLUDED_CHILD_LINK::equals);
 
         assertTrue(containsExcluded && containsExcludedChild);
@@ -258,7 +258,6 @@ class GridResourcesGeneratorImplTest {
     @Test
     void testActivationCheck() throws ParseException {
         when(configService.getExcludedPaths()).thenReturn(new String[]{TEST_EXCLUDED_PATH});
-        when(configService.activatedContent()).thenReturn(true);
         when(configService.isSkipContentModifiedAfterActivation()).thenReturn(true);
         context.load().json(TEST_REPLICATED_RESOURCES_TREE_PATH, TEST_FOLDER_PATH);
 
@@ -272,11 +271,11 @@ class GridResourcesGeneratorImplTest {
         List<GridResource> gridResources = fixture.generateGridResources(GRID_RESOURCE_TYPE, spyResourceResolver);
 
         boolean notContainsInactive = gridResources.stream()
-                .map(GridResource::getHref)
+                .map(GridResource::getValue)
                 .noneMatch(href -> href.contains(LINK_PART_INACTIVE));
 
         List<String> resultLinks = gridResources.stream()
-                .map(GridResource::getHref)
+                .map(GridResource::getValue)
                 .collect(Collectors.toList());
 
         assertTrue(notContainsInactive);

@@ -2,3 +2,5 @@
 
 console-ui.less
 console-ui.pagination.less
+console-ui.editproperty.less
+console-ui.stats.less
