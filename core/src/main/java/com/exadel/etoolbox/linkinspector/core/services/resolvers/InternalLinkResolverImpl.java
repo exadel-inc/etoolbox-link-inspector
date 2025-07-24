@@ -103,6 +103,7 @@ public class InternalLinkResolverImpl implements Resolver {
         }
         Status status = checkLink(result.getValue(), resourceResolver);
         if (status.getCode() == HttpStatus.SC_NOT_FOUND && StringUtils.isNotBlank(internalLinksHost)) {
+            result.setValue("https://" + internalLinksHost + result.getValue());
             externalLinkResolver.validate(result, resourceResolver);
         } else {
             result.setStatus(status.getCode(), status.getMessage());
