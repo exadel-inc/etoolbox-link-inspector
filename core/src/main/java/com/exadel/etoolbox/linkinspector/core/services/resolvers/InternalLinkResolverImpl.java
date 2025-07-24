@@ -129,6 +129,7 @@ public class InternalLinkResolverImpl implements Resolver {
     }
 
     private Status checkLinkInternal(String href, ResourceResolver resourceResolver) {
+        href = StringUtils.substringBeforeLast(href, "?");
         return Optional.of(resourceResolver.resolve(href))
                 .filter(resource -> !ResourceUtil.isNonExistingResource(resource))
                 .map(resource -> new Status(HttpStatus.SC_OK, "OK"))
