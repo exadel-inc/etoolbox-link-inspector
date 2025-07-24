@@ -100,7 +100,7 @@ public class ConfigResourceListenerImpl implements ResourceChangeListener {
                 log.warn("Configuration for pid {} is not found", pid);
             }
         } catch (Exception e) {
-            log.error("Failed to get configuration for pid {}", pid, e);
+            log.info("Failed to get configuration for pid {}", pid, e);
         }
         return result;
     }
@@ -113,7 +113,7 @@ public class ConfigResourceListenerImpl implements ResourceChangeListener {
         try {
             configuration.delete();
         } catch (Exception e) {
-            log.error("Failed to delete configuration for pid {}", pid, e);
+            log.warn("Failed to delete configuration for pid {}", pid, e);
         }
     }
 
@@ -138,7 +138,7 @@ public class ConfigResourceListenerImpl implements ResourceChangeListener {
         try {
             configuration.update(dictionary);
         } catch (Exception e) {
-            log.error("Failed to update configuration for pid {}", configuration.getPid(), e);
+            log.info("Failed to update configuration for pid {}", configuration.getPid(), e);
         }
     }
 

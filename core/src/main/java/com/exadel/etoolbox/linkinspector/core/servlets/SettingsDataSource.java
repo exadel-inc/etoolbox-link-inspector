@@ -148,7 +148,7 @@ public class SettingsDataSource extends SlingSafeMethodsServlet {
             try {
                 objectClassDefinition = metaTypeInformation.getObjectClassDefinition(linkResolver.getClass().getName(), null);
             } catch (IllegalArgumentException e) {
-                log.error("Unable to get ObjectClassDefinition for {}.", linkResolver.getClass().getName());
+                log.info("Unable to get ObjectClassDefinition for {}.", linkResolver.getClass().getName());
             }
             if (objectClassDefinition == null) {
                 continue;

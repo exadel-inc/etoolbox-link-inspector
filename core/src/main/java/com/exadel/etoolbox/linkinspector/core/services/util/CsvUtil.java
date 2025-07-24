@@ -104,7 +104,7 @@ public class CsvUtil {
             csvPrinter.flush();
             return out.toByteArray();
         } catch (IOException e) {
-            LOG.error(String.format("Failed to build CSV, the number of items: %s", items.size()), e);
+            LOG.info(String.format("Failed to build CSV, the number of items: %s", items.size()), e);
             return ArrayUtils.EMPTY_BYTE_ARRAY;
         }
     }

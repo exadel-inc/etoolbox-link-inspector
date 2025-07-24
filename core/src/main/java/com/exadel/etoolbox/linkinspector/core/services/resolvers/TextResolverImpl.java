@@ -58,7 +58,7 @@ public class TextResolverImpl implements Resolver {
         try {
             this.search = Pattern.compile(config.search(), config.caseSensitive() ? 0 : Pattern.CASE_INSENSITIVE);
         } catch (IllegalArgumentException | NullPointerException e) {
-            log.error("Invalid search pattern: {}", config.search(), e);
+            log.info("Invalid search pattern: {}", config.search(), e);
             this.enabled = false;
         }
     }

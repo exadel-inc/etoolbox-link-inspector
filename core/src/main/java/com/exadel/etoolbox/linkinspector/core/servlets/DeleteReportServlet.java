@@ -58,7 +58,7 @@ public class DeleteReportServlet extends SlingAllMethodsServlet {
             dataFeedService.deleteDataFeed();
             response.setStatus(HttpStatus.SC_OK);
         } catch (DataFeedException e) {
-            LOG.error(e.getMessage());
+            LOG.info(e.getMessage());
             response.setStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR);
         }
     }

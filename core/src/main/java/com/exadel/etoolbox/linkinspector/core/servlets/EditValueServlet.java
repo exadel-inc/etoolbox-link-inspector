@@ -85,7 +85,7 @@ public class EditValueServlet extends SlingAllMethodsServlet {
         ModifiableValueMap modifiableValueMap = resource.adaptTo(ModifiableValueMap.class);
         if (modifiableValueMap == null) {
             response.setStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR);
-            log.error("Resource is not adaptable to ModifiableValueMap: {}", resource.getPath());
+            log.info("Resource is not adaptable to ModifiableValueMap: {}", resource.getPath());
             return;
         }
         modifiableValueMap.put(propertyName, updatedLink);
