@@ -64,7 +64,7 @@ public class LinkInspectorResourceUtil {
                 resourceResolver.commit();
             }
         } catch (PersistenceException e) {
-            LOG.error(String.format("Failed to delete resource %s", path), e);
+            LOG.warn(String.format("Failed to delete resource %s", path), e);
         }
     }
 
@@ -85,7 +85,7 @@ public class LinkInspectorResourceUtil {
             JcrUtil.createPath(path, JcrConstants.NT_UNSTRUCTURED, session);
             session.save();
         } catch (RepositoryException e) {
-            LOG.error("Failed to recreate node {}", path, e);
+            LOG.info("Failed to recreate node {}", path, e);
         }
     }
 
@@ -110,7 +110,7 @@ public class LinkInspectorResourceUtil {
                 resourceResolver.commit();
             }
         } catch (PersistenceException e) {
-            LOG.error("Failed to add parameter to node", e);
+            LOG.info("Failed to add parameter to node", e);
         }
     }
 
@@ -150,7 +150,7 @@ public class LinkInspectorResourceUtil {
 
             session.save();
         } catch (RepositoryException | IOException e) {
-            LOG.error(String.format("Failed to create file node %s", path), e);
+            LOG.warn(String.format("Failed to create file node %s", path), e);
         }
     }
 

@@ -102,7 +102,7 @@ public class ServletUtil {
         try {
             response.getWriter().write(json);
         } catch (IOException e) {
-            LOG.error("Failed to write json to response", e);
+            LOG.info("Failed to write json to response", e);
         }
     }
 }
