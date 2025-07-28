@@ -40,6 +40,8 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static org.apache.commons.lang.StringUtils.EMPTY;
+
 /**
  * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  * Validates external links via sending HEAD requests concurrently using {@link PoolingHttpClientConnectionManager}
@@ -103,8 +105,9 @@ public class InternalLinkResolverImpl implements Resolver {
         }
         Status status = checkLink(result.getValue(), resourceResolver);
         if (status.getCode() == HttpStatus.SC_NOT_FOUND && StringUtils.isNotBlank(internalLinksHost)) {
-            String schema = StringUtils.startsWith(internalLinksHost, HTTP_SCHEMA) || StringUtils.startsWith(internalLinksHost, HTTPS_SCHEMA) ? StringUtils.EMPTY : HTTPS_SCHEMA;
-            externalLinkResolver.validate(new LinkResult(result.getType(), schema + StringUtils.substringBefore(internalLinksHost, "/") + result.getValue()), resourceResolver);
+            String prefix = StringUtils.startsWithAny(internalLinksHost, HTTP_SCHEMA, HTTPS_SCHEMA) ? EMPTY : HTTPS_SCHEMA;
+            String origin = StringUtils.stripEnd(internalLinksHost, "/");
+            externalLinkResolver.validate(new LinkResult(result.getType(), prefix + origin + result.getValue()), resourceResolver);
         } else {
             result.setStatus(status.getCode(), status.getMessage());
         }
