@@ -14,8 +14,8 @@
 
 package com.exadel.etoolbox.linkinspector.core.services.resolvers;
 
-import com.exadel.etoolbox.linkinspector.api.Result;
 import com.exadel.etoolbox.linkinspector.api.Resolver;
+import com.exadel.etoolbox.linkinspector.api.Result;
 import com.exadel.etoolbox.linkinspector.api.Status;
 import com.exadel.etoolbox.linkinspector.core.models.LinkResult;
 import com.exadel.etoolbox.linkinspector.core.services.resolvers.configs.InternalLinkResolverConfig;
@@ -35,11 +35,7 @@ import org.slf4j.LoggerFactory;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -132,7 +128,10 @@ public class InternalLinkResolverImpl implements Resolver {
         return Optional.of(resourceResolver.resolve(href))
                 .filter(resource -> !ResourceUtil.isNonExistingResource(resource))
                 .map(resource -> new Status(HttpStatus.SC_OK, "OK"))
-                .orElse(new Status(HttpStatus.SC_NOT_FOUND, "Not Found"));
+                .orElse(Optional.of(resourceResolver.resolve(StringUtils.substringBefore(href, "?")))
+                        .filter(resource -> !ResourceUtil.isNonExistingResource(resource))
+                        .map(resource -> new Status(HttpStatus.SC_OK, "OK"))
+                        .orElse(new Status(HttpStatus.SC_NOT_FOUND, "Not Found")));
     }
 
     private String decode(String href) {
