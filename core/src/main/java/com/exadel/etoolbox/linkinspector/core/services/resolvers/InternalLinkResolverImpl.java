@@ -40,6 +40,8 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static org.apache.commons.lang.StringUtils.EMPTY;
+
 /**
  * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  * Validates external links via sending HEAD requests concurrently using {@link PoolingHttpClientConnectionManager}
@@ -49,6 +51,10 @@ import java.util.regex.Pattern;
 @Designate(ocd = InternalLinkResolverConfig.class)
 public class InternalLinkResolverImpl implements Resolver {
 
+    private static final Logger LOG = LoggerFactory.getLogger(InternalLinkResolverImpl.class);
+
+    private static final String HTTP_SCHEMA = "http://";
+    private static final String HTTPS_SCHEMA = "https://";
     private static final Pattern PATTERN_INTERNAL_LINK = Pattern.compile("(^|(?<=\"))/content/([-\\w\\d():%_+.~#?&/=\\s]*)", Pattern.UNICODE_CHARACTER_CLASS);
 
     private String internalLinksHost;
@@ -99,7 +105,9 @@ public class InternalLinkResolverImpl implements Resolver {
         }
         Status status = checkLink(result.getValue(), resourceResolver);
         if (status.getCode() == HttpStatus.SC_NOT_FOUND && StringUtils.isNotBlank(internalLinksHost)) {
-            externalLinkResolver.validate(result, resourceResolver);
+            String prefix = StringUtils.startsWithAny(internalLinksHost, HTTP_SCHEMA, HTTPS_SCHEMA) ? EMPTY : HTTPS_SCHEMA;
+            String origin = StringUtils.stripEnd(internalLinksHost, "/");
+            externalLinkResolver.validate(new LinkResult(result.getType(), prefix + origin + result.getValue()), resourceResolver);
         } else {
             result.setStatus(status.getCode(), status.getMessage());
         }

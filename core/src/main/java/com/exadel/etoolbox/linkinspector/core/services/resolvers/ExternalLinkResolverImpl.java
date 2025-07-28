@@ -101,7 +101,7 @@ public class ExternalLinkResolverImpl implements Resolver {
      */
     @Override
     public void validate(Result result, ResourceResolver resourceResolver) {
-        if (result == null || !StringUtils.equalsIgnoreCase(getId(), result.getType())) {
+        if (result == null) {
             return;
         }
         try {
