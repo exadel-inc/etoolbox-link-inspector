@@ -14,10 +14,11 @@
 
 package com.exadel.etoolbox.linkinspector.core.services.resolvers;
 
-import com.exadel.etoolbox.linkinspector.api.Result;
 import com.exadel.etoolbox.linkinspector.api.Resolver;
+import com.exadel.etoolbox.linkinspector.api.Result;
 import com.exadel.etoolbox.linkinspector.core.models.LinkResult;
 import com.exadel.etoolbox.linkinspector.core.services.resolvers.configs.ExternalLinkResolverConfig;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.config.RequestConfig;
@@ -31,25 +32,15 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.osgi.services.HttpClientBuilderFactory;
 import org.apache.http.util.EntityUtils;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Deactivate;
-import org.osgi.service.component.annotations.Modified;
-import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.*;
 import org.osgi.service.metatype.annotations.Designate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -57,11 +48,10 @@ import java.util.regex.Pattern;
  * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  * Validates external links via sending HEAD requests concurrently using {@link PoolingHttpClientConnectionManager}
  */
+@Slf4j
 @Component(service = {Resolver.class, ExternalLinkResolverImpl.class}, immediate = true)
 @Designate(ocd = ExternalLinkResolverConfig.class)
 public class ExternalLinkResolverImpl implements Resolver {
-
-    private static final Logger LOG = LoggerFactory.getLogger(ExternalLinkResolverImpl.class);
 
     private static final int DEFAULT_CONNECTION_TIMEOUT = 5000;
     private static final int DEFAULT_MAX_TOTAL = 1000;
@@ -118,16 +108,16 @@ public class ExternalLinkResolverImpl implements Resolver {
             int statusCode = checkLink(result.getValue());
             result.setStatus(statusCode);
         } catch (SocketTimeoutException e) {
-            LOG.error("Timeout occurred while validating link {}", result.getValue(), e);
+            log.info("Timeout occurred while validating link {}", result.getValue(), e);
             result.setStatus(HttpStatus.SC_REQUEST_TIMEOUT, "Request Timeout");
         } catch (UnknownHostException e) {
-            LOG.error("Unknown host detected when validating {}", result.getValue(), e);
+            log.info("Unknown host detected when validating {}", result.getValue(), e);
             result.setStatus(HttpStatus.SC_NOT_FOUND, "Unknown host");
         } catch (URISyntaxException e) {
-            LOG.error("Invalid URI syntax when validating link {}", result.getValue(), e);
+            log.info("Invalid URI syntax when validating link {}", result.getValue(), e);
             result.setStatus(HttpStatus.SC_BAD_REQUEST, "Invalid URI syntax");
         } catch (Exception e) {
-            LOG.error("Failed to validate link {}", result.getValue(), e);
+            log.info("Failed to validate link {}", result.getValue(), e);
             result.setStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR, StringUtils.defaultIfEmpty(e.getMessage(), e.toString()));
         }
     }
@@ -156,7 +146,7 @@ public class ExternalLinkResolverImpl implements Resolver {
             try {
                 this.httpClient.close();
             } catch (IOException e) {
-                LOG.error("Failed to close httpClient", e);
+                log.info("Failed to close httpClient", e);
             }
         }
         Optional.ofNullable(connectionManager)
@@ -175,12 +165,12 @@ public class ExternalLinkResolverImpl implements Resolver {
     private int checkLink(String url, HttpRequestBase method) throws IOException {
         try (CloseableHttpResponse httpResp = this.httpClient.execute(method)) {
             if (httpResp == null) {
-                LOG.error("Failed to get response from server while performing request, url: {}", url);
+                log.info("Failed to get response from server while performing request, url: {}", url);
                 return HttpStatus.SC_BAD_REQUEST;
             }
             int statusCode = httpResp.getStatusLine().getStatusCode();
             EntityUtils.consumeQuietly(httpResp.getEntity());
-            LOG.trace("PoolingHttpClientConnectionManager leased: {}, link: {}",
+            log.trace("PoolingHttpClientConnectionManager leased: {}, link: {}",
                     connectionManager.getTotalStats().getLeased(), url);
             return statusCode;
         } finally {
