@@ -53,6 +53,8 @@ public class InternalLinkResolverImpl implements Resolver {
 
     private static final Logger LOG = LoggerFactory.getLogger(InternalLinkResolverImpl.class);
 
+    private static final String HTTP_SCHEMA = "http://";
+    private static final String HTTPS_SCHEMA = "https://";
     private static final Pattern PATTERN_INTERNAL_LINK = Pattern.compile("(^|(?<=\"))/content/([-\\w\\d():%_+.~#?&/=\\s]*)", Pattern.UNICODE_CHARACTER_CLASS);
 
     private String internalLinksHost;
@@ -103,7 +105,8 @@ public class InternalLinkResolverImpl implements Resolver {
         }
         Status status = checkLink(result.getValue(), resourceResolver);
         if (status.getCode() == HttpStatus.SC_NOT_FOUND && StringUtils.isNotBlank(internalLinksHost)) {
-            externalLinkResolver.validate(new LinkResult(result.getType(), "https://" + internalLinksHost + result.getValue()), resourceResolver);
+            String schema = StringUtils.startsWith(internalLinksHost, HTTP_SCHEMA) || StringUtils.startsWith(internalLinksHost, HTTPS_SCHEMA) ? StringUtils.EMPTY : HTTPS_SCHEMA;
+            externalLinkResolver.validate(new LinkResult(result.getType(), schema + StringUtils.substringBefore(internalLinksHost, "/") + result.getValue()), resourceResolver);
         } else {
             result.setStatus(status.getCode(), status.getMessage());
         }
