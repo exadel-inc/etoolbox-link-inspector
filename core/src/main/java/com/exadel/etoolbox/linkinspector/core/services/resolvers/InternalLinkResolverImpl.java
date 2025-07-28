@@ -19,6 +19,7 @@ import com.exadel.etoolbox.linkinspector.api.Result;
 import com.exadel.etoolbox.linkinspector.api.Status;
 import com.exadel.etoolbox.linkinspector.core.models.LinkResult;
 import com.exadel.etoolbox.linkinspector.core.services.resolvers.configs.InternalLinkResolverConfig;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
@@ -43,11 +44,10 @@ import java.util.regex.Pattern;
  * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  * Validates external links via sending HEAD requests concurrently using {@link PoolingHttpClientConnectionManager}
  */
+@Slf4j
 @Component(service = Resolver.class, immediate = true)
 @Designate(ocd = InternalLinkResolverConfig.class)
 public class InternalLinkResolverImpl implements Resolver {
-
-    private static final Logger LOG = LoggerFactory.getLogger(InternalLinkResolverImpl.class);
 
     private static final Pattern PATTERN_INTERNAL_LINK = Pattern.compile("(^|(?<=\"))/content/([-\\w\\d():%_+.~#?&/=\\s]*)", Pattern.UNICODE_CHARACTER_CLASS);
 
@@ -138,7 +138,7 @@ public class InternalLinkResolverImpl implements Resolver {
         try {
             return URLDecoder.decode(href, StandardCharsets.UTF_8.name());
         } catch (UnsupportedEncodingException e) {
-            LOG.error("Failed to decode a link", e);
+            log.info("Failed to decode a link", e);
         }
         return href;
     }
