@@ -14,11 +14,12 @@
 
 package com.exadel.etoolbox.linkinspector.core.services.resolvers;
 
-import com.exadel.etoolbox.linkinspector.api.Result;
 import com.exadel.etoolbox.linkinspector.api.Resolver;
+import com.exadel.etoolbox.linkinspector.api.Result;
 import com.exadel.etoolbox.linkinspector.api.Status;
 import com.exadel.etoolbox.linkinspector.core.models.LinkResult;
 import com.exadel.etoolbox.linkinspector.core.services.resolvers.configs.InternalLinkResolverConfig;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
@@ -35,11 +36,7 @@ import org.slf4j.LoggerFactory;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -47,6 +44,7 @@ import java.util.regex.Pattern;
  * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  * Validates external links via sending HEAD requests concurrently using {@link PoolingHttpClientConnectionManager}
  */
+@Slf4j
 @Component(service = Resolver.class, immediate = true)
 @Designate(ocd = InternalLinkResolverConfig.class)
 public class InternalLinkResolverImpl implements Resolver {
@@ -132,18 +130,20 @@ public class InternalLinkResolverImpl implements Resolver {
     }
 
     private Status checkLinkInternal(String href, ResourceResolver resourceResolver) {
-        href = StringUtils.substringBeforeLast(href, "?");
         return Optional.of(resourceResolver.resolve(href))
                 .filter(resource -> !ResourceUtil.isNonExistingResource(resource))
                 .map(resource -> new Status(HttpStatus.SC_OK, "OK"))
-                .orElse(new Status(HttpStatus.SC_NOT_FOUND, "Not Found"));
+                .orElse(Optional.of(resourceResolver.resolve(StringUtils.substringBefore(href, "?")))
+                        .filter(resource -> !ResourceUtil.isNonExistingResource(resource))
+                        .map(resource -> new Status(HttpStatus.SC_OK, "OK"))
+                        .orElse(new Status(HttpStatus.SC_NOT_FOUND, "Not Found")));
     }
 
     private String decode(String href) {
         try {
             return URLDecoder.decode(href, StandardCharsets.UTF_8.name());
         } catch (UnsupportedEncodingException e) {
-            LOG.error("Failed to decode a link", e);
+            log.info("Failed to decode a link", e);
         }
         return href;
     }
