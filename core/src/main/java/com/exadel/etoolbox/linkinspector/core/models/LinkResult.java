@@ -19,7 +19,7 @@ public class LinkResult implements Result {
     public static final String DEFAULT_TYPE = "other";
 
     private final String type;
-    private String value;
+    private final String value;
     @Setter
     private Status status;
 
@@ -49,13 +49,5 @@ public class LinkResult implements Result {
     @Override
     public String getMatch() {
         return StringUtils.EMPTY;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void setValue(String value) {
-        this.value = value;
     }
 }

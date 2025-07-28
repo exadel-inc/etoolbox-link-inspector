@@ -100,11 +100,4 @@ public interface Result {
     default void setStatus(int code, String message) {
         setStatus(new Status(code, message));
     }
-
-    /**
-     * Sets the value of the text fragment
-     *
-     * @param value    The value to be set
-     */
-    void setValue(String value);
 }

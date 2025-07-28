@@ -148,13 +148,5 @@ public class TextResolverImpl implements Resolver {
         public void setStatus(Status status) {
             // No operation
         }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public void setValue(String value) {
-            // No operation
-        }
     }
 }
