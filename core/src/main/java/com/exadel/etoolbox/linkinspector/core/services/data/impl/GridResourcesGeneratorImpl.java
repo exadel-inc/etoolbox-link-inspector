@@ -218,7 +218,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
             boolean terminated = executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
             LOG.trace("ExecutorService terminated: {}", terminated);
         } catch (InterruptedException e) {
-            LOG.info("Parallel links validation failed", e);
+            LOG.error("Parallel links validation failed", e);
             executorService.shutdownNow();
             Thread.currentThread().interrupt();
         }
@@ -331,7 +331,7 @@ public class GridResourcesGeneratorImpl implements GridResourcesGenerator {
                     true
             );
         } catch (PersistenceException e) {
-            LOG.info(String.format("Failed to create the resource %s", STATS_RESOURCE_PATH), e);
+            LOG.error(String.format("Failed to create the resource %s", STATS_RESOURCE_PATH), e);
         }
     }
 

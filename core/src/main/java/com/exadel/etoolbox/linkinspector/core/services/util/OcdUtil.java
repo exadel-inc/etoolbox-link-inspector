@@ -67,7 +67,7 @@ public class OcdUtil {
                     component.getClass().getName(),
                     null);
         } catch (IllegalArgumentException e) {
-            log.info("Failed to get ObjectClassDefinition for {}.", component.getClass().getName());
+            log.error("Failed to get ObjectClassDefinition for {}.", component.getClass().getName());
         }
         if (objectClassDefinition == null || StringUtils.isBlank(objectClassDefinition.getName())) {
             return result;

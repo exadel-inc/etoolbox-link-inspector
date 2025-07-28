@@ -60,7 +60,7 @@ public class JsonUtil {
                 JsonNode jsonNode = OBJECT_MAPPER.valueToTree(object);
                 arrayNode.add(jsonNode);
             } catch (IllegalArgumentException e) {
-                LOG.info("Failed to convert gridResources to JSON", e);
+                LOG.error("Failed to convert gridResources to JSON", e);
             }
         });
         return arrayNode;
@@ -79,7 +79,7 @@ public class JsonUtil {
             final JavaType type = OBJECT_MAPPER.getTypeFactory().constructType(modelClass);
             return OBJECT_MAPPER.readValue(is, type);
         } catch (IOException e) {
-            LOG.info("Failed to map json to model", e);
+            LOG.error("Failed to map json to model", e);
         }
         return null;
     }
@@ -99,7 +99,7 @@ public class JsonUtil {
                 String stringValue = IOUtils.toString(streamOptional.get(), StandardCharsets.UTF_8);
                 return (ArrayNode) OBJECT_MAPPER.readTree(stringValue);
             } catch (IOException e) {
-                LOG.info("Failed to get JSON array", e);
+                LOG.error("Failed to get JSON array", e);
             }
         } else {
             LOG.debug("Failed to get json array from {}", jsonPath);

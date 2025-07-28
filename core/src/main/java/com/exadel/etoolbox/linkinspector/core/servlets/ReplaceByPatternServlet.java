@@ -177,10 +177,10 @@ public class ReplaceByPatternServlet extends SlingAllMethodsServlet {
             stopWatch.stop();
             LOG.info("Replacement by pattern is finished in {} ms", stopWatch.getTime(TimeUnit.MILLISECONDS));
         } catch (PersistenceException e) {
-            LOG.info(String.format("Replacement failed, pattern: %s, replacement: %s", linkPattern, replacement), e);
+            LOG.error(String.format("Replacement failed, pattern: %s, replacement: %s", linkPattern, replacement), e);
             response.setStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR);
         } catch (IOException | RepositoryException | PackageException e) {
-            LOG.info("Failed to create backup package, replacement by pattern was not applied", e);
+            LOG.error("Failed to create backup package, replacement by pattern was not applied", e);
             response.setStatus(HttpStatus.SC_FORBIDDEN);
         }
     }
@@ -295,7 +295,7 @@ public class ReplaceByPatternServlet extends SlingAllMethodsServlet {
                 LOG.debug("Failed to download output as CSV, output byte array is empty");
             }
         } catch (IOException e) {
-            LOG.info("Failed to download output as CSV, the number of updated locations: {}", linkDtos.size());
+            LOG.error("Failed to download output as CSV, the number of updated locations: {}", linkDtos.size());
         }
         stopWatch.stop();
         LOG.debug("CSV output generation is finished in {} ms", stopWatch.getTime(TimeUnit.MILLISECONDS));
@@ -309,7 +309,7 @@ public class ReplaceByPatternServlet extends SlingAllMethodsServlet {
                     item.getPropertyLocation()
             );
         } catch (IOException e) {
-            LOG.info(String.format("Failed to build CSV for the item %s", item.getCurrentLink()), e);
+            LOG.error(String.format("Failed to build CSV for the item %s", item.getCurrentLink()), e);
         }
     }
 

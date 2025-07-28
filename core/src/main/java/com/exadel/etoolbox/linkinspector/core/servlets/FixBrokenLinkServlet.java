@@ -113,7 +113,7 @@ public class FixBrokenLinkServlet extends SlingAllMethodsServlet {
                 response.setStatus(HttpStatus.SC_NO_CONTENT);
             }
         } catch (IOException e) {
-            LOG.info(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
             response.setStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR);
         }
     }

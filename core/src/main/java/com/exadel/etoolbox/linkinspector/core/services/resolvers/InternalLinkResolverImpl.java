@@ -139,7 +139,7 @@ public class InternalLinkResolverImpl implements Resolver {
         try {
             return URLDecoder.decode(href, StandardCharsets.UTF_8.name());
         } catch (UnsupportedEncodingException e) {
-            LOG.info("Failed to decode a link", e);
+            LOG.error("Failed to decode a link", e);
         }
         return href;
     }

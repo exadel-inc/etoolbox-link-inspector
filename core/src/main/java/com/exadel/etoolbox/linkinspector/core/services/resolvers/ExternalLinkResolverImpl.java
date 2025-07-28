@@ -118,16 +118,16 @@ public class ExternalLinkResolverImpl implements Resolver {
             int statusCode = checkLink(result.getValue());
             result.setStatus(statusCode);
         } catch (SocketTimeoutException e) {
-            LOG.info("Timeout occurred while validating link {}", result.getValue(), e);
+            LOG.error("Timeout occurred while validating link {}", result.getValue(), e);
             result.setStatus(HttpStatus.SC_REQUEST_TIMEOUT, "Request Timeout");
         } catch (UnknownHostException e) {
-            LOG.info("Unknown host detected when validating {}", result.getValue(), e);
+            LOG.error("Unknown host detected when validating {}", result.getValue(), e);
             result.setStatus(HttpStatus.SC_NOT_FOUND, "Unknown host");
         } catch (URISyntaxException e) {
-            LOG.info("Invalid URI syntax when validating link {}", result.getValue(), e);
+            LOG.error("Invalid URI syntax when validating link {}", result.getValue(), e);
             result.setStatus(HttpStatus.SC_BAD_REQUEST, "Invalid URI syntax");
         } catch (Exception e) {
-            LOG.info("Failed to validate link {}", result.getValue(), e);
+            LOG.error("Failed to validate link {}", result.getValue(), e);
             result.setStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR, StringUtils.defaultIfEmpty(e.getMessage(), e.toString()));
         }
     }
@@ -156,7 +156,7 @@ public class ExternalLinkResolverImpl implements Resolver {
             try {
                 this.httpClient.close();
             } catch (IOException e) {
-                LOG.info("Failed to close httpClient", e);
+                LOG.error("Failed to close httpClient", e);
             }
         }
         Optional.ofNullable(connectionManager)
@@ -175,7 +175,7 @@ public class ExternalLinkResolverImpl implements Resolver {
     private int checkLink(String url, HttpRequestBase method) throws IOException {
         try (CloseableHttpResponse httpResp = this.httpClient.execute(method)) {
             if (httpResp == null) {
-                LOG.info("Failed to get response from server while performing request, url: {}", url);
+                LOG.error("Failed to get response from server while performing request, url: {}", url);
                 return HttpStatus.SC_BAD_REQUEST;
             }
             int statusCode = httpResp.getStatusLine().getStatusCode();

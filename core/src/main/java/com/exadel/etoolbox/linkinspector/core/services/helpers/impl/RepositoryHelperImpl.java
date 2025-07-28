@@ -53,7 +53,7 @@ public class RepositoryHelperImpl implements RepositoryHelper {
             return resourceResolverFactory.getServiceResourceResolver(
                     Collections.singletonMap(ResourceResolverFactory.SUBSERVICE, LINK_INSPECTOR_SERVICE_NAME));
         } catch (LoginException e) {
-            LOG.info("Failed to get service resource resolver", e);
+            LOG.error("Failed to get service resource resolver", e);
         }
         return null;
     }
@@ -74,7 +74,7 @@ public class RepositoryHelperImpl implements RepositoryHelper {
         try {
             return session.hasPermission(path, permissions);
         } catch (RepositoryException e) {
-            LOG.info("Failed to check permissions '{}' for resource {}: {}", permissions, path, e.getMessage());
+            LOG.error("Failed to check permissions '{}' for resource {}: {}", permissions, path, e.getMessage());
         }
         return false;
     }
@@ -101,7 +101,7 @@ public class RepositoryHelperImpl implements RepositoryHelper {
                     true
             );
         } catch (PersistenceException e) {
-            LOG.info(String.format("Failed to create the resource %s", path), e);
+            LOG.error(String.format("Failed to create the resource %s", path), e);
         }
     }
 }

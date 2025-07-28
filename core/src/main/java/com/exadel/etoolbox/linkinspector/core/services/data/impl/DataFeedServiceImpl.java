@@ -198,7 +198,7 @@ public class DataFeedServiceImpl implements DataFeedService {
             gridResourcesCache.clearCache();
             serviceResourceResolver.commit();
         } catch (PersistenceException e) {
-            LOG.warn("Failed to delete data feed", e);
+            LOG.error("Failed to delete data feed", e);
             throw new DataFeedException("Exception Deleting Data Feed");
         }
     }
@@ -214,7 +214,7 @@ public class DataFeedServiceImpl implements DataFeedService {
                     Optional.ofNullable(JsonUtil.jsonToModel(jsonNode, GridResource.class))
                             .ifPresent(gridResources::add);
                 } catch (Exception e) {
-                    LOG.info("Failed to convert JSON object to GridResource", e);
+                    LOG.error("Failed to convert JSON object to GridResource", e);
                 }
             }
         }
@@ -230,7 +230,7 @@ public class DataFeedServiceImpl implements DataFeedService {
             resourceResolver.commit();
             LOG.debug("Saving data feed json to jcr completed, path {}", JSON_FEED_PATH);
         } catch (PersistenceException e) {
-            LOG.warn("Saving data feed json to jcr failed", e);
+            LOG.error("Saving data feed json to jcr failed", e);
         }
     }
 
@@ -294,7 +294,7 @@ public class DataFeedServiceImpl implements DataFeedService {
                     CsvUtil.buildLocation(viewItem.getResourcePath(), viewItem.getPropertyName())
             );
         } catch (IOException e) {
-            LOG.info(String.format("Failed to build CSV for the grid resource %s", viewItem.getValue()), e);
+            LOG.error(String.format("Failed to build CSV for the grid resource %s", viewItem.getValue()), e);
         }
     }
 
