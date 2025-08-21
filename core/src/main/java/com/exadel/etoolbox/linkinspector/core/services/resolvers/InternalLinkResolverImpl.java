@@ -107,7 +107,10 @@ public class InternalLinkResolverImpl implements Resolver {
         if (status.getCode() == HttpStatus.SC_NOT_FOUND && StringUtils.isNotBlank(internalLinksHost)) {
             String prefix = StringUtils.startsWithAny(internalLinksHost, HTTP_SCHEMA, HTTPS_SCHEMA) ? EMPTY : HTTPS_SCHEMA;
             String origin = StringUtils.stripEnd(internalLinksHost, "/");
-            externalLinkResolver.validate(new LinkResult(result.getType(), prefix + origin + result.getValue()), resourceResolver);
+            String extension = StringUtils.isAlpha(StringUtils.substringAfterLast(result.getValue(), ".")) ? StringUtils.EMPTY : ".html";
+            LinkResult linkResult = new LinkResult(result.getType(), prefix + origin + result.getValue() + extension);
+            externalLinkResolver.validate(linkResult, resourceResolver);
+            result.setStatus(linkResult.getStatus());
         } else {
             result.setStatus(status.getCode(), status.getMessage());
         }
