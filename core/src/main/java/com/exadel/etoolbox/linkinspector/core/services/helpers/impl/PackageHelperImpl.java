@@ -15,7 +15,9 @@
 package com.exadel.etoolbox.linkinspector.core.services.helpers.impl;
 
 import com.exadel.etoolbox.linkinspector.core.services.helpers.PackageHelper;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.jackrabbit.vault.fs.api.PathFilterSet;
+import org.apache.jackrabbit.vault.fs.config.ConfigurationException;
 import org.apache.jackrabbit.vault.fs.config.DefaultWorkspaceFilter;
 import org.apache.jackrabbit.vault.fs.filter.DefaultPathFilter;
 import org.apache.jackrabbit.vault.packaging.JcrPackage;
@@ -37,6 +39,7 @@ import java.util.Optional;
  * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  * Implements {@link PackageHelper} interface to provide an OSGi service which handles JCR packages creation.
  */
+@Slf4j
 @Component(service = PackageHelper.class)
 public class PackageHelperImpl implements PackageHelper {
 
@@ -78,7 +81,11 @@ public class PackageHelperImpl implements PackageHelper {
     private PathFilterSet pathToFilterSet(String path, boolean excludeChildren) {
         PathFilterSet pathFilterSet = new PathFilterSet(path);
         if (excludeChildren) {
-            pathFilterSet.addExclude(new DefaultPathFilter(path + EXCLUDE_CHILDREN_PATTERN));
+            try {
+                pathFilterSet.addExclude(new DefaultPathFilter(path + EXCLUDE_CHILDREN_PATTERN));
+            } catch (ConfigurationException e) {
+                log.error("Error adding exclude filter to path filter set", e);
+            }
         }
         return pathFilterSet;
     }
