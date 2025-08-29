@@ -30,7 +30,6 @@ import javax.json.Json;
 import javax.servlet.Servlet;
 
 /**
- * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  * Retrieves and provides information about the status of data feed generation jobs.
  * <p>
  * This servlet exposes an HTTP GET endpoint that queries the Sling Job Manager for information
@@ -39,6 +38,7 @@ import javax.servlet.Servlet;
  * <p>
  * The servlet is registered at the path "/bin/etoolbox/link-inspector/job-status" and is used
  * by the Link Inspector UI to show job status indicators during data feed generation.
+ * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  */
 @Component(service = {Servlet.class})
 @SlingServletResourceTypes(

@@ -25,7 +25,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  * Handles the asynchronous generation of the link data feed via a Sling job.
  * <p>
  * This class consumes jobs on the data feed generation topic and delegates the
@@ -35,6 +34,7 @@ import org.slf4j.LoggerFactory;
  * <p>
  * The executor registers itself for the {@link #GENERATE_DATA_FEED_TOPIC} topic and
  * processes any jobs posted to that topic.
+ * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  */
 @Component(service = JobExecutor.class,
         property = {

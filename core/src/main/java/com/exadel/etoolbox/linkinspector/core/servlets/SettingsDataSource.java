@@ -43,7 +43,6 @@ import javax.servlet.Servlet;
 import java.util.*;
 
 /**
- * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  * Provides a DataSource for the Link Inspector settings UI.
  * <p>
  * This servlet dynamically generates UI components for configuring resolver settings
@@ -53,6 +52,7 @@ import java.util.*;
  * <p>
  * The servlet is registered at the path "/bin/etoolbox/link-inspector/settings" and
  * is used by the Link Inspector UI to build the configuration interface.
+ * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  */
 @Component(service = {Servlet.class})
 @SlingServletResourceTypes(

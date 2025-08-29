@@ -8,9 +8,9 @@ import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  * Implementation of the {@link Result} interface that represents the result of checking an URL or a JCR resource path.
  * Contains information about the link type, value, and validation status.
+ * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  */
 @Getter
 @EqualsAndHashCode

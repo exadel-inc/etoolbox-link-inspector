@@ -31,14 +31,13 @@ import java.util.Collection;
 import java.util.Optional;
 
 /**
- * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  * Utility class providing helper methods for JSON manipulation and conversion.
  * <p>
  * This class contains static utility methods for common JSON operations in the link inspector
  * context, such as converting objects to JSON, parsing JSON data into model objects, and
  * reading JSON files from the JCR repository.
  * <p>
- * All methods are static and the class cannot be instantiated.
+ * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  */
 public class JsonUtil {
     private static final Logger LOG = LoggerFactory.getLogger(JsonUtil.class);

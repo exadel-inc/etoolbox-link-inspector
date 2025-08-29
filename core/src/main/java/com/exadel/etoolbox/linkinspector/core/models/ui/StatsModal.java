@@ -29,11 +29,11 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
- * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  * Represents content of the Stats popover that contains the generation statistics data written
  * by {@link GridResourcesGenerator#generateGridResources}. Most of the
  * fields correspond to the configuration values from the
  * {@link GridResourcesGenerator} service
+ * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  */
 @Model(
         adaptables = Resource.class,

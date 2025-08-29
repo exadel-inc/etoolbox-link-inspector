@@ -54,9 +54,24 @@ Import-Package: javax.annotation;version=0.0.0,*
                     </archive>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+            </plugin>
         </plugins>
     </build>
     <profiles>
+        <profile>
+            <id>deploy</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
         <profile>
             <id>test</id>
             <build>

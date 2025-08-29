@@ -25,12 +25,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /**
- * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  * Utility class for counting and accumulating statistics about links by their types.
  * <p>
  * This class is used to track the frequency of different link types during
  * link inspection and validation processes. It provides thread-safe counting operations
  * and methods to retrieve statistics about the processed links.
+ * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  */
 public class LinksCounter {
     public static final LinksCounter EMPTY = new LinksCounter();

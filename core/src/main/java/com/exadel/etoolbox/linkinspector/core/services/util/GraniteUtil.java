@@ -29,7 +29,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  * Utility class providing helper methods for working with AEM Granite UI components.
  * <p>
  * This class offers utility methods for creating synthetic resources that represent
@@ -37,7 +36,7 @@ import java.util.Map;
  * and can be used in the construction of dynamic UI components for the Link Inspector
  * interface.
  * <p>
- * All methods are static and provide common operations for resource creation.
+ * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  */
 public class GraniteUtil {
 

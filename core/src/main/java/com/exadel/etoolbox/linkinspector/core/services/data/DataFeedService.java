@@ -23,9 +23,9 @@ import org.apache.sling.api.resource.Resource;
 import java.util.List;
 
 /**
- * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  * Provides the service responsible for managing the data feed based on the set of resources generated
  * by ${@link GridResourcesGenerator}
+ * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  */
 public interface DataFeedService {
     /**

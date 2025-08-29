@@ -32,7 +32,6 @@ import javax.servlet.Servlet;
 import java.util.Optional;
 
 /**
- * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  * Verifies the existence of a repository resource at a specified path.
  * <p>
  * This servlet exposes an HTTP POST endpoint that accepts a repository path parameter
@@ -42,6 +41,7 @@ import java.util.Optional;
  * The servlet is registered at the path "/bin/etoolbox/link-inspector/resource-exist-check"
  * and is used by the Link Inspector UI to validate resource paths before performing
  * operations that depend on resource existence.
+ * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  */
 @Component(service = {Servlet.class})
 @SlingServletResourceTypes(

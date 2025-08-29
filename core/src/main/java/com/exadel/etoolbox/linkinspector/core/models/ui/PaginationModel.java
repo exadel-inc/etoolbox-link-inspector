@@ -17,11 +17,11 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  * Calculates the pagination logic for the Link Inspector grid view.
  * This model handles the pagination implementation for the grid display, including
  * page number calculation, filtering by link type or substring, and determining
  * the range of pages to show in the pagination UI.
+ * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  */
 @Model(
         adaptables = SlingHttpServletRequest.class,
