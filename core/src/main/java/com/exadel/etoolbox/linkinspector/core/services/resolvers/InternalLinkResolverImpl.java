@@ -14,11 +14,12 @@
 
 package com.exadel.etoolbox.linkinspector.core.services.resolvers;
 
-import com.exadel.etoolbox.linkinspector.api.Result;
 import com.exadel.etoolbox.linkinspector.api.Resolver;
+import com.exadel.etoolbox.linkinspector.api.Result;
 import com.exadel.etoolbox.linkinspector.api.Status;
 import com.exadel.etoolbox.linkinspector.core.models.LinkResult;
 import com.exadel.etoolbox.linkinspector.core.services.resolvers.configs.InternalLinkResolverConfig;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -28,30 +29,29 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.metatype.annotations.Designate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static org.apache.commons.lang.StringUtils.EMPTY;
 
 /**
  * Validates internal AEM links in JCR properties
  * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  */
+@Slf4j
 @Component(service = Resolver.class, immediate = true)
 @Designate(ocd = InternalLinkResolverConfig.class)
 public class InternalLinkResolverImpl implements Resolver {
 
-    private static final Logger LOG = LoggerFactory.getLogger(InternalLinkResolverImpl.class);
+    private static final Pattern REGEXP_FILE_EXTENSION = Pattern.compile("\\.\\w+$");
 
+    private static final String HTTP_SCHEMA = "http://";
+    private static final String HTTPS_SCHEMA = "https://";
     private static final Pattern PATTERN_INTERNAL_LINK = Pattern.compile("(^|(?<=\"))/content/([-\\w\\d():%_+.~#?&/=\\s]*)", Pattern.UNICODE_CHARACTER_CLASS);
 
     private String internalLinksHost;
@@ -102,7 +102,12 @@ public class InternalLinkResolverImpl implements Resolver {
         }
         Status status = checkLink(result.getValue(), resourceResolver);
         if (status.getCode() == HttpStatus.SC_NOT_FOUND && StringUtils.isNotBlank(internalLinksHost)) {
-            externalLinkResolver.validate(result, resourceResolver);
+            String prefix = StringUtils.startsWithAny(internalLinksHost, HTTP_SCHEMA, HTTPS_SCHEMA) ? EMPTY : HTTPS_SCHEMA;
+            String origin = StringUtils.stripEnd(internalLinksHost, "/");
+            String extension = REGEXP_FILE_EXTENSION.matcher(result.getValue()).find() ? StringUtils.EMPTY : ".html";
+            LinkResult linkResult = new LinkResult(result.getType(), prefix + origin + result.getValue() + extension);
+            externalLinkResolver.validate(linkResult, resourceResolver);
+            result.setStatus(linkResult.getStatus());
         } else {
             result.setStatus(status.getCode(), status.getMessage());
         }
@@ -131,14 +136,17 @@ public class InternalLinkResolverImpl implements Resolver {
         return Optional.of(resourceResolver.resolve(href))
                 .filter(resource -> !ResourceUtil.isNonExistingResource(resource))
                 .map(resource -> new Status(HttpStatus.SC_OK, "OK"))
-                .orElse(new Status(HttpStatus.SC_NOT_FOUND, "Not Found"));
+                .orElse(Optional.of(resourceResolver.resolve(StringUtils.substringBefore(href, "?")))
+                        .filter(resource -> !ResourceUtil.isNonExistingResource(resource))
+                        .map(resource -> new Status(HttpStatus.SC_OK, "OK"))
+                        .orElse(new Status(HttpStatus.SC_NOT_FOUND, "Not Found")));
     }
 
     private String decode(String href) {
         try {
             return URLDecoder.decode(href, StandardCharsets.UTF_8.name());
         } catch (UnsupportedEncodingException e) {
-            LOG.error("Failed to decode a link", e);
+            log.info("Failed to decode a link", e);
         }
         return href;
     }
