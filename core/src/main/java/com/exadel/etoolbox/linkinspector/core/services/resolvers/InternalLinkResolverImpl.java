@@ -22,7 +22,6 @@ import com.exadel.etoolbox.linkinspector.core.services.resolvers.configs.Interna
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceUtil;
 import org.osgi.service.component.annotations.Activate;
@@ -41,8 +40,8 @@ import java.util.regex.Pattern;
 import static org.apache.commons.lang.StringUtils.EMPTY;
 
 /**
+ * Validates internal AEM links in JCR properties
  * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
- * Validates external links via sending HEAD requests concurrently using {@link PoolingHttpClientConnectionManager}
  */
 @Slf4j
 @Component(service = Resolver.class, immediate = true)

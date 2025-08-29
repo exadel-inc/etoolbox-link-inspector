@@ -36,8 +36,8 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 /**
- * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  * Implements {@link LinkHelper} interface to provide an OSGi service which provides helper methods for processing links
+ * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  */
 @Component(
         service = LinkHelper.class

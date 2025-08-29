@@ -17,12 +17,12 @@ package com.exadel.etoolbox.linkinspector.core.services.data;
 import java.time.ZonedDateTime;
 
 /**
- * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  * Provides generic configuration settings used by the content inspection functionality.
  * <p>
  * This interface defines methods to retrieve various configuration options that control
  * how links are discovered, filtered, and validated throughout the content repository.
  * These settings affect path inclusion/exclusion, performance controls, and validation criteria.
+ * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  */
 public interface ConfigService {
 

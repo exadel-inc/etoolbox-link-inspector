@@ -30,7 +30,6 @@ import javax.servlet.Servlet;
 import java.util.Collections;
 
 /**
- * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  * Handles requests to generate a link inspection data feed.
  * <p>
  * This servlet exposes an HTTP POST endpoint that initiates an asynchronous job
@@ -43,6 +42,7 @@ import java.util.Collections;
  * <p>
  * The servlet is registered at the path "/bin/etoolbox/link-inspector/datafeed/generate"
  * and is used by the Link Inspector UI to manually trigger data generation.
+ * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  */
 @Component(service = {Servlet.class})
 @SlingServletResourceTypes(

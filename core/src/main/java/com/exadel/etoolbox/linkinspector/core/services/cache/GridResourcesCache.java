@@ -20,13 +20,13 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
- * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  * Service interface for caching generated link inspection data.
  * <p>
  * This interface provides methods to manage a cache of {@link GridResource} objects,
  * allowing for efficient access to link inspection results without requiring regeneration
  * on each request. The implementation uses a thread-safe collection to ensure proper
  * concurrent access.
+ * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  */
 public interface GridResourcesCache {
 

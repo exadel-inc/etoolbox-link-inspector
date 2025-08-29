@@ -29,10 +29,10 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  * Utility class providing methods for servlet request and response handling.
  * Offers helpers for parameter extraction, response writing, and other common
  * servlet-related operations used throughout the Link Inspector tool.
+ * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  */
 public class ServletUtil {
     private static final Logger LOG = LoggerFactory.getLogger(ServletUtil.class);

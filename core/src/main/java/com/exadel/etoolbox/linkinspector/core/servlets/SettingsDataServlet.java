@@ -40,7 +40,6 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  * Provides configuration settings data for Link Inspector resolvers.
  * <p>
  * This servlet exposes an HTTP GET endpoint that retrieves and returns the current
@@ -50,6 +49,7 @@ import java.util.Map;
  * <p>
  * The servlet is registered at the path "/bin/etoolbox/link-inspector/settings.json"
  * and is used by the Link Inspector UI to display and edit resolver settings.
+ * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  */
 @Component(service = {Servlet.class})
 @SlingServletResourceTypes(

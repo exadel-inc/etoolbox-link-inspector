@@ -37,8 +37,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
+ * Searches for text patterns in JCR properties
  * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
- * Validates external links via sending HEAD requests concurrently using {@link PoolingHttpClientConnectionManager}
  */
 @Component(service = Resolver.class, immediate = true)
 @Designate(ocd = TextResolverConfig.class)

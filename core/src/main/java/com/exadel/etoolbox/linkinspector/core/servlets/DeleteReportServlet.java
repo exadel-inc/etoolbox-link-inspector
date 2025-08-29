@@ -29,7 +29,6 @@ import org.slf4j.LoggerFactory;
 import javax.servlet.Servlet;
 
 /**
- * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  * Handles deletion of Link Inspector reports from the repository.
  * <p>
  * This servlet exposes an HTTP DELETE endpoint that removes all link inspection data
@@ -38,6 +37,7 @@ import javax.servlet.Servlet;
  * <p>
  * The servlet is registered at the path "/bin/etoolbox/link-inspector/delete-report"
  * and is used by the Link Inspector UI to clear existing reports when requested by the user.
+ * <p><u>Note</u>: This class is not a part of the public API and is subject to change. Do not use it in your own code</p>
  */
 @Component(service = {Servlet.class},
         property = {

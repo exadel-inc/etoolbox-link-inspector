@@ -6,13 +6,28 @@
     <groupId>com.exadel.etoolbox</groupId>
     <artifactId>etoolbox-link-inspector</artifactId>
     <packaging>pom</packaging>
-    <version>2.0.0-SNAPSHOT</version>
-    <description>EToolbox Link Inspector</description>
+    <version>2.0.1</version>
+    <name>EToolbox Link Inspector</name>
+    <description>Searches and modifies broken links and other textual patterns in AEM repositories</description>
+    <url>https://github.com/exadel-inc/etoolbox-link-inspector</url>
 
     <organization>
         <name>Exadel, Inc.</name>
         <url>https://exadel.com</url>
     </organization>
+
+    <developers>
+        <developer>
+            <id>exadel-dx</id>
+            <name>Exadel DX Team</name>
+            <organization>Exadel, Inc.</organization>
+            <organizationUrl>https://exadel.com</organizationUrl>
+            <roles>
+                <role>developer</role>
+            </roles>
+            <timezone>Europe/Warsaw</timezone>
+        </developer>
+    </developers>
 
     <licenses>
         <license>
@@ -20,6 +35,13 @@
             <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
         </license>
     </licenses>
+
+    <scm>
+        <connection>scm:git:git://github.com/exadel-inc/etoolbox-link-inspector.git</connection>
+        <developerConnection>scm:git:git@github.com:exadel-inc/etoolbox-link-inspector.git</developerConnection>
+        <url>https://github.com/exadel-inc/etoolbox-link-inspector</url>
+        <tag>HEAD</tag>
+    </scm>
 
     <modules>
         <module>all</module>
@@ -76,6 +98,21 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-jar-plugin</artifactId>
                     <version>3.1.2</version>
+                </plugin>
+                <!-- Maven Javadoc Plugin -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <version>3.2.0</version>
+                    <executions>
+                        <execution>
+                            <id>attach-javadoc</id>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>jar</goal>
+                            </goals>
+                        </execution>
+                    </executions>
                 </plugin>
                 <!-- Maven Clean Plugin -->
                 <plugin>
@@ -399,20 +436,6 @@ Bundle-DocURL:
                                     <phase>install</phase>
                                     <goals>
                                         <goal>sign</goal>
-                                    </goals>
-                                </execution>
-                            </executions>
-                        </plugin>
-                        <plugin>
-                            <groupId>org.apache.maven.plugins</groupId>
-                            <artifactId>maven-javadoc-plugin</artifactId>
-                            <version>3.2.0</version>
-                            <executions>
-                                <execution>
-                                    <id>attach-javadoc</id>
-                                    <phase>package</phase>
-                                    <goals>
-                                        <goal>jar</goal>
                                     </goals>
                                 </execution>
                             </executions>
