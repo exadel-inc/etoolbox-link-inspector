@@ -25,14 +25,11 @@ import org.apache.http.HttpStatus;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceUtil;
-import org.apache.sling.api.uri.SlingUriBuilder;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.metatype.annotations.Designate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -52,7 +49,7 @@ import static org.apache.commons.lang.StringUtils.EMPTY;
 @Designate(ocd = InternalLinkResolverConfig.class)
 public class InternalLinkResolverImpl implements Resolver {
 
-    private static final Logger LOG = LoggerFactory.getLogger(InternalLinkResolverImpl.class);
+    private static final Pattern REGEXP_FILE_EXTENSION = Pattern.compile("\\.\\w+$");
 
     private static final String HTTP_SCHEMA = "http://";
     private static final String HTTPS_SCHEMA = "https://";
@@ -108,7 +105,7 @@ public class InternalLinkResolverImpl implements Resolver {
         if (status.getCode() == HttpStatus.SC_NOT_FOUND && StringUtils.isNotBlank(internalLinksHost)) {
             String prefix = StringUtils.startsWithAny(internalLinksHost, HTTP_SCHEMA, HTTPS_SCHEMA) ? EMPTY : HTTPS_SCHEMA;
             String origin = StringUtils.stripEnd(internalLinksHost, "/");
-            String extension = StringUtils.isNotBlank(SlingUriBuilder.parse(result.getValue(), resourceResolver).getExtension()) ? StringUtils.EMPTY : ".html";
+            String extension = REGEXP_FILE_EXTENSION.matcher(result.getValue()).find() ? StringUtils.EMPTY : ".html";
             LinkResult linkResult = new LinkResult(result.getType(), prefix + origin + result.getValue() + extension);
             externalLinkResolver.validate(linkResult, resourceResolver);
             result.setStatus(linkResult.getStatus());

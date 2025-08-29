@@ -17,14 +17,9 @@ package com.exadel.etoolbox.linkinspector.core.services.helpers.impl;
 import com.exadel.etoolbox.linkinspector.core.services.helpers.PackageHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.jackrabbit.vault.fs.api.PathFilterSet;
-import org.apache.jackrabbit.vault.fs.config.ConfigurationException;
 import org.apache.jackrabbit.vault.fs.config.DefaultWorkspaceFilter;
 import org.apache.jackrabbit.vault.fs.filter.DefaultPathFilter;
-import org.apache.jackrabbit.vault.packaging.JcrPackage;
-import org.apache.jackrabbit.vault.packaging.JcrPackageDefinition;
-import org.apache.jackrabbit.vault.packaging.JcrPackageManager;
-import org.apache.jackrabbit.vault.packaging.PackageException;
-import org.apache.jackrabbit.vault.packaging.Packaging;
+import org.apache.jackrabbit.vault.packaging.*;
 import org.apache.jackrabbit.vault.util.DefaultProgressListener;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -81,11 +76,7 @@ public class PackageHelperImpl implements PackageHelper {
     private PathFilterSet pathToFilterSet(String path, boolean excludeChildren) {
         PathFilterSet pathFilterSet = new PathFilterSet(path);
         if (excludeChildren) {
-            try {
-                pathFilterSet.addExclude(new DefaultPathFilter(path + EXCLUDE_CHILDREN_PATTERN));
-            } catch (ConfigurationException e) {
-                log.error("Error adding exclude filter to path filter set", e);
-            }
+            pathFilterSet.addExclude(new DefaultPathFilter(path + EXCLUDE_CHILDREN_PATTERN));
         }
         return pathFilterSet;
     }
