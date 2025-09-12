@@ -48,7 +48,8 @@ import static org.apache.commons.lang.StringUtils.EMPTY;
 @Designate(ocd = InternalLinkResolverConfig.class)
 public class InternalLinkResolverImpl implements Resolver {
 
-    private static final Pattern REGEXP_FILE_EXTENSION = Pattern.compile("\\.\\w+$");
+    private static final Pattern REGEXP_FILE_EXTENSION = Pattern.compile("\\.\\w+(?=(?:\\?|#|$))");
+    private static final String QUESTION_MARK = "?";
 
     private static final String HTTP_SCHEMA = "http://";
     private static final String HTTPS_SCHEMA = "https://";
@@ -105,7 +106,9 @@ public class InternalLinkResolverImpl implements Resolver {
             String prefix = StringUtils.startsWithAny(internalLinksHost, HTTP_SCHEMA, HTTPS_SCHEMA) ? EMPTY : HTTPS_SCHEMA;
             String origin = StringUtils.stripEnd(internalLinksHost, "/");
             String extension = REGEXP_FILE_EXTENSION.matcher(result.getValue()).find() ? StringUtils.EMPTY : ".html";
-            LinkResult linkResult = new LinkResult(result.getType(), prefix + origin + result.getValue() + extension);
+            String[] split = StringUtils.split(result.getValue(), QUESTION_MARK);
+            String parameters = split.length > 1 ? QUESTION_MARK + split[1] : StringUtils.EMPTY;
+            LinkResult linkResult = new LinkResult(result.getType(), prefix + origin + split[0] + extension + parameters);
             externalLinkResolver.validate(linkResult, resourceResolver);
             result.setStatus(linkResult.getStatus());
         } else {
