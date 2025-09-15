@@ -50,4 +50,10 @@ public @interface ExternalLinkResolverConfig {
                     "Gecko) Chrome/86.0.4240.111 Safari/537.36"
     )
     String userAgent() default StringUtils.EMPTY;
+
+    @AttributeDefinition(
+            name = "Redirects Enabled",
+            description = "Is redirects enabled?"
+    )
+    boolean redirectsEnabled() default true;
 }
