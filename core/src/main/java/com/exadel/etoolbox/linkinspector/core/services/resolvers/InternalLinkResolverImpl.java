@@ -24,6 +24,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceUtil;
+import org.apache.sling.api.uri.SlingUriBuilder;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Modified;
@@ -48,7 +49,6 @@ import static org.apache.commons.lang.StringUtils.EMPTY;
 @Designate(ocd = InternalLinkResolverConfig.class)
 public class InternalLinkResolverImpl implements Resolver {
 
-    private static final Pattern REGEXP_FILE_EXTENSION = Pattern.compile("\\.\\w+(?=(?:\\?|#|$))");
     private static final String QUESTION_MARK = "?";
 
     private static final String HTTP_SCHEMA = "http://";
@@ -105,10 +105,10 @@ public class InternalLinkResolverImpl implements Resolver {
         if (status.getCode() == HttpStatus.SC_NOT_FOUND && StringUtils.isNotBlank(internalLinksHost)) {
             String prefix = StringUtils.startsWithAny(internalLinksHost, HTTP_SCHEMA, HTTPS_SCHEMA) ? EMPTY : HTTPS_SCHEMA;
             String origin = StringUtils.stripEnd(internalLinksHost, "/");
-            String extension = REGEXP_FILE_EXTENSION.matcher(result.getValue()).find() ? StringUtils.EMPTY : ".html";
-            String[] split = StringUtils.split(result.getValue(), QUESTION_MARK);
-            String parameters = split.length > 1 ? QUESTION_MARK + split[1] : StringUtils.EMPTY;
-            LinkResult linkResult = new LinkResult(result.getType(), prefix + origin + split[0] + extension + parameters);
+            SlingUriBuilder slingUri = SlingUriBuilder.parse(result.getValue(), resourceResolver);
+            String extension = StringUtils.isNotBlank(slingUri.getExtension()) ? slingUri.getExtension() : ".html";
+            String parameters = StringUtils.isNotBlank(slingUri.getQuery()) ? QUESTION_MARK + slingUri.getQuery() : StringUtils.EMPTY;
+            LinkResult linkResult = new LinkResult(result.getType(), prefix + origin + slingUri.getPath() + extension + parameters);
             externalLinkResolver.validate(linkResult, resourceResolver);
             result.setStatus(linkResult.getStatus());
         } else {
