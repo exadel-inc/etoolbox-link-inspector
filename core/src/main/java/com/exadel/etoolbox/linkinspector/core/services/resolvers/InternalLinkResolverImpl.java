@@ -53,7 +53,7 @@ public class InternalLinkResolverImpl implements Resolver {
 
     private static final String HTTP_SCHEMA = "http://";
     private static final String HTTPS_SCHEMA = "https://";
-    private static final Pattern PATTERN_INTERNAL_LINK = Pattern.compile("(^|(?<=\"))/content/([-\\w\\d():%_+.~#?&/=\\s]*)", Pattern.UNICODE_CHARACTER_CLASS);
+    private static final Pattern PATTERN_INTERNAL_LINK = Pattern.compile("(^|(?<=\"))/content/([-\\w\\d():%'_+.~#?&/=\\s]*)", Pattern.UNICODE_CHARACTER_CLASS);
 
     private String internalLinksHost;
     private boolean enabled;
