@@ -69,6 +69,7 @@ public class ExternalLinkResolverImpl implements Resolver {
     private int connectionTimeout;
     private int socketTimeout;
     private String userAgent;
+    private boolean redirectsEnabled;
     private boolean enabled;
 
     /**
@@ -137,6 +138,7 @@ public class ExternalLinkResolverImpl implements Resolver {
         connectionTimeout = config.connectionTimeout();
         socketTimeout = config.socketTimeout();
         userAgent = config.userAgent();
+        redirectsEnabled = config.redirectsEnabled();
         buildCloseableHttpClient();
     }
 
@@ -195,6 +197,7 @@ public class ExternalLinkResolverImpl implements Resolver {
                     .setConnectTimeout(connectionTimeout)
                     .setConnectionRequestTimeout(socketTimeout)
                     .setSocketTimeout(socketTimeout)
+                    .setRedirectsEnabled(redirectsEnabled)
                     .build();
             this.httpClient = clientBuilder
                     .setDefaultRequestConfig(config)
