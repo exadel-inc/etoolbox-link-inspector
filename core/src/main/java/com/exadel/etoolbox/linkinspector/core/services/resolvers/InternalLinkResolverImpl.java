@@ -19,6 +19,7 @@ import com.exadel.etoolbox.linkinspector.api.Result;
 import com.exadel.etoolbox.linkinspector.api.Status;
 import com.exadel.etoolbox.linkinspector.core.models.LinkResult;
 import com.exadel.etoolbox.linkinspector.core.services.resolvers.configs.InternalLinkResolverConfig;
+import com.exadel.etoolbox.linkinspector.core.services.util.SlingUriBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
@@ -48,11 +49,11 @@ import static org.apache.commons.lang.StringUtils.EMPTY;
 @Designate(ocd = InternalLinkResolverConfig.class)
 public class InternalLinkResolverImpl implements Resolver {
 
-    private static final Pattern REGEXP_FILE_EXTENSION = Pattern.compile("\\.\\w+$");
+    private static final String QUESTION_MARK = "?";
 
     private static final String HTTP_SCHEMA = "http://";
     private static final String HTTPS_SCHEMA = "https://";
-    private static final Pattern PATTERN_INTERNAL_LINK = Pattern.compile("(^|(?<=\"))/content/([-\\w\\d():%_+.~#?&/=\\s]*)", Pattern.UNICODE_CHARACTER_CLASS);
+    private static final Pattern PATTERN_INTERNAL_LINK = Pattern.compile("(^|(?<=\"))/content/([-\\w\\d():%'_+.~#?&/=\\s]*)", Pattern.UNICODE_CHARACTER_CLASS);
 
     private String internalLinksHost;
     private boolean enabled;
@@ -104,8 +105,10 @@ public class InternalLinkResolverImpl implements Resolver {
         if (status.getCode() == HttpStatus.SC_NOT_FOUND && StringUtils.isNotBlank(internalLinksHost)) {
             String prefix = StringUtils.startsWithAny(internalLinksHost, HTTP_SCHEMA, HTTPS_SCHEMA) ? EMPTY : HTTPS_SCHEMA;
             String origin = StringUtils.stripEnd(internalLinksHost, "/");
-            String extension = REGEXP_FILE_EXTENSION.matcher(result.getValue()).find() ? StringUtils.EMPTY : ".html";
-            LinkResult linkResult = new LinkResult(result.getType(), prefix + origin + result.getValue() + extension);
+            SlingUriBuilder slingUri = SlingUriBuilder.parse(result.getValue(), resourceResolver);
+            String extension = StringUtils.isNotBlank(slingUri.getExtension()) ? slingUri.getExtension() : ".html";
+            String parameters = StringUtils.isNotBlank(slingUri.getQuery()) ? QUESTION_MARK + slingUri.getQuery() : StringUtils.EMPTY;
+            LinkResult linkResult = new LinkResult(result.getType(), prefix + origin + slingUri.getPath() + extension + parameters);
             externalLinkResolver.validate(linkResult, resourceResolver);
             result.setStatus(linkResult.getStatus());
         } else {
