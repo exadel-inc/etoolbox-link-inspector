@@ -3,12 +3,11 @@ package com.exadel.etoolbox.linkinspector.core.services.util;
 import java.net.URI;
 import java.util.Map;
 import java.util.function.Consumer;
-import org.apache.sling.api.request.RequestPathInfo;
 import org.apache.sling.api.resource.Resource;
 import org.osgi.annotation.versioning.ProviderType;
 
 @ProviderType
-public interface SlingUri extends RequestPathInfo {
+public interface SlingUri {
     URI toUri();
 
     String toString();
