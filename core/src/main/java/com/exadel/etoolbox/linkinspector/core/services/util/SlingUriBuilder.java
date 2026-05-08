@@ -1,17 +1,11 @@
 package com.exadel.etoolbox.linkinspector.core.services.util;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.sling.api.SlingHttpServletRequest;
-import org.apache.sling.api.request.RequestPathInfo;
-import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.osgi.annotation.versioning.ProviderType;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -20,24 +14,6 @@ import java.util.stream.Stream;
 @ProviderType
 @Slf4j
 public class SlingUriBuilder {
-    private static final String HTTPS_SCHEME = "https";
-    private static final int HTTPS_DEFAULT_PORT = 443;
-    private static final String HTTP_SCHEME = "http";
-    private static final int HTTP_DEFAULT_PORT = 80;
-    private static final String FILE_SCHEME = "file";
-    static final String CHAR_HASH = "#";
-    static final String CHAR_QM = "?";
-    static final char CHAR_AMP = '&';
-    static final char CHAR_AT = '@';
-    static final char CHAR_SEMICOLON = ';';
-    static final char CHAR_EQUALS = '=';
-    static final char CHAR_SINGLEQUOTE = '\'';
-    static final String CHAR_COLON = ":";
-    static final String CHAR_DOT = ".";
-    static final String CHAR_SLASH = "/";
-    static final String SELECTOR_DOT_REGEX = "\\.(?!\\.?/)";
-    static final String PATH_PARAMETERS_REGEX = ";([a-zA-z0-9]+)=(?:\\'([^']*)\\'|([^/]+))";
-    static final String BEST_EFFORT_INVALID_URI_MATCHER = "^(?:([^:#@]+):)?(?://(?:([^@#]+)@)?([^/#:]+)(?::([0-9]+))?)?(?:([^?#]+))?(?:\\?([^#]*))?(?:#(.*))?$";
     private String scheme = null;
     private String userInfo = null;
     private String host = null;
@@ -51,37 +27,9 @@ public class SlingUriBuilder {
     private String query = null;
     private String fragment = null;
     private ResourceResolver resourceResolver = null;
-    private boolean isBuilt = false;
 
     public static SlingUriBuilder create() {
         return new SlingUriBuilder();
-    }
-
-    public static SlingUriBuilder createFrom(SlingUri slingUri) {
-        return create().setScheme(slingUri.getScheme()).setUserInfo(slingUri.getUserInfo()).setHost(slingUri.getHost()).setPort(slingUri.getPort()).setResourcePath(slingUri.getResourcePath()).setPathParameters(slingUri.getPathParameters()).setSelectors(slingUri.getSelectors()).setExtension(slingUri.getExtension()).setSuffix(slingUri.getSuffix()).setQuery(slingUri.getQuery()).setFragment(slingUri.getFragment()).setSchemeSpecificPart(slingUri.isOpaque() ? slingUri.getSchemeSpecificPart() : null).setResourceResolver(slingUri instanceof SlingUriBuilder.ImmutableSlingUri ? ((SlingUriBuilder.ImmutableSlingUri)slingUri).getData().resourceResolver : null);
-    }
-
-    public static SlingUriBuilder createFrom(Resource resource) {
-        return create().setResourcePath(resource.getPath()).setResourceResolver(resource.getResourceResolver());
-    }
-
-    public static SlingUriBuilder createFrom(RequestPathInfo requestPathInfo) {
-        Resource suffixResource = requestPathInfo.getSuffixResource();
-        return create().setResourceResolver(suffixResource != null ? suffixResource.getResourceResolver() : null).setResourcePath(requestPathInfo.getResourcePath()).setSelectors(requestPathInfo.getSelectors()).setExtension(requestPathInfo.getExtension()).setSuffix(requestPathInfo.getSuffix());
-    }
-
-    public static SlingUriBuilder createFrom(SlingHttpServletRequest request) {
-        ResourceResolver resourceResolver = request.getResourceResolver();
-        SlingUriBuilder uriBuilder = createFrom(request.getRequestPathInfo()).setResourceResolver(resourceResolver).setScheme(request.getScheme()).setHost(request.getServerName()).setPort(request.getServerPort()).setQuery(request.getQueryString());
-        String resourcePath = uriBuilder.getResourcePath();
-        if (resourcePath != null) {
-            String mappedResourcePath = resourceResolver.map(request, resourcePath);
-            if (!resourcePath.equals(mappedResourcePath) && request.getPathInfo().startsWith(mappedResourcePath)) {
-                uriBuilder.setResourcePath(mappedResourcePath);
-            }
-        }
-
-        return uriBuilder;
     }
 
     public static SlingUriBuilder createFrom(URI uri, ResourceResolver resourceResolver) {
@@ -252,24 +200,6 @@ public class SlingUriBuilder {
         }
     }
 
-    public SlingUriBuilder addSelector(String selector) {
-        if (this.schemeSpecificPart == null && this.resourcePath != null) {
-            this.selectors.add(selector);
-            return this;
-        } else {
-            return this;
-        }
-    }
-
-    public SlingUriBuilder removeSelector(String selector) {
-        if (this.schemeSpecificPart == null && this.resourcePath != null) {
-            this.selectors.remove(selector);
-            return this;
-        } else {
-            return this;
-        }
-    }
-
     public SlingUriBuilder setExtension(String extension) {
         if (this.schemeSpecificPart == null && this.resourcePath != null) {
             this.extension = extension;
@@ -277,21 +207,6 @@ public class SlingUriBuilder {
         } else {
             return this;
         }
-    }
-
-    public SlingUriBuilder setPathParameter(String key, String value) {
-        if (this.schemeSpecificPart == null && this.resourcePath != null) {
-            this.pathParameters.put(key, value);
-            return this;
-        } else {
-            return this;
-        }
-    }
-
-    public SlingUriBuilder setPathParameters(Map<String, String> pathParameters) {
-        this.pathParameters.clear();
-        this.pathParameters.putAll(pathParameters);
-        return this;
     }
 
     public SlingUriBuilder setSuffix(String suffix) {
@@ -316,33 +231,6 @@ public class SlingUriBuilder {
         }
     }
 
-    public SlingUriBuilder addQueryParameter(String parameterName, String value) {
-        if (this.schemeSpecificPart != null) {
-            return this;
-        } else {
-            try {
-                this.query = (this.query == null ? "" : this.query + '&') + URLEncoder.encode(parameterName, StandardCharsets.UTF_8.name()) + "=" + URLEncoder.encode(value, StandardCharsets.UTF_8.name());
-                return this;
-            } catch (UnsupportedEncodingException e) {
-                throw new IllegalStateException("Encoding not supported: " + StandardCharsets.UTF_8, e);
-            }
-        }
-    }
-
-    public SlingUriBuilder setQueryParameters(Map<String, String> queryParameters) {
-        if (this.schemeSpecificPart != null) {
-            return this;
-        } else {
-            this.setQuery((String)null);
-
-            for(Map.Entry<String, String> parameter : queryParameters.entrySet()) {
-                this.addQueryParameter((String)parameter.getKey(), (String)parameter.getValue());
-            }
-
-            return this;
-        }
-    }
-
     public SlingUriBuilder setFragment(String fragment) {
         this.fragment = fragment;
         return this;
@@ -358,161 +246,21 @@ public class SlingUriBuilder {
         return this;
     }
 
-    public SlingUriBuilder removeSchemeAndAuthority() {
-        this.setScheme((String)null);
-        this.setUserInfo((String)null);
-        this.setHost((String)null);
-        this.setPort(-1);
-        return this;
-    }
-
-    public SlingUriBuilder useSchemeAndAuthority(SlingUri slingUri) {
-        this.setScheme(slingUri.getScheme());
-        this.setUserInfo(slingUri.getUserInfo());
-        this.setHost(slingUri.getHost());
-        this.setPort(slingUri.getPort());
-        return this;
-    }
-
-    public String getResourcePath() {
-        return this.resourcePath;
-    }
-
-    public String getSelectorString() {
-        return !this.selectors.isEmpty() ? String.join(".", this.selectors) : null;
-    }
-
-    public String[] getSelectors() {
-        return (String[])this.selectors.toArray(new String[this.selectors.size()]);
-    }
-
     public String getExtension() {
         return this.extension;
-    }
-
-    public Map<String, String> getPathParameters() {
-        return this.pathParameters;
-    }
-
-    public String getSuffix() {
-        return this.suffix;
-    }
-
-    public Resource getSuffixResource() {
-        return isNotBlank(this.suffix) && this.resourceResolver != null ? this.resourceResolver.getResource(this.suffix) : null;
     }
 
     public String getPath() {
         return this.assemblePath(true);
     }
 
-    public String getSchemeSpecificPart() {
-        return this.isOpaque() ? this.schemeSpecificPart : this.toStringInternal(false, false);
-    }
-
     public String getQuery() {
         return this.query;
-    }
-
-    public String getFragment() {
-        return this.fragment;
-    }
-
-    public String getScheme() {
-        return this.scheme;
-    }
-
-    public String getHost() {
-        return this.host;
-    }
-
-    public int getPort() {
-        return this.port;
-    }
-
-    public String getUserInfo() {
-        return this.userInfo;
-    }
-
-    public SlingUriBuilder useSchemeAndAuthority(URI uri) {
-        this.useSchemeAndAuthority(createFrom(uri, this.resourceResolver).build());
-        return this;
     }
 
     public SlingUriBuilder setResourceResolver(ResourceResolver resourceResolver) {
         this.resourceResolver = resourceResolver;
         return this;
-    }
-
-    public SlingUri build() {
-        if (this.isBuilt) {
-            throw new IllegalStateException("SlingUriBuilder.build() may only be called once per builder instance");
-        } else {
-            this.isBuilt = true;
-            return new SlingUriBuilder.ImmutableSlingUri();
-        }
-    }
-
-    public String toString() {
-        return this.toStringInternal(true, true);
-    }
-
-    public boolean isPath() {
-        return isBlank(this.scheme) && isBlank(this.host) && isNotBlank(this.resourcePath);
-    }
-
-    public boolean isAbsolutePath() {
-        return this.isPath() && this.resourcePath.startsWith("/");
-    }
-
-    public boolean isRelativePath() {
-        return this.isPath() && !this.resourcePath.startsWith("/");
-    }
-
-    public boolean isAbsolute() {
-        return this.scheme != null;
-    }
-
-    public boolean isOpaque() {
-        return this.scheme != null && this.schemeSpecificPart != null;
-    }
-
-    private String toStringInternal(boolean includeScheme, boolean includeFragment) {
-        StringBuilder requestUri = new StringBuilder();
-        if (includeScheme && this.isAbsolute()) {
-            requestUri.append(this.scheme + ":");
-        }
-
-        if (this.host != null) {
-            requestUri.append("//");
-            if (isNotBlank(this.userInfo)) {
-                requestUri.append(this.userInfo + '@');
-            }
-
-            requestUri.append(this.host);
-            if (this.port > 0 && (!"http".equals(this.scheme) || this.port != 80) && (!"https".equals(this.scheme) || this.port != 443)) {
-                requestUri.append(":");
-                requestUri.append(this.port);
-            }
-        }
-
-        if (this.schemeSpecificPart != null) {
-            requestUri.append(this.schemeSpecificPart);
-        }
-
-        if (this.resourcePath != null) {
-            requestUri.append(this.assemblePath(true));
-        }
-
-        if (this.query != null) {
-            requestUri.append("?" + this.query);
-        }
-
-        if (includeFragment && this.fragment != null) {
-            requestUri.append("#" + this.fragment);
-        }
-
-        return requestUri.toString();
     }
 
     private void setPathWithDefinedResourcePosition(String path, int firstDotPositionAfterResourcePath) {
@@ -587,232 +335,6 @@ public class SlingUriBuilder {
             }
 
             return pathBuilder.toString();
-        }
-    }
-
-    private class ImmutableSlingUri implements SlingUri {
-        private ImmutableSlingUri() {
-        }
-
-        public String getResourcePath() {
-            return this.getData().getResourcePath();
-        }
-
-        public String getSelectorString() {
-            return this.getData().getSelectorString();
-        }
-
-        public String[] getSelectors() {
-            return this.getData().getSelectors();
-        }
-
-        public String getExtension() {
-            return this.getData().getExtension();
-        }
-
-        public Map<String, String> getPathParameters() {
-            return Collections.unmodifiableMap(this.getData().getPathParameters());
-        }
-
-        public String getSuffix() {
-            return this.getData().getSuffix();
-        }
-
-        public String getPath() {
-            return this.getData().getPath();
-        }
-
-        public String getSchemeSpecificPart() {
-            return this.getData().getSchemeSpecificPart();
-        }
-
-        public String getQuery() {
-            return this.getData().getQuery();
-        }
-
-        public String getFragment() {
-            return this.getData().getFragment();
-        }
-
-        public String getScheme() {
-            return this.getData().getScheme();
-        }
-
-        public String getHost() {
-            return this.getData().getHost();
-        }
-
-        public int getPort() {
-            return this.getData().getPort();
-        }
-
-        public Resource getSuffixResource() {
-            return this.getData().getSuffixResource();
-        }
-
-        public String getUserInfo() {
-            return this.getData().getUserInfo();
-        }
-
-        public boolean isOpaque() {
-            return this.getData().isOpaque();
-        }
-
-        public boolean isPath() {
-            return this.getData().isPath();
-        }
-
-        public boolean isAbsolutePath() {
-            return this.getData().isAbsolutePath();
-        }
-
-        public boolean isRelativePath() {
-            return this.getData().isRelativePath();
-        }
-
-        public boolean isAbsolute() {
-            return this.getData().isAbsolute();
-        }
-
-        public String toString() {
-            return this.getData().toString();
-        }
-
-        public URI toUri() {
-            String uriString = this.toString();
-
-            try {
-                return new URI(uriString);
-            } catch (URISyntaxException e) {
-                throw new IllegalStateException("Invalid Sling URI: " + uriString, e);
-            }
-        }
-
-        private SlingUriBuilder getData() {
-            return SlingUriBuilder.this;
-        }
-
-        public int hashCode() {
-            int prime = 31;
-            int result = 1;
-            result = 31 * result + (SlingUriBuilder.this.extension == null ? 0 : SlingUriBuilder.this.extension.hashCode());
-            result = 31 * result + (SlingUriBuilder.this.fragment == null ? 0 : SlingUriBuilder.this.fragment.hashCode());
-            result = 31 * result + (SlingUriBuilder.this.host == null ? 0 : SlingUriBuilder.this.host.hashCode());
-            result = 31 * result + SlingUriBuilder.this.pathParameters.hashCode();
-            result = 31 * result + SlingUriBuilder.this.port;
-            result = 31 * result + (SlingUriBuilder.this.query == null ? 0 : SlingUriBuilder.this.query.hashCode());
-            result = 31 * result + (SlingUriBuilder.this.resourcePath == null ? 0 : SlingUriBuilder.this.resourcePath.hashCode());
-            result = 31 * result + (SlingUriBuilder.this.scheme == null ? 0 : SlingUriBuilder.this.scheme.hashCode());
-            result = 31 * result + SlingUriBuilder.this.schemeSpecificPart == null ? 0 : SlingUriBuilder.this.schemeSpecificPart.hashCode();
-            result = 31 * result + SlingUriBuilder.this.selectors.hashCode();
-            result = 31 * result + (SlingUriBuilder.this.suffix == null ? 0 : SlingUriBuilder.this.suffix.hashCode());
-            result = 31 * result + (SlingUriBuilder.this.userInfo == null ? 0 : SlingUriBuilder.this.userInfo.hashCode());
-            return result;
-        }
-
-        public boolean equals(Object obj) {
-            if (this == obj) {
-                return true;
-            } else if (obj == null) {
-                return false;
-            } else if (this.getClass() != obj.getClass()) {
-                return false;
-            } else {
-                SlingUriBuilder.ImmutableSlingUri other = (SlingUriBuilder.ImmutableSlingUri)obj;
-                if (SlingUriBuilder.this.extension == null) {
-                    if (other.getData().extension != null) {
-                        return false;
-                    }
-                } else if (!SlingUriBuilder.this.extension.equals(other.getData().extension)) {
-                    return false;
-                }
-
-                if (SlingUriBuilder.this.fragment == null) {
-                    if (other.getData().fragment != null) {
-                        return false;
-                    }
-                } else if (!SlingUriBuilder.this.fragment.equals(other.getData().fragment)) {
-                    return false;
-                }
-
-                if (SlingUriBuilder.this.host == null) {
-                    if (other.getData().host != null) {
-                        return false;
-                    }
-                } else if (!SlingUriBuilder.this.host.equals(other.getData().host)) {
-                    return false;
-                }
-
-                if (SlingUriBuilder.this.pathParameters == null) {
-                    if (other.getData().pathParameters != null) {
-                        return false;
-                    }
-                } else if (!SlingUriBuilder.this.pathParameters.equals(other.getData().pathParameters)) {
-                    return false;
-                }
-
-                if (SlingUriBuilder.this.port != other.getData().port) {
-                    return false;
-                } else {
-                    if (SlingUriBuilder.this.query == null) {
-                        if (other.getData().query != null) {
-                            return false;
-                        }
-                    } else if (!SlingUriBuilder.this.query.equals(other.getData().query)) {
-                        return false;
-                    }
-
-                    if (SlingUriBuilder.this.resourcePath == null) {
-                        if (other.getData().resourcePath != null) {
-                            return false;
-                        }
-                    } else if (!SlingUriBuilder.this.resourcePath.equals(other.getData().resourcePath)) {
-                        return false;
-                    }
-
-                    if (SlingUriBuilder.this.scheme == null) {
-                        if (other.getData().scheme != null) {
-                            return false;
-                        }
-                    } else if (!SlingUriBuilder.this.scheme.equals(other.getData().scheme)) {
-                        return false;
-                    }
-
-                    if (SlingUriBuilder.this.schemeSpecificPart == null) {
-                        if (other.getData().schemeSpecificPart != null) {
-                            return false;
-                        }
-                    } else if (!SlingUriBuilder.this.schemeSpecificPart.equals(other.getData().schemeSpecificPart)) {
-                        return false;
-                    }
-
-                    if (SlingUriBuilder.this.selectors == null) {
-                        if (other.getData().selectors != null) {
-                            return false;
-                        }
-                    } else if (!SlingUriBuilder.this.selectors.equals(other.getData().selectors)) {
-                        return false;
-                    }
-
-                    if (SlingUriBuilder.this.suffix == null) {
-                        if (other.getData().suffix != null) {
-                            return false;
-                        }
-                    } else if (!SlingUriBuilder.this.suffix.equals(other.getData().suffix)) {
-                        return false;
-                    }
-
-                    if (SlingUriBuilder.this.userInfo == null) {
-                        if (other.getData().userInfo != null) {
-                            return false;
-                        }
-                    } else if (!SlingUriBuilder.this.userInfo.equals(other.getData().userInfo)) {
-                        return false;
-                    }
-
-                    return true;
-                }
-            }
         }
     }
 

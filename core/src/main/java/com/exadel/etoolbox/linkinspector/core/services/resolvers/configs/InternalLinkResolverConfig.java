@@ -31,8 +31,8 @@ public @interface InternalLinkResolverConfig {
     boolean enabled() default true;
 
     @AttributeDefinition(
-            name = "Check Internal Links as External?",
-            description = "Check internal links as external ones by sending HTTP requests to the server. Internal links host should be specified for this to work properly"
+            name = "Check Internal Links over Network",
+            description = "Check internal links by sending network requests. Internal links host should be specified for this to work properly"
     )
     boolean checkAsExternal() default false;
 
