@@ -57,6 +57,7 @@ public class InternalLinkResolverImpl implements Resolver {
 
     private String internalLinksHost;
     private boolean enabled;
+    private boolean checkAsExternal;
 
     @Reference
     private Resolver externalLinkResolver;
@@ -66,6 +67,7 @@ public class InternalLinkResolverImpl implements Resolver {
     private void activate(InternalLinkResolverConfig config) {
         this.enabled = config.enabled();
         this.internalLinksHost = config.internalLinksHost();
+        this.checkAsExternal = config.checkAsExternal();
     }
 
     /**
@@ -102,7 +104,7 @@ public class InternalLinkResolverImpl implements Resolver {
             return;
         }
         Status status = checkLink(result.getValue(), resourceResolver);
-        if (status.getCode() == HttpStatus.SC_NOT_FOUND && StringUtils.isNotBlank(internalLinksHost)) {
+        if ((status.getCode() == HttpStatus.SC_NOT_FOUND || checkAsExternal) && StringUtils.isNotBlank(internalLinksHost)) {
             String prefix = StringUtils.startsWithAny(internalLinksHost, HTTP_SCHEMA, HTTPS_SCHEMA) ? EMPTY : HTTPS_SCHEMA;
             String origin = StringUtils.stripEnd(internalLinksHost, "/");
             SlingUriBuilder slingUri = SlingUriBuilder.parse(result.getValue(), resourceResolver);

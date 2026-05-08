@@ -31,6 +31,12 @@ public @interface InternalLinkResolverConfig {
     boolean enabled() default true;
 
     @AttributeDefinition(
+            name = "Check Internal Links over Network",
+            description = "Check internal links by sending network requests. Internal links host should be specified for this to work properly"
+    )
+    boolean checkAsExternal() default false;
+
+    @AttributeDefinition(
             name = "Internal Links Host",
             description = "Host to be used for verifying internal links. " +
                     "If no value is set, links will be verified against local JCR"
